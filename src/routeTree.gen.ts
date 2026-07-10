@@ -9,38 +9,152 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AppPreviewRouteImport } from './routes/app-preview'
+import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppModelsRouteImport } from './routes/app.models'
+import { Route as AppHistoryRouteImport } from './routes/app.history'
+import { Route as AppDevelopersRouteImport } from './routes/app.developers'
+import { Route as AppAccountRouteImport } from './routes/app.account'
+import { Route as AppModelsSlugRouteImport } from './routes/app.models.$slug'
 
+const AppPreviewRoute = AppPreviewRouteImport.update({
+  id: '/app-preview',
+  path: '/app-preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppModelsRoute = AppModelsRouteImport.update({
+  id: '/models',
+  path: '/models',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppHistoryRoute = AppHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDevelopersRoute = AppDevelopersRouteImport.update({
+  id: '/developers',
+  path: '/developers',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAccountRoute = AppAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppModelsSlugRoute = AppModelsSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => AppModelsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/app': typeof AppRouteWithChildren
+  '/app-preview': typeof AppPreviewRoute
+  '/app/account': typeof AppAccountRoute
+  '/app/developers': typeof AppDevelopersRoute
+  '/app/history': typeof AppHistoryRoute
+  '/app/models': typeof AppModelsRouteWithChildren
+  '/app/': typeof AppIndexRoute
+  '/app/models/$slug': typeof AppModelsSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/app-preview': typeof AppPreviewRoute
+  '/app/account': typeof AppAccountRoute
+  '/app/developers': typeof AppDevelopersRoute
+  '/app/history': typeof AppHistoryRoute
+  '/app/models': typeof AppModelsRouteWithChildren
+  '/app': typeof AppIndexRoute
+  '/app/models/$slug': typeof AppModelsSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/app': typeof AppRouteWithChildren
+  '/app-preview': typeof AppPreviewRoute
+  '/app/account': typeof AppAccountRoute
+  '/app/developers': typeof AppDevelopersRoute
+  '/app/history': typeof AppHistoryRoute
+  '/app/models': typeof AppModelsRouteWithChildren
+  '/app/': typeof AppIndexRoute
+  '/app/models/$slug': typeof AppModelsSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/app'
+    | '/app-preview'
+    | '/app/account'
+    | '/app/developers'
+    | '/app/history'
+    | '/app/models'
+    | '/app/'
+    | '/app/models/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/app-preview'
+    | '/app/account'
+    | '/app/developers'
+    | '/app/history'
+    | '/app/models'
+    | '/app'
+    | '/app/models/$slug'
+  id:
+    | '__root__'
+    | '/'
+    | '/app'
+    | '/app-preview'
+    | '/app/account'
+    | '/app/developers'
+    | '/app/history'
+    | '/app/models'
+    | '/app/'
+    | '/app/models/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
+  AppPreviewRoute: typeof AppPreviewRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/app-preview': {
+      id: '/app-preview'
+      path: '/app-preview'
+      fullPath: '/app-preview'
+      preLoaderRoute: typeof AppPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +162,86 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/models': {
+      id: '/app/models'
+      path: '/models'
+      fullPath: '/app/models'
+      preLoaderRoute: typeof AppModelsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/history': {
+      id: '/app/history'
+      path: '/history'
+      fullPath: '/app/history'
+      preLoaderRoute: typeof AppHistoryRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/developers': {
+      id: '/app/developers'
+      path: '/developers'
+      fullPath: '/app/developers'
+      preLoaderRoute: typeof AppDevelopersRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/account': {
+      id: '/app/account'
+      path: '/account'
+      fullPath: '/app/account'
+      preLoaderRoute: typeof AppAccountRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/models/$slug': {
+      id: '/app/models/$slug'
+      path: '/$slug'
+      fullPath: '/app/models/$slug'
+      preLoaderRoute: typeof AppModelsSlugRouteImport
+      parentRoute: typeof AppModelsRoute
+    }
   }
 }
 
+interface AppModelsRouteChildren {
+  AppModelsSlugRoute: typeof AppModelsSlugRoute
+}
+
+const AppModelsRouteChildren: AppModelsRouteChildren = {
+  AppModelsSlugRoute: AppModelsSlugRoute,
+}
+
+const AppModelsRouteWithChildren = AppModelsRoute._addFileChildren(
+  AppModelsRouteChildren,
+)
+
+interface AppRouteChildren {
+  AppAccountRoute: typeof AppAccountRoute
+  AppDevelopersRoute: typeof AppDevelopersRoute
+  AppHistoryRoute: typeof AppHistoryRoute
+  AppModelsRoute: typeof AppModelsRouteWithChildren
+  AppIndexRoute: typeof AppIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppAccountRoute: AppAccountRoute,
+  AppDevelopersRoute: AppDevelopersRoute,
+  AppHistoryRoute: AppHistoryRoute,
+  AppModelsRoute: AppModelsRouteWithChildren,
+  AppIndexRoute: AppIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
+  AppPreviewRoute: AppPreviewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
