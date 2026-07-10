@@ -25,7 +25,7 @@ function ModelPlayground() {
   const [advanced, setAdvanced] = useState(false);
   const [state, setState] = useState<Record<string, unknown>>(() => {
     const init: Record<string, unknown> = {};
-    model.params.forEach((p) => {
+    model.params.forEach((p: ParamSpec) => {
       if (p.kind === "slider") init[p.key] = p.default;
       if (p.kind === "select") init[p.key] = p.options[0];
       if (p.kind === "toggle") init[p.key] = !!p.default;
@@ -35,8 +35,8 @@ function ModelPlayground() {
 
   const currentPrice = useMemo(() => estimatePrice(model, state), [model, state]);
 
-  const simple = model.params.filter((p) => !("advanced" in p) || !p.advanced);
-  const adv = model.params.filter((p) => "advanced" in p && p.advanced);
+  const simple: ParamSpec[] = model.params.filter((p: ParamSpec) => !("advanced" in p) || !p.advanced);
+  const adv: ParamSpec[] = model.params.filter((p: ParamSpec) => "advanced" in p && !!p.advanced);
 
   return (
     <div className="mx-auto max-w-6xl px-5 sm:px-8 py-8">
