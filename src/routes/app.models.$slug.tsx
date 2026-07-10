@@ -66,14 +66,14 @@ function ModelPlayground() {
             </div>
           </div>
           <div className="space-y-5">
-            {simple.map((p, i) => <Field key={i} p={p} state={state} setState={setState} />)}
+            {simple.map((p: ParamSpec, i: number) => <Field key={i} p={p} state={state} setState={setState} />)}
             <motion.div
               initial={false}
               animate={{ height: advanced ? "auto" : 0, opacity: advanced ? 1 : 0 }}
               transition={{ duration: 0.3 }}
               className="overflow-hidden space-y-5"
             >
-              {adv.map((p, i) => <Field key={i} p={p} state={state} setState={setState} />)}
+              {adv.map((p: ParamSpec, i: number) => <Field key={i} p={p} state={state} setState={setState} />)}
             </motion.div>
           </div>
           <button className="mt-6 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber px-5 py-3 text-sm font-medium text-primary-foreground hover:opacity-95 transition">
