@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-type Cell = { label: string; value: number };
+type Cell = { label: string; value: number | null };
 
 function getTime(target: Date) {
   const diff = Math.max(0, target.getTime() - Date.now());
@@ -12,18 +12,22 @@ function getTime(target: Date) {
   return { days, hours, minutes, seconds };
 }
 
+/**
+ * SSR-safe: server renders "--", client fills in after mount → no hydration mismatch.
+ */
 export function EditorialCountdown({ target }: { target: Date }) {
-  const [t, setT] = useState(() => getTime(target));
+  const [t, setT] = useState<null | ReturnType<typeof getTime>>(null);
   useEffect(() => {
+    setT(getTime(target));
     const id = setInterval(() => setT(getTime(target)), 1000);
     return () => clearInterval(id);
   }, [target]);
 
   const cells: Cell[] = [
-    { label: "jours", value: t.days },
-    { label: "heures", value: t.hours },
-    { label: "minutes", value: t.minutes },
-    { label: "secondes", value: t.seconds },
+    { label: "jours",    value: t?.days    ?? null },
+    { label: "heures",   value: t?.hours   ?? null },
+    { label: "minutes",  value: t?.minutes ?? null },
+    { label: "secondes", value: t?.seconds ?? null },
   ];
 
   return (
@@ -48,14 +52,14 @@ export function EditorialCountdown({ target }: { target: Date }) {
   );
 }
 
-function FlipDigit({ value }: { value: number }) {
-  const shown = String(value).padStart(2, "0");
+function FlipDigit({ value }: { value: number | null }) {
+  const shown = value == null ? "--" : String(value).padStart(2, "0");
   return (
     <span className="inline-flex overflow-hidden">
       <AnimatePresence mode="popLayout" initial={false}>
         <motion.span
           key={shown}
-          initial={{ y: "40%", opacity: 0 }}
+          initial={value == null ? false : { y: "40%", opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: "-40%", opacity: 0 }}
           transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
@@ -66,4 +70,16 @@ function FlipDigit({ value }: { value: number }) {
       </AnimatePresence>
     </span>
   );
+}
+
+/** Compact countdown for header badges. Same SSR safety. */
+export function CountdownCompact({ target }: { target: Date }) {
+  const [t, setT] = useState<null | ReturnType<typeof getTime>>(null);
+  useEffect(() => {
+    setT(getTime(target));
+    const id = setInterval(() => setT(getTime(target)), 60000);
+    return () => clearInterval(id);
+  }, [target]);
+  if (!t) return <span className="font-mono tabular text-[10px]">J-—</span>;
+  return <span className="font-mono tabular text-[10px]">J-{t.days}</span>;
 }
