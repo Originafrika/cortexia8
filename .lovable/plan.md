@@ -1,118 +1,74 @@
+# Cortexia v4 — Finalisation UI complète
 
-# Cortexia — Plan de build (frontend, données mockées)
+Objectif : livrer un produit démontrable de bout en bout, plus rien en placeholder.
 
-Objectif : livrer une démo produit au niveau de finition Linear / Runway / Vercel. Aucune API réelle, tout mocké en TS. Copywriting entièrement rédigé, ton direct, jamais générique.
+## 1. Corrections urgentes (avant tout ajout)
 
-## 1. Système de design (fondation, avant toute page)
+- **Fix hydratation countdown** : `EditorialCountdown` rend `Date.now()` au SSR → mismatch. Le composant ne calcule le `diff` qu'après montage (état initial = `null`, valeurs affichées `--` jusqu'à l'hydratation).
+- **Nettoyer toute mention de marge/×1.26/kie.ai** dans les textes visibles (simulateur, comparatif, FAQ, catalogue). La majoration reste un commentaire code, jamais un mot UI.
 
-Fichier : `src/styles.css` (tokens) + `tailwind` via @theme.
+## 2. Le Wall — showcase modèles
 
-- **Palette dark-first** : fond `#0A0A0B` avec 4 nuances superposées (`surface-0` à `surface-3`), texte `#F4F1EA`, muted `#8A8580`.
-- **Accent unique** : **ambre profond** `oklch(0.78 0.16 70)` (`#E8A64B`-ish), + accent secondaire `emerald-desaturated` pour états positifs. Pas de violet/bleu IA.
-- **Bordures** : `1px solid oklch(1 0 0 / 0.08)`, gradients de bordure sur cards clés (mask/border-image).
-- **Ombres colorées** : `shadow-elevated` teintée ambre à faible opacité.
-- **Typo** :
-  - Display : **Instrument Serif** ou **Fraunces** (variable) — headlines à fort caractère.
-  - Sans body : **Geist** — corps et UI.
-  - Mono/tabular : **JetBrains Mono** — chiffres, prix, compteurs (font-variant-numeric: tabular-nums partout où il y a des chiffres).
-  - Chargées via `<link>` dans `__root.tsx` (jamais `@import` remote en v4).
-- **Espacement** : échelle généreuse, sections landing `py-32` desktop / `py-20` mobile.
-- **Radius** : `--radius: 0.875rem`, cards importantes `rounded-2xl`.
-- **Focus ring** : `ring-2 ring-accent/60 ring-offset-2 ring-offset-background`.
+Nouveau composant `ModelsWall` (masonry CSS columns 2/3/4 responsive) présent sur `/` et `/app-preview`.
+- Mix images (Unsplash source stable), vidéos MP4 en autoplay muted loop au hover, cards audio avec waveform SVG animée + cover.
+- Chaque card : badge modèle utilisé, catégorie.
+- Filtres pills au-dessus : catégorie (Image/Vidéo/Musique/Voix) + cas d'usage (Pub/UGC/Émission/Film).
+- Cascade d'apparition au scroll via Framer `whileInView` staggered.
+- Chargement progressif : bouton "Voir plus" qui ajoute un batch de 12 (illusion d'infini avec ~60 items mockés).
+- Clic → modale (Dialog custom) avec grand média, prompt, modèle, CTA "Crée le tien" → `/app/models/$slug`.
+- Version condensée `WallPreview` (bandeau 6 cards + fondu) sous le hero des deux landings.
 
-Primitives réutilisables : `PriceDisplay` (count animé + devise), `CurrencyBadge`, `ModelCard`, `Pill`, `Marquee`, `Countdown`, `Accordion`, `Skeleton` (shimmer custom, pas de spinner).
+## 3. Devise + langue combinés (i18n)
 
-## 2. State global (mock)
+- Nouveau `src/lib/i18n.ts` : dictionnaire par langue (`fr`, `en`, `pt`, `id`, `es`), hook `useT()`, store Zustand langue + devise unifié.
+- Mapping devise→langue par défaut (USD→en, XOF→fr, EUR→fr, BRL→pt, IDR→id, NGN→en, MXN→es…). Override manuel possible.
+- Composant unique `LocalePicker` (remplace `CurrencyPicker`) : drapeau + code devise + langue, popover avec recherche, deux colonnes (devise / langue) reliées mais dissociables.
+- Toutes les strings des landings + nav app passent par `t("clé")`. Transition texte : fade court sur changement de langue (motion `AnimatePresence` sur `lang` key).
 
-- `src/lib/currency.ts` : store Zustand (déjà pas installé — à ajouter) OU React context léger. Devises USD, EUR, XOF, NGN, IDR, BRL, avec taux mockés statiques. Persistance `localStorage`. Un hook `useCurrency()` diffuse les changements → `PriceDisplay` s'anime.
-- `src/lib/models.ts` : catalogue complet (image / vidéo / audio / texte) exactement selon le prompt, avec `priceUSD` déjà majoré ×1.26, `params[]`, `badge?`, `slug`, icônes.
-- `src/lib/mock-history.ts` : générations factices (image URLs de placeholder générées, prompts, coût, date, modèle).
-- `src/lib/format-price.ts` : conversion + formatage tabulaire.
-- Hook `useCountUp(value, duration)` pour animation numérique.
+## 4. Agent (`/app`) amélioré
 
-## 3. Routes (TanStack Router — `src/routes/`)
+- **Onboarding première visite** : overlay 3 étapes (agent / playgrounds / paiement à l'usage) gated par `localStorage("cortexia:onboarded")`, ré-ouvrable via icône aide dans le header. Crédit de bienvenue 5 $ visible dès l'entrée.
+- **Prompt starters** : 6 cards catégorisées (Pub/UGC/Émission/Film) affichées quand le fil est vide, remplissent la textarea au clic.
+- **Carte de décision modèle** dans le fil : icône + justification rédigée + 2-3 alternatives mini-cards cliquables (switch instantané).
+- **Chips d'affinage** après chaque génération : "Plus cinématographique", "Ambiance nuit", "Version 6s", etc. — envoient un message auto qui relance une génération dans le même thread.
+- **Progression réaliste** : barre par type (vidéo = étapes + ETA plus long ; image = réveil par flou décroissant sur un placeholder).
+- **Thread multi-générations** : liste scrollable, chaque résultat gardé avec ancre, mini-nav "sauter au résultat N".
 
-```
-__root.tsx            → head global (title Cortexia), CurrencyProvider, QueryClient
-index.tsx             → Page A : Waitlist (jusqu'au 1er août)
-app-preview.tsx       → Page B : landing finale (CTA → /app)
-app.tsx               → Layout app (sidebar + header solde crédits + devise)
-  app.index.tsx       → Playground unifié (agent)
-  app.models.tsx      → Catalogue
-  app.models.$slug.tsx→ Playground modèle
-  app.history.tsx     → Historique
-  app.developers.tsx  → Espace dev (clés + docs + usage)
-  app.account.tsx     → Compte / facturation
-```
+## 5. Simulateur corrigé
 
-Chaque route a son propre `head()` (title/description/og distincts). Root n'a pas d'og:image.
+- Toujours calcul des deux montants (Cortexia à l'usage vs abonnement mensuel de référence par catégorie, ex. Higgsfield-like 39 $, Midjourney 30 $, ElevenLabs 22 $).
+- 3 états d'affichage : économie positive / seuil approché / abonnement compétitif — jamais 0. Message honnête dans le 3ᵉ cas, deux montants toujours visibles.
+- Repère visuel de seuil sur chaque slider (tick + tooltip "seuil abonnement").
+- Marche pour toutes catégories et toutes devises.
 
-## 4. Page `/` — Waitlist
+## 6. Distinction waitlist / live
 
-Structure verticale, hero asymétrique :
+- Constante `src/lib/launch.ts` : `LAUNCH_MODE: "waitlist" | "live"`, `LAUNCH_DATE`.
+- `/` (waitlist) : badge persistant "Pré-lancement · J-N" intégré au header + mini countdown compact, footer "Accès équipe" en lien texte sobre.
+- `/app-preview` : zéro mention waitlist/countdown/rang.
+- Aucun CTA de la waitlist ne pointe vers `/app` ou `/app-preview` sauf le lien discret footer.
 
-- **Fond animé** : mesh gradient ambre/anthracite très lent (CSS keyframes) + grille de miniatures floutées de créations qui défilent en arrière-plan avec overlay.
-- **Hero** : headline serif large ("L'IA sans t'abonner à ce que tu n'utilises pas."), sous-titre direct, countdown éditorial vers 2026-08-01 intégré à droite du hero — grands chiffres tabulaires qui transitionnent (fade sur le dernier digit qui change, pas flicker). Composant `EditorialCountdown`.
-- **Waitlist form** : email + pills métier (Pub / UGC / Émission / Film / Autre). Submit → transition en place vers écran de confirmation (rang mocké #1247, barre progression, lien parrainage copiable, boutons partage custom X/WhatsApp/Telegram/LinkedIn stylés).
-- **Simulateur de crédits** : carte flottante 2 colonnes. Sliders par catégorie (image/vidéo/voix/texte) avec icônes. Résultat à droite avec `PriceDisplay` animé + phrase dynamique "Avec un abonnement classique, ça t'aurait coûté X même sans rien générer".
-- **Sélecteur de devise** discret en haut à droite (drapeau + code, dropdown recherche), change global animé.
-- **Bandeau modèles** : marquee horizontal auto-loop des cards de modèles (pause au hover).
-- **Comparatif Cortexia vs abonnement** : 2 colonnes contrastées (grise vs ambre), 3-4 exemples chiffrés tirés du catalogue réel.
-- **Preuve sociale** : compteur waitlist animé (`useCountUp`, +1 aléatoire toutes les ~15s), 3 témoignages (Amara/Lomé, Julien/São Paulo, Wei/Jakarta) avec avatars générés.
-- **FAQ** accordéon (animation height fluide).
-- **Footer** avec lien discret "Accès équipe" → `/app-preview`.
+## 7. Onboarding waitlist enrichi
 
-## 5. Page `/app-preview`
+- Écran de confirmation reprend le cas d'usage sélectionné ("Parfait pour les créateurs UGC…").
+- Compteur amis invités (mock 0), progression parrainage, partage stylé conservé.
 
-Mêmes sections que la waitlist (hero, simulateur, marquee modèles, comparatif, tarifs, témoignages, FAQ) SANS countdown ni formulaire waitlist. CTA "Commencer à créer" → `/app`.
+## 8. Détails techniques
 
-## 6. App (`/app/*`)
+- Nouveaux fichiers : `lib/i18n.ts`, `lib/launch.ts`, `lib/wall-data.ts`, `components/models-wall.tsx`, `components/wall-preview.tsx`, `components/wall-modal.tsx`, `components/locale-picker.tsx`, `components/onboarding-overlay.tsx`, `components/prompt-starters.tsx`, `components/model-decision-card.tsx`, `components/refine-chips.tsx`, `components/waveform-card.tsx`.
+- Refactor : `EditorialCountdown` (fix hydration), `SiteHeader` (badge + mini countdown en mode waitlist), `CreditSimulator` (nouvelle logique 3 états), `WaitlistForm` (récap use case), routes `index.tsx`, `app-preview.tsx`, `app.tsx`, `app.index.tsx` (i18n + onboarding + agent enrichi), `app.account.tsx` (LocalePicker), suppression `CurrencyPicker` (remplacé partout).
+- Assets Wall : URLs Unsplash/Pexels/mixkit publiques + covers générées.
+- Aucune dépendance nouvelle (Framer + Zustand déjà présents).
 
-**Layout `app.tsx`** : sidebar gauche (Agent / Modèles / Historique / Développeur / Compte), header top avec solde crédits animé + sélecteur devise + avatar.
+## 9. Ordre d'exécution en un passage
 
-- **`/app`** — Agent : layout à 2 zones, résultat central (image/vidéo/audio), fil de conversation discret à droite ou en bas. Textarea avec placeholder rotatif (5 exemples cyclant toutes les 4s, stop au focus), drag & drop multi-fichiers avec chips preview. Badge de modèle choisi avec raison ("Sélectionné pour son rendu photoréaliste") + mini-menu pour changer. Génération : barre progression simulée + étapes textuelles. Prix affiché avant génération.
+1. Fix countdown + purge mentions marge.
+2. `launch.ts` + `i18n.ts` + `LocalePicker` (remplacement `CurrencyPicker` partout).
+3. `wall-data.ts` + `ModelsWall` + `WallPreview` + `WallModal`.
+4. Refactor `SiteHeader` waitlist-aware + `WaitlistForm` récap.
+5. Refactor `CreditSimulator` 3 états + repère seuil.
+6. Refactor `app.index.tsx` : onboarding, starters, decision card, refine chips, thread multi, progression.
+7. Injection i18n dans routes `/` et `/app-preview`.
+8. Passe responsive rapide + vérif liens/routes.
 
-- **`/app/models`** — Catalogue : grille cards riches, pills filtres (catégorie), search debounced. Badges "Populaire"/"Nouveau". Prix Cortexia (×1.26 déjà appliqué).
-
-- **`/app/models/$slug`** — Formulaire dynamique selon `params[]` du modèle (prompt, upload, résolution, ratio, durée, seed, style). Toggle Simple/Avancé (transition height). `PriceDisplay` recalculé en direct. Galerie d'exemples pré-remplis en dessous.
-
-- **`/app/history`** — Grille masonry, filtres type/modèle/date, overlay métadonnées au hover, panneau latéral au clic avec bouton "Régénérer".
-
-- **`/app/developers`** — Table clés API (statut, dernière utilisation, permissions), modale création avec affichage one-time du secret. Doc interactive : sidebar endpoints, blocs code coloration (Prism ou shiki minimal), tabs curl/JS/Python, bouton copier. Sparkline usage + coût du mois.
-
-- **`/app/account`** — Carte crédits premium (gradient ambre subtil, style carte de paiement), table transactions, cards moyens de paiement (Mobile Money / Carte / Crypto / Alipay) avec icônes distinctes, montant avec conversion live. Préférence devise persistée + toast confirmation.
-
-## 7. Animations & micro-interactions
-
-- Framer Motion (à installer) pour transitions de page (fade+slide subtle), accordéons, panneaux, modales.
-- `useCountUp` custom pour tous les prix / compteurs.
-- Hover cards : `scale-[1.02]` + shadow ambre + transition 200ms ease-out.
-- Skeletons shimmer via keyframe CSS custom.
-- Focus ring cohérent partout.
-
-## 8. Contenu / copywriting
-
-Rédigé intégralement selon le ton défini (voix directe, phrases courtes, vocabulaire créateur). Zéro placeholder. Headlines, sous-titres, boutons, tooltips, erreurs, emails de confirmation à l'écran.
-
-## 9. Détails techniques
-
-- **Dépendances à ajouter** : `framer-motion`, `zustand` (state devise + solde), `lucide-react` (déjà présent probablement).
-- **Fonts** via `<link>` Google Fonts dans `__root.tsx` head.
-- **Responsive** : mobile-first, chaque section testée mentalement 375px. Countdown, simulateur, waitlist form → traitement mobile spécifique (stack vertical, tailles réduites mais toujours éditoriales).
-- **Accessibilité** : contraste AA, focus rings, aria-labels sur boutons icônes, prefers-reduced-motion respecté (désactive marquee & mesh anim).
-- **SEO** : `head()` par route, title/desc/og distincts, une seule H1 par page.
-- Aucun backend / Supabase / edge function. Tout mocké.
-- Placeholder actuel de `/` supprimé.
-
-## 10. Ordre d'exécution
-
-1. Tokens design + fonts + primitives (`PriceDisplay`, `Countdown`, `Marquee`, `Pill`, `Skeleton`, `CurrencyProvider`).
-2. Catalogue modèles + hook devise + `useCountUp`.
-3. Page `/` waitlist (priorité craft max).
-4. Page `/app-preview`.
-5. Layout `/app` + agent playground.
-6. `/app/models` + `/app/models/$slug`.
-7. `/app/history`, `/app/developers`, `/app/account`.
-8. Pass responsive + polish (transitions de page, reduced-motion, focus states).
-
-Livrable : produit qui semble déjà en production, pas un prototype.
+Livrable : produit prêt à démo, backend seul reste à connecter.
