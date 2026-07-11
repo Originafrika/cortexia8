@@ -1,13 +1,24 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight, Check, Copy } from "lucide-react";
+import { ArrowRight, Check, Copy, Users } from "lucide-react";
 import { useCountUp } from "@/lib/use-count-up";
+import { useT } from "@/lib/i18n";
 
-const PROFESSIONS = ["Pub", "UGC", "Émission", "Film", "Autre"];
+const PROFESSIONS = ["Pub", "UGC", "Émission", "Film", "Autre"] as const;
+type Profession = typeof PROFESSIONS[number];
+
+const RECAP: Record<Profession, string> = {
+  Pub:      "Parfait pour les créatifs pub — Kling, Seedance et GPT Image seront dans ta boîte à outils dès l'ouverture.",
+  UGC:      "Parfait pour les créateurs UGC — on te prévient dès que Cortexia ouvre, avec un accès prioritaire au playground vidéo.",
+  Émission: "Parfait pour les équipes d'émission — voix, montage IA et musiques seront disponibles dès le lancement.",
+  Film:     "Parfait pour la production audiovisuelle — Kling 4K et modèles cinéma prêts dès l'ouverture.",
+  Autre:    "On te met de côté un accès dès l'ouverture, avec un mot d'accueil personnel.",
+};
 
 export function WaitlistForm() {
+  const t = useT();
   const [email, setEmail] = useState("");
-  const [profession, setProfession] = useState<string | null>(null);
+  const [profession, setProfession] = useState<Profession | null>(null);
   const [status, setStatus] = useState<"idle" | "loading" | "done">("idle");
   const [rank, setRank] = useState(1247);
 
@@ -35,7 +46,7 @@ export function WaitlistForm() {
             className="surface-gradient-border rounded-2xl bg-surface-1/70 backdrop-blur-xl p-5 sm:p-6"
           >
             <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-              Rejoindre la waitlist
+              {t("waitlist.title")}
             </div>
             <div className="mt-4 grid gap-3 sm:grid-cols-[1fr,auto]">
               <input
@@ -43,7 +54,7 @@ export function WaitlistForm() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="ton@email.com"
+                placeholder={t("waitlist.email_placeholder")}
                 className="w-full min-w-0 rounded-xl border border-border bg-surface-0/80 px-4 py-3 text-sm placeholder:text-muted-foreground/60 focus:border-amber/50"
               />
               <button
@@ -51,12 +62,12 @@ export function WaitlistForm() {
                 disabled={status === "loading" || !email || !profession}
                 className="group inline-flex items-center justify-center gap-2 rounded-xl bg-amber px-5 py-3 text-sm font-medium text-primary-foreground disabled:opacity-40 hover:opacity-95 transition"
               >
-                {status === "loading" ? "…" : (<>Je réserve ma place <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" /></>)}
+                {status === "loading" ? "…" : (<>{t("waitlist.cta")} <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" /></>)}
               </button>
             </div>
 
             <div className="mt-5">
-              <div className="text-xs text-muted-foreground mb-2">Je crée surtout :</div>
+              <div className="text-xs text-muted-foreground mb-2">{t("waitlist.i_create")}</div>
               <div className="flex flex-wrap gap-2">
                 {PROFESSIONS.map((p) => {
                   const active = profession === p;
@@ -79,23 +90,23 @@ export function WaitlistForm() {
               </div>
             </div>
 
-            <p className="mt-5 text-[11px] text-muted-foreground/80">
-              Zéro spam. On t'écrit une fois pour te dire que c'est ouvert, une seconde pour t'offrir tes premiers crédits.
-            </p>
+            <p className="mt-5 text-[11px] text-muted-foreground/80">{t("waitlist.no_spam")}</p>
           </motion.form>
         ) : (
-          <ConfirmationCard key="done" rank={rank} email={email} />
+          <ConfirmationCard key="done" rank={rank} email={email} profession={profession!} />
         )}
       </AnimatePresence>
     </div>
   );
 }
 
-function ConfirmationCard({ rank, email }: { rank: number; email: string }) {
+function ConfirmationCard({ rank, email, profession }: { rank: number; email: string; profession: Profession }) {
+  const t = useT();
   const displayRank = useCountUp(rank, 800);
   const [copied, setCopied] = useState(false);
+  const invitedCount = 0;
   const link = `cortexia.ai/r/${btoa(email).slice(0, 8).replace(/[^a-zA-Z0-9]/g, "x")}`;
-  const referredPct = 12; // symbolic progress bar
+  const referredPct = 12;
 
   return (
     <motion.div
@@ -105,10 +116,10 @@ function ConfirmationCard({ rank, email }: { rank: number; email: string }) {
       className="surface-gradient-border rounded-2xl bg-surface-1/80 backdrop-blur-xl p-6 sm:p-7"
     >
       <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-soft">
-        Tu es dedans.
+        {t("waitlist.done")}
       </div>
       <div className="mt-3 flex items-baseline gap-2">
-        <span className="text-sm text-muted-foreground">Ta place</span>
+        <span className="text-sm text-muted-foreground">{t("waitlist.your_seat")}</span>
         <span className="font-display text-5xl sm:text-6xl tracking-[-0.03em] tabular text-foreground">
           #{Math.round(displayRank).toLocaleString("fr-FR")}
         </span>
@@ -125,9 +136,22 @@ function ConfirmationCard({ rank, email }: { rank: number; email: string }) {
         {referredPct}% de la file franchie. Parraine pour avancer plus vite.
       </div>
 
-      <div className="mt-6 rounded-xl border border-border bg-surface-0/60 p-4">
-        <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-          Ton lien de parrainage
+      <div className="mt-5 rounded-xl border border-amber/30 bg-amber/10 p-4">
+        <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-soft">
+          Profil enregistré : {profession}
+        </div>
+        <p className="mt-1.5 text-sm text-foreground/90 leading-relaxed">{RECAP[profession]}</p>
+      </div>
+
+      <div className="mt-5 rounded-xl border border-border bg-surface-0/60 p-4">
+        <div className="flex items-center justify-between">
+          <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+            {t("waitlist.referral")}
+          </div>
+          <div className="flex items-center gap-1.5 font-mono text-[10px] text-muted-foreground tabular">
+            <Users className="size-3" />
+            <span className="text-foreground/90">{invitedCount}</span> {t("waitlist.friends_invited")}
+          </div>
         </div>
         <div className="mt-2 flex items-center gap-2">
           <code className="flex-1 truncate rounded-lg bg-surface-2/70 px-3 py-2 font-mono text-xs text-foreground/90">
@@ -137,7 +161,7 @@ function ConfirmationCard({ rank, email }: { rank: number; email: string }) {
             onClick={() => { navigator.clipboard.writeText(link); setCopied(true); setTimeout(() => setCopied(false), 1500); }}
             className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-2/50 px-3 py-2 text-xs hover:border-amber/40 transition"
           >
-            {copied ? <><Check className="size-3.5 text-emerald" /> Copié</> : <><Copy className="size-3.5" /> Copier</>}
+            {copied ? <><Check className="size-3.5 text-emerald" /> {t("waitlist.copied")}</> : <><Copy className="size-3.5" /> {t("waitlist.copy")}</>}
           </button>
         </div>
         <p className="mt-3 text-xs text-foreground/85 leading-relaxed">
@@ -154,10 +178,7 @@ function ConfirmationCard({ rank, email }: { rank: number; email: string }) {
         </div>
       </div>
 
-      <p className="mt-5 text-xs text-muted-foreground leading-relaxed">
-        On t'écrit le <span className="text-foreground/90">1er août</span> avec ton accès. D'ici là,
-        surveille ta boîte et ta place dans la file — elle bouge à chaque nouvel inscrit.
-      </p>
+      <p className="mt-5 text-xs text-muted-foreground leading-relaxed">{t("waitlist.launch_email")}</p>
     </motion.div>
   );
 }
