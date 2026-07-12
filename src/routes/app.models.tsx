@@ -1,15 +1,24 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useMatchRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { MODELS, basePrice, unitLabel, type ModelCategory, type Model } from "@/lib/models";
 import { PriceDisplay } from "@/components/price-display";
-import { Search, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ModelPlaygroundContent } from "./app.models.$slug";
-import { AnimatePresence, motion } from "framer-motion";
 
 export const Route = createFileRoute("/app/models")({
-  component: ModelsCatalog,
+  component: ModelsLayout,
 });
+
+function ModelsLayout() {
+  const matchRoute = useMatchRoute();
+  const isExact = matchRoute({ to: "/app/models", exact: true });
+
+  if (!isExact) {
+    return <Outlet />;
+  }
+
+  return <ModelsCatalog />;
+}
 
 const CATS: { key: ModelCategory | "all"; label: string }[] = [
   { key: "all", label: "Tout" },
@@ -25,7 +34,6 @@ function ModelsCatalog() {
   const [cat, setCat] = useState<ModelCategory | "all">("all");
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
-  const [selectedModel, setSelectedModel] = useState<Model | null>(null);
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
@@ -103,7 +111,7 @@ function ModelsCatalog() {
         <>
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {paged.map((m) => (
-              <ModelCard key={m.slug} m={m} onClick={() => setSelectedModel(m)} />
+              <ModelCard key={m.slug} m={m} />
             ))}
           </div>
 
@@ -143,54 +151,16 @@ function ModelsCatalog() {
           )}
         </>
       )}
-
-      {/* Premium Modal for the Model Playground */}
-      <AnimatePresence>
-        {selectedModel && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 grid place-items-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto"
-            onClick={() => setSelectedModel(null)}
-          >
-            <motion.div
-              initial={{ opacity: 0, y: 16, scale: 0.97 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 12, scale: 0.98 }}
-              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-              onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-5xl my-8 rounded-3xl border border-border bg-surface-1 shadow-2xl p-6 sm:p-8"
-            >
-              <button
-                onClick={() => setSelectedModel(null)}
-                className="absolute top-4 right-4 z-10 grid place-items-center size-9 rounded-full bg-black/60 backdrop-blur text-white hover:bg-black/80 border border-white/10 transition cursor-pointer"
-                aria-label="Fermer"
-              >
-                <X className="size-4" />
-              </button>
-              <ModelPlaygroundContent model={selectedModel} isModal={true} />
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
 
-function ModelCard({ m, onClick }: { m: Model; onClick: () => void }) {
+function ModelCard({ m }: { m: Model }) {
   return (
-    <div
-      onClick={onClick}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onClick();
-        }
-      }}
-      className="group surface-gradient-border rounded-2xl bg-surface-1/60 backdrop-blur p-5 hover:bg-surface-1/80 transition-all hover:-translate-y-0.5 hover:shadow-[0_20px_60px_-20px_oklch(0.78_0.16_70_/_0.25)] cursor-pointer text-left"
+    <Link
+      to="/app/models/$slug"
+      params={{ slug: m.slug }}
+      className="group surface-gradient-border rounded-2xl bg-surface-1/60 backdrop-blur p-5 hover:bg-surface-1/80 transition-all hover:-translate-y-0.5 hover:shadow-[0_20px_60px_-20px_oklch(0.78_0.16_70_/_0.25)]"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
@@ -225,6 +195,6 @@ function ModelCard({ m, onClick }: { m: Model; onClick: () => void }) {
         />
         <span className="text-[11px] text-muted-foreground font-mono">{unitLabel(m)}</span>
       </div>
-    </div>
+    </Link>
   );
 }
