@@ -57,8 +57,11 @@ print(result.url, result.cost)`,
   }
 
   function createKey() {
-    const secret = "cx_live_" + Math.random().toString(36).slice(2, 34);
-    setShowNewKey(secret);
+    // Use Web Crypto CSPRNG. Real secret minting must happen server-side; this is UI mock only.
+    const bytes = new Uint8Array(24);
+    crypto.getRandomValues(bytes);
+    const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+    setShowNewKey("cx_live_" + hex);
   }
 
   return (
