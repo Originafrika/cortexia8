@@ -1,15 +1,24 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { MODELS, basePrice, type Model } from "@/lib/models";
+import { useMemo, useState } from "react";
+import { MODELS, basePrice, type Model, type ModelCategory } from "@/lib/models";
 import { PriceDisplay } from "@/components/price-display";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, RefreshCw } from "lucide-react";
+import { X, RefreshCw, Search, Copy, Check } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/app/history")({
   component: HistoryPage,
 });
 
-type Item = { id: string; model: Model; prompt: string; date: string; cost: number; ratio: string; tint: string };
+type Item = {
+  id: string;
+  model: Model;
+  prompt: string;
+  date: string;
+  cost: number;
+  ratio: string;
+  tint: string;
+};
 
 const PROMPTS = [
   "Flacon ambré, marbre travertin, lumière naturelle",
@@ -27,10 +36,17 @@ const PROMPTS = [
 ];
 
 const TINTS = ["#3d2a1e", "#2a1e3d", "#1e3d2a", "#3d1e2a", "#2a3d1e", "#1e2a3d"];
+const CATS: { key: ModelCategory | "all"; label: string }[] = [
+  { key: "all", label: "Tout" },
+  { key: "image", label: "Image" },
+  { key: "video", label: "Vidéo" },
+  { key: "audio", label: "Voix" },
+  { key: "text", label: "Texte" },
+];
 
 function makeItems(): Item[] {
   const pool = MODELS.filter((m) => m.category !== "text");
-  return Array.from({ length: 24 }).map((_, i) => {
+  return Array.from({ length: 48 }).map((_, i) => {
     const m = pool[i % pool.length];
     return {
       id: `g-${i}`,
@@ -47,34 +63,110 @@ function makeItems(): Item[] {
 function HistoryPage() {
   const [items] = useState(makeItems);
   const [selected, setSelected] = useState<Item | null>(null);
+  const [cat, setCat] = useState<ModelCategory | "all">("all");
+  const [q, setQ] = useState("");
+  const [modelSlug, setModelSlug] = useState<string>("all");
+  const [copied, setCopied] = useState(false);
+
+  const modelOptions = useMemo(() => {
+    const set = new Map<string, Model>();
+    items.forEach((it) => set.set(it.model.slug, it.model));
+    return Array.from(set.values());
+  }, [items]);
+
+  const filtered = useMemo(() => {
+    const term = q.trim().toLowerCase();
+    return items.filter((it) => {
+      if (cat !== "all" && it.model.category !== cat) return false;
+      if (modelSlug !== "all" && it.model.slug !== modelSlug) return false;
+      if (term && !it.prompt.toLowerCase().includes(term) && !it.model.name.toLowerCase().includes(term)) return false;
+      return true;
+    });
+  }, [items, cat, modelSlug, q]);
+
+  function copyPrompt(text: string) {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  }
 
   return (
     <div className="mx-auto max-w-7xl px-5 sm:px-8 py-10">
-      <div className="mb-8">
-        <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Historique</div>
-        <h1 className="mt-2 font-display text-4xl tracking-[-0.03em]">Tout ce que tu as créé.</h1>
+      <div className="mb-8 grid gap-4 sm:flex sm:items-end sm:justify-between">
+        <div className="min-w-0">
+          <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Historique</div>
+          <h1 className="mt-2 font-display text-4xl tracking-[-0.03em]">Tout ce que tu as créé.</h1>
+          <p className="mt-2 text-muted-foreground text-sm">{filtered.length} génération{filtered.length > 1 ? "s" : ""} · {items.length} au total</p>
+        </div>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Rechercher un prompt, un modèle…"
+            className="w-full sm:w-72 rounded-full border border-border bg-surface-1/70 pl-9 pr-4 py-2 text-sm focus:border-amber/40 outline-none"
+          />
+        </div>
       </div>
 
-      <div className="columns-2 md:columns-3 lg:columns-4 gap-3 [column-fill:_balance]">
-        {items.map((it) => (
+      <div className="flex flex-wrap gap-2 mb-4">
+        {CATS.map((c) => (
           <button
-            key={it.id}
-            onClick={() => setSelected(it)}
-            className={"mb-3 block w-full break-inside-avoid group relative overflow-hidden rounded-xl border border-border " + it.ratio}
-            style={{ background: `linear-gradient(135deg, ${it.tint}, oklch(0.14 0 0))` }}
+            key={c.key}
+            onClick={() => { setCat(c.key); setModelSlug("all"); }}
+            className={cn(
+              "rounded-full border px-3.5 py-1.5 text-xs font-medium transition",
+              cat === c.key ? "border-amber/60 bg-amber/15 text-amber-soft" : "border-border bg-surface-1/50 text-muted-foreground hover:text-foreground"
+            )}
           >
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-            <div className="absolute inset-x-0 bottom-0 p-3 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all">
-              <div className="text-[11px] font-mono text-amber-soft">{it.model.name}</div>
-              <div className="text-xs text-foreground/90 line-clamp-1">{it.prompt}</div>
-              <div className="text-[10px] text-muted-foreground mt-1 flex items-center justify-between">
-                <span>{it.date}</span>
-                <PriceDisplay usd={it.cost} className="text-[10px]" />
-              </div>
-            </div>
+            {c.label}
           </button>
         ))}
+        <div className="ml-auto flex items-center gap-2">
+          <label className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Modèle</label>
+          <select
+            value={modelSlug}
+            onChange={(e) => setModelSlug(e.target.value)}
+            className="rounded-full border border-border bg-surface-1/70 px-3 py-1.5 text-xs focus:border-amber/40 outline-none max-w-[200px]"
+          >
+            <option value="all">Tous</option>
+            {modelOptions
+              .filter((m) => cat === "all" || m.category === cat)
+              .map((m) => <option key={m.slug} value={m.slug}>{m.name}</option>)}
+          </select>
+        </div>
       </div>
+
+      {filtered.length === 0 ? (
+        <div className="mt-16 text-center text-muted-foreground">
+          <div className="font-display text-2xl mb-2">Rien à afficher.</div>
+          <div className="text-sm">Ajuste les filtres ou lance une nouvelle génération.</div>
+        </div>
+      ) : (
+        <div className="columns-2 md:columns-3 lg:columns-4 gap-3 [column-fill:_balance]">
+          {filtered.map((it) => (
+            <button
+              key={it.id}
+              onClick={() => setSelected(it)}
+              className={"mb-3 block w-full break-inside-avoid group relative overflow-hidden rounded-xl border border-border " + it.ratio}
+              style={{ background: `linear-gradient(135deg, ${it.tint}, oklch(0.14 0 0))` }}
+            >
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+              <div className="absolute top-2 left-2 rounded-full bg-black/60 backdrop-blur px-2 py-0.5 text-[9px] font-mono uppercase tracking-wider text-foreground/80">
+                {it.model.category}
+              </div>
+              <div className="absolute inset-x-0 bottom-0 p-3 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all text-left">
+                <div className="text-[11px] font-mono text-amber-soft truncate">{it.model.name}</div>
+                <div className="text-xs text-foreground/90 line-clamp-1">{it.prompt}</div>
+                <div className="text-[10px] text-muted-foreground mt-1 flex items-center justify-between">
+                  <span>{it.date}</span>
+                  <PriceDisplay usd={it.cost} className="text-[10px]" />
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
 
       <AnimatePresence>
         {selected && (
@@ -89,16 +181,22 @@ function HistoryPage() {
               </div>
               <div className={"m-4 rounded-xl " + selected.ratio} style={{ background: `linear-gradient(135deg, ${selected.tint}, oklch(0.14 0 0))` }} />
               <div className="px-4 pb-6">
-                <div className="text-xs text-muted-foreground">Prompt</div>
-                <div className="mt-1 text-foreground/90">{selected.prompt}</div>
+                <div className="flex items-center justify-between">
+                  <div className="text-xs text-muted-foreground">Prompt</div>
+                  <button onClick={() => copyPrompt(selected.prompt)} className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground">
+                    {copied ? <><Check className="size-3 text-emerald" /> Copié</> : <><Copy className="size-3" /> Copier</>}
+                  </button>
+                </div>
+                <div className="mt-1 text-foreground/90 leading-relaxed">{selected.prompt}</div>
                 <div className="mt-6 grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <div className="text-xs text-muted-foreground">Modèle</div>
                     <div className="mt-1">{selected.model.name}</div>
+                    <div className="text-[11px] text-muted-foreground font-mono">{selected.model.provider}</div>
                   </div>
                   <div>
                     <div className="text-xs text-muted-foreground">Coût</div>
-                    <div className="mt-1"><PriceDisplay usd={selected.cost} /></div>
+                    <div className="mt-1"><PriceDisplay usd={selected.cost} emphasize /></div>
                   </div>
                   <div>
                     <div className="text-xs text-muted-foreground">Date</div>
