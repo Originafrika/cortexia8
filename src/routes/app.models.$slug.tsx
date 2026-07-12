@@ -169,44 +169,77 @@ export function ModelPlaygroundContent({
   useEffect(() => () => clearTimers(), []);
 
   return (
-    <div className={cn("mx-auto", isModal ? "p-0" : "max-w-6xl px-5 sm:px-8 py-8")}>
+    <div
+      className={cn(
+        "mx-auto",
+        isModal
+          ? "p-0"
+          : "max-w-6xl px-5 sm:px-8 py-6 lg:h-[calc(100vh-3.5rem)] lg:flex lg:flex-col lg:overflow-hidden",
+      )}
+    >
       {!isModal && (
-        <Link
-          to="/app/models"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="size-4" /> Catalogue
-        </Link>
+        <div className="shrink-0">
+          <Link
+            to="/app/models"
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="size-4" /> Catalogue
+          </Link>
+
+          <div className="mt-4 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4 sm:flex sm:flex-wrap sm:justify-between">
+            <div className="min-w-0">
+              <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                {model.provider} · {model.category}
+              </div>
+              <h1 className="mt-2 font-display text-3xl sm:text-4xl tracking-[-0.03em] truncate">
+                {model.name}
+              </h1>
+              <p className="mt-1 text-muted-foreground max-w-xl text-xs truncate">{model.blurb}</p>
+            </div>
+            <div className="text-right shrink-0">
+              <PriceDisplay
+                usd={currentPrice}
+                className="font-display text-2xl sm:text-3xl tracking-[-0.02em]"
+                emphasize
+              />
+              <div className="text-xs text-muted-foreground font-mono">{unitLabel(model)}</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isModal && (
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4 sm:flex sm:flex-wrap sm:justify-between shrink-0 mb-6">
+          <div className="min-w-0">
+            <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+              {model.provider} · {model.category}
+            </div>
+            <h1 className="mt-2 font-display text-3xl sm:text-4xl tracking-[-0.03em] truncate">
+              {model.name}
+            </h1>
+            <p className="mt-1 text-muted-foreground max-w-xl text-xs truncate">{model.blurb}</p>
+          </div>
+          <div className="text-right shrink-0">
+            <PriceDisplay
+              usd={currentPrice}
+              className="font-display text-2xl sm:text-3xl tracking-[-0.02em]"
+              emphasize
+            />
+            <div className="text-xs text-muted-foreground font-mono">{unitLabel(model)}</div>
+          </div>
+        </div>
       )}
 
       <div
         className={cn(
-          "grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4 sm:flex sm:flex-wrap sm:justify-between",
-          !isModal && "mt-4",
+          "mt-6 grid gap-6 lg:grid-cols-[1.15fr,0.85fr]",
+          isModal
+            ? "lg:h-[60vh] lg:overflow-hidden"
+            : "lg:flex-1 lg:min-h-0 lg:overflow-hidden pb-4",
         )}
       >
-        <div className="min-w-0">
-          <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-            {model.provider} · {model.category}
-          </div>
-          <h1 className="mt-2 font-display text-3xl sm:text-4xl tracking-[-0.03em] truncate">
-            {model.name}
-          </h1>
-          <p className="mt-1 text-muted-foreground max-w-xl">{model.blurb}</p>
-        </div>
-        <div className="text-right shrink-0">
-          <PriceDisplay
-            usd={currentPrice}
-            className="font-display text-2xl sm:text-3xl tracking-[-0.02em]"
-            emphasize
-          />
-          <div className="text-xs text-muted-foreground font-mono">{unitLabel(model)}</div>
-        </div>
-      </div>
-
-      <div className="mt-8 grid gap-6 lg:grid-cols-[1.15fr,0.85fr]">
-        <div className="surface-gradient-border rounded-2xl bg-surface-1/60 p-6">
-          <div className="flex items-center justify-between mb-4">
+        <div className="surface-gradient-border rounded-2xl bg-surface-1/60 p-6 lg:h-full lg:flex lg:flex-col lg:overflow-hidden">
+          <div className="flex items-center justify-between mb-4 shrink-0">
             <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
               Paramètres
             </div>
@@ -233,7 +266,7 @@ export function ModelPlaygroundContent({
               </div>
             )}
           </div>
-          <div className="space-y-5">
+          <div className="space-y-5 flex-1 lg:overflow-y-auto pr-1">
             {simple.map((p: ParamSpec, i: number) => (
               <Field
                 key={i}
@@ -266,7 +299,7 @@ export function ModelPlaygroundContent({
           <button
             onClick={generate}
             disabled={status === "loading"}
-            className="mt-6 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber px-5 py-3 text-sm font-medium text-primary-foreground hover:opacity-95 transition disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
+            className="mt-6 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber px-5 py-3 text-sm font-medium text-primary-foreground hover:opacity-95 transition disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer shrink-0"
           >
             {status === "loading" ? (
               <>
@@ -281,7 +314,7 @@ export function ModelPlaygroundContent({
           </button>
         </div>
 
-        <div>
+        <div className="lg:h-full lg:overflow-y-auto pr-1 space-y-6">
           <ResultPanel
             status={status}
             progress={progress}
