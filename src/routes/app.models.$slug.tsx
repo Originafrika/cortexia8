@@ -89,7 +89,7 @@ function ModelPlayground() {
 
   function generate() {
     if (status === "loading") return;
-    if ((model.params.some((p) => p.kind === "prompt")) && prompt.trim().length < 3) {
+    if ((model.params.some((p: ParamSpec) => p.kind === "prompt")) && prompt.trim().length < 3) {
       setStatus("error");
       setError("Ajoute un prompt d'au moins quelques mots pour lancer la génération.");
       return;
