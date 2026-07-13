@@ -3,16 +3,21 @@ import { AmbientBackground } from "@/components/ambient-background";
 import { LocalePicker } from "@/components/locale-picker";
 import { PriceDisplay } from "@/components/price-display";
 import { OnboardingOverlay, useOnboarding } from "@/components/onboarding-overlay";
-import { MessageSquare, LayoutGrid, History, Code2, Wallet, Sparkles, HelpCircle } from "lucide-react";
+import {
+  MessageSquare,
+  LayoutGrid,
+  History,
+  Code2,
+  Wallet,
+  Sparkles,
+  HelpCircle,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/app")({
   head: () => ({
-    meta: [
-      { title: "Cortexia — App" },
-      { name: "robots", content: "noindex,nofollow" },
-    ],
+    meta: [{ title: "Cortexia — App" }, { name: "robots", content: "noindex,nofollow" }],
   }),
   component: AppLayout,
 });
@@ -24,11 +29,11 @@ function AppLayout() {
   const { open, setOpen } = useOnboarding();
 
   const NAV = [
-    { to: "/app",             label: t("app.nav.agent"),   icon: MessageSquare, exact: true },
-    { to: "/app/models",      label: t("app.nav.models"),  icon: LayoutGrid },
-    { to: "/app/history",     label: t("app.nav.history"), icon: History },
-    { to: "/app/developers",  label: t("app.nav.dev"),     icon: Code2 },
-    { to: "/app/account",     label: t("app.nav.account"), icon: Wallet },
+    { to: "/app", label: t("app.nav.agent"), icon: MessageSquare, exact: true },
+    { to: "/app/models", label: t("app.nav.models"), icon: LayoutGrid },
+    { to: "/app/history", label: t("app.nav.history"), icon: History },
+    { to: "/app/developers", label: t("app.nav.dev"), icon: Code2 },
+    { to: "/app/account", label: t("app.nav.account"), icon: Wallet },
   ];
 
   return (
@@ -52,7 +57,9 @@ function AppLayout() {
                   to={item.to as never}
                   className={cn(
                     "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-                    active ? "bg-surface-2/70 text-foreground" : "text-muted-foreground hover:bg-surface-1/60 hover:text-foreground",
+                    active
+                      ? "bg-surface-2/70 text-foreground"
+                      : "text-muted-foreground hover:bg-surface-1/60 hover:text-foreground",
                   )}
                 >
                   <Icon className="size-4" />
@@ -62,9 +69,18 @@ function AppLayout() {
             })}
           </nav>
           <div className="mt-auto rounded-xl border border-border bg-surface-1/60 p-3">
-            <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">{t("app.header.balance")}</div>
-            <PriceDisplay usd={CREDIT_USD} className="mt-1 font-display text-2xl tracking-[-0.02em]" emphasize />
-            <Link to="/app/account" className="mt-2 inline-flex items-center gap-1 text-xs text-amber-soft hover:underline">
+            <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+              {t("app.header.balance")}
+            </div>
+            <PriceDisplay
+              usd={CREDIT_USD}
+              className="mt-1 font-display text-2xl tracking-[-0.02em]"
+              emphasize
+            />
+            <Link
+              to="/app/account"
+              className="mt-2 inline-flex items-center gap-1 text-xs text-amber-soft hover:underline"
+            >
               Recharger →
             </Link>
           </div>

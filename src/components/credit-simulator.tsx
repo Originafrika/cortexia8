@@ -2,7 +2,14 @@ import { useMemo, useState } from "react";
 import { PriceDisplay } from "./price-display";
 import { useCurrency, formatMoney } from "@/lib/currency";
 import { useT } from "@/lib/i18n";
-import { Image as ImageIcon, Film, Mic, MessageSquare, AlertTriangle, Sparkles } from "lucide-react";
+import {
+  Image as ImageIcon,
+  Film,
+  Mic,
+  MessageSquare,
+  AlertTriangle,
+  Sparkles,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Category = {
@@ -22,10 +29,54 @@ type Category = {
 };
 
 const CATEGORIES: Category[] = [
-  { key: "image", label: "Images",   icon: ImageIcon,     unit: "images",         unitPriceUSD: 0.05,  suffix: "images / mois",       max: 1000, step: 5,   helper: "Seedream Pro 1K en moyenne.", refPlan: { name: "Midjourney Standard", usd: 30 } },
-  { key: "video", label: "Vidéo",    icon: Film,          unit: "secondes",       unitPriceUSD: 0.12,  suffix: "secondes / mois",     max: 1200, step: 5,   helper: "Kling 3 Turbo 1080p.",         refPlan: { name: "Higgsfield Pro",     usd: 39 } },
-  { key: "voice", label: "Voix",     icon: Mic,           unit: "1000 caractères",unitPriceUSD: 0.088, suffix: "×1 000 car. / mois",  max: 400,  step: 2,   helper: "ElevenLabs V3.",               refPlan: { name: "ElevenLabs Starter", usd: 22 } },
-  { key: "text",  label: "Texte",    icon: MessageSquare, unit: "M tokens",       unitPriceUSD: 5.4,   suffix: "M tokens / mois",     max: 40,   step: 0.5, helper: "Claude Sonnet 5 en sortie.",   refPlan: { name: "Claude Pro",          usd: 20 } },
+  {
+    key: "image",
+    label: "Images",
+    icon: ImageIcon,
+    unit: "images",
+    unitPriceUSD: 0.05,
+    suffix: "images / mois",
+    max: 1000,
+    step: 5,
+    helper: "Seedream Pro 1K en moyenne.",
+    refPlan: { name: "Midjourney Standard", usd: 30 },
+  },
+  {
+    key: "video",
+    label: "Vidéo",
+    icon: Film,
+    unit: "secondes",
+    unitPriceUSD: 0.12,
+    suffix: "secondes / mois",
+    max: 1200,
+    step: 5,
+    helper: "Kling 3 Turbo 1080p.",
+    refPlan: { name: "Higgsfield Pro", usd: 39 },
+  },
+  {
+    key: "voice",
+    label: "Voix",
+    icon: Mic,
+    unit: "1000 caractères",
+    unitPriceUSD: 0.088,
+    suffix: "×1 000 car. / mois",
+    max: 400,
+    step: 2,
+    helper: "ElevenLabs V3.",
+    refPlan: { name: "ElevenLabs Starter", usd: 22 },
+  },
+  {
+    key: "text",
+    label: "Texte",
+    icon: MessageSquare,
+    unit: "M tokens",
+    unitPriceUSD: 5.4,
+    suffix: "M tokens / mois",
+    max: 40,
+    step: 0.5,
+    helper: "Claude Sonnet 5 en sortie.",
+    refPlan: { name: "Claude Pro", usd: 20 },
+  },
 ];
 
 const DEFAULT_VALUES: Record<string, number> = { image: 40, video: 25, voice: 6, text: 0.8 };
@@ -87,7 +138,9 @@ export function CreditSimulator({ compact }: { compact?: boolean }) {
                       <Icon className="size-3.5 text-amber-soft" />
                     </span>
                     <span className="font-medium">{cat.label}</span>
-                    <span className="text-muted-foreground text-xs hidden sm:inline">{cat.helper}</span>
+                    <span className="text-muted-foreground text-xs hidden sm:inline">
+                      {cat.helper}
+                    </span>
                   </label>
                   <div className="text-right">
                     <div className="font-mono tabular text-sm text-foreground/90">
@@ -106,7 +159,9 @@ export function CreditSimulator({ compact }: { compact?: boolean }) {
                     max={cat.max}
                     step={cat.step}
                     value={val}
-                    onChange={(e) => setValues((v) => ({ ...v, [cat.key]: parseFloat(e.target.value) }))}
+                    onChange={(e) =>
+                      setValues((v) => ({ ...v, [cat.key]: parseFloat(e.target.value) }))
+                    }
                     className="w-full accent-amber h-1.5 appearance-none rounded-full bg-surface-3 cursor-pointer"
                     aria-label={cat.label}
                   />

@@ -79,7 +79,12 @@ function HistoryPage() {
     return items.filter((it) => {
       if (cat !== "all" && it.model.category !== cat) return false;
       if (modelSlug !== "all" && it.model.slug !== modelSlug) return false;
-      if (term && !it.prompt.toLowerCase().includes(term) && !it.model.name.toLowerCase().includes(term)) return false;
+      if (
+        term &&
+        !it.prompt.toLowerCase().includes(term) &&
+        !it.model.name.toLowerCase().includes(term)
+      )
+        return false;
       return true;
     });
   }, [items, cat, modelSlug, q]);
@@ -94,9 +99,13 @@ function HistoryPage() {
     <div className="mx-auto max-w-7xl px-5 sm:px-8 py-10">
       <div className="mb-8 grid gap-4 sm:flex sm:items-end sm:justify-between">
         <div className="min-w-0">
-          <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Historique</div>
+          <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+            Historique
+          </div>
           <h1 className="mt-2 font-display text-4xl tracking-[-0.03em]">Tout ce que tu as créé.</h1>
-          <p className="mt-2 text-muted-foreground text-sm">{filtered.length} génération{filtered.length > 1 ? "s" : ""} · {items.length} au total</p>
+          <p className="mt-2 text-muted-foreground text-sm">
+            {filtered.length} génération{filtered.length > 1 ? "s" : ""} · {items.length} au total
+          </p>
         </div>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
@@ -113,17 +122,24 @@ function HistoryPage() {
         {CATS.map((c) => (
           <button
             key={c.key}
-            onClick={() => { setCat(c.key); setModelSlug("all"); }}
+            onClick={() => {
+              setCat(c.key);
+              setModelSlug("all");
+            }}
             className={cn(
               "rounded-full border px-3.5 py-1.5 text-xs font-medium transition",
-              cat === c.key ? "border-amber/60 bg-amber/15 text-amber-soft" : "border-border bg-surface-1/50 text-muted-foreground hover:text-foreground"
+              cat === c.key
+                ? "border-amber/60 bg-amber/15 text-amber-soft"
+                : "border-border bg-surface-1/50 text-muted-foreground hover:text-foreground",
             )}
           >
             {c.label}
           </button>
         ))}
         <div className="ml-auto flex items-center gap-2">
-          <label className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Modèle</label>
+          <label className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+            Modèle
+          </label>
           <select
             value={modelSlug}
             onChange={(e) => setModelSlug(e.target.value)}
@@ -132,7 +148,11 @@ function HistoryPage() {
             <option value="all">Tous</option>
             {modelOptions
               .filter((m) => cat === "all" || m.category === cat)
-              .map((m) => <option key={m.slug} value={m.slug}>{m.name}</option>)}
+              .map((m) => (
+                <option key={m.slug} value={m.slug}>
+                  {m.name}
+                </option>
+              ))}
           </select>
         </div>
       </div>
@@ -148,7 +168,10 @@ function HistoryPage() {
             <button
               key={it.id}
               onClick={() => setSelected(it)}
-              className={"mb-3 block w-full break-inside-avoid group relative overflow-hidden rounded-xl border border-border " + it.ratio}
+              className={
+                "mb-3 block w-full break-inside-avoid group relative overflow-hidden rounded-xl border border-border " +
+                it.ratio
+              }
               style={{ background: `linear-gradient(135deg, ${it.tint}, oklch(0.14 0 0))` }}
             >
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
@@ -156,7 +179,9 @@ function HistoryPage() {
                 {it.model.category}
               </div>
               <div className="absolute inset-x-0 bottom-0 p-3 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all text-left">
-                <div className="text-[11px] font-mono text-amber-soft truncate">{it.model.name}</div>
+                <div className="text-[11px] font-mono text-amber-soft truncate">
+                  {it.model.name}
+                </div>
                 <div className="text-xs text-foreground/90 line-clamp-1">{it.prompt}</div>
                 <div className="text-[10px] text-muted-foreground mt-1 flex items-center justify-between">
                   <span>{it.date}</span>
@@ -171,20 +196,51 @@ function HistoryPage() {
       <AnimatePresence>
         {selected && (
           <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelected(null)}
-              className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm" />
-            <motion.aside initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-              className="fixed right-0 top-0 bottom-0 z-50 w-full sm:w-[440px] bg-surface-1 border-l border-border overflow-y-auto">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelected(null)}
+              className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+            />
+            <motion.aside
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              className="fixed right-0 top-0 bottom-0 z-50 w-full sm:w-[440px] bg-surface-1 border-l border-border overflow-y-auto"
+            >
               <div className="sticky top-0 flex items-center justify-between p-4 border-b border-border bg-surface-1/95 backdrop-blur">
-                <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Détail</div>
-                <button onClick={() => setSelected(null)} className="rounded-lg p-1 hover:bg-surface-2"><X className="size-4" /></button>
+                <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                  Détail
+                </div>
+                <button
+                  onClick={() => setSelected(null)}
+                  className="rounded-lg p-1 hover:bg-surface-2"
+                >
+                  <X className="size-4" />
+                </button>
               </div>
-              <div className={"m-4 rounded-xl " + selected.ratio} style={{ background: `linear-gradient(135deg, ${selected.tint}, oklch(0.14 0 0))` }} />
+              <div
+                className={"m-4 rounded-xl " + selected.ratio}
+                style={{ background: `linear-gradient(135deg, ${selected.tint}, oklch(0.14 0 0))` }}
+              />
               <div className="px-4 pb-6">
                 <div className="flex items-center justify-between">
                   <div className="text-xs text-muted-foreground">Prompt</div>
-                  <button onClick={() => copyPrompt(selected.prompt)} className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground">
-                    {copied ? <><Check className="size-3 text-emerald" /> Copié</> : <><Copy className="size-3" /> Copier</>}
+                  <button
+                    onClick={() => copyPrompt(selected.prompt)}
+                    className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground"
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="size-3 text-emerald" /> Copié
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="size-3" /> Copier
+                      </>
+                    )}
                   </button>
                 </div>
                 <div className="mt-1 text-foreground/90 leading-relaxed">{selected.prompt}</div>
@@ -192,11 +248,15 @@ function HistoryPage() {
                   <div>
                     <div className="text-xs text-muted-foreground">Modèle</div>
                     <div className="mt-1">{selected.model.name}</div>
-                    <div className="text-[11px] text-muted-foreground font-mono">{selected.model.provider}</div>
+                    <div className="text-[11px] text-muted-foreground font-mono">
+                      {selected.model.provider}
+                    </div>
                   </div>
                   <div>
                     <div className="text-xs text-muted-foreground">Coût</div>
-                    <div className="mt-1"><PriceDisplay usd={selected.cost} emphasize /></div>
+                    <div className="mt-1">
+                      <PriceDisplay usd={selected.cost} emphasize />
+                    </div>
                   </div>
                   <div>
                     <div className="text-xs text-muted-foreground">Date</div>

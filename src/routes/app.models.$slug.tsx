@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { getModel, basePrice, unitLabel, type Model, type ParamSpec } from "@/lib/models";
+import { getModel, basePrice, unitLabel, MODELS, type Model, type ParamSpec } from "@/lib/models";
 import { PriceDisplay } from "@/components/price-display";
 import {
   ArrowLeft,
@@ -10,16 +10,7 @@ import {
   Download,
   AlertTriangle,
   Loader2,
-  Image as ImageIcon,
-  Ratio,
-  Palette,
-  Clock,
-  Dice5,
-  Volume2,
-  Upload,
-  SlidersHorizontal,
-  Settings2,
-  X,
+  MoreVertical,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -105,43 +96,89 @@ export function ModelPlaygroundContent({
   model: Model;
   isModal?: boolean;
 }) {
+  const [currentModel, setCurrentModel] = useState<Model>(model);
+  const [advanced, setAdvanced] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [state, setState] = useState<Record<string, unknown>>(() => initState(model));
 
+  // Keep currentModel in sync with route loaded model
+  useEffect(() => {
+    setCurrentModel(model);
+  }, [model]);
+
+  // Reset when active model changes (whether via route or dynamic switch)
   useEffect(() => {
     setPrompt("");
     setStatus("idle");
     setHistory([]);
+    setSelectedHistoryItem(null);
     setError(null);
     setProgress(0);
-    setActiveId(null);
-    setState(initState(model));
+    const init: Record<string, unknown> = {};
+    currentModel.params.forEach((p: ParamSpec) => {
+      if (p.kind === "slider") init[p.key] = p.default;
+      if (p.kind === "select") init[p.key] = p.options[0];
+      if (p.kind === "toggle") init[p.key] = !!p.default;
+    });
+    setState(init);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [model.slug]);
+  }, [currentModel.slug]);
 
   const [status, setStatus] = useState<Status>("idle");
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<Result | null>(null);
+  const [selectedHistoryItem, setSelectedHistoryItem] = useState<Result | null>(null);
   const [history, setHistory] = useState<Result[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const timers = useRef<number[]>([]);
   const galleryRef = useRef<HTMLDivElement>(null);
 
-  const currentPrice = useMemo(() => estimatePrice(model, state), [model, state]);
-  const hasPrompt = model.params.some((p) => p.kind === "prompt");
-  const active = history.find((h) => h.id === activeId) ?? null;
+  const currentPrice = useMemo(() => estimatePrice(currentModel, state), [currentModel, state]);
 
-  // Group all non-prompt params for icon buttons
-  const iconParams = model.params.filter((p) => p.kind !== "prompt");
+  const simple: ParamSpec[] = currentModel.params.filter(
+    (p: ParamSpec) => !("advanced" in p) || !p.advanced,
+  );
+  const adv: ParamSpec[] = currentModel.params.filter(
+    (p: ParamSpec) => "advanced" in p && !!p.advanced,
+  );
 
   function clearTimers() {
     timers.current.forEach((t) => window.clearTimeout(t));
     timers.current = [];
   }
 
+  function loadHistoryItem(item: Result) {
+    setPrompt(item.prompt);
+    setState(item.state);
+    setResult(item);
+    setSelectedHistoryItem(item);
+    setStatus("success");
+    setError(null);
+  }
+
+  function regenerateItem(item: Result) {
+    setPrompt(item.prompt);
+    setState(item.state);
+    setCurrentModel(item.model);
+    // Let state transition happen before triggering generation
+    setTimeout(() => {
+      generate();
+    }, 80);
+  }
+
+  function loadReferenceItem(item: Result) {
+    setPrompt(item.prompt);
+    setState(item.state);
+    setCurrentModel(item.model);
+  }
+
   function generate() {
     if (status === "loading") return;
-    if (hasPrompt && prompt.trim().length < 3) {
+    if (
+      currentModel.params.some((p: ParamSpec) => p.kind === "prompt") &&
+      prompt.trim().length < 3
+    ) {
       setStatus("error");
       setError("Ajoute un prompt d'au moins quelques mots pour lancer la génération.");
       return;
@@ -150,12 +187,15 @@ export function ModelPlaygroundContent({
     setStatus("loading");
     setError(null);
     setProgress(0);
+    // Force focused workspace view on load
+    setSelectedHistoryItem(null);
+    // Realistic duration by category
     const duration =
-      model.category === "video"
+      currentModel.category === "video"
         ? 4200
-        : model.category === "audio"
+        : currentModel.category === "audio"
           ? 2600
-          : model.category === "text"
+          : currentModel.category === "text"
             ? 1800
             : 2200;
     const steps = 40;
@@ -167,15 +207,17 @@ export function ModelPlaygroundContent({
     timers.current.push(
       window.setTimeout(() => {
         const newResult: Result = {
-          id: Math.random().toString(36).substring(2, 9),
-          model,
-          prompt: prompt.trim() || "(sans prompt)",
+          id: Math.random().toString(36).substring(7),
+          model: currentModel,
+          prompt: prompt || "(sans prompt)",
           cost: currentPrice,
           tint: TINTS[Math.floor(Math.random() * TINTS.length)],
           ratio: ratioClassFrom(state.ratio as string),
           state: { ...state },
           timestamp: new Date(),
         };
+        setResult(newResult);
+        setSelectedHistoryItem(newResult);
         setHistory((prev) => [newResult, ...prev]);
         setActiveId(newResult.id);
         setStatus("success");
@@ -198,21 +240,25 @@ export function ModelPlaygroundContent({
     >
       {/* Top bar */}
       {!isModal && (
-        <div className="shrink-0 border-b border-border/60 bg-surface-0/40 backdrop-blur">
-          <div className="mx-auto max-w-6xl px-5 sm:px-8 py-3 flex items-center gap-4">
-            <Link
-              to="/app/models"
-              className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground shrink-0"
-            >
-              <ArrowLeft className="size-3.5" /> Catalogue
-            </Link>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-baseline gap-2 min-w-0">
-                <h1 className="font-display text-lg tracking-[-0.02em] truncate">{model.name}</h1>
-                <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground truncate">
-                  {model.provider}
-                </span>
+        <div className="shrink-0">
+          <Link
+            to="/app/models"
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="size-4" /> Catalogue
+          </Link>
+
+          <div className="mt-4 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4 sm:flex sm:flex-wrap sm:justify-between">
+            <div className="min-w-0">
+              <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                {currentModel.provider} · {currentModel.category}
               </div>
+              <h1 className="mt-2 font-display text-3xl sm:text-4xl tracking-[-0.03em] truncate text-amber-soft">
+                {currentModel.name}
+              </h1>
+              <p className="mt-1 text-muted-foreground max-w-xl text-xs truncate">
+                {currentModel.blurb}
+              </p>
             </div>
             <div className="text-right shrink-0">
               <PriceDisplay
@@ -220,13 +266,38 @@ export function ModelPlaygroundContent({
                 className="font-display text-lg tracking-[-0.02em]"
                 emphasize
               />
-              <div className="text-[10px] text-muted-foreground font-mono">{unitLabel(model)}</div>
+              <div className="text-xs text-muted-foreground font-mono">
+                {unitLabel(currentModel)}
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Gallery / result area */}
+      {isModal && (
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4 sm:flex sm:flex-wrap sm:justify-between shrink-0 mb-6">
+          <div className="min-w-0">
+            <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+              {currentModel.provider} · {currentModel.category}
+            </div>
+            <h1 className="mt-2 font-display text-3xl sm:text-4xl tracking-[-0.03em] truncate text-amber-soft">
+              {currentModel.name}
+            </h1>
+            <p className="mt-1 text-muted-foreground max-w-xl text-xs truncate">
+              {currentModel.blurb}
+            </p>
+          </div>
+          <div className="text-right shrink-0">
+            <PriceDisplay
+              usd={currentPrice}
+              className="font-display text-2xl sm:text-3xl tracking-[-0.02em]"
+              emphasize
+            />
+            <div className="text-xs text-muted-foreground font-mono">{unitLabel(currentModel)}</div>
+          </div>
+        </div>
+      )}
+
       <div
         ref={galleryRef}
         className="flex-1 min-h-0 overflow-y-auto"
@@ -312,6 +383,39 @@ export function ModelPlaygroundContent({
                     <PriceDisplay usd={item.cost} className="text-[9px]" />
                   </div>
                 </button>
+              </div>
+            )}
+          </div>
+          <div className="space-y-5 flex-1 lg:overflow-y-auto pr-1">
+            {simple.map((p: ParamSpec, i: number) => (
+              <Field
+                key={i}
+                p={p}
+                state={state}
+                setState={setState}
+                prompt={prompt}
+                setPrompt={setPrompt}
+                currentModel={currentModel}
+                setCurrentModel={setCurrentModel}
+              />
+            ))}
+            <motion.div
+              initial={false}
+              animate={{ height: advanced ? "auto" : 0, opacity: advanced ? 1 : 0 }}
+              transition={{ duration: 0.3 }}
+              className="overflow-hidden space-y-5"
+            >
+              {adv.map((p: ParamSpec, i: number) => (
+                <Field
+                  key={i}
+                  p={p}
+                  state={state}
+                  setState={setState}
+                  prompt={prompt}
+                  setPrompt={setPrompt}
+                  currentModel={currentModel}
+                  setCurrentModel={setCurrentModel}
+                />
               ))}
             </div>
           ) : (
@@ -334,7 +438,22 @@ export function ModelPlaygroundContent({
             onGenerate={generate}
             status={status}
             progress={progress}
-            currentPrice={currentPrice}
+            error={error}
+            result={result}
+            model={model}
+            onRetry={generate}
+            onReset={() => {
+              setStatus("idle");
+              setResult(null);
+              setError(null);
+            }}
+            history={history}
+            onSelectHistory={loadHistoryItem}
+            onRegenerateItem={regenerateItem}
+            onSetPrompt={setPrompt}
+            onLoadReference={loadReferenceItem}
+            selectedHistoryItem={selectedHistoryItem}
+            setSelectedHistoryItem={setSelectedHistoryItem}
           />
         </div>
       </div>
@@ -363,7 +482,18 @@ function PromptBar({
   onGenerate,
   status,
   progress,
-  currentPrice,
+  error,
+  result,
+  model,
+  onRetry,
+  onReset,
+  history,
+  onSelectHistory,
+  onRegenerateItem,
+  onSetPrompt,
+  onLoadReference,
+  selectedHistoryItem,
+  setSelectedHistoryItem,
 }: {
   model: Model;
   iconParams: ParamSpec[];
@@ -375,61 +505,149 @@ function PromptBar({
   onGenerate: () => void;
   status: Status;
   progress: number;
-  currentPrice: number;
+  error: string | null;
+  result: Result | null;
+  model: Model;
+  onRetry: () => void;
+  onReset: () => void;
+  history: Result[];
+  onSelectHistory: (item: Result) => void;
+  onRegenerateItem?: (item: Result) => void;
+  onSetPrompt?: (v: string) => void;
+  onLoadReference?: (item: Result) => void;
+  selectedHistoryItem: Result | null;
+  setSelectedHistoryItem: (item: Result | null) => void;
 }) {
-  const promptSpec = model.params.find((p) => p.kind === "prompt");
-  const placeholder =
-    (promptSpec && "placeholder" in promptSpec && promptSpec.placeholder) ||
-    "Décris ce que tu veux générer…";
+  const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
 
-  return (
-    <div className="surface-gradient-border rounded-2xl bg-surface-1/70 p-3">
-      {hasPrompt ? (
-        <textarea
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-              e.preventDefault();
-              onGenerate();
-            }
-          }}
-          rows={2}
-          placeholder={placeholder}
-          className="w-full resize-none bg-transparent px-2 py-1.5 text-sm outline-none placeholder:text-muted-foreground/70"
-        />
-      ) : (
-        <div className="px-2 py-1.5 text-sm text-muted-foreground">
-          Configure les paramètres ci-dessous, puis génère.
+  // Close active dropdown menu on document click
+  useEffect(() => {
+    const handleOutsideClick = () => setActiveMenuId(null);
+    window.addEventListener("click", handleOutsideClick);
+    return () => window.removeEventListener("click", handleOutsideClick);
+  }, []);
+
+  const isFocusedView = selectedHistoryItem !== null && status !== "loading";
+
+  if (status === "loading") {
+    return (
+      <div className="space-y-4">
+        <div className="surface-gradient-border rounded-2xl bg-surface-1/60 overflow-hidden relative grid place-items-center aspect-square">
+          <div className="absolute inset-0 bg-[linear-gradient(115deg,transparent_20%,oklch(0.78_0.16_70_/_0.18)_50%,transparent_80%)] bg-[length:200%_100%] animate-[shimmer_1.6s_linear_infinite]" />
+          <div className="absolute inset-0 grid place-items-center text-center px-6">
+            <div>
+              <Loader2 className="size-6 mx-auto text-amber animate-spin" />
+              <div className="mt-3 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                {model.category === "video"
+                  ? "Rendu vidéo"
+                  : model.category === "audio"
+                    ? "Synthèse vocale"
+                    : model.category === "text"
+                      ? "Rédaction"
+                      : "Rendu image"}
+              </div>
+              <div className="mt-1 text-sm text-foreground/80">{progress}%</div>
+              <div className="mt-3 mx-auto w-40 h-1 rounded-full bg-surface-3 overflow-hidden">
+                <div
+                  className="h-full bg-amber transition-[width] duration-150"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+            </div>
+          </div>
         </div>
-      )}
+      </div>
+    );
+  }
 
-      <div className="mt-2 flex items-center gap-1.5 flex-wrap">
-        {iconParams.map((p, i) => (
-          <ParamIconButton key={i} p={p} state={state} setState={setState} />
-        ))}
+  if (isFocusedView) {
+    const item = selectedHistoryItem;
+    const ratioClass = item.ratio ?? "aspect-square";
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => setSelectedHistoryItem(null)}
+            className="inline-flex items-center gap-1.5 text-xs text-amber-soft hover:underline cursor-pointer"
+          >
+            ← Retour aux générations
+          </button>
+          <div className="text-[10px] font-mono text-muted-foreground">
+            Modèle utilisé : {item.model.name}
+          </div>
+        </div>
 
-        <div className="ml-auto flex items-center gap-2">
-          <div className="hidden sm:flex items-center gap-1 text-[11px] text-muted-foreground font-mono">
-            <span>Coût</span>
-            <PriceDisplay usd={currentPrice} className="text-[11px] text-foreground" />
+        <div
+          className={
+            "surface-gradient-border rounded-2xl bg-surface-1/60 overflow-hidden relative grid place-items-center " +
+            ratioClass
+          }
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="absolute inset-0"
+            style={{ background: `linear-gradient(135deg, ${item.tint}, oklch(0.14 0 0))` }}
+          >
+            <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between">
+              <div className="rounded-full bg-black/60 backdrop-blur px-2 py-1 text-[10px] font-mono uppercase tracking-wider">
+                {item.model.category}
+              </div>
+              <div className="rounded-full bg-black/60 backdrop-blur px-2 py-1">
+                <PriceDisplay usd={item.cost} className="text-[10px]" />
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        <div className="surface-gradient-border rounded-2xl bg-surface-1/60 p-4 space-y-3">
+          <div>
+            <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-muted-foreground">
+              Prompt
+            </div>
+            <div className="mt-1 text-sm text-foreground/90">{item.prompt}</div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {onRegenerateItem && (
+              <button
+                onClick={() => onRegenerateItem(item)}
+                className="flex-1 min-w-[100px] inline-flex items-center justify-center gap-1.5 rounded-xl border border-border bg-surface-2/40 px-3 py-2 text-xs hover:border-amber/40 transition cursor-pointer"
+              >
+                <RefreshCw className="size-3.5" /> Régénérer
+              </button>
+            )}
+            {onSetPrompt && (
+              <button
+                onClick={() => {
+                  onSetPrompt(item.prompt);
+                }}
+                className="flex-1 min-w-[140px] inline-flex items-center justify-center gap-1.5 rounded-xl border border-amber/30 bg-amber/5 px-3 py-2 text-xs hover:bg-amber/10 transition text-amber-soft cursor-pointer"
+              >
+                <Sparkles className="size-3.5" /> Prendre comme réf
+              </button>
+            )}
+            <button className="flex-1 min-w-[100px] inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber text-primary-foreground px-3 py-2 text-xs font-medium hover:opacity-95 transition cursor-pointer">
+              <Download className="size-3.5" /> Télécharger
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // DEFAULT / GRID VIEW
+  return (
+    <div className="space-y-4">
+      {history.length > 0 && (
+        <div className="flex items-center justify-between">
+          <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+            Grille de session ({history.length})
           </div>
           <button
-            onClick={onGenerate}
-            disabled={status === "loading"}
-            className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber px-4 h-9 text-sm font-medium text-primary-foreground hover:opacity-95 transition disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
+            onClick={onReset}
+            className="text-xs text-amber-soft hover:underline cursor-pointer"
           >
-            {status === "loading" ? (
-              <>
-                <Loader2 className="size-4 animate-spin" />
-                <span className="hidden sm:inline">{progress}%</span>
-              </>
-            ) : (
-              <>
-                <span className="hidden sm:inline">Générer</span>
-                <ArrowUp className="size-4" />
-              </>
-            )}
+            + Nouvelle génération
           </button>
         </div>
       </div>
@@ -437,57 +655,145 @@ function PromptBar({
   );
 }
 
-function ParamIconButton({
-  p,
-  state,
-  setState,
-}: {
-  p: ParamSpec;
-  state: Record<string, unknown>;
-  setState: React.Dispatch<React.SetStateAction<Record<string, unknown>>>;
-}) {
-  const key = "key" in p ? p.key : p.kind;
-  const Icon = iconForParam(key, p.kind);
-  const label = p.label;
+      {history.length > 0 ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {history.map((item) => {
+            const isMenuOpen = activeMenuId === item.id;
+            return (
+              <div
+                key={item.id}
+                className="relative aspect-square rounded-xl border border-border overflow-hidden group hover:border-amber/40 transition duration-200"
+                style={{ background: `linear-gradient(135deg, ${item.tint}, oklch(0.14 0 0))` }}
+              >
+                {/* Clicking card body navigates/opens focus view */}
+                <button
+                  onClick={() => onSelectHistory(item)}
+                  className="absolute inset-0 w-full h-full text-left cursor-pointer"
+                >
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition duration-150 flex items-center justify-center">
+                    <span className="text-[10px] font-mono text-white bg-black/70 px-2 py-1 rounded shadow">
+                      Ouvrir
+                    </span>
+                  </div>
+                  <div className="absolute bottom-2 left-2 right-2 text-[9px] font-mono text-white/90 bg-black/60 backdrop-blur px-1.5 py-1 rounded truncate">
+                    {item.prompt}
+                  </div>
+                </button>
 
-  // Compact value preview
-  let preview: string | null = null;
-  if (p.kind === "select") preview = String(state[p.key] ?? "");
-  else if (p.kind === "slider")
-    preview = `${state[p.key] ?? p.default}${p.suffix ?? ""}`;
-  else if (p.kind === "toggle") preview = state[p.key] ? "On" : null;
+                {/* Vertical Three-Dot Shortcut Menu */}
+                <div className="absolute top-1.5 right-1.5 z-10">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveMenuId(isMenuOpen ? null : item.id);
+                    }}
+                    className="p-1 rounded-lg bg-black/60 hover:bg-black/90 text-white/80 hover:text-white transition cursor-pointer"
+                  >
+                    <MoreVertical className="size-3.5" />
+                  </button>
 
-  const isActive =
-    (p.kind === "toggle" && !!state[p.key]) ||
-    (p.kind === "select" && p.options[0] !== state[p.key]) ||
-    (p.kind === "slider" && state[p.key] !== p.default);
+                  {/* Dropdown Floating Actions */}
+                  <AnimatePresence>
+                    {isMenuOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95, y: -5 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: -5 }}
+                        className="absolute right-0 mt-1 w-32 rounded-lg bg-surface-2 border border-border shadow-xl p-1 text-xs text-foreground"
+                      >
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onSelectHistory(item);
+                            setActiveMenuId(null);
+                          }}
+                          className="w-full text-left px-2 py-1 hover:bg-surface-3 rounded transition cursor-pointer"
+                        >
+                          Ouvrir
+                        </button>
+                        {onRegenerateItem && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onRegenerateItem(item);
+                              setActiveMenuId(null);
+                            }}
+                            className="w-full text-left px-2 py-1 hover:bg-surface-3 rounded transition cursor-pointer text-amber-soft"
+                          >
+                            Régénérer
+                          </button>
+                        )}
+                        {onLoadReference && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onLoadReference(item);
+                              setActiveMenuId(null);
+                            }}
+                            className="w-full text-left px-2 py-1 hover:bg-surface-3 rounded transition cursor-pointer text-amber-soft"
+                          >
+                            Prendre comme réf
+                          </button>
+                        )}
+                        {onSetPrompt && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onSetPrompt(item.prompt);
+                              setActiveMenuId(null);
+                            }}
+                            className="w-full text-left px-2 py-1 hover:bg-surface-3 rounded transition cursor-pointer"
+                          >
+                            Utiliser Prompt
+                          </button>
+                        )}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            alert("Simulé : téléchargement lancé.");
+                            setActiveMenuId(null);
+                          }}
+                          className="w-full text-left px-2 py-1 hover:bg-surface-3 rounded transition cursor-pointer"
+                        >
+                          Télécharger
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        /* Empty Idle state with Sparkles and Examples */
+        <div className="space-y-6">
+          <div className="surface-gradient-border rounded-2xl bg-surface-1/60 overflow-hidden relative grid place-items-center aspect-square">
+            <div className="text-center px-6">
+              <Sparkles className="size-6 mx-auto text-amber" />
+              <div className="mt-3 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                Zone de résultat
+              </div>
+              <div className="mt-1 text-sm text-foreground/70">
+                Ton rendu apparaîtra ici après génération.
+              </div>
+            </div>
+          </div>
 
-  return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <button
-          className={cn(
-            "inline-flex items-center gap-1.5 rounded-full border h-8 px-2.5 text-xs transition cursor-pointer",
-            isActive
-              ? "border-amber/60 bg-amber/10 text-amber-soft"
-              : "border-border bg-surface-2/40 text-muted-foreground hover:text-foreground hover:border-border-strong",
-          )}
-          title={label}
-        >
-          <Icon className="size-3.5" />
-          {preview && (
-            <span className="font-mono text-[10px] uppercase tracking-wider">{preview}</span>
-          )}
-        </button>
-      </PopoverTrigger>
-      <PopoverContent
-        side="top"
-        align="start"
-        className="w-72 bg-surface-1/95 backdrop-blur border-border"
-      >
-        <div className="flex items-center gap-2 mb-3">
-          <Icon className="size-4 text-amber" />
-          <div className="text-xs font-medium">{label}</div>
+          <div>
+            <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-3">
+              Exemples
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {["#3d2a1e", "#1e2a3d", "#2a3d1e"].map((c, i) => (
+                <div
+                  key={i}
+                  className="aspect-square rounded-lg border border-border"
+                  style={{ background: `linear-gradient(135deg, ${c}, transparent)` }}
+                />
+              ))}
+            </div>
+          </div>
         </div>
         <ParamEditor p={p} state={state} setState={setState} />
       </PopoverContent>
@@ -499,11 +805,77 @@ function ParamEditor({
   p,
   state,
   setState,
+  prompt,
+  setPrompt,
+  currentModel,
+  setCurrentModel,
 }: {
   p: ParamSpec;
   state: Record<string, unknown>;
-  setState: React.Dispatch<React.SetStateAction<Record<string, unknown>>>;
+  setState: (fn: (s: Record<string, unknown>) => Record<string, unknown>) => void;
+  prompt: string;
+  setPrompt: (v: string) => void;
+  currentModel?: Model;
+  setCurrentModel?: (m: Model) => void;
 }) {
+  if (p.kind === "prompt") {
+    return (
+      <label className="block">
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-xs text-muted-foreground">{p.label}</span>
+          {setCurrentModel && (
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] text-muted-foreground font-mono">Modèle:</span>
+              <select
+                value={currentModel?.slug}
+                onChange={(e) => {
+                  const found = MODELS.find((m) => m.slug === e.target.value);
+                  if (found) setCurrentModel(found);
+                }}
+                className="bg-surface-3 border border-border text-[11px] rounded px-1.5 py-0.5 outline-none focus:border-amber text-foreground cursor-pointer"
+              >
+                <optgroup label="Images">
+                  {MODELS.filter((m) => m.category === "image").map((m) => (
+                    <option key={m.slug} value={m.slug}>
+                      {m.name}
+                    </option>
+                  ))}
+                </optgroup>
+                <optgroup label="Vidéos">
+                  {MODELS.filter((m) => m.category === "video").map((m) => (
+                    <option key={m.slug} value={m.slug}>
+                      {m.name}
+                    </option>
+                  ))}
+                </optgroup>
+                <optgroup label="Audios">
+                  {MODELS.filter((m) => m.category === "audio").map((m) => (
+                    <option key={m.slug} value={m.slug}>
+                      {m.name}
+                    </option>
+                  ))}
+                </optgroup>
+                <optgroup label="LLM / Texte">
+                  {MODELS.filter((m) => m.category === "text").map((m) => (
+                    <option key={m.slug} value={m.slug}>
+                      {m.name}
+                    </option>
+                  ))}
+                </optgroup>
+              </select>
+            </div>
+          )}
+        </div>
+        <textarea
+          rows={3}
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          placeholder={p.placeholder}
+          className="w-full rounded-xl border border-border bg-surface-0/60 px-4 py-3 text-sm outline-none focus:border-amber/50 resize-none"
+        />
+      </label>
+    );
+  }
   if (p.kind === "upload") {
     return (
       <div className="rounded-xl border border-dashed border-border bg-surface-0/40 px-3 py-6 text-center text-xs text-muted-foreground cursor-pointer hover:border-amber/40">

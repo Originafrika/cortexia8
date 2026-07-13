@@ -8,9 +8,14 @@ export function useCountUp(value: number, duration = 450) {
   const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
-    const reduced = typeof window !== "undefined"
-      && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    if (reduced || duration <= 0) { setDisplay(value); fromRef.current = value; return; }
+    const reduced =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (reduced || duration <= 0) {
+      setDisplay(value);
+      fromRef.current = value;
+      return;
+    }
 
     fromRef.current = display;
     startRef.current = null;
@@ -27,7 +32,9 @@ export function useCountUp(value: number, duration = 450) {
       else fromRef.current = to;
     };
     rafRef.current = requestAnimationFrame(step);
-    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, duration]);
 

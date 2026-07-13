@@ -35,7 +35,10 @@ export function SiteHeader({ variant = "landing" }: { variant?: "landing" | "pre
         </div>
         <div className="flex items-center gap-3">
           {variant === "preview" && (
-            <Link to="/app" className="hidden sm:inline text-xs text-muted-foreground hover:text-foreground transition">
+            <Link
+              to="/app"
+              className="hidden sm:inline text-xs text-muted-foreground hover:text-foreground transition"
+            >
               {t("nav.open_app")}
             </Link>
           )}

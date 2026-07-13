@@ -8,9 +8,9 @@ import { cn } from "@/lib/utils";
 
 const KIND_META: Record<WallKind, { icon: typeof Play; labelKey: string }> = {
   image: { icon: ImageIcon, labelKey: "wall.filters.image" },
-  video: { icon: Play,      labelKey: "wall.filters.video" },
-  music: { icon: Music2,    labelKey: "wall.filters.music" },
-  voice: { icon: Mic,       labelKey: "wall.filters.voice" },
+  video: { icon: Play, labelKey: "wall.filters.video" },
+  music: { icon: Music2, labelKey: "wall.filters.music" },
+  voice: { icon: Mic, labelKey: "wall.filters.voice" },
 };
 
 const USE_CASES: UseCase[] = ["ad", "ugc", "show", "film"];
@@ -24,9 +24,7 @@ export function ModelsWall() {
 
   const filtered = useMemo(() => {
     return WALL_ITEMS.filter(
-      (w) =>
-        (kind === "all" || w.kind === kind) &&
-        (useCase === "all" || w.useCase === useCase),
+      (w) => (kind === "all" || w.kind === kind) && (useCase === "all" || w.useCase === useCase),
     );
   }, [kind, useCase]);
 
@@ -142,7 +140,11 @@ function WallCard({ item, index, onOpen }: { item: WallItem; index: number; onOp
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
-      transition={{ duration: 0.5, delay: Math.min(0.5, (index % 12) * 0.04), ease: [0.22, 1, 0.36, 1] }}
+      transition={{
+        duration: 0.5,
+        delay: Math.min(0.5, (index % 12) * 0.04),
+        ease: [0.22, 1, 0.36, 1],
+      }}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       onClick={onOpen}
@@ -244,9 +246,19 @@ function WallModal({ item, onClose }: { item: WallItem | null; onClose: () => vo
             </button>
             <div className="relative bg-black">
               {item.kind === "video" && item.video ? (
-                <video src={item.video} controls autoPlay loop className="w-full max-h-[60vh] object-contain bg-black" />
+                <video
+                  src={item.video}
+                  controls
+                  autoPlay
+                  loop
+                  className="w-full max-h-[60vh] object-contain bg-black"
+                />
               ) : (
-                <img src={item.image} alt="" className="w-full max-h-[60vh] object-contain bg-black" />
+                <img
+                  src={item.image}
+                  alt=""
+                  className="w-full max-h-[60vh] object-contain bg-black"
+                />
               )}
             </div>
             <div className="p-6 sm:p-8">
@@ -295,7 +307,12 @@ export function WallPreview() {
                 i === 4 && "sm:row-span-2 sm:aspect-auto",
               )}
             >
-              <img src={item.image} alt="" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+              <img
+                src={item.image}
+                alt=""
+                className="absolute inset-0 h-full w-full object-cover"
+                loading="lazy"
+              />
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
               <div className="absolute top-1.5 left-1.5 grid place-items-center size-5 rounded-full bg-black/60 backdrop-blur border border-white/10">
                 <KindIcon className="size-2.5 text-white" />
