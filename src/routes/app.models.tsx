@@ -11,9 +11,9 @@ export const Route = createFileRoute("/app/models")({
 
 function ModelsLayout() {
   const matchRoute = useMatchRoute();
-  const isChild = matchRoute({ to: "/app/models/$slug", fuzzy: true });
+  const isExact = matchRoute({ to: "/app/models", exact: true });
 
-  if (isChild) {
+  if (!isExact) {
     return <Outlet />;
   }
 
