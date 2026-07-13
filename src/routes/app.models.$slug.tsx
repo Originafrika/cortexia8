@@ -44,11 +44,14 @@ export const Route = createFileRoute("/app/models/$slug")({
 type Status = "idle" | "loading" | "success" | "error";
 
 type Result = {
+  id: string;
   model: Model;
   prompt: string;
   cost: number;
   tint: string;
   ratio: string;
+  state: Record<string, unknown>;
+  timestamp: Date;
 };
 
 const TINTS = ["#3d2a1e", "#2a1e3d", "#1e3d2a", "#3d1e2a", "#2a3d1e", "#1e2a3d"];
@@ -82,6 +85,7 @@ export function ModelPlaygroundContent({
     setPrompt("");
     setStatus("idle");
     setResult(null);
+    setHistory([]);
     setError(null);
     setProgress(0);
     const init: Record<string, unknown> = {};
@@ -98,6 +102,7 @@ export function ModelPlaygroundContent({
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<Result | null>(null);
+  const [history, setHistory] = useState<Result[]>([]);
   const timers = useRef<number[]>([]);
 
   const currentPrice = useMemo(() => estimatePrice(model, state), [model, state]);
@@ -110,6 +115,14 @@ export function ModelPlaygroundContent({
   function clearTimers() {
     timers.current.forEach((t) => window.clearTimeout(t));
     timers.current = [];
+  }
+
+  function loadHistoryItem(item: Result) {
+    setPrompt(item.prompt);
+    setState(item.state);
+    setResult(item);
+    setStatus("success");
+    setError(null);
   }
 
   function generate() {
@@ -146,7 +159,8 @@ export function ModelPlaygroundContent({
     timers.current.push(
       window.setTimeout(() => {
         setStatus("success");
-        setResult({
+        const newResult: Result = {
+          id: Math.random().toString(36).substring(7),
           model,
           prompt: prompt || "(sans prompt)",
           cost: currentPrice,
@@ -161,7 +175,11 @@ export function ModelPlaygroundContent({
                   : (state.ratio as string) === "4:3"
                     ? "aspect-[4/3]"
                     : "aspect-square",
-        });
+          state: { ...state },
+          timestamp: new Date(),
+        };
+        setResult(newResult);
+        setHistory((prev) => [newResult, ...prev]);
       }, duration + 60),
     );
   }
@@ -327,6 +345,8 @@ export function ModelPlaygroundContent({
               setResult(null);
               setError(null);
             }}
+            history={history}
+            onSelectHistory={loadHistoryItem}
           />
         </div>
       </div>
@@ -342,6 +362,8 @@ function ResultPanel({
   model,
   onRetry,
   onReset,
+  history,
+  onSelectHistory,
 }: {
   status: Status;
   progress: number;
@@ -350,6 +372,8 @@ function ResultPanel({
   model: Model;
   onRetry: () => void;
   onReset: () => void;
+  history: Result[];
+  onSelectHistory: (item: Result) => void;
 }) {
   const ratioClass = result?.ratio ?? "aspect-square";
   return (
@@ -478,6 +502,42 @@ function ResultPanel({
           >
             Nouvelle génération
           </button>
+        </div>
+      )}
+
+      {/* Historique de session interactive */}
+      {history.length > 0 && (
+        <div className="space-y-3">
+          <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+            Historique de session ({history.length})
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            {history.map((item) => {
+              const isActive = result?.id === item.id && status === "success";
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => onSelectHistory(item)}
+                  className={cn(
+                    "relative aspect-square rounded-xl border overflow-hidden transition group text-left cursor-pointer",
+                    isActive
+                      ? "border-amber ring-2 ring-amber/30 scale-[0.98]"
+                      : "border-border hover:border-amber/40 hover:scale-[1.02]",
+                  )}
+                  style={{ background: `linear-gradient(135deg, ${item.tint}, oklch(0.14 0 0))` }}
+                >
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition duration-150 flex items-center justify-center">
+                    <span className="text-[9px] font-mono text-white bg-black/70 px-1.5 py-0.5 rounded shadow">
+                      Charger
+                    </span>
+                  </div>
+                  <div className="absolute bottom-1.5 left-1.5 right-1.5 text-[8px] font-mono text-white/90 bg-black/60 backdrop-blur px-1 py-0.5 rounded truncate">
+                    {item.prompt}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
       )}
 
