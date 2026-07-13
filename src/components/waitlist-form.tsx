@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight, Check, Copy, Users } from "lucide-react";
+import { ArrowRight, Check, Copy, Users, AlertTriangle } from "lucide-react";
 import { useCountUp } from "@/lib/use-count-up";
 import { useT } from "@/lib/i18n";
+import { waitlistSignup } from "@/lib/waitlist";
 
 const PROFESSIONS = ["Pub", "UGC", "Émission", "Film", "Autre"] as const;
 type Profession = (typeof PROFESSIONS)[number];
@@ -20,23 +21,31 @@ export function WaitlistForm() {
   const t = useT();
   const [email, setEmail] = useState("");
   const [profession, setProfession] = useState<Profession | null>(null);
-  const [status, setStatus] = useState<"idle" | "loading" | "done">("idle");
-  const [rank, setRank] = useState(1247);
+  const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
+  const [rank, setRank] = useState(0);
+  const [referralCode, setReferralCode] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
 
-  function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!email || !profession) return;
     setStatus("loading");
-    setTimeout(() => {
-      setRank(1247 + Math.floor(Math.random() * 30));
+    setErrorMsg("");
+    try {
+      const result = await waitlistSignup({ email, profession });
+      setReferralCode(result.referral_code);
+      setRank(result.id);
       setStatus("done");
-    }, 900);
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : "Erreur d'inscription");
+      setStatus("error");
+    }
   }
 
   return (
     <div className="relative w-full">
       <AnimatePresence mode="wait">
-        {status !== "done" ? (
+        {status !== "done" && status !== "error" ? (
           <motion.form
             key="form"
             initial={{ opacity: 0, y: 6 }}
@@ -100,8 +109,29 @@ export function WaitlistForm() {
 
             <p className="mt-5 text-[11px] text-muted-foreground/80">{t("waitlist.no_spam")}</p>
           </motion.form>
+        ) : status === "error" ? (
+          <motion.div
+            key="error"
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="surface-gradient-border rounded-2xl bg-surface-1/70 backdrop-blur-xl p-6"
+          >
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="size-5 text-amber shrink-0 mt-0.5" />
+              <div>
+                <div className="font-display text-lg">Une erreur est survenue</div>
+                <p className="mt-1 text-sm text-muted-foreground">{errorMsg}</p>
+                <button
+                  onClick={() => setStatus("idle")}
+                  className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-amber px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-95 transition"
+                >
+                  Réessayer
+                </button>
+              </div>
+            </div>
+          </motion.div>
         ) : (
-          <ConfirmationCard key="done" rank={rank} email={email} profession={profession!} />
+          <ConfirmationCard key="done" rank={rank} email={email} profession={profession!} referralCode={referralCode} />
         )}
       </AnimatePresence>
     </div>
@@ -112,18 +142,18 @@ function ConfirmationCard({
   rank,
   email,
   profession,
+  referralCode,
 }: {
   rank: number;
   email: string;
   profession: Profession;
+  referralCode: string;
 }) {
   const t = useT();
   const displayRank = useCountUp(rank, 800);
   const [copied, setCopied] = useState(false);
   const invitedCount = 0;
-  const link = `cortexia.ai/r/${btoa(email)
-    .slice(0, 8)
-    .replace(/[^a-zA-Z0-9]/g, "x")}`;
+  const link = `cortexia.ai/r/${referralCode}`;
   const referredPct = 12;
 
   return (
