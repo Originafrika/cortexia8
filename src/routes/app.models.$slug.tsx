@@ -193,7 +193,7 @@ export function ModelPlaygroundContent({
     <div
       className={cn(
         "flex flex-col",
-        isModal ? "h-[min(80vh,720px)]" : "h-[calc(100vh-3.5rem)]",
+        isModal ? "h-[min(80dvh,720px)]" : "h-[calc(100dvh-3.5rem)]",
       )}
     >
       {/* Top bar */}
