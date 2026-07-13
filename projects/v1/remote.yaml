@@ -1,6 +1,0 @@
-repo: git@github.com:originafrika/cortexia8.git
-branch: main
-type: lovable
-lovable_project_id: "9069e791-0ea0-4e33-8a11-f1f240adbc4d"
-demo_url: https://cortexia8.lovable.app
-notes: "Projet Lovable avec sync GitHub — ne pas rebase/force push (voir AGENTS.md)"
