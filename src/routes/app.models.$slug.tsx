@@ -597,7 +597,7 @@ function ParamEditor({
 function LoadingCard({ model, progress }: { model: Model; progress: number }) {
   return (
     <div className="surface-gradient-border rounded-2xl bg-surface-1/60 overflow-hidden">
-      <div className="relative aspect-video grid place-items-center">
+      <div className="relative aspect-video max-h-[45dvh] grid place-items-center">
         <div className="absolute inset-0 bg-[linear-gradient(115deg,transparent_20%,oklch(0.78_0.16_70_/_0.18)_50%,transparent_80%)] bg-[length:200%_100%] animate-[shimmer_1.6s_linear_infinite]" />
         <div className="relative text-center">
           <Loader2 className="size-6 mx-auto text-amber animate-spin" />
