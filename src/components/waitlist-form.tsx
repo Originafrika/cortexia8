@@ -32,7 +32,7 @@ export function WaitlistForm() {
     setStatus("loading");
     setErrorMsg("");
     try {
-      const result = await waitlistSignup({ email, profession });
+      const result = await waitlistSignup({ data: { email, profession } });
       setReferralCode(result.referral_code);
       setRank(result.id);
       setStatus("done");
