@@ -12,6 +12,8 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@neondatabase/auth-ui": "^0.2.1-beta",
+    "@neondatabase/neon-js": "^0.6.2-beta",
     "@neondatabase/serverless": "^1.0.0",
     "drizzle-orm": "^0.43.0",
     "@hookform/resolvers": "^5.2.2",

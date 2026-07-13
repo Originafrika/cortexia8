@@ -8,6 +8,8 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import { NeonAuthUIProvider } from "@neondatabase/auth-ui";
+import { authClient } from "../auth";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -150,7 +152,9 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <NeonAuthUIProvider authClient={authClient}>
+        <Outlet />
+      </NeonAuthUIProvider>
     </QueryClientProvider>
   );
 }

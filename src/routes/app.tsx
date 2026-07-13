@@ -3,6 +3,7 @@ import { AmbientBackground } from "@/components/ambient-background";
 import { LocalePicker } from "@/components/locale-picker";
 import { PriceDisplay } from "@/components/price-display";
 import { OnboardingOverlay, useOnboarding } from "@/components/onboarding-overlay";
+import { SignedIn, RedirectToSignIn } from "@neondatabase/auth-ui";
 import {
   MessageSquare,
   LayoutGrid,
@@ -28,6 +29,27 @@ function AppLayout() {
   const t = useT();
   const { open, setOpen } = useOnboarding();
 
+  return (
+    <SignedIn>
+      <AppShell path={path} CREDIT_USD={CREDIT_USD} t={t} open={open} setOpen={setOpen} />
+    </SignedIn>
+    <RedirectToSignIn />
+  );
+}
+
+function AppShell({
+  path,
+  CREDIT_USD,
+  t,
+  open,
+  setOpen,
+}: {
+  path: string;
+  CREDIT_USD: number;
+  t: (k: string) => string;
+  open: boolean;
+  setOpen: (v: boolean) => void;
+}) {
   const NAV = [
     { to: "/app", label: t("app.nav.agent"), icon: MessageSquare, exact: true },
     { to: "/app/models", label: t("app.nav.models"), icon: LayoutGrid },
