@@ -1,0 +1,21 @@
+nom: "v1-pre-lancement"
+produit: playground
+description: "Site de pré-lancement Cortexia avec waitlist + catalogue modèles + simulateur pricing"
+stack: "TanStack Start / React / TypeScript / Vite / TailwindCSS / Lovable"
+statut: live
+date_lancement: "2026-08-01"
+etapes:
+  - etape: "Landing page + waitlist"
+    clos: true
+  - etape: "Catalogue modèles avec pricing"
+    clos: true
+  - etape: "Simulateur de crédits"
+    clos: true
+  - etape: "Multi-devise + i18n"
+    clos: true
+  - etape: "Routes app (account, models, history, developers)"
+    clos: true
+  - etape: "Tests de paiement Mobile Money"
+    clos: false
+  - etape: "Go live 1er août"
+    clos: false
