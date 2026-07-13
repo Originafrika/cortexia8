@@ -634,30 +634,35 @@ function ActiveResultView({
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="grid gap-4 lg:grid-cols-[1fr,320px]"
+      className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]"
     >
-      <div
-        className={cn(
-          "surface-gradient-border rounded-2xl overflow-hidden relative",
-          result.ratio,
-        )}
-        style={{ background: `linear-gradient(135deg, ${result.tint}, oklch(0.14 0 0))` }}
-      >
-        <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between">
-          <div className="rounded-full bg-black/60 backdrop-blur px-2 py-1 text-[10px] font-mono uppercase tracking-wider">
-            {result.model.category}
-          </div>
-          <div className="rounded-full bg-black/60 backdrop-blur px-2 py-1">
-            <PriceDisplay usd={result.cost} className="text-[10px]" />
+      <div className="flex items-center justify-center min-w-0">
+        <div
+          className={cn(
+            "surface-gradient-border rounded-2xl overflow-hidden relative",
+            "h-[min(58dvh,520px)] max-w-full w-auto",
+            result.ratio,
+          )}
+          style={{ background: `linear-gradient(135deg, ${result.tint}, oklch(0.14 0 0))` }}
+        >
+          <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between gap-2">
+            <div className="rounded-full bg-black/60 backdrop-blur px-2 py-1 text-[10px] font-mono uppercase tracking-wider truncate">
+              {result.model.category}
+            </div>
+            <div className="rounded-full bg-black/60 backdrop-blur px-2 py-1 shrink-0">
+              <PriceDisplay usd={result.cost} className="text-[10px]" />
+            </div>
           </div>
         </div>
       </div>
-      <div className="space-y-3">
+      <div className="space-y-3 min-w-0">
         <div className="surface-gradient-border rounded-2xl bg-surface-1/60 p-4">
           <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-muted-foreground">
             Prompt
           </div>
-          <div className="mt-1.5 text-sm text-foreground/90 leading-relaxed">{result.prompt}</div>
+          <div className="mt-1.5 text-sm text-foreground/90 leading-relaxed line-clamp-4">
+            {result.prompt}
+          </div>
         </div>
         <div className="surface-gradient-border rounded-2xl bg-surface-1/60 p-4">
           <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-muted-foreground mb-2">
