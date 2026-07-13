@@ -1,0 +1,1 @@
+import{r as e}from"./bundle-mjs-bJ18fI0g.js";import{l as t,s as n}from"./index-Cu7rd4yv.js";var r=e();function i(){let{pathname:e}=n.useParams();return(0,r.jsx)(`div`,{className:`flex min-h-screen items-center justify-center bg-background px-4`,children:(0,r.jsx)(t,{pathname:e})})}export{i as component};

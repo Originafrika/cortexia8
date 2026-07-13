@@ -1,0 +1,6 @@
+import{r as e}from"./bundle-mjs-bJ18fI0g.js";import{r as t,t as n}from"./createLucideIcon-BkKq5ciT.js";var r=n(`arrow-right`,[[`path`,{d:`M5 12h14`,key:`1ays0h`}],[`path`,{d:`m12 5 7 7-7 7`,key:`xquz4c`}]]),i=e();function a({className:e}){return(0,i.jsxs)(`div`,{className:t(`pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-background`,e),children:[(0,i.jsx)(`div`,{className:`absolute inset-0 opacity-[0.55] mesh-anim`,style:{background:`
+            radial-gradient(60% 45% at 20% 20%, oklch(0.78 0.16 70 / 0.28), transparent 60%),
+            radial-gradient(50% 40% at 80% 10%, oklch(0.55 0.12 30 / 0.22), transparent 60%),
+            radial-gradient(70% 55% at 70% 90%, oklch(0.35 0.08 50 / 0.35), transparent 70%),
+            radial-gradient(40% 30% at 10% 90%, oklch(0.72 0.14 155 / 0.10), transparent 60%)
+          `}}),(0,i.jsx)(`div`,{className:`absolute inset-0 opacity-[0.06] mix-blend-overlay`,style:{backgroundImage:`url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.6'/></svg>")`}}),(0,i.jsx)(`div`,{className:`absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background`})]})}export{r as n,a as t};
