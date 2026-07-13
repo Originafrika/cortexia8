@@ -152,7 +152,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <NeonAuthUIProvider authClient={authClient}>
+      <NeonAuthUIProvider authClient={authClient} emailOTP>
         <Outlet />
       </NeonAuthUIProvider>
     </QueryClientProvider>
