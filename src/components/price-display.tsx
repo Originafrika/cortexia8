@@ -16,11 +16,7 @@ export function PriceDisplay({ usd, className, compact, forceDecimals, suffix, e
   const shown = useCountUp(usd, 320);
   return (
     <span
-      className={cn(
-        "font-mono tabular",
-        emphasize && "text-foreground",
-        className
-      )}
+      className={cn("font-mono tabular", emphasize && "text-foreground", className)}
       aria-label={formatMoney(usd, c)}
     >
       {formatMoney(shown, c, { compact, forceDecimals })}

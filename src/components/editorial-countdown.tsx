@@ -24,9 +24,9 @@ export function EditorialCountdown({ target }: { target: Date }) {
   }, [target]);
 
   const cells: Cell[] = [
-    { label: "jours",    value: t?.days    ?? null },
-    { label: "heures",   value: t?.hours   ?? null },
-    { label: "minutes",  value: t?.minutes ?? null },
+    { label: "jours", value: t?.days ?? null },
+    { label: "heures", value: t?.hours ?? null },
+    { label: "minutes", value: t?.minutes ?? null },
     { label: "secondes", value: t?.seconds ?? null },
   ];
 

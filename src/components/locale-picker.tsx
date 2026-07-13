@@ -55,7 +55,9 @@ export function LocalePicker({ className }: { className?: string }) {
         <div className="absolute right-0 top-full mt-2 w-[22rem] max-w-[calc(100vw-2rem)] rounded-2xl border border-border bg-popover shadow-2xl shadow-black/60 p-2 z-50 animate-in fade-in-0 zoom-in-95">
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <div className="px-2 py-1.5 font-mono text-[9px] uppercase tracking-[0.22em] text-muted-foreground">Devise</div>
+              <div className="px-2 py-1.5 font-mono text-[9px] uppercase tracking-[0.22em] text-muted-foreground">
+                Devise
+              </div>
               <div className="max-h-64 overflow-y-auto">
                 {Object.values(CURRENCIES).map((cur) => (
                   <button
@@ -63,7 +65,7 @@ export function LocalePicker({ className }: { className?: string }) {
                     onClick={() => onCurrency(cur.code)}
                     className={cn(
                       "w-full flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs hover:bg-surface-2/70 transition-colors",
-                      cur.code === code && "bg-surface-2/50"
+                      cur.code === code && "bg-surface-2/50",
                     )}
                   >
                     <span aria-hidden>{cur.flag}</span>
@@ -85,7 +87,7 @@ export function LocalePicker({ className }: { className?: string }) {
                     onClick={() => setLang(l)}
                     className={cn(
                       "w-full flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs hover:bg-surface-2/70 transition-colors",
-                      l === lang && "bg-surface-2/50"
+                      l === lang && "bg-surface-2/50",
                     )}
                   >
                     <span aria-hidden>{LANGS[l].flag}</span>

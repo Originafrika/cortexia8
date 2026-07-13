@@ -5,14 +5,15 @@ import { useCountUp } from "@/lib/use-count-up";
 import { useT } from "@/lib/i18n";
 
 const PROFESSIONS = ["Pub", "UGC", "Émission", "Film", "Autre"] as const;
-type Profession = typeof PROFESSIONS[number];
+type Profession = (typeof PROFESSIONS)[number];
 
 const RECAP: Record<Profession, string> = {
-  Pub:      "Parfait pour les créatifs pub — Kling, Seedance et GPT Image seront dans ta boîte à outils dès l'ouverture.",
-  UGC:      "Parfait pour les créateurs UGC — on te prévient dès que Cortexia ouvre, avec un accès prioritaire au playground vidéo.",
-  Émission: "Parfait pour les équipes d'émission — voix, montage IA et musiques seront disponibles dès le lancement.",
-  Film:     "Parfait pour la production audiovisuelle — Kling 4K et modèles cinéma prêts dès l'ouverture.",
-  Autre:    "On te met de côté un accès dès l'ouverture, avec un mot d'accueil personnel.",
+  Pub: "Parfait pour les créatifs pub — Kling, Seedance et GPT Image seront dans ta boîte à outils dès l'ouverture.",
+  UGC: "Parfait pour les créateurs UGC — on te prévient dès que Cortexia ouvre, avec un accès prioritaire au playground vidéo.",
+  Émission:
+    "Parfait pour les équipes d'émission — voix, montage IA et musiques seront disponibles dès le lancement.",
+  Film: "Parfait pour la production audiovisuelle — Kling 4K et modèles cinéma prêts dès l'ouverture.",
+  Autre: "On te met de côté un accès dès l'ouverture, avec un mot d'accueil personnel.",
 };
 
 export function WaitlistForm() {
@@ -62,7 +63,14 @@ export function WaitlistForm() {
                 disabled={status === "loading" || !email || !profession}
                 className="group inline-flex items-center justify-center gap-2 rounded-xl bg-amber px-5 py-3 text-sm font-medium text-primary-foreground disabled:opacity-40 hover:opacity-95 transition"
               >
-                {status === "loading" ? "…" : (<>{t("waitlist.cta")} <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" /></>)}
+                {status === "loading" ? (
+                  "…"
+                ) : (
+                  <>
+                    {t("waitlist.cta")}{" "}
+                    <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+                  </>
+                )}
               </button>
             </div>
 
@@ -100,12 +108,22 @@ export function WaitlistForm() {
   );
 }
 
-function ConfirmationCard({ rank, email, profession }: { rank: number; email: string; profession: Profession }) {
+function ConfirmationCard({
+  rank,
+  email,
+  profession,
+}: {
+  rank: number;
+  email: string;
+  profession: Profession;
+}) {
   const t = useT();
   const displayRank = useCountUp(rank, 800);
   const [copied, setCopied] = useState(false);
   const invitedCount = 0;
-  const link = `cortexia.ai/r/${btoa(email).slice(0, 8).replace(/[^a-zA-Z0-9]/g, "x")}`;
+  const link = `cortexia.ai/r/${btoa(email)
+    .slice(0, 8)
+    .replace(/[^a-zA-Z0-9]/g, "x")}`;
   const referredPct = 12;
 
   return (
@@ -150,7 +168,8 @@ function ConfirmationCard({ rank, email, profession }: { rank: number; email: st
           </div>
           <div className="flex items-center gap-1.5 font-mono text-[10px] text-muted-foreground tabular">
             <Users className="size-3" />
-            <span className="text-foreground/90">{invitedCount}</span> {t("waitlist.friends_invited")}
+            <span className="text-foreground/90">{invitedCount}</span>{" "}
+            {t("waitlist.friends_invited")}
           </div>
         </div>
         <div className="mt-2 flex items-center gap-2">
@@ -158,10 +177,22 @@ function ConfirmationCard({ rank, email, profession }: { rank: number; email: st
             {link}
           </code>
           <button
-            onClick={() => { navigator.clipboard.writeText(link); setCopied(true); setTimeout(() => setCopied(false), 1500); }}
+            onClick={() => {
+              navigator.clipboard.writeText(link);
+              setCopied(true);
+              setTimeout(() => setCopied(false), 1500);
+            }}
             className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-2/50 px-3 py-2 text-xs hover:border-amber/40 transition"
           >
-            {copied ? <><Check className="size-3.5 text-emerald" /> {t("waitlist.copied")}</> : <><Copy className="size-3.5" /> {t("waitlist.copy")}</>}
+            {copied ? (
+              <>
+                <Check className="size-3.5 text-emerald" /> {t("waitlist.copied")}
+              </>
+            ) : (
+              <>
+                <Copy className="size-3.5" /> {t("waitlist.copy")}
+              </>
+            )}
           </button>
         </div>
         <p className="mt-3 text-xs text-foreground/85 leading-relaxed">
@@ -171,14 +202,19 @@ function ConfirmationCard({ rank, email, profession }: { rank: number; email: st
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           {["X", "WhatsApp", "Telegram", "LinkedIn"].map((n) => (
-            <button key={n} className="rounded-full border border-border bg-surface-2/50 px-3 py-1.5 text-xs text-foreground/85 hover:border-border-strong hover:text-foreground transition">
+            <button
+              key={n}
+              className="rounded-full border border-border bg-surface-2/50 px-3 py-1.5 text-xs text-foreground/85 hover:border-border-strong hover:text-foreground transition"
+            >
               Partager sur {n}
             </button>
           ))}
         </div>
       </div>
 
-      <p className="mt-5 text-xs text-muted-foreground leading-relaxed">{t("waitlist.launch_email")}</p>
+      <p className="mt-5 text-xs text-muted-foreground leading-relaxed">
+        {t("waitlist.launch_email")}
+      </p>
     </motion.div>
   );
 }

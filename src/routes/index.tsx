@@ -18,7 +18,11 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Cortexia — L'IA sans t'abonner. Waitlist ouverte." },
-      { name: "description", content: "Cortexia ouvre le 1er août : un accès unique aux meilleurs modèles IA image, vidéo, voix, texte — facturés à l'usage. Rejoins la waitlist." },
+      {
+        name: "description",
+        content:
+          "Cortexia ouvre le 1er août : un accès unique aux meilleurs modèles IA image, vidéo, voix, texte — facturés à l'usage. Rejoins la waitlist.",
+      },
     ],
   }),
   component: WaitlistLanding,
@@ -83,7 +87,9 @@ function Hero() {
               <br />
               <span className="italic text-amber-soft">{t("hero.title.b")}</span>
             </h1>
-            <p className="mt-6 max-w-xl text-lg text-foreground/80 leading-relaxed">{t("hero.subtitle")}</p>
+            <p className="mt-6 max-w-xl text-lg text-foreground/80 leading-relaxed">
+              {t("hero.subtitle")}
+            </p>
           </LangFade>
 
           <motion.div
@@ -122,7 +128,9 @@ function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <div className="font-display text-2xl tracking-[-0.02em]">{value}</div>
-      <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">{label}</div>
+      <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+        {label}
+      </div>
     </div>
   );
 }
@@ -146,9 +154,12 @@ function SimulatorSection() {
   return (
     <section className="mx-auto max-w-7xl px-5 sm:px-8 py-16 sm:py-24">
       <div className="max-w-2xl mb-10">
-        <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">{t("sim.eyebrow")}</div>
+        <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+          {t("sim.eyebrow")}
+        </div>
         <h2 className="mt-3 font-display text-4xl sm:text-5xl tracking-[-0.03em]">
-          {t("sim.title.a")}<br />
+          {t("sim.title.a")}
+          <br />
           <span className="text-muted-foreground italic">{t("sim.title.b")}</span>
         </h2>
         <p className="mt-4 text-foreground/75">{t("sim.subtitle")}</p>
@@ -167,7 +178,9 @@ function WallSection() {
           <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
             {t("wall.eyebrow")}
           </div>
-          <h2 className="mt-3 font-display text-4xl sm:text-5xl tracking-[-0.03em]">{t("wall.title")}</h2>
+          <h2 className="mt-3 font-display text-4xl sm:text-5xl tracking-[-0.03em]">
+            {t("wall.title")}
+          </h2>
           <p className="mt-4 text-foreground/75">{t("wall.subtitle")}</p>
         </div>
         <ModelsWall />
@@ -180,7 +193,9 @@ function ModelsSection() {
   return (
     <section className="py-16 sm:py-24">
       <div className="mx-auto max-w-7xl px-5 sm:px-8 mb-10">
-        <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Catalogue</div>
+        <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+          Catalogue
+        </div>
         <h2 className="mt-3 font-display text-4xl sm:text-5xl tracking-[-0.03em]">
           Tous les modèles qui comptent. Sous un seul compte.
         </h2>
@@ -195,9 +210,12 @@ function ComparisonSection() {
   return (
     <section className="mx-auto max-w-7xl px-5 sm:px-8 py-16 sm:py-24">
       <div className="max-w-2xl mb-10">
-        <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">{t("compare.eyebrow")}</div>
+        <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+          {t("compare.eyebrow")}
+        </div>
         <h2 className="mt-3 font-display text-4xl sm:text-5xl tracking-[-0.03em]">
-          {t("compare.title.a")}<br /> {t("compare.title.b")}
+          {t("compare.title.a")}
+          <br /> {t("compare.title.b")}
         </h2>
       </div>
       <div className="grid gap-6 md:grid-cols-2">
@@ -218,8 +236,8 @@ function ComparisonSection() {
           subtitle={t("compare.new.subtitle")}
           items={[
             { label: "30 s de vidéo Kling 3 Turbo 1080p", usd: 30 * 0.1418 },
-            { label: "40 images Seedream Pro 1K",         usd: 40 * 0.0441 },
-            { label: "6 000 caractères ElevenLabs V3",    usd: 6 * 0.0882 },
+            { label: "40 images Seedream Pro 1K", usd: 40 * 0.0441 },
+            { label: "6 000 caractères ElevenLabs V3", usd: 6 * 0.0882 },
           ]}
           note={t("compare.new.note")}
         />
@@ -228,36 +246,79 @@ function ComparisonSection() {
   );
 }
 
-function PlanCard({ kind, title, subtitle, items, note }: { kind: "old" | "cortexia"; title: string; subtitle: string; items: { label: string; usd: number }[]; note: string }) {
+function PlanCard({
+  kind,
+  title,
+  subtitle,
+  items,
+  note,
+}: {
+  kind: "old" | "cortexia";
+  title: string;
+  subtitle: string;
+  items: { label: string; usd: number }[];
+  note: string;
+}) {
   const t = useT();
   const total = items.reduce((s, i) => s + i.usd, 0);
   return (
-    <div className={
-      "rounded-3xl p-7 sm:p-8 border transition-all " +
-      (kind === "cortexia"
-        ? "surface-gradient-border bg-surface-1/70 border-transparent shadow-[0_30px_80px_-30px_oklch(0.78_0.16_70_/_0.25)]"
-        : "border-border bg-surface-0/40 text-muted-foreground")
-    }>
-      <div className={"font-mono text-[10px] uppercase tracking-[0.22em] " + (kind === "cortexia" ? "text-amber-soft" : "text-muted-foreground/70")}>
+    <div
+      className={
+        "rounded-3xl p-7 sm:p-8 border transition-all " +
+        (kind === "cortexia"
+          ? "surface-gradient-border bg-surface-1/70 border-transparent shadow-[0_30px_80px_-30px_oklch(0.78_0.16_70_/_0.25)]"
+          : "border-border bg-surface-0/40 text-muted-foreground")
+      }
+    >
+      <div
+        className={
+          "font-mono text-[10px] uppercase tracking-[0.22em] " +
+          (kind === "cortexia" ? "text-amber-soft" : "text-muted-foreground/70")
+        }
+      >
         {subtitle}
       </div>
-      <h3 className={"mt-2 font-display text-3xl tracking-[-0.02em] " + (kind === "cortexia" ? "text-foreground" : "text-foreground/70")}>{title}</h3>
+      <h3
+        className={
+          "mt-2 font-display text-3xl tracking-[-0.02em] " +
+          (kind === "cortexia" ? "text-foreground" : "text-foreground/70")
+        }
+      >
+        {title}
+      </h3>
       <ul className="mt-6 space-y-3">
         {items.map((i) => (
           <li key={i.label} className="flex items-baseline justify-between gap-4 text-sm">
             <span className={kind === "cortexia" ? "text-foreground/85" : ""}>{i.label}</span>
-            <PriceDisplay usd={i.usd} className={"text-sm " + (kind === "cortexia" ? "text-foreground" : "line-through decoration-1")} />
+            <PriceDisplay
+              usd={i.usd}
+              className={
+                "text-sm " + (kind === "cortexia" ? "text-foreground" : "line-through decoration-1")
+              }
+            />
           </li>
         ))}
       </ul>
       <div className="mt-6 pt-6 border-t border-border flex items-baseline justify-between">
         <span className="text-xs uppercase tracking-wider font-mono">{t("compare.total")}</span>
-        <PriceDisplay usd={total} className={
-          "font-display text-3xl tracking-[-0.02em] " +
-          (kind === "cortexia" ? "text-amber-soft" : "line-through decoration-1 text-muted-foreground")
-        } />
+        <PriceDisplay
+          usd={total}
+          className={
+            "font-display text-3xl tracking-[-0.02em] " +
+            (kind === "cortexia"
+              ? "text-amber-soft"
+              : "line-through decoration-1 text-muted-foreground")
+          }
+        />
       </div>
-      <p className={"mt-4 text-xs " + (kind === "cortexia" ? "text-foreground/70" : "text-muted-foreground/70")}>{note}</p>
+      <p
+        className={
+          "mt-4 text-xs " +
+          (kind === "cortexia" ? "text-foreground/70" : "text-muted-foreground/70")
+        }
+      >
+        {note}
+      </p>
     </div>
   );
 }
@@ -275,7 +336,9 @@ function SocialProofSection() {
     <section className="mx-auto max-w-7xl px-5 sm:px-8 py-16 sm:py-24">
       <div className="grid gap-12 lg:grid-cols-[0.9fr,1.1fr] items-start">
         <div>
-          <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">{t("social.eyebrow")}</div>
+          <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+            {t("social.eyebrow")}
+          </div>
           <div className="mt-4 font-display text-[clamp(3.5rem,10vw,7rem)] leading-[0.9] tracking-[-0.035em] tabular text-foreground">
             {Math.round(displayed).toLocaleString("fr-FR")}
           </div>
@@ -283,15 +346,21 @@ function SocialProofSection() {
         </div>
         <div className="grid gap-4">
           <Testimonial
-            name="Amara" role="Créatrice UGC" city="Lomé"
+            name="Amara"
+            role="Créatrice UGC"
+            city="Lomé"
             quote="Je paie enfin ce que je consomme. Trois vidéos ce mois-ci, trois vidéos facturées. Pas de forfait qui me pique."
           />
           <Testimonial
-            name="Julien" role="Fondateur d'agence" city="São Paulo"
+            name="Julien"
+            role="Fondateur d'agence"
+            city="São Paulo"
             quote="Je compare Kling et Seedance sur le même prompt en trois clics. Avant, c'était deux abonnements et deux onboardings."
           />
           <Testimonial
-            name="Wei" role="Développeur solo" city="Jakarta"
+            name="Wei"
+            role="Développeur solo"
+            city="Jakarta"
             quote="Une API, une facture à l'usage, pas de minimum mensuel. Ma trésorerie respire enfin."
           />
         </div>
@@ -300,7 +369,17 @@ function SocialProofSection() {
   );
 }
 
-function Testimonial({ name, role, city, quote }: { name: string; role: string; city: string; quote: string }) {
+function Testimonial({
+  name,
+  role,
+  city,
+  quote,
+}: {
+  name: string;
+  role: string;
+  city: string;
+  quote: string;
+}) {
   const initial = name[0];
   return (
     <div className="surface-gradient-border rounded-2xl bg-surface-1/50 backdrop-blur p-5 sm:p-6">
@@ -311,7 +390,10 @@ function Testimonial({ name, role, city, quote }: { name: string; role: string; 
         </div>
         <div className="text-sm">
           <span className="font-medium">{name}</span>
-          <span className="text-muted-foreground"> · {role} · {city}</span>
+          <span className="text-muted-foreground">
+            {" "}
+            · {role} · {city}
+          </span>
         </div>
       </div>
     </div>
@@ -319,11 +401,26 @@ function Testimonial({ name, role, city, quote }: { name: string; role: string; 
 }
 
 const FAQS = [
-  { q: "Vraiment sans abonnement ?", a: "Sans. Tu recharges le montant que tu veux, tu génères, tu repars. Reviens dans 3 mois sans avoir rien perdu." },
-  { q: "Comment sont fixés les prix ?", a: "Un prix unique par modèle, visible avant chaque génération. Pas de palier caché, pas d'engagement, pas de minimum mensuel." },
-  { q: "Je peux payer en Mobile Money ?", a: "Oui — Orange Money, MTN, Wave. Aussi carte, crypto (USDT / USDC), Alipay. Le paiement local n'est pas une option de plus, c'est le cœur du produit." },
-  { q: "Quels modèles au lancement ?", a: "Toute la famille Kling 3, Seedance 2, Nano Banana 2, GPT-5, Claude Sonnet/Opus, Gemini 3, ElevenLabs V3, et une douzaine d'autres. Nouveaux modèles ajoutés dès leur sortie." },
-  { q: "Vous avez une API ?", a: "Oui, dès le lancement. Endpoints REST, clés self-service, même moteur de facturation à l'usage, sans minimum mensuel." },
+  {
+    q: "Vraiment sans abonnement ?",
+    a: "Sans. Tu recharges le montant que tu veux, tu génères, tu repars. Reviens dans 3 mois sans avoir rien perdu.",
+  },
+  {
+    q: "Comment sont fixés les prix ?",
+    a: "Un prix unique par modèle, visible avant chaque génération. Pas de palier caché, pas d'engagement, pas de minimum mensuel.",
+  },
+  {
+    q: "Je peux payer en Mobile Money ?",
+    a: "Oui — Orange Money, MTN, Wave. Aussi carte, crypto (USDT / USDC), Alipay. Le paiement local n'est pas une option de plus, c'est le cœur du produit.",
+  },
+  {
+    q: "Quels modèles au lancement ?",
+    a: "Toute la famille Kling 3, Seedance 2, Nano Banana 2, GPT-5, Claude Sonnet/Opus, Gemini 3, ElevenLabs V3, et une douzaine d'autres. Nouveaux modèles ajoutés dès leur sortie.",
+  },
+  {
+    q: "Vous avez une API ?",
+    a: "Oui, dès le lancement. Endpoints REST, clés self-service, même moteur de facturation à l'usage, sans minimum mensuel.",
+  },
 ];
 
 function FaqSection() {
@@ -332,8 +429,12 @@ function FaqSection() {
   return (
     <section className="mx-auto max-w-3xl px-5 sm:px-8 py-16 sm:py-24">
       <div className="mb-10">
-        <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">{t("faq.eyebrow")}</div>
-        <h2 className="mt-3 font-display text-4xl sm:text-5xl tracking-[-0.03em]">{t("faq.title")}</h2>
+        <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+          {t("faq.eyebrow")}
+        </div>
+        <h2 className="mt-3 font-display text-4xl sm:text-5xl tracking-[-0.03em]">
+          {t("faq.title")}
+        </h2>
       </div>
       <div className="divide-y divide-border border-y border-border">
         {FAQS.map((f, i) => {
@@ -345,7 +446,12 @@ function FaqSection() {
                 className="flex w-full items-center justify-between gap-4 py-5 text-left"
               >
                 <span className="font-display text-lg sm:text-xl tracking-[-0.01em]">{f.q}</span>
-                <ChevronDown className={"size-5 text-muted-foreground transition-transform " + (isOpen ? "rotate-180 text-amber" : "")} />
+                <ChevronDown
+                  className={
+                    "size-5 text-muted-foreground transition-transform " +
+                    (isOpen ? "rotate-180 text-amber" : "")
+                  }
+                />
               </button>
               <motion.div
                 initial={false}
@@ -376,9 +482,16 @@ function FooterSection() {
           <span className="text-muted-foreground text-xs">{t("footer.copy")}</span>
         </div>
         <div className="flex items-center gap-4 text-xs text-muted-foreground">
-          <a href="#" className="hover:text-foreground transition">{t("footer.policy")}</a>
-          <a href="#" className="hover:text-foreground transition">{t("footer.contact")}</a>
-          <Link to="/app-preview" className="opacity-40 hover:opacity-80 transition inline-flex items-center gap-1">
+          <a href="#" className="hover:text-foreground transition">
+            {t("footer.policy")}
+          </a>
+          <a href="#" className="hover:text-foreground transition">
+            {t("footer.contact")}
+          </a>
+          <Link
+            to="/app-preview"
+            className="opacity-40 hover:opacity-80 transition inline-flex items-center gap-1"
+          >
             {t("footer.team")} <ArrowRight className="size-3" />
           </Link>
         </div>

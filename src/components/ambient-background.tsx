@@ -3,8 +3,14 @@ import { cn } from "@/lib/utils";
 /** Full-page ambient background: slow-drifting warm mesh gradient over deep near-black. */
 export function AmbientBackground({ className }: { className?: string }) {
   return (
-    <div className={cn("pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-background", className)}>
-      <div className="absolute inset-0 opacity-[0.55] mesh-anim"
+    <div
+      className={cn(
+        "pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-background",
+        className,
+      )}
+    >
+      <div
+        className="absolute inset-0 opacity-[0.55] mesh-anim"
         style={{
           background: `
             radial-gradient(60% 45% at 20% 20%, oklch(0.78 0.16 70 / 0.28), transparent 60%),
@@ -15,9 +21,11 @@ export function AmbientBackground({ className }: { className?: string }) {
         }}
       />
       {/* grain */}
-      <div className="absolute inset-0 opacity-[0.06] mix-blend-overlay"
+      <div
+        className="absolute inset-0 opacity-[0.06] mix-blend-overlay"
         style={{
-          backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.6'/></svg>\")",
+          backgroundImage:
+            "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.6'/></svg>\")",
         }}
       />
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background" />
