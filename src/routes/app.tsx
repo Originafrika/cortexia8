@@ -30,10 +30,12 @@ function AppLayout() {
   const { open, setOpen } = useOnboarding();
 
   return (
-    <SignedIn>
-      <AppShell path={path} CREDIT_USD={CREDIT_USD} t={t} open={open} setOpen={setOpen} />
-    </SignedIn>
-    <RedirectToSignIn />
+    <>
+      <SignedIn>
+        <AppShell path={path} CREDIT_USD={CREDIT_USD} t={t} open={open} setOpen={setOpen} />
+      </SignedIn>
+      <RedirectToSignIn />
+    </>
   );
 }
 

@@ -13,10 +13,12 @@ import { Route as AppPreviewRouteImport } from './routes/app-preview'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AuthPathnameRouteImport } from './routes/auth.$pathname'
 import { Route as AppModelsRouteImport } from './routes/app.models'
 import { Route as AppHistoryRouteImport } from './routes/app.history'
 import { Route as AppDevelopersRouteImport } from './routes/app.developers'
 import { Route as AppAccountRouteImport } from './routes/app.account'
+import { Route as AccountPathnameRouteImport } from './routes/account.$pathname'
 import { Route as AppModelsSlugRouteImport } from './routes/app.models.$slug'
 
 const AppPreviewRoute = AppPreviewRouteImport.update({
@@ -39,6 +41,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
+const AuthPathnameRoute = AuthPathnameRouteImport.update({
+  id: '/auth/$pathname',
+  path: '/auth/$pathname',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppModelsRoute = AppModelsRouteImport.update({
   id: '/models',
   path: '/models',
@@ -59,6 +66,11 @@ const AppAccountRoute = AppAccountRouteImport.update({
   path: '/account',
   getParentRoute: () => AppRoute,
 } as any)
+const AccountPathnameRoute = AccountPathnameRouteImport.update({
+  id: '/account/$pathname',
+  path: '/account/$pathname',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppModelsSlugRoute = AppModelsSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
@@ -69,20 +81,24 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/app-preview': typeof AppPreviewRoute
+  '/account/$pathname': typeof AccountPathnameRoute
   '/app/account': typeof AppAccountRoute
   '/app/developers': typeof AppDevelopersRoute
   '/app/history': typeof AppHistoryRoute
   '/app/models': typeof AppModelsRouteWithChildren
+  '/auth/$pathname': typeof AuthPathnameRoute
   '/app/': typeof AppIndexRoute
   '/app/models/$slug': typeof AppModelsSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/app-preview': typeof AppPreviewRoute
+  '/account/$pathname': typeof AccountPathnameRoute
   '/app/account': typeof AppAccountRoute
   '/app/developers': typeof AppDevelopersRoute
   '/app/history': typeof AppHistoryRoute
   '/app/models': typeof AppModelsRouteWithChildren
+  '/auth/$pathname': typeof AuthPathnameRoute
   '/app': typeof AppIndexRoute
   '/app/models/$slug': typeof AppModelsSlugRoute
 }
@@ -91,10 +107,12 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/app-preview': typeof AppPreviewRoute
+  '/account/$pathname': typeof AccountPathnameRoute
   '/app/account': typeof AppAccountRoute
   '/app/developers': typeof AppDevelopersRoute
   '/app/history': typeof AppHistoryRoute
   '/app/models': typeof AppModelsRouteWithChildren
+  '/auth/$pathname': typeof AuthPathnameRoute
   '/app/': typeof AppIndexRoute
   '/app/models/$slug': typeof AppModelsSlugRoute
 }
@@ -104,20 +122,24 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/app-preview'
+    | '/account/$pathname'
     | '/app/account'
     | '/app/developers'
     | '/app/history'
     | '/app/models'
+    | '/auth/$pathname'
     | '/app/'
     | '/app/models/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/app-preview'
+    | '/account/$pathname'
     | '/app/account'
     | '/app/developers'
     | '/app/history'
     | '/app/models'
+    | '/auth/$pathname'
     | '/app'
     | '/app/models/$slug'
   id:
@@ -125,10 +147,12 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/app-preview'
+    | '/account/$pathname'
     | '/app/account'
     | '/app/developers'
     | '/app/history'
     | '/app/models'
+    | '/auth/$pathname'
     | '/app/'
     | '/app/models/$slug'
   fileRoutesById: FileRoutesById
@@ -137,6 +161,8 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   AppPreviewRoute: typeof AppPreviewRoute
+  AccountPathnameRoute: typeof AccountPathnameRoute
+  AuthPathnameRoute: typeof AuthPathnameRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -169,6 +195,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/auth/$pathname': {
+      id: '/auth/$pathname'
+      path: '/auth/$pathname'
+      fullPath: '/auth/$pathname'
+      preLoaderRoute: typeof AuthPathnameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/models': {
       id: '/app/models'
       path: '/models'
@@ -196,6 +229,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/account'
       preLoaderRoute: typeof AppAccountRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/account/$pathname': {
+      id: '/account/$pathname'
+      path: '/account/$pathname'
+      fullPath: '/account/$pathname'
+      preLoaderRoute: typeof AccountPathnameRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/app/models/$slug': {
       id: '/app/models/$slug'
@@ -241,6 +281,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   AppPreviewRoute: AppPreviewRoute,
+  AccountPathnameRoute: AccountPathnameRoute,
+  AuthPathnameRoute: AuthPathnameRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
