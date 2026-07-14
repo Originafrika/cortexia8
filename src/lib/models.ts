@@ -6,7 +6,7 @@ export type Unit = "image" | "second" | "clip" | "1k-chars" | "1m-tokens-io";
 
 export type ParamSpec =
   | { kind: "prompt"; label: string; placeholder?: string }
-  | { kind: "upload"; label: string; multiple?: boolean }
+  | { kind: "upload"; label: string; multiple?: boolean; accepts?: string }
   | { kind: "select"; label: string; key: string; options: string[]; advanced?: boolean }
   | {
       kind: "slider";
@@ -47,7 +47,7 @@ const commonImageParams: ParamSpec[] = [
     label: "Prompt",
     placeholder: "Un plan produit d'un flacon ambré, lumière studio douce, fond terracotta…",
   },
-  { kind: "upload", label: "Références visuelles (optionnel)", multiple: true },
+  { kind: "upload", label: "Références visuelles (optionnel)", multiple: true, accepts: "image/*" },
   { kind: "select", label: "Ratio", key: "ratio", options: ["1:1", "3:4", "4:3", "16:9", "9:16"] },
   { kind: "select", label: "Résolution", key: "resolution", options: ["1K", "2K", "4K"] },
   {
@@ -66,7 +66,7 @@ const commonVideoParams: ParamSpec[] = [
     label: "Prompt",
     placeholder: "Une créatrice UGC déballe un flacon, plan serré, lumière du matin…",
   },
-  { kind: "upload", label: "Image de départ (optionnel)" },
+  { kind: "upload", label: "Image de départ (optionnel)", accepts: "image/*" },
   { kind: "select", label: "Ratio", key: "ratio", options: ["16:9", "9:16", "1:1", "4:3"] },
   {
     kind: "select",
