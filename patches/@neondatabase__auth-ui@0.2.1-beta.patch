@@ -1,7 +1,16 @@
 diff --git a/dist/index.mjs b/dist/index.mjs
-index ef6aacd9dc6950eb4230ee72ee4e8f4768cd6075..191ee9564be0f9a96c7259f14891421380b0a9d5 100644
+index ef6aacd9dc6950eb4230ee72ee4e8f4768cd6075..1df67a49775b00b711045915a129c5c76be3f717 100644
 --- a/dist/index.mjs
 +++ b/dist/index.mjs
+@@ -8840,7 +8840,7 @@ function OTPInputGroup({ otpSeparators = 0 }) {
+ 	] });
+ }
+ function EmailOTPForm(props) {
+-	const [email, setEmail] = useState();
++	const [email, setEmail] = useState(() => new URLSearchParams(window.location.search).get("email") || undefined);
+ 	if (!email) return /* @__PURE__ */ jsx(EmailForm, {
+ 		...props,
+ 		setEmail
 @@ -9547,7 +9547,7 @@ function SignInForm({ className, classNames, isSubmitting, localization, redirec
  function SignUpForm({ className, classNames, callbackURL, isSubmitting, localization, redirectTo, setIsSubmitting, passwordValidation }) {
  	const isHydrated = useIsHydrated();
@@ -11,13 +20,15 @@ index ef6aacd9dc6950eb4230ee72ee4e8f4768cd6075..191ee9564be0f9a96c7259f148914213
  	const confirmPasswordEnabled = credentials == null ? void 0 : credentials.confirmPassword;
  	const usernameEnabled = credentials == null ? void 0 : credentials.username;
  	const usernameRequired = (credentials == null ? void 0 : credentials.usernameRequired) ?? true;
-@@ -9696,7 +9696,13 @@ function SignUpForm({ className, classNames, callbackURL, isSubmitting, localiza
+@@ -9696,7 +9696,15 @@ function SignUpForm({ className, classNames, callbackURL, isSubmitting, localiza
  				fetchOptions
  			});
  			if ("token" in data && data.token) await onSuccess();
 -			else {
 +			else if (emailOTP) {
-+				navigate(`${basePath}/${viewPaths.EMAIL_OTP}${window.location.search}`);
++				const emailParams = new URLSearchParams(window.location.search);
++				emailParams.set("email", email);
++				navigate(`${basePath}/${viewPaths.EMAIL_OTP}?${emailParams.toString()}`);
 +				toast$1({
 +					variant: "success",
 +					message: localization.SIGN_UP_EMAIL
