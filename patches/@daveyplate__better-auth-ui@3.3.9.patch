@@ -1,0 +1,27 @@
+diff --git a/dist/index.js b/dist/index.js
+index 9fb5b50eb35c96669f5678989481b867cea630c0..45f8c4d9913268ff649fa55185bb9f4c706fe798 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -8139,6 +8139,7 @@ function SignUpForm({
+     basePath,
+     baseURL,
+     credentials,
++    emailOTP,
+     localization: contextLocalization,
+     nameRequired,
+     persistClient,
+@@ -8357,6 +8358,14 @@ function SignUpForm({
+       });
+       if ("token" in data && data.token) {
+         await onSuccess();
++      } else if (emailOTP) {
++        navigate(
++          `${basePath}/${viewPaths.EMAIL_OTP}${window.location.search}`
++        );
++        toast({
++          variant: "success",
++          message: localization.SIGN_UP_EMAIL
++        });
+       } else {
+         navigate(
+           `${basePath}/${viewPaths.SIGN_IN}${window.location.search}`

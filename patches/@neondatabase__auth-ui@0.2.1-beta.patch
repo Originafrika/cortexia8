@@ -1,0 +1,28 @@
+diff --git a/dist/index.mjs b/dist/index.mjs
+index ef6aacd9dc6950eb4230ee72ee4e8f4768cd6075..191ee9564be0f9a96c7259f14891421380b0a9d5 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -9547,7 +9547,7 @@ function SignInForm({ className, classNames, isSubmitting, localization, redirec
+ function SignUpForm({ className, classNames, callbackURL, isSubmitting, localization, redirectTo, setIsSubmitting, passwordValidation }) {
+ 	const isHydrated = useIsHydrated();
+ 	const { captchaRef, getCaptchaHeaders, resetCaptcha } = useCaptcha({ localization });
+-	const { additionalFields, authClient: authClient2, basePath, baseURL, credentials, localization: contextLocalization, nameRequired, persistClient, redirectTo: contextRedirectTo, signUp: signUpOptions, viewPaths, navigate, toast: toast$1, avatar, localizeErrors } = useContext(AuthUIContext);
++	const { additionalFields, authClient: authClient2, basePath, baseURL, credentials, emailOTP, localization: contextLocalization, nameRequired, persistClient, redirectTo: contextRedirectTo, signUp: signUpOptions, viewPaths, navigate, toast: toast$1, avatar, localizeErrors } = useContext(AuthUIContext);
+ 	const confirmPasswordEnabled = credentials == null ? void 0 : credentials.confirmPassword;
+ 	const usernameEnabled = credentials == null ? void 0 : credentials.username;
+ 	const usernameRequired = (credentials == null ? void 0 : credentials.usernameRequired) ?? true;
+@@ -9696,7 +9696,13 @@ function SignUpForm({ className, classNames, callbackURL, isSubmitting, localiza
+ 				fetchOptions
+ 			});
+ 			if ("token" in data && data.token) await onSuccess();
+-			else {
++			else if (emailOTP) {
++				navigate(`${basePath}/${viewPaths.EMAIL_OTP}${window.location.search}`);
++				toast$1({
++					variant: "success",
++					message: localization.SIGN_UP_EMAIL
++				});
++			} else {
+ 				navigate(`${basePath}/${viewPaths.SIGN_IN}${window.location.search}`);
+ 				toast$1({
+ 					variant: "success",
