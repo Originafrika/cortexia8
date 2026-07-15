@@ -28,13 +28,13 @@ type Dict = Record<string, string>;
 
 const fr: Dict = {
   "nav.open_app": "Ouvrir l'app",
-  "badge.launch": "Ouverture — 1er août",
-  "badge.live": "En ligne — accès libre",
+  "badge.launch": "Ouverture , 1er août",
+  "badge.live": "En ligne , accès libre",
   "badge.prelaunch": "Pré-lancement",
 
   "hero.title": "Un accès. Tous les modèles. Un agent qui sait lequel choisir.",
   "hero.subtitle":
-    "Cortexia te donne le catalogue complet — Kling, Seedream, Nano Banana, Claude, ElevenLabs et le reste — en accès direct, playground par playground. Besoin d'aller vite ? L'agent choisit et orchestre à ta place. Facturé à l'usage, jamais à l'abonnement.",
+    "Cortexia te donne le catalogue complet , Kling, Seedream, Nano Banana, Claude, ElevenLabs et le reste , en accès direct, playground par playground. Besoin d'aller vite ? L'agent choisit et orchestre à ta place. Facturé à l'usage, jamais à l'abonnement.",
   "hero.micro_cta": "30+ modèles. Un seul compte. Payable par carte, Mobile Money, crypto ou Alipay.",
 
   "stat.models": "modèles",
@@ -49,14 +49,14 @@ const fr: Dict = {
     "Décris ce que tu veux. L'agent lit ton prompt, choisit le modèle le plus adapté dans tout le catalogue, et génère. Tu vois pourquoi il a choisi ce modèle, et tu peux en changer en un clic si tu préfères autre chose.",
   "modes.playground.title": "Mode Playground",
   "modes.playground.body":
-    "Tu sais déjà que tu veux Kling 3.0 Pro pour ce mouvement de caméra, ou Seedream pour ce rendu photoréaliste ? Va directement sur son playground. Chaque modèle a son interface complète — résolution, ratio, durée, seed, style, tous les paramètres réels, rien de simplifié à l'excès.",
+    "Tu sais déjà que tu veux Kling 3.0 Pro pour ce mouvement de caméra, ou Seedream pour ce rendu photoréaliste ? Va directement sur son playground. Chaque modèle a son interface complète , résolution, ratio, durée, seed, style, tous les paramètres réels, rien de simplifié à l'excès.",
   "modes.synthesis":
     "Les deux modes partagent le même compte, le même solde, le même prix à l'usage. Tu changes de mode selon le projet, jamais selon ton fournisseur.",
 
   "catalog.eyebrow": "Catalogue",
   "catalog.title": "Pas un modèle. Le catalogue entier.",
   "catalog.body":
-    "Image, vidéo, voix, musique, texte — plus de 30 modèles des meilleurs labos (Google, Anthropic, OpenAI, ByteDance, Kuaishou, ElevenLabs, xAI...) accessibles avec le même compte, le même solde, la même simplicité. Plus besoin de 4 abonnements pour 4 types de contenu.",
+    "Image, vidéo, voix, musique, texte , plus de 30 modèles des meilleurs labos (Google, Anthropic, OpenAI, ByteDance, Kuaishou, ElevenLabs, xAI...) accessibles avec le même compte, le même solde, la même simplicité. Plus besoin de 4 abonnements pour 4 types de contenu.",
 
   "waitlist.title": "Réserve ta place avant le 1er août",
   "waitlist.subtitle":
@@ -73,12 +73,12 @@ const fr: Dict = {
   "waitlist.copied": "Copié",
   "waitlist.friends_invited": "amis invités",
   "waitlist.launch_email":
-    "Bien joué. On te prévient dès l'ouverture, le 1er août — avec tes crédits offerts déjà sur ton compte, accès direct au catalogue complet et à l'agent, dès le premier jour.",
+    "Bien joué. On te prévient dès l'ouverture, le 1er août , avec tes crédits offerts déjà sur ton compte, accès direct au catalogue complet et à l'agent, dès le premier jour.",
 
   "sim.eyebrow": "La facture est le simulateur",
   "sim.title": "La facture est le simulateur. Pas de surprise.",
   "sim.subtitle":
-    "Compose ton mois type, tous modèles confondus — un peu d'image, un peu de vidéo, un peu de voix. Compare en direct avec un abonnement classique.",
+    "Compose ton mois type, tous modèles confondus , un peu d'image, un peu de vidéo, un peu de voix. Compare en direct avec un abonnement classique.",
   "sim.eyebrow_card": "Simulateur",
   "sim.compose": "Compose ton mois type.",
   "sim.your_month": "Ton mois avec Cortexia",
@@ -87,7 +87,7 @@ const fr: Dict = {
   "sim.you_save": "Tu économises",
   "sim.this_month": "ce mois-ci.",
   "sim.threshold_note":
-    "À ce volume, un abonnement classique commence à être compétitif — mais tu ne payes toujours que ce que tu utilises, sans engagement, sans risque de payer pour rien un mois plus creux.",
+    "À ce volume, un abonnement classique commence à être compétitif , mais tu ne payes toujours que ce que tu utilises, sans engagement, sans risque de payer pour rien un mois plus creux.",
   "sim.close_note":
     "Tu approches du seuil où un abonnement fixe redevient intéressant. Reste en usage tant que ton volume varie.",
   "sim.threshold_marker": "seuil abonnement",
@@ -106,7 +106,7 @@ const fr: Dict = {
   "compare.new.title": "Cortexia",
   "compare.new.row1": "1 seul accès, tout le catalogue, une seule facture",
   "compare.new.row2": "Tu payes exactement ce que tu génères",
-  "compare.new.row3": "Tu choisis le modèle exact — ou tu laisses l'agent choisir",
+  "compare.new.row3": "Tu choisis le modèle exact , ou tu laisses l'agent choisir",
   "compare.new.row4": "Carte, Mobile Money, crypto, Alipay",
   "compare.new.note": "Tu n'as rien à payer les jours creux.",
   "compare.total": "Total mensuel",
@@ -114,7 +114,7 @@ const fr: Dict = {
   "wall.eyebrow": "Le vrai bench, c'est ce qui sort.",
   "wall.title": "Le vrai bench, c'est ce qui sort.",
   "wall.subtitle":
-    "Chaque rendu ci-dessous vient d'un modèle du catalogue, généré au prix affiché. Filtre par type, ouvre pour voir le prompt et le modèle utilisé — pas de démo isolée, c'est ce que tu auras entre les mains.",
+    "Chaque rendu ci-dessous vient d'un modèle du catalogue, généré au prix affiché. Filtre par type, ouvre pour voir le prompt et le modèle utilisé , pas de démo isolée, c'est ce que tu auras entre les mains.",
   "wall.filters.all": "Tout",
   "wall.filters.image": "Image",
   "wall.filters.video": "Vidéo",
@@ -133,20 +133,20 @@ const fr: Dict = {
   "access.eyebrow": "Accessibilité",
   "access.title": "Disponible partout. Payable partout.",
   "access.body":
-    "Carte bancaire, Mobile Money, crypto ou Alipay. Le catalogue complet, où que tu sois — parce qu'un bon outil ne devrait jamais dépendre de ta banque.",
+    "Carte bancaire, Mobile Money, crypto ou Alipay. Le catalogue complet, où que tu sois , parce qu'un bon outil ne devrait jamais dépendre de ta banque.",
 
   "social.eyebrow": "Ils attendent déjà",
   "social.copy":
-    "créateurs inscrits, de Lomé à Jakarta en passant par São Paulo et Paris. Le premier accès se fait par ordre d'inscription — le parrainage fait remonter.",
+    "créateurs inscrits, de Lomé à Jakarta en passant par São Paulo et Paris. Le premier accès se fait par ordre d'inscription , le parrainage fait remonter.",
 
   "faq.eyebrow": "Ce qu'on nous demande",
   "faq.title": "Questions honnêtes.",
   "faq.q1": "Je peux choisir moi-même le modèle, ou c'est toujours l'agent qui décide ?",
-  "faq.a1": "Les deux. Chaque modèle a son propre playground accessible directement — tu peux aussi laisser l'agent choisir et orchestrer pour toi.",
+  "faq.a1": "Les deux. Chaque modèle a son propre playground accessible directement , tu peux aussi laisser l'agent choisir et orchestrer pour toi.",
   "faq.q2": "Combien de modèles seront disponibles au lancement ?",
-  "faq.a2": "Plus de 30, couvrant image, vidéo, voix, musique et texte — le catalogue complet visible plus haut sur cette page.",
+  "faq.a2": "Plus de 30, couvrant image, vidéo, voix, musique et texte , le catalogue complet visible plus haut sur cette page.",
   "faq.q3": "Combien ça coûte vraiment ?",
-  "faq.a3": "Tu payes uniquement ce que tu génères, au prix affiché sur chaque modèle — pas de palier caché, pas de minimum mensuel.",
+  "faq.a3": "Tu payes uniquement ce que tu génères, au prix affiché sur chaque modèle , pas de palier caché, pas de minimum mensuel.",
   "faq.q4": "Je peux payer avec Mobile Money, crypto ou Alipay ?",
   "faq.a4": "Oui, en plus de la carte bancaire classique, partout où c'est disponible.",
   "faq.q5": "Pourquoi c'est moins cher qu'un abonnement ?",
@@ -154,7 +154,7 @@ const fr: Dict = {
   "faq.q6": "Vous avez une API ?",
   "faq.a6": "Oui, dès le lancement. Endpoints REST, clés self-service, même moteur de facturation à l'usage, sans minimum mensuel.",
 
-  "footer.copy": "© 2026 — construit pour les créateurs, partout.",
+  "footer.copy": "© 2026. Construit pour les créateurs, partout.",
   "footer.policy": "Politique",
   "footer.contact": "Contact",
   "footer.team": "Accès équipe",
@@ -182,13 +182,13 @@ const fr: Dict = {
 
   "app.onb.step1.title": "Un agent qui choisit le bon modèle.",
   "app.onb.step1.body":
-    "Dis ce que tu veux — image, vidéo, voix, texte. Cortexia route ton prompt vers le meilleur modèle du catalogue et t'explique pourquoi.",
+    "Dis ce que tu veux , image, vidéo, voix, texte. Cortexia route ton prompt vers le meilleur modèle du catalogue et t'explique pourquoi.",
   "app.onb.step2.title": "Un playground par modèle.",
   "app.onb.step2.body":
     "Besoin de contrôle fin ? Va directement dans le catalogue et choisis ton modèle. Chaque page a son formulaire dédié et son prix live.",
   "app.onb.step3.title": "Zéro abonnement. Zéro surprise.",
   "app.onb.step3.body":
-    "Le prix s'affiche avant chaque génération. Tu recharges ce que tu veux — Mobile Money, carte, crypto, Alipay — et tu repars quand tu veux.",
+    "Le prix s'affiche avant chaque génération. Tu recharges ce que tu veux , Mobile Money, carte, crypto, Alipay , et tu repars quand tu veux.",
   "app.onb.next": "Suivant",
   "app.onb.skip": "Passer",
   "app.onb.done": "Commencer à créer",
@@ -197,13 +197,13 @@ const fr: Dict = {
 
 const en: Dict = {
   "nav.open_app": "Open app",
-  "badge.launch": "Launching — August 1st",
-  "badge.live": "Live — open access",
+  "badge.launch": "Launching , August 1st",
+  "badge.live": "Live , open access",
   "badge.prelaunch": "Pre-launch",
 
   "hero.title": "One access. Every model. An agent that knows which to pick.",
   "hero.subtitle":
-    "Cortexia gives you the full catalog — Kling, Seedream, Nano Banana, Claude, ElevenLabs and more — direct access, playground by playground. Need it fast? The agent picks and orchestrates for you. Pay-as-you-go, never a subscription.",
+    "Cortexia gives you the full catalog , Kling, Seedream, Nano Banana, Claude, ElevenLabs and more , direct access, playground by playground. Need it fast? The agent picks and orchestrates for you. Pay-as-you-go, never a subscription.",
   "hero.micro_cta": "30+ models. One account. Pay by card, Mobile Money, crypto or Alipay.",
 
   "stat.models": "models",
@@ -218,14 +218,14 @@ const en: Dict = {
     "Describe what you want. The agent reads your prompt, picks the best model in the entire catalog, and generates. You see why it chose that model, and you can switch in one click if you'd rather pick yourself.",
   "modes.playground.title": "Playground mode",
   "modes.playground.body":
-    "You already know you want Kling 3.0 Pro for that camera movement, or Seedream for photorealism? Go straight to its playground. Every model has its full interface — resolution, ratio, duration, seed, style, all the real parameters, nothing oversimplified.",
+    "You already know you want Kling 3.0 Pro for that camera movement, or Seedream for photorealism? Go straight to its playground. Every model has its full interface , resolution, ratio, duration, seed, style, all the real parameters, nothing oversimplified.",
   "modes.synthesis":
     "Both modes share the same account, the same balance, the same pay-as-you-go pricing. You switch modes by project, never by provider.",
 
   "catalog.eyebrow": "Catalog",
   "catalog.title": "Not one model. The full catalog.",
   "catalog.body":
-    "Image, video, voice, music, text — over 30 models from the best labs (Google, Anthropic, OpenAI, ByteDance, Kuaishou, ElevenLabs, xAI...) accessible with the same account, the same balance, the same simplicity. No more 4 subscriptions for 4 types of content.",
+    "Image, video, voice, music, text , over 30 models from the best labs (Google, Anthropic, OpenAI, ByteDance, Kuaishou, ElevenLabs, xAI...) accessible with the same account, the same balance, the same simplicity. No more 4 subscriptions for 4 types of content.",
 
   "waitlist.title": "Save your spot before August 1st",
   "waitlist.subtitle":
@@ -242,12 +242,12 @@ const en: Dict = {
   "waitlist.copied": "Copied",
   "waitlist.friends_invited": "friends invited",
   "waitlist.launch_email":
-    "Nice one. We'll email you on August 1st with your access — welcome credits already on your account, full catalog and agent access from day one.",
+    "Nice one. We'll email you on August 1st with your access , welcome credits already on your account, full catalog and agent access from day one.",
 
   "sim.eyebrow": "The bill is the simulator",
   "sim.title": "The bill is the simulator. No surprises.",
   "sim.subtitle":
-    "Build your typical month, all models mixed — a bit of image, a bit of video, a bit of voice. Compare side-by-side with a classic subscription.",
+    "Build your typical month, all models mixed , a bit of image, a bit of video, a bit of voice. Compare side-by-side with a classic subscription.",
   "sim.eyebrow_card": "Simulator",
   "sim.compose": "Compose your typical month.",
   "sim.your_month": "Your month with Cortexia",
@@ -256,7 +256,7 @@ const en: Dict = {
   "sim.you_save": "You save",
   "sim.this_month": "this month.",
   "sim.threshold_note":
-    "At this volume, a classic subscription starts to be competitive — but you still only pay what you use, with no commitment and no risk of paying for a quiet month.",
+    "At this volume, a classic subscription starts to be competitive , but you still only pay what you use, with no commitment and no risk of paying for a quiet month.",
   "sim.close_note":
     "You're approaching the point where a flat subscription becomes worth it. Stay pay-as-you-go while your volume varies.",
   "sim.threshold_marker": "subscription break-even",
@@ -275,7 +275,7 @@ const en: Dict = {
   "compare.new.title": "Cortexia",
   "compare.new.row1": "1 account, the full catalog, one bill",
   "compare.new.row2": "You pay exactly what you generate",
-  "compare.new.row3": "Pick the exact model — or let the agent choose",
+  "compare.new.row3": "Pick the exact model , or let the agent choose",
   "compare.new.row4": "Card, Mobile Money, crypto, Alipay",
   "compare.new.note": "Nothing to pay on quiet days.",
   "compare.total": "Monthly total",
@@ -283,7 +283,7 @@ const en: Dict = {
   "wall.eyebrow": "The real benchmark is what comes out.",
   "wall.title": "The real benchmark is what comes out.",
   "wall.subtitle":
-    "Every render below comes from a catalog model, generated at the shown price. Filter by type, click to see the prompt and model used — no isolated demo, this is what you'll have in your hands.",
+    "Every render below comes from a catalog model, generated at the shown price. Filter by type, click to see the prompt and model used , no isolated demo, this is what you'll have in your hands.",
   "wall.filters.all": "All",
   "wall.filters.image": "Image",
   "wall.filters.video": "Video",
@@ -302,20 +302,20 @@ const en: Dict = {
   "access.eyebrow": "Accessibility",
   "access.title": "Available everywhere. Payable everywhere.",
   "access.body":
-    "Credit card, Mobile Money, crypto or Alipay. The full catalog, wherever you are — because a good tool should never depend on your bank.",
+    "Credit card, Mobile Money, crypto or Alipay. The full catalog, wherever you are , because a good tool should never depend on your bank.",
 
   "social.eyebrow": "They're already waiting",
   "social.copy":
-    "creators signed up, from Lomé to Jakarta via São Paulo and Paris. First access is by signup order — referrals move you up.",
+    "creators signed up, from Lomé to Jakarta via São Paulo and Paris. First access is by signup order , referrals move you up.",
 
   "faq.eyebrow": "What you keep asking",
   "faq.title": "Straight answers.",
   "faq.q1": "Can I choose the model myself, or does the agent always decide?",
-  "faq.a1": "Both. Every model has its own playground accessible directly — you can also let the agent pick and orchestrate for you.",
+  "faq.a1": "Both. Every model has its own playground accessible directly , you can also let the agent pick and orchestrate for you.",
   "faq.q2": "How many models at launch?",
-  "faq.a2": "Over 30, covering image, video, voice, music and text — the full catalog visible higher up on this page.",
+  "faq.a2": "Over 30, covering image, video, voice, music and text , the full catalog visible higher up on this page.",
   "faq.q3": "How much does it actually cost?",
-  "faq.a3": "You only pay for what you generate, at the price shown on each model — no hidden tiers, no monthly minimum.",
+  "faq.a3": "You only pay for what you generate, at the price shown on each model , no hidden tiers, no monthly minimum.",
   "faq.q4": "Can I pay with Mobile Money, crypto or Alipay?",
   "faq.a4": "Yes, alongside standard credit card, wherever it's available.",
   "faq.q5": "Why is it cheaper than a subscription?",
@@ -323,7 +323,7 @@ const en: Dict = {
   "faq.q6": "Do you have an API?",
   "faq.a6": "Yes, from day one. REST endpoints, self-service keys, same pay-as-you-go pricing, no monthly minimum.",
 
-  "footer.copy": "© 2026 — built for creators, everywhere.",
+  "footer.copy": "© 2026. Built for creators, everywhere.",
   "footer.policy": "Privacy",
   "footer.contact": "Contact",
   "footer.team": "Team access",
@@ -350,30 +350,30 @@ const en: Dict = {
 
   "app.onb.step1.title": "An agent that picks the right model.",
   "app.onb.step1.body":
-    "Say what you want — image, video, voice, text. Cortexia routes your prompt to the best model in the catalog and tells you why.",
+    "Say what you want , image, video, voice, text. Cortexia routes your prompt to the best model in the catalog and tells you why.",
   "app.onb.step2.title": "A playground per model.",
   "app.onb.step2.body":
     "Need fine control? Head to the catalog and pick your model. Each has its own form and live pricing.",
   "app.onb.step3.title": "No subscription. No surprises.",
   "app.onb.step3.body":
-    "The price shows before every generation. Top up what you want — Mobile Money, card, crypto, Alipay — leave whenever.",
+    "The price shows before every generation. Top up what you want , Mobile Money, card, crypto, Alipay , leave whenever.",
   "app.onb.next": "Next",
   "app.onb.skip": "Skip",
   "app.onb.done": "Start creating",
   "app.onb.welcome_credit": "$5 of welcome credits added to your account.",
 };
 
-// Portuguese, Spanish, Indonesian — cover the core landing strings.
+// Portuguese, Spanish, Indonesian , cover the core landing strings.
 // Missing keys fall back to English then French.
 const pt: Dict = {
   "nav.open_app": "Abrir o app",
-  "badge.launch": "Abertura — 1º de agosto",
-  "badge.live": "No ar — acesso livre",
+  "badge.launch": "Abertura , 1º de agosto",
+  "badge.live": "No ar , acesso livre",
   "badge.prelaunch": "Pré-lançamento",
   "hero.title.a": "IA sem assinar",
   "hero.title.b": "aquilo que você nunca usa.",
   "hero.subtitle":
-    "Um ponto de entrada para os melhores modelos — Kling, Seedance, Nano Banana, GPT-5, Claude, ElevenLabs — cobrado por geração. Pague com Mobile Money, cartão, cripto ou Alipay. Onde quer que você crie.",
+    "Um ponto de entrada para os melhores modelos , Kling, Seedance, Nano Banana, GPT-5, Claude, ElevenLabs , cobrado por geração. Pague com Mobile Money, cartão, cripto ou Alipay. Onde quer que você crie.",
   "waitlist.title": "Entrar na waitlist",
   "waitlist.email_placeholder": "voce@email.com",
   "waitlist.cta": "Reservar meu lugar",
@@ -387,7 +387,7 @@ const pt: Dict = {
   "sim.you_save": "Você economiza",
   "sim.this_month": "este mês.",
   "sim.threshold_note":
-    "Neste volume, uma assinatura clássica começa a ser competitiva — mas você ainda só paga pelo que usa, sem compromisso, sem risco de pagar por um mês vazio.",
+    "Neste volume, uma assinatura clássica começa a ser competitiva , mas você ainda só paga pelo que usa, sem compromisso, sem risco de pagar por um mês vazio.",
   "wall.title": "O verdadeiro benchmark é o que sai.",
   "wall.load_more": "Ver mais criações",
   "app.onb.done": "Começar a criar",
@@ -395,13 +395,13 @@ const pt: Dict = {
 
 const es: Dict = {
   "nav.open_app": "Abrir la app",
-  "badge.launch": "Apertura — 1 de agosto",
-  "badge.live": "En línea — acceso libre",
+  "badge.launch": "Apertura , 1 de agosto",
+  "badge.live": "En línea , acceso libre",
   "badge.prelaunch": "Pre-lanzamiento",
   "hero.title.a": "IA sin suscribirte",
   "hero.title.b": "a lo que nunca usas.",
   "hero.subtitle":
-    "Un único acceso a los mejores modelos — Kling, Seedance, Nano Banana, GPT-5, Claude, ElevenLabs — facturado por generación. Paga con Mobile Money, tarjeta, cripto o Alipay. Donde quiera que crees.",
+    "Un único acceso a los mejores modelos , Kling, Seedance, Nano Banana, GPT-5, Claude, ElevenLabs , facturado por generación. Paga con Mobile Money, tarjeta, cripto o Alipay. Donde quiera que crees.",
   "waitlist.cta": "Reservar mi lugar",
   "waitlist.i_create": "Creo sobre todo:",
   "sim.title.a": "Escribe tu uso. Ve el precio.",
@@ -416,13 +416,13 @@ const es: Dict = {
 
 const id: Dict = {
   "nav.open_app": "Buka app",
-  "badge.launch": "Rilis — 1 Agustus",
-  "badge.live": "Online — akses bebas",
+  "badge.launch": "Rilis , 1 Agustus",
+  "badge.live": "Online , akses bebas",
   "badge.prelaunch": "Pra-rilis",
   "hero.title.a": "AI tanpa berlangganan",
   "hero.title.b": "hal yang tak kamu pakai.",
   "hero.subtitle":
-    "Satu akses ke model-model terbaik — Kling, Seedance, Nano Banana, GPT-5, Claude, ElevenLabs — dibayar per generasi. Bayar dengan Mobile Money, kartu, kripto atau Alipay. Di mana pun kamu berkarya.",
+    "Satu akses ke model-model terbaik , Kling, Seedance, Nano Banana, GPT-5, Claude, ElevenLabs , dibayar per generasi. Bayar dengan Mobile Money, kartu, kripto atau Alipay. Di mana pun kamu berkarya.",
   "waitlist.cta": "Simpan tempatku",
   "waitlist.i_create": "Aku terutama membuat:",
   "sim.title.a": "Ketik pemakaianmu. Lihat harganya.",
