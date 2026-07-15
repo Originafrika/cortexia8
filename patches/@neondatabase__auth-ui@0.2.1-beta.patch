@@ -7,7 +7,7 @@ index ef6aacd9dc6950eb4230ee72ee4e8f4768cd6075..1df67a49775b00b711045915a129c5c7
  }
  function EmailOTPForm(props) {
 -	const [email, setEmail] = useState();
-+	const [email, setEmail] = useState(() => new URLSearchParams(window.location.search).get("email") || undefined);
++	const [email, setEmail] = useState(() => getSearchParam("email") || undefined);
  	if (!email) return /* @__PURE__ */ jsx(EmailForm, {
  		...props,
  		setEmail
