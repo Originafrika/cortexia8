@@ -138,7 +138,6 @@ export function CreditSimulator({ compact }: { compact?: boolean }) {
                   {models.map((m) => {
                     const val = values[m.key] || 0;
                     const cost = val * m.unitPriceUSD;
-                    if (val === 0) return null; // Hide models with zero usage
                     return (
                       <div key={m.key}>
                         <div className="flex items-baseline justify-between gap-3">
