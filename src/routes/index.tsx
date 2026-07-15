@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { authClient } from "@/auth";
 import { AmbientBackground } from "@/components/ambient-background";
 import { SiteHeader } from "@/components/site-header";
 import { EditorialCountdown } from "@/components/editorial-countdown";
