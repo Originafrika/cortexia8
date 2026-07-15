@@ -95,7 +95,8 @@ function Auth() {
       const { data, error } = await authClient.emailOtp.verifyEmail({ email, otp: code });
       if (error) throw error;
 
-      if (data?.session) {
+      const anyData = data as { session?: unknown; token?: string } | null;
+      if (anyData?.session || anyData?.token) {
         navigate({ to: "/app" });
         return;
       }
