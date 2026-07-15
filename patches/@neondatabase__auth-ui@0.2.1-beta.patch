@@ -1,23 +1,19 @@
 diff --git a/dist/index.mjs b/dist/index.mjs
-index ef6aacd..ba85f2a 100644
+index ef6aacd..c13947c 100644
 --- a/dist/index.mjs
 +++ b/dist/index.mjs
-@@ -8840,7 +8840,14 @@ function OTPInputGroup({ otpSeparators = 0 }) {
- 	] });
+@@ -8841,6 +8841,10 @@ function OTPInputGroup({ otpSeparators = 0 }) {
  }
  function EmailOTPForm(props) {
-+	const isHydrated = useIsHydrated();
  	const [email, setEmail] = useState();
 +	useEffect(() => {
-+		if (isHydrated && !email) {
-+			const urlEmail = getSearchParam("email");
-+			if (urlEmail) setEmail(urlEmail);
-+		}
-+	}, [isHydrated]);
++		const urlEmail = new URLSearchParams(window.location.search).get("email");
++		if (urlEmail) setEmail(urlEmail);
++	}, []);
  	if (!email) return /* @__PURE__ */ jsx(EmailForm, {
  		...props,
  		setEmail
-@@ -9547,7 +9554,7 @@ function SignInForm({ className, classNames, isSubmitting, localization, redirec
+@@ -9547,7 +9551,7 @@ function SignInForm({ className, classNames, isSubmitting, localization, redirec
  function SignUpForm({ className, classNames, callbackURL, isSubmitting, localization, redirectTo, setIsSubmitting, passwordValidation }) {
  	const isHydrated = useIsHydrated();
  	const { captchaRef, getCaptchaHeaders, resetCaptcha } = useCaptcha({ localization });
@@ -26,7 +22,7 @@ index ef6aacd..ba85f2a 100644
  	const confirmPasswordEnabled = credentials == null ? void 0 : credentials.confirmPassword;
  	const usernameEnabled = credentials == null ? void 0 : credentials.username;
  	const usernameRequired = (credentials == null ? void 0 : credentials.usernameRequired) ?? true;
-@@ -9696,7 +9703,15 @@ function SignUpForm({ className, classNames, callbackURL, isSubmitting, localiza
+@@ -9696,7 +9700,15 @@ function SignUpForm({ className, classNames, callbackURL, isSubmitting, localiza
  				fetchOptions
  			});
  			if ("token" in data && data.token) await onSuccess();

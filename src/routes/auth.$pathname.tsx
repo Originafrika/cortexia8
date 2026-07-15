@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useSearch } from "@tanstack/react-router";
 import { AuthView } from "@neondatabase/auth-ui";
 
 export const Route = createFileRoute("/auth/$pathname")({
@@ -6,7 +6,8 @@ export const Route = createFileRoute("/auth/$pathname")({
 });
 
 function Auth() {
-  const { pathname } = Route.useParams();
+  const { pathname } = Route.useParams({});
+  const search = useSearch({ from: Route.id });
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
