@@ -64,7 +64,32 @@ export function WaitlistForm() {
             <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
               {t("waitlist.title")}
             </div>
-            <div className="mt-4 grid gap-3 sm:grid-cols-[1fr,auto]">
+
+            <div className="mt-4">
+              <div className="text-xs text-muted-foreground mb-2">{t("waitlist.i_create")}</div>
+              <div className="flex flex-wrap gap-2">
+                {PROFESSIONS.map((p) => {
+                  const active = profession === p;
+                  return (
+                    <button
+                      key={p}
+                      type="button"
+                      onClick={() => setProfession(p)}
+                      className={
+                        "rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all " +
+                        (active
+                          ? "border-amber/60 bg-amber/15 text-amber-soft"
+                          : "border-border bg-surface-2/50 text-muted-foreground hover:border-border-strong hover:text-foreground/90")
+                      }
+                    >
+                      {p}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="mt-5 grid gap-3 sm:grid-cols-[1fr,auto]">
               <input
                 type="email"
                 required
@@ -89,29 +114,6 @@ export function WaitlistForm() {
               </button>
             </div>
 
-            <div className="mt-5">
-              <div className="text-xs text-muted-foreground mb-2">{t("waitlist.i_create")}</div>
-              <div className="flex flex-wrap gap-2">
-                {PROFESSIONS.map((p) => {
-                  const active = profession === p;
-                  return (
-                    <button
-                      key={p}
-                      type="button"
-                      onClick={() => setProfession(p)}
-                      className={
-                        "rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all " +
-                        (active
-                          ? "border-amber/60 bg-amber/15 text-amber-soft"
-                          : "border-border bg-surface-2/50 text-muted-foreground hover:border-border-strong hover:text-foreground/90")
-                      }
-                    >
-                      {p}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
 
             <p className="mt-5 text-[11px] text-muted-foreground/80">{t("waitlist.no_spam")}</p>
           </motion.form>
