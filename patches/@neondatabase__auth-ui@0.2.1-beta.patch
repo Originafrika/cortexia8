@@ -1,46 +1,45 @@
 diff --git a/dist/index.mjs b/dist/index.mjs
-index ef6aacd9dc6950eb4230ee72ee4e8f4768cd6075..1df67a49775b00b711045915a129c5c76be3f717 100644
+index ef6aacd..ba85f2a 100644
 --- a/dist/index.mjs
 +++ b/dist/index.mjs
 @@ -8840,7 +8840,14 @@ function OTPInputGroup({ otpSeparators = 0 }) {
-	] });
+ 	] });
  }
  function EmailOTPForm(props) {
--	const [email, setEmail] = useState();
 +	const isHydrated = useIsHydrated();
-+	const [email, setEmail] = useState();
+ 	const [email, setEmail] = useState();
 +	useEffect(() => {
 +		if (isHydrated && !email) {
 +			const urlEmail = getSearchParam("email");
 +			if (urlEmail) setEmail(urlEmail);
 +		}
 +	}, [isHydrated]);
-	if (!email) return /* @__PURE__ */ jsx(EmailForm, {
-		...props,
-		setEmail
-@@ -9547,7 +9547,7 @@ function SignInForm({ className, classNames, isSubmitting, localization, redirec
-function SignUpForm({ className, classNames, callbackURL, isSubmitting, localization, redirectTo, setIsSubmitting, passwordValidation }) {
-	const isHydrated = useIsHydrated();
-	const { captchaRef, getCaptchaHeaders, resetCaptcha } = useCaptcha({ localization });
+ 	if (!email) return /* @__PURE__ */ jsx(EmailForm, {
+ 		...props,
+ 		setEmail
+@@ -9547,7 +9554,7 @@ function SignInForm({ className, classNames, isSubmitting, localization, redirec
+ function SignUpForm({ className, classNames, callbackURL, isSubmitting, localization, redirectTo, setIsSubmitting, passwordValidation }) {
+ 	const isHydrated = useIsHydrated();
+ 	const { captchaRef, getCaptchaHeaders, resetCaptcha } = useCaptcha({ localization });
 -	const { additionalFields, authClient: authClient2, basePath, baseURL, credentials, localization: contextLocalization, nameRequired, persistClient, redirectTo: contextRedirectTo, signUp: signUpOptions, viewPaths, navigate, toast: toast$1, avatar, localizeErrors } = useContext(AuthUIContext);
 +	const { additionalFields, authClient: authClient2, basePath, baseURL, credentials, emailOTP, localization: contextLocalization, nameRequired, persistClient, redirectTo: contextRedirectTo, signUp: signUpOptions, viewPaths, navigate, toast: toast$1, avatar, localizeErrors } = useContext(AuthUIContext);
-	const confirmPasswordEnabled = credentials == null ? void 0 : credentials.confirmPassword;
-	const usernameEnabled = credentials == null ? void 0 : credentials.username;
-	const usernameRequired = (credentials == null ? void 0 : credentials.usernameRequired) ?? true;
-@@ -9696,7 +9696,15 @@ function SignUpForm({ className, classNames, callbackURL, isSubmitting, localiza
-			fetchOptions
-		});
-		if ("token" in data && data.token) await onSuccess();
--		else {
-+		else if (emailOTP) {
-+			const emailParams = new URLSearchParams(window.location.search);
-+			emailParams.set("email", email);
-+			navigate(`${basePath}/${viewPaths.EMAIL_OTP}?${emailParams.toString()}`);
-+			toast$1({
-+				variant: "success",
-+				message: localization.SIGN_UP_EMAIL
-+			});
-+		} else {
-			navigate(`${basePath}/${viewPaths.SIGN_IN}${window.location.search}`);
-			toast$1({
-				variant: "success",
+ 	const confirmPasswordEnabled = credentials == null ? void 0 : credentials.confirmPassword;
+ 	const usernameEnabled = credentials == null ? void 0 : credentials.username;
+ 	const usernameRequired = (credentials == null ? void 0 : credentials.usernameRequired) ?? true;
+@@ -9696,7 +9703,15 @@ function SignUpForm({ className, classNames, callbackURL, isSubmitting, localiza
+ 				fetchOptions
+ 			});
+ 			if ("token" in data && data.token) await onSuccess();
+-			else {
++			else if (emailOTP) {
++				const emailParams = new URLSearchParams(window.location.search);
++				emailParams.set("email", email);
++				navigate(`${basePath}/${viewPaths.EMAIL_OTP}?${emailParams.toString()}`);
++				toast$1({
++					variant: "success",
++					message: localization.SIGN_UP_EMAIL
++				});
++			} else {
+ 				navigate(`${basePath}/${viewPaths.SIGN_IN}${window.location.search}`);
+ 				toast$1({
+ 					variant: "success",
