@@ -12,16 +12,16 @@ import { useT } from "@/lib/i18n";
 import { LAUNCH_DATE } from "@/lib/launch";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, ArrowRight } from "lucide-react";
+import { ChevronDown, ArrowRight, Bot, Sliders } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Cortexia — L'IA sans t'abonner. Waitlist ouverte." },
+      { title: "Cortexia — Un accès. Tous les modèles. Waitlist ouverte." },
       {
         name: "description",
         content:
-          "Cortexia ouvre le 1er août : un accès unique aux meilleurs modèles IA image, vidéo, voix, texte — facturés à l'usage. Rejoins la waitlist.",
+          "Cortexia ouvre le 1er août : le catalogue complet — Kling, Seedream, Claude, ElevenLabs — en accès direct, playground par playground. L'agent choisit pour toi ou tu gardes la main. Facturé à l'usage. Rejoins la waitlist.",
       },
     ],
   }),
@@ -35,13 +35,14 @@ function WaitlistLanding() {
       <SiteHeader />
 
       <Hero />
+      <ModesSection />
+      <CatalogSection />
       <WallPreviewSection />
-      <AgentSection />
-      <SimulatorSection />
-      <AccessSection />
       <WallSection />
+      <SimulatorSection />
       <ComparisonSection />
       <SocialProofSection />
+      <AccessSection />
       <FaqSection />
       <FooterSection />
     </div>
@@ -49,12 +50,11 @@ function WaitlistLanding() {
 }
 
 function LangFade({ children }: { children: React.ReactNode }) {
-  // Force re-mount on lang change for a smooth text swap.
   const t = useT();
   return (
     <AnimatePresence mode="wait">
       <motion.div
-        key={t("hero.title.a")}
+        key={t("hero.title")}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -83,10 +83,8 @@ function Hero() {
           </motion.div>
 
           <LangFade>
-            <h1 className="mt-6 font-display text-[clamp(2.5rem,7vw,5.5rem)] leading-[0.98] tracking-[-0.035em]">
+            <h1 className="mt-6 font-display text-[clamp(2.2rem,6.5vw,4.8rem)] leading-[1.02] tracking-[-0.035em]">
               {t("hero.title")}
-              <br />
-              <span className="italic text-amber-soft">{t("hero.punch")}</span>
             </h1>
             <p className="mt-6 max-w-xl text-lg text-foreground/80 leading-relaxed">
               {t("hero.subtitle")}
@@ -137,83 +135,84 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
+function ModesSection() {
+  const t = useT();
+  return (
+    <section className="mx-auto max-w-7xl px-5 sm:px-8 py-16 sm:py-24">
+      <div className="max-w-3xl mb-10">
+        <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+          {t("modes.eyebrow")}
+        </div>
+        <h2 className="mt-3 font-display text-3xl sm:text-4xl tracking-[-0.03em]">
+          {t("modes.title")}
+        </h2>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Agent mode */}
+        <div className="surface-gradient-border rounded-2xl bg-surface-1/50 backdrop-blur p-6 sm:p-8">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="grid place-items-center size-10 rounded-xl bg-amber/10 text-amber">
+              <Bot className="size-5" />
+            </div>
+            <h3 className="font-display text-xl tracking-[-0.02em]">{t("modes.agent.title")}</h3>
+          </div>
+          <p className="text-foreground/80 leading-relaxed text-sm">
+            {t("modes.agent.body")}
+          </p>
+        </div>
+
+        {/* Playground mode */}
+        <div className="surface-gradient-border rounded-2xl bg-surface-1/50 backdrop-blur p-6 sm:p-8">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="grid place-items-center size-10 rounded-xl bg-amber/10 text-amber">
+              <Sliders className="size-5" />
+            </div>
+            <h3 className="font-display text-xl tracking-[-0.02em]">{t("modes.playground.title")}</h3>
+          </div>
+          <p className="text-foreground/80 leading-relaxed text-sm">
+            {t("modes.playground.body")}
+          </p>
+        </div>
+      </div>
+
+      <p className="mt-6 text-center text-sm text-muted-foreground italic">
+        {t("modes.synthesis")}
+      </p>
+    </section>
+  );
+}
+
+function CatalogSection() {
+  const t = useT();
+  return (
+    <section className="py-16 sm:py-24 border-y border-border bg-surface-0/40">
+      <div className="mx-auto max-w-7xl px-5 sm:px-8 mb-10">
+        <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+          {t("catalog.eyebrow")}
+        </div>
+        <h2 className="mt-3 font-display text-3xl sm:text-4xl tracking-[-0.03em]">
+          {t("catalog.title")}
+        </h2>
+        <p className="mt-4 text-foreground/75 max-w-2xl leading-relaxed">
+          {t("catalog.body")}
+        </p>
+      </div>
+      <ModelsMarquee />
+    </section>
+  );
+}
+
 function WallPreviewSection() {
   const t = useT();
   return (
-    <section className="mx-auto max-w-7xl px-5 sm:px-8 pb-16 sm:pb-24">
+    <section className="mx-auto max-w-7xl px-5 sm:px-8 py-16 sm:py-24">
       <div className="max-w-2xl mb-6">
         <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
           {t("wall.eyebrow")}
         </div>
       </div>
       <WallPreview />
-    </section>
-  );
-}
-
-function AgentSection() {
-  const t = useT();
-  return (
-    <section className="mx-auto max-w-7xl px-5 sm:px-8 py-16 sm:py-24">
-      <div className="max-w-3xl">
-        <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-          {t("agent.eyebrow")}
-        </div>
-        <h2 className="mt-3 font-display text-4xl sm:text-5xl tracking-[-0.03em]">
-          {t("agent.title.a")}
-          <br />
-          <span className="text-amber-soft italic">{t("agent.title.b")}</span>
-        </h2>
-        <p className="mt-4 text-foreground/80 leading-relaxed max-w-2xl">
-          {t("agent.body")}
-        </p>
-      </div>
-      <div className="mt-8 grid gap-3 sm:grid-cols-3">
-        {["agent.point.a", "agent.point.b", "agent.point.c"].map((k) => (
-          <div key={k} className="rounded-xl border border-border bg-surface-1/40 p-4 text-sm text-foreground/85">
-            {t(k)}
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function AccessSection() {
-  const t = useT();
-  return (
-    <section className="border-y border-border bg-surface-0/40 py-16 sm:py-24">
-      <div className="mx-auto max-w-7xl px-5 sm:px-8 text-center">
-        <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-          {t("access.eyebrow")}
-        </div>
-        <h2 className="mt-3 font-display text-3xl sm:text-4xl tracking-[-0.03em]">
-          {t("access.title")}
-        </h2>
-        <p className="mt-4 mx-auto max-w-xl text-foreground/80 leading-relaxed">
-          {t("access.body")}
-        </p>
-      </div>
-    </section>
-  );
-}
-
-function SimulatorSection() {
-  const t = useT();
-  return (
-    <section className="mx-auto max-w-7xl px-5 sm:px-8 py-16 sm:py-24">
-      <div className="max-w-2xl mb-10">
-        <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-          {t("sim.eyebrow")}
-        </div>
-        <h2 className="mt-3 font-display text-4xl sm:text-5xl tracking-[-0.03em]">
-          {t("sim.title.a")}
-          <br />
-          <span className="text-muted-foreground italic">{t("sim.title.b")}</span>
-        </h2>
-        <p className="mt-4 text-foreground/75">{t("sim.subtitle")}</p>
-      </div>
-      <CreditSimulator />
     </section>
   );
 }
@@ -238,18 +237,20 @@ function WallSection() {
   );
 }
 
-function ModelsSection() {
+function SimulatorSection() {
+  const t = useT();
   return (
-    <section className="py-16 sm:py-24">
-      <div className="mx-auto max-w-7xl px-5 sm:px-8 mb-10">
+    <section className="mx-auto max-w-7xl px-5 sm:px-8 py-16 sm:py-24">
+      <div className="max-w-2xl mb-10">
         <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-          Catalogue
+          {t("sim.eyebrow")}
         </div>
         <h2 className="mt-3 font-display text-4xl sm:text-5xl tracking-[-0.03em]">
-          Tous les modèles qui comptent. Sous un seul compte.
+          {t("sim.title")}
         </h2>
+        <p className="mt-4 text-foreground/75">{t("sim.subtitle")}</p>
       </div>
-      <ModelsMarquee />
+      <CreditSimulator />
     </section>
   );
 }
@@ -310,8 +311,6 @@ function ComparisonSection() {
     </section>
   );
 }
-
-
 
 function SocialProofSection() {
   const t = useT();
@@ -387,6 +386,25 @@ function Testimonial({
         </div>
       </div>
     </div>
+  );
+}
+
+function AccessSection() {
+  const t = useT();
+  return (
+    <section className="border-y border-border bg-surface-0/40 py-16 sm:py-24">
+      <div className="mx-auto max-w-7xl px-5 sm:px-8 text-center">
+        <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+          {t("access.eyebrow")}
+        </div>
+        <h2 className="mt-3 font-display text-3xl sm:text-4xl tracking-[-0.03em]">
+          {t("access.title")}
+        </h2>
+        <p className="mt-4 mx-auto max-w-xl text-foreground/80 leading-relaxed">
+          {t("access.body")}
+        </p>
+      </div>
+    </section>
   );
 }
 
