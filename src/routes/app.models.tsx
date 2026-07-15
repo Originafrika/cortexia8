@@ -11,7 +11,7 @@ export const Route = createFileRoute("/app/models")({
 
 function ModelsLayout() {
   const matchRoute = useMatchRoute();
-  const isExact = matchRoute({ to: "/app/models", exact: true });
+  const isExact = matchRoute({ to: "/app/models" });
 
   if (!isExact) {
     return <Outlet />;
