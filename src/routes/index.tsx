@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { authClient } from "@/auth";
 import { AmbientBackground } from "@/components/ambient-background";
 import { SiteHeader } from "@/components/site-header";
 import { EditorialCountdown } from "@/components/editorial-countdown";
@@ -471,6 +472,22 @@ function FaqSection() {
 
 function FooterSection() {
   const t = useT();
+  const { data: session } = authClient.useSession();
+  const user = session?.user as { role?: string } | undefined;
+  const isAdmin = user?.role === "admin";
+  const isSignedIn = !!session?.user;
+  const [toast, setToast] = useState(false);
+
+  const handleTeamClick = (e: React.MouseEvent) => {
+    if (isSignedIn && !isAdmin) {
+      e.preventDefault();
+      setToast(true);
+      setTimeout(() => setToast(false), 3200);
+    }
+  };
+
+  const teamHref = !isSignedIn ? "/auth/sign-in" : isAdmin ? "/app" : "#";
+
   return (
     <footer className="mt-8 border-t border-border">
       <div className="mx-auto max-w-7xl px-5 sm:px-8 py-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -488,14 +505,30 @@ function FooterSection() {
           <a href="#" className="hover:text-foreground transition">
             {t("footer.contact")}
           </a>
-          <Link
-            to="/app-preview"
+          <a
+            href={teamHref}
+            onClick={handleTeamClick}
+            title={
+              isSignedIn && !isAdmin ? "Accès limité à l'équipe jusqu'au 1er août" : undefined
+            }
             className="opacity-40 hover:opacity-80 transition inline-flex items-center gap-1"
           >
             {t("footer.team")} <ArrowRight className="size-3" />
-          </Link>
+          </a>
         </div>
       </div>
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 12 }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 rounded-full border border-amber/40 bg-surface-1/95 backdrop-blur px-4 py-2 text-xs text-foreground shadow-lg"
+          >
+            Accès limité à l'équipe jusqu'au 1<sup>er</sup> août
+          </motion.div>
+        )}
+      </AnimatePresence>
     </footer>
   );
 }
