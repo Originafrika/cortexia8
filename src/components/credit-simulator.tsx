@@ -12,74 +12,59 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type Category = {
+type SimModel = {
   key: string;
-  label: string;
+  name: string;
+  category: "image" | "video" | "voice" | "text";
   icon: React.ElementType;
-  /** Displayed usage unit ("images", "secondes"…). */
   unit: string;
-  /** USD per unit. */
   unitPriceUSD: number;
   suffix: string;
   max: number;
   step: number;
-  helper: string;
-  /** Reference subscription that would cover this category, monthly USD. */
-  refPlan: { name: string; usd: number };
+  defaultValue: number;
 };
 
-const CATEGORIES: Category[] = [
-  {
-    key: "image",
-    label: "Images",
-    icon: ImageIcon,
-    unit: "images",
-    unitPriceUSD: 0.05,
-    suffix: "images / mois",
-    max: 1000,
-    step: 5,
-    helper: "Seedream Pro 1K en moyenne.",
-    refPlan: { name: "Midjourney Standard", usd: 30 },
-  },
-  {
-    key: "video",
-    label: "Vidéo",
-    icon: Film,
-    unit: "secondes",
-    unitPriceUSD: 0.12,
-    suffix: "secondes / mois",
-    max: 1200,
-    step: 5,
-    helper: "Kling 3 Turbo 1080p.",
-    refPlan: { name: "Higgsfield Pro", usd: 39 },
-  },
-  {
-    key: "voice",
-    label: "Voix",
-    icon: Mic,
-    unit: "1000 caractères",
-    unitPriceUSD: 0.088,
-    suffix: "×1 000 car. / mois",
-    max: 400,
-    step: 2,
-    helper: "ElevenLabs V3.",
-    refPlan: { name: "ElevenLabs Starter", usd: 22 },
-  },
-  {
-    key: "text",
-    label: "Texte",
-    icon: MessageSquare,
-    unit: "M tokens",
-    unitPriceUSD: 5.4,
-    suffix: "M tokens / mois",
-    max: 40,
-    step: 0.5,
-    helper: "Claude Sonnet 5 en sortie.",
-    refPlan: { name: "Claude Pro", usd: 20 },
-  },
+const ALL_MODELS: SimModel[] = [
+  // Image
+  { key: "qwen-image-2", name: "Qwen Image 2.0", category: "image", icon: ImageIcon, unit: "images", unitPriceUSD: 0.0378, suffix: "images / mois", max: 500, step: 5, defaultValue: 0 },
+  { key: "seedream-5-pro", name: "Seedream 5.0 Pro", category: "image", icon: ImageIcon, unit: "images", unitPriceUSD: 0.0441, suffix: "images / mois", max: 500, step: 5, defaultValue: 40 },
+  { key: "seedream-5-lite", name: "Seedream 5.0 Lite", category: "image", icon: ImageIcon, unit: "images", unitPriceUSD: 0.0347, suffix: "images / mois", max: 500, step: 5, defaultValue: 0 },
+  { key: "nano-banana-2", name: "Nano Banana 2", category: "image", icon: ImageIcon, unit: "images", unitPriceUSD: 0.0504, suffix: "images / mois", max: 500, step: 5, defaultValue: 0 },
+  { key: "nano-banana-2-lite", name: "Nano Banana 2 Lite", category: "image", icon: ImageIcon, unit: "images", unitPriceUSD: 0.0252, suffix: "images / mois", max: 500, step: 5, defaultValue: 0 },
+  { key: "gpt-image-2", name: "GPT Image 2", category: "image", icon: ImageIcon, unit: "images", unitPriceUSD: 0.0378, suffix: "images / mois", max: 500, step: 5, defaultValue: 0 },
+  { key: "wan-27-image", name: "Wan 2.7 Image", category: "image", icon: ImageIcon, unit: "images", unitPriceUSD: 0.0302, suffix: "images / mois", max: 500, step: 5, defaultValue: 0 },
+  { key: "wan-27-image-pro", name: "Wan 2.7 Image Pro", category: "image", icon: ImageIcon, unit: "images", unitPriceUSD: 0.0756, suffix: "images / mois", max: 500, step: 5, defaultValue: 0 },
+  // Video
+  { key: "seedance-2-mini", name: "Seedance 2.0 Mini", category: "video", icon: Film, unit: "secondes", unitPriceUSD: 0.0378, suffix: "secondes / mois", max: 300, step: 5, defaultValue: 0 },
+  { key: "seedance-2-fast", name: "Seedance 2.0 Fast", category: "video", icon: Film, unit: "secondes", unitPriceUSD: 0.0567, suffix: "secondes / mois", max: 300, step: 5, defaultValue: 0 },
+  { key: "happyhorse-11", name: "HappyHorse-1.1", category: "video", icon: Film, unit: "secondes", unitPriceUSD: 0.1418, suffix: "secondes / mois", max: 300, step: 5, defaultValue: 0 },
+  { key: "kling-3-turbo", name: "Kling 3.0 Turbo", category: "video", icon: Film, unit: "secondes", unitPriceUSD: 0.1134, suffix: "secondes / mois", max: 300, step: 5, defaultValue: 25 },
+  { key: "kling-3-standard", name: "Kling 3.0 Standard", category: "video", icon: Film, unit: "secondes", unitPriceUSD: 0.126, suffix: "secondes / mois", max: 300, step: 5, defaultValue: 0 },
+  { key: "kling-3-pro", name: "Kling 3.0 Pro", category: "video", icon: Film, unit: "secondes", unitPriceUSD: 0.1701, suffix: "secondes / mois", max: 300, step: 5, defaultValue: 0 },
+  { key: "kling-3-4k", name: "Kling 3.0 4K", category: "video", icon: Film, unit: "secondes", unitPriceUSD: 0.4221, suffix: "secondes / mois", max: 300, step: 5, defaultValue: 0 },
+  { key: "kling-3-motion", name: "Kling 3.0 Motion", category: "video", icon: Film, unit: "secondes", unitPriceUSD: 0.126, suffix: "secondes / mois", max: 300, step: 5, defaultValue: 0 },
+  { key: "grok-imagine-15", name: "Grok Video 1.5", category: "video", icon: Film, unit: "secondes", unitPriceUSD: 0.0101, suffix: "secondes / mois", max: 300, step: 5, defaultValue: 0 },
+  { key: "wan-27-video", name: "Wan 2.7 Video", category: "video", icon: Film, unit: "secondes", unitPriceUSD: 0.1008, suffix: "secondes / mois", max: 300, step: 5, defaultValue: 0 },
+  { key: "gemini-omni-video", name: "Gemini Omni Video", category: "video", icon: Film, unit: "clips", unitPriceUSD: 0.6615, suffix: "clips / mois", max: 50, step: 1, defaultValue: 0 },
+  { key: "omnihuman-15", name: "OmniHuman 1.5", category: "video", icon: Film, unit: "secondes", unitPriceUSD: 0.1701, suffix: "secondes / mois", max: 300, step: 5, defaultValue: 0 },
+  { key: "volc-lip-sync", name: "Volcengine Lip Sync", category: "video", icon: Film, unit: "secondes", unitPriceUSD: 0.0504, suffix: "secondes / mois", max: 300, step: 5, defaultValue: 0 },
+  // Voice
+  { key: "eleven-v3", name: "ElevenLabs V3", category: "voice", icon: Mic, unit: "1k caractères", unitPriceUSD: 0.0882, suffix: "×1k car. / mois", max: 200, step: 2, defaultValue: 6 },
+  // Text
+  { key: "claude-sonnet-5", name: "Claude Sonnet 5", category: "text", icon: MessageSquare, unit: "M tokens", unitPriceUSD: 5.3865, suffix: "M tokens / mois", max: 20, step: 0.5, defaultValue: 0.8 },
 ];
 
-const DEFAULT_VALUES: Record<string, number> = { image: 40, video: 25, voice: 6, text: 0.8 };
+const CATEGORY_META: Record<string, { label: string; icon: React.ElementType; refSub: { name: string; usd: number } }> = {
+  image: { label: "Image", icon: ImageIcon, refSub: { name: "Midjourney Standard", usd: 30 } },
+  video: { label: "Vidéo", icon: Film, refSub: { name: "Higgsfield Pro", usd: 39 } },
+  voice: { label: "Voix", icon: Mic, refSub: { name: "ElevenLabs Starter", usd: 22 } },
+  text: { label: "Texte", icon: MessageSquare, refSub: { name: "Claude Pro", usd: 20 } },
+};
+
+const DEFAULT_VALUES: Record<string, number> = Object.fromEntries(
+  ALL_MODELS.map((m) => [m.key, m.defaultValue]),
+);
 
 export function CreditSimulator({ compact }: { compact?: boolean }) {
   const t = useT();
@@ -87,24 +72,31 @@ export function CreditSimulator({ compact }: { compact?: boolean }) {
   const c = useCurrency();
 
   const total = useMemo(
-    () => CATEGORIES.reduce((sum, cat) => sum + values[cat.key] * cat.unitPriceUSD, 0),
+    () => ALL_MODELS.reduce((sum, m) => sum + (values[m.key] || 0) * m.unitPriceUSD, 0),
     [values],
   );
 
-  // Reference basket: total monthly cost of the equivalent stacked subscriptions
-  // — always computed against the same categories the user is simulating.
+  // Group models by category for display
+  const categories = useMemo(() => {
+    const groups: Record<string, SimModel[]> = {};
+    for (const m of ALL_MODELS) {
+      if (!groups[m.category]) groups[m.category] = [];
+      groups[m.category].push(m);
+    }
+    return groups;
+  }, []);
+
+  // Reference: sum of all category reference subscriptions
   const referenceMonthly = useMemo(
-    () => CATEGORIES.reduce((sum, cat) => sum + cat.refPlan.usd, 0),
+    () => Object.values(CATEGORY_META).reduce((sum, cat) => sum + cat.refSub.usd, 0),
     [],
   );
 
   const diff = referenceMonthly - total;
-  // Three states — never a zero display.
-  //   "save"     : Cortexia much cheaper
-  //   "near"     : within 20% of the subscription cost
-  //   "over"     : Cortexia now costs more than the reference basket
   const state: "save" | "near" | "over" =
     diff > referenceMonthly * 0.2 ? "save" : diff >= 0 ? "near" : "over";
+
+  const hasUsage = Object.values(values).some((v) => v > 0);
 
   return (
     <div
@@ -122,67 +114,73 @@ export function CreditSimulator({ compact }: { compact?: boolean }) {
             <h3 className="mt-1 font-display text-2xl tracking-[-0.02em]">{t("sim.compose")}</h3>
           </div>
         </div>
-        <div className="space-y-6">
-          {CATEGORIES.map((cat) => {
-            const val = values[cat.key];
-            const sub = val * cat.unitPriceUSD;
-            // Value on the slider where Cortexia cost equals the reference plan
-            const breakEven = cat.refPlan.usd / cat.unitPriceUSD;
-            const breakEvenPct = Math.min(100, (breakEven / cat.max) * 100);
-            const Icon = cat.icon;
+        <div className="space-y-8">
+          {Object.entries(categories).map(([catKey, models]) => {
+            const meta = CATEGORY_META[catKey];
+            if (!meta) return null;
+            const catTotal = models.reduce((sum, m) => sum + (values[m.key] || 0) * m.unitPriceUSD, 0);
             return (
-              <div key={cat.key}>
-                <div className="flex items-baseline justify-between gap-3">
-                  <label className="flex items-center gap-2.5 text-sm">
-                    <span className="grid place-items-center size-7 rounded-lg bg-surface-2 border border-border">
-                      <Icon className="size-3.5 text-amber-soft" />
+              <div key={catKey}>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="grid place-items-center size-6 rounded-md bg-surface-2 border border-border">
+                    <meta.icon className="size-3 text-amber-soft" />
+                  </span>
+                  <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                    {meta.label}
+                  </span>
+                  {catTotal > 0 && (
+                    <span className="ml-auto font-mono text-[11px] text-foreground/70 tabular">
+                      {formatMoney(catTotal, c)}
                     </span>
-                    <span className="font-medium">{cat.label}</span>
-                    <span className="text-muted-foreground text-xs hidden sm:inline">
-                      {cat.helper}
-                    </span>
-                  </label>
-                  <div className="text-right">
-                    <div className="font-mono tabular text-sm text-foreground/90">
-                      {cat.step < 1 ? val.toFixed(1) : Math.round(val)}
-                      <span className="text-muted-foreground ml-1 text-[11px]">{cat.suffix}</span>
-                    </div>
-                    <div className="font-mono tabular text-[11px] text-muted-foreground">
-                      {formatMoney(sub, c)}
-                    </div>
-                  </div>
-                </div>
-                <div className="relative mt-3">
-                  <input
-                    type="range"
-                    min={0}
-                    max={cat.max}
-                    step={cat.step}
-                    value={val}
-                    onChange={(e) =>
-                      setValues((v) => ({ ...v, [cat.key]: parseFloat(e.target.value) }))
-                    }
-                    className="w-full accent-amber h-1.5 appearance-none rounded-full bg-surface-3 cursor-pointer"
-                    aria-label={cat.label}
-                  />
-                  {/* Break-even threshold marker */}
-                  {breakEvenPct < 98 && (
-                    <div
-                      className="pointer-events-none absolute top-1/2 -translate-y-1/2 h-3 w-px bg-amber-soft/80"
-                      style={{ left: `calc(${breakEvenPct}% - 0.5px)` }}
-                      title={t("sim.threshold_marker")}
-                    />
                   )}
                 </div>
-                {val > breakEven && (
-                  <div className="mt-1.5 flex items-center gap-1 font-mono text-[10px] text-amber-soft/80">
-                    <AlertTriangle className="size-3" />
-                    {t("sim.threshold_marker")}
-                  </div>
-                )}
+                <div className="space-y-4">
+                  {models.map((m) => {
+                    const val = values[m.key] || 0;
+                    const cost = val * m.unitPriceUSD;
+                    if (val === 0) return null; // Hide models with zero usage
+                    return (
+                      <div key={m.key}>
+                        <div className="flex items-baseline justify-between gap-3">
+                          <label className="flex items-center gap-2 text-sm">
+                            <span className="font-medium text-foreground/90">{m.name}</span>
+                          </label>
+                          <div className="text-right">
+                            <div className="font-mono tabular text-sm text-foreground/90">
+                              {m.step < 1 ? val.toFixed(1) : Math.round(val)}
+                              <span className="text-muted-foreground ml-1 text-[11px]">{m.suffix}</span>
+                            </div>
+                            <div className="font-mono tabular text-[11px] text-muted-foreground">
+                              {formatMoney(cost, c)}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="relative mt-2">
+                          <input
+                            type="range"
+                            min={0}
+                            max={m.max}
+                            step={m.step}
+                            value={val}
+                            onChange={(e) =>
+                              setValues((v) => ({ ...v, [m.key]: parseFloat(e.target.value) }))
+                            }
+                            className="w-full accent-amber h-1.5 appearance-none rounded-full bg-surface-3 cursor-pointer"
+                            aria-label={m.name}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             );
           })}
+          {!hasUsage && (
+            <p className="text-sm text-muted-foreground italic">
+              {t("sim.compose")}
+            </p>
+          )}
         </div>
       </div>
 
@@ -213,7 +211,7 @@ export function CreditSimulator({ compact }: { compact?: boolean }) {
               >
                 {formatMoney(referenceMonthly, c)}
               </span>
-              <span className="text-xs text-muted-foreground">/ mois — même sans rien générer</span>
+              <span className="text-xs text-muted-foreground">/ mois, meme sans rien generer</span>
             </div>
 
             {state === "save" && (
@@ -239,7 +237,7 @@ export function CreditSimulator({ compact }: { compact?: boolean }) {
           </div>
         </div>
         <div className="text-[11px] font-mono text-muted-foreground/80">
-          Basé sur un panier de référence : {CATEGORIES.map((cat) => cat.refPlan.name).join(" · ")}.
+          Bas sur un panier de reference : {Object.values(CATEGORY_META).map((c) => c.refSub.name).join(" . ")}.
         </div>
       </div>
     </div>
