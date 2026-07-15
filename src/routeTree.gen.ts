@@ -13,6 +13,7 @@ import { Route as AppPreviewRouteImport } from './routes/app-preview'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as RCodeRouteImport } from './routes/r.$code'
 import { Route as AuthPathnameRouteImport } from './routes/auth.$pathname'
 import { Route as AppModelsRouteImport } from './routes/app.models'
 import { Route as AppHistoryRouteImport } from './routes/app.history'
@@ -40,6 +41,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppRoute,
+} as any)
+const RCodeRoute = RCodeRouteImport.update({
+  id: '/r/$code',
+  path: '/r/$code',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthPathnameRoute = AuthPathnameRouteImport.update({
   id: '/auth/$pathname',
@@ -87,6 +93,7 @@ export interface FileRoutesByFullPath {
   '/app/history': typeof AppHistoryRoute
   '/app/models': typeof AppModelsRouteWithChildren
   '/auth/$pathname': typeof AuthPathnameRoute
+  '/r/$code': typeof RCodeRoute
   '/app/': typeof AppIndexRoute
   '/app/models/$slug': typeof AppModelsSlugRoute
 }
@@ -99,6 +106,7 @@ export interface FileRoutesByTo {
   '/app/history': typeof AppHistoryRoute
   '/app/models': typeof AppModelsRouteWithChildren
   '/auth/$pathname': typeof AuthPathnameRoute
+  '/r/$code': typeof RCodeRoute
   '/app': typeof AppIndexRoute
   '/app/models/$slug': typeof AppModelsSlugRoute
 }
@@ -113,6 +121,7 @@ export interface FileRoutesById {
   '/app/history': typeof AppHistoryRoute
   '/app/models': typeof AppModelsRouteWithChildren
   '/auth/$pathname': typeof AuthPathnameRoute
+  '/r/$code': typeof RCodeRoute
   '/app/': typeof AppIndexRoute
   '/app/models/$slug': typeof AppModelsSlugRoute
 }
@@ -128,6 +137,7 @@ export interface FileRouteTypes {
     | '/app/history'
     | '/app/models'
     | '/auth/$pathname'
+    | '/r/$code'
     | '/app/'
     | '/app/models/$slug'
   fileRoutesByTo: FileRoutesByTo
@@ -140,6 +150,7 @@ export interface FileRouteTypes {
     | '/app/history'
     | '/app/models'
     | '/auth/$pathname'
+    | '/r/$code'
     | '/app'
     | '/app/models/$slug'
   id:
@@ -153,6 +164,7 @@ export interface FileRouteTypes {
     | '/app/history'
     | '/app/models'
     | '/auth/$pathname'
+    | '/r/$code'
     | '/app/'
     | '/app/models/$slug'
   fileRoutesById: FileRoutesById
@@ -163,6 +175,7 @@ export interface RootRouteChildren {
   AppPreviewRoute: typeof AppPreviewRoute
   AccountPathnameRoute: typeof AccountPathnameRoute
   AuthPathnameRoute: typeof AuthPathnameRoute
+  RCodeRoute: typeof RCodeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -194,6 +207,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/'
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/r/$code': {
+      id: '/r/$code'
+      path: '/r/$code'
+      fullPath: '/r/$code'
+      preLoaderRoute: typeof RCodeRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/auth/$pathname': {
       id: '/auth/$pathname'
@@ -283,6 +303,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppPreviewRoute: AppPreviewRoute,
   AccountPathnameRoute: AccountPathnameRoute,
   AuthPathnameRoute: AuthPathnameRoute,
+  RCodeRoute: RCodeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

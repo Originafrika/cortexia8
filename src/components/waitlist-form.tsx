@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, Check, Copy, Users, AlertTriangle } from "lucide-react";
 import { useCountUp } from "@/lib/use-count-up";
@@ -24,7 +24,13 @@ export function WaitlistForm() {
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [rank, setRank] = useState(0);
   const [referralCode, setReferralCode] = useState("");
+  const [referredBy, setReferredBy] = useState<string | undefined>(undefined);
   const [errorMsg, setErrorMsg] = useState("");
+
+  useEffect(() => {
+    const ref = new URLSearchParams(window.location.search).get("ref") || undefined;
+    if (ref) setReferredBy(ref);
+  }, []);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -32,7 +38,7 @@ export function WaitlistForm() {
     setStatus("loading");
     setErrorMsg("");
     try {
-      const result = await waitlistSignup({ data: { email, profession } });
+      const result = await waitlistSignup({ data: { email, profession, referred_by: referredBy } });
       setReferralCode(result.referral_code);
       setRank(result.id);
       setStatus("done");
@@ -153,7 +159,8 @@ function ConfirmationCard({
   const displayRank = useCountUp(rank, 800);
   const [copied, setCopied] = useState(false);
   const invitedCount = 0;
-  const link = `cortexia.ai/r/${referralCode}`;
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://cortexia.ai";
+  const link = `${origin}/r/${referralCode}`;
   const referredPct = 12;
 
   return (

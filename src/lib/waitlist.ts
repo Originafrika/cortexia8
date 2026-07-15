@@ -54,3 +54,15 @@ export const getRank = createServerFn({ method: "GET" })
     `;
     return result.length > 0 ? Number(result[0].rank) : null;
   });
+
+export const lookupReferralCode = createServerFn({ method: "GET" })
+  .validator((d: { code: string }) => {
+    if (!d.code) throw new Error("Code invalide");
+    return d;
+  })
+  .handler(async ({ data }) => {
+    const result = await sql`
+      SELECT email FROM waitlist WHERE referral_code = ${data.code}
+    `;
+    return result.length > 0 ? (result[0].email as string) : null;
+  });
