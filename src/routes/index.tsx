@@ -9,6 +9,8 @@ import { ModelsMarquee } from "@/components/models-marquee";
 import { ModelsWall, WallPreview } from "@/components/models-wall";
 import { useCountUp } from "@/lib/use-count-up";
 import { useT } from "@/lib/i18n";
+import { getWaitlistCount } from "@/lib/waitlist";
+import { useQuery } from "@tanstack/react-query";
 import { LAUNCH_DATE } from "@/lib/launch";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -314,7 +316,14 @@ function ComparisonSection() {
 
 function SocialProofSection() {
   const t = useT();
+  const { data: realCount } = useQuery({
+    queryKey: ["waitlist-count"],
+    queryFn: () => getWaitlistCount(),
+  });
   const [count, setCount] = useState(4218);
+  useEffect(() => {
+    if (realCount && realCount > 0) setCount(realCount);
+  }, [realCount]);
   useEffect(() => {
     const id = setInterval(() => setCount((v) => v + Math.floor(Math.random() * 3)), 8000);
     return () => clearInterval(id);
