@@ -64,6 +64,9 @@ export function WaitlistForm() {
             <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
               {t("waitlist.title")}
             </div>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {t("waitlist.subtitle")}
+            </p>
 
             <div className="mt-4">
               <div className="text-xs text-muted-foreground mb-2">{t("waitlist.i_create")}</div>
@@ -235,9 +238,7 @@ function ConfirmationCard({
           </button>
         </div>
         <p className="mt-3 text-xs text-foreground/85 leading-relaxed">
-          Chaque ami inscrit via ton lien te fait gagner{" "}
-          <span className="text-amber-soft font-medium">3 places</span> et{" "}
-          <span className="text-amber-soft font-medium">2 $ de crédits offerts</span> au lancement.
+          {t("waitlist.referral_copy")}
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           {["X", "WhatsApp", "Telegram", "LinkedIn"].map((n) => (

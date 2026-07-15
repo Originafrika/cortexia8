@@ -7,7 +7,6 @@ import { WaitlistForm } from "@/components/waitlist-form";
 import { CreditSimulator } from "@/components/credit-simulator";
 import { ModelsMarquee } from "@/components/models-marquee";
 import { ModelsWall, WallPreview } from "@/components/models-wall";
-import { PriceDisplay } from "@/components/price-display";
 import { useCountUp } from "@/lib/use-count-up";
 import { useT } from "@/lib/i18n";
 import { LAUNCH_DATE } from "@/lib/launch";
@@ -37,9 +36,10 @@ function WaitlistLanding() {
 
       <Hero />
       <WallPreviewSection />
+      <AgentSection />
       <SimulatorSection />
+      <AccessSection />
       <WallSection />
-      <ModelsSection />
       <ComparisonSection />
       <SocialProofSection />
       <FaqSection />
@@ -84,14 +84,15 @@ function Hero() {
 
           <LangFade>
             <h1 className="mt-6 font-display text-[clamp(2.5rem,7vw,5.5rem)] leading-[0.98] tracking-[-0.035em]">
-              {t("hero.title.a")}
+              {t("hero.title")}
               <br />
-              <span className="italic text-amber-soft">{t("hero.title.b")}</span>
+              <span className="italic text-amber-soft">{t("hero.punch")}</span>
             </h1>
             <p className="mt-6 max-w-xl text-lg text-foreground/80 leading-relaxed">
               {t("hero.subtitle")}
             </p>
           </LangFade>
+          <p className="mt-4 text-xs text-muted-foreground">{t("hero.micro_cta")}</p>
 
           <motion.div
             initial={{ opacity: 0, y: 12 }}
@@ -146,6 +147,53 @@ function WallPreviewSection() {
         </div>
       </div>
       <WallPreview />
+    </section>
+  );
+}
+
+function AgentSection() {
+  const t = useT();
+  return (
+    <section className="mx-auto max-w-7xl px-5 sm:px-8 py-16 sm:py-24">
+      <div className="max-w-3xl">
+        <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+          {t("agent.eyebrow")}
+        </div>
+        <h2 className="mt-3 font-display text-4xl sm:text-5xl tracking-[-0.03em]">
+          {t("agent.title.a")}
+          <br />
+          <span className="text-amber-soft italic">{t("agent.title.b")}</span>
+        </h2>
+        <p className="mt-4 text-foreground/80 leading-relaxed max-w-2xl">
+          {t("agent.body")}
+        </p>
+      </div>
+      <div className="mt-8 grid gap-3 sm:grid-cols-3">
+        {["agent.point.a", "agent.point.b", "agent.point.c"].map((k) => (
+          <div key={k} className="rounded-xl border border-border bg-surface-1/40 p-4 text-sm text-foreground/85">
+            {t(k)}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function AccessSection() {
+  const t = useT();
+  return (
+    <section className="border-y border-border bg-surface-0/40 py-16 sm:py-24">
+      <div className="mx-auto max-w-7xl px-5 sm:px-8 text-center">
+        <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+          {t("access.eyebrow")}
+        </div>
+        <h2 className="mt-3 font-display text-3xl sm:text-4xl tracking-[-0.03em]">
+          {t("access.title")}
+        </h2>
+        <p className="mt-4 mx-auto max-w-xl text-foreground/80 leading-relaxed">
+          {t("access.body")}
+        </p>
+      </div>
     </section>
   );
 }
@@ -209,120 +257,61 @@ function ModelsSection() {
 function ComparisonSection() {
   const t = useT();
   return (
-    <section className="mx-auto max-w-7xl px-5 sm:px-8 py-16 sm:py-24">
+    <section className="mx-auto max-w-5xl px-5 sm:px-8 py-16 sm:py-24">
       <div className="max-w-2xl mb-10">
         <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
           {t("compare.eyebrow")}
         </div>
-        <h2 className="mt-3 font-display text-4xl sm:text-5xl tracking-[-0.03em]">
-          {t("compare.title.a")}
-          <br /> {t("compare.title.b")}
+        <h2 className="mt-3 font-display text-3xl sm:text-4xl tracking-[-0.03em]">
+          {t("compare.title")}
         </h2>
+        <p className="mt-2 text-muted-foreground">{t("compare.subtitle")}</p>
       </div>
-      <div className="grid gap-6 md:grid-cols-2">
-        <PlanCard
-          kind="old"
-          title={t("compare.old.title")}
-          subtitle={t("compare.old.subtitle")}
-          items={[
-            { label: "Higgsfield Pro", usd: 39 },
-            { label: "Midjourney Standard", usd: 30 },
-            { label: "ElevenLabs Starter", usd: 22 },
-          ]}
-          note={t("compare.old.note")}
-        />
-        <PlanCard
-          kind="cortexia"
-          title={t("compare.new.title")}
-          subtitle={t("compare.new.subtitle")}
-          items={[
-            { label: "30 s de vidéo Kling 3 Turbo 1080p", usd: 30 * 0.1418 },
-            { label: "40 images Seedream Pro 1K", usd: 40 * 0.0441 },
-            { label: "6 000 caractères ElevenLabs V3", usd: 6 * 0.0882 },
-          ]}
-          note={t("compare.new.note")}
-        />
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="rounded-3xl border border-border bg-surface-0/40 p-6 sm:p-8">
+          <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground/70">
+            {t("compare.old.subtitle")}
+          </div>
+          <h3 className="mt-2 font-display text-2xl text-foreground/70 tracking-[-0.02em]">
+            {t("compare.old.title")}
+          </h3>
+          <ul className="mt-6 space-y-3 text-sm text-muted-foreground">
+            <li className="flex items-start gap-2">✕ {t("compare.old.row1")}</li>
+            <li className="flex items-start gap-2">✕ {t("compare.old.row2")}</li>
+            <li className="flex items-start gap-2">✕ {t("compare.old.row3")}</li>
+            <li className="flex items-start gap-2">✕ {t("compare.old.row4")}</li>
+          </ul>
+        </div>
+
+        <div className="surface-gradient-border rounded-3xl bg-surface-1/70 p-6 sm:p-8 border-transparent">
+          <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-soft">
+            {t("compare.new.subtitle")}
+          </div>
+          <h3 className="mt-2 font-display text-2xl tracking-[-0.02em]">
+            {t("compare.new.title")}
+          </h3>
+          <ul className="mt-6 space-y-3 text-sm text-foreground/85">
+            <li className="flex items-start gap-2">
+              <span className="text-emerald mt-0.5">✓</span> {t("compare.new.row1")}
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-emerald mt-0.5">✓</span> {t("compare.new.row2")}
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-emerald mt-0.5">✓</span> {t("compare.new.row3")}
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-emerald mt-0.5">✓</span> {t("compare.new.row4")}
+            </li>
+          </ul>
+        </div>
       </div>
     </section>
   );
 }
 
-function PlanCard({
-  kind,
-  title,
-  subtitle,
-  items,
-  note,
-}: {
-  kind: "old" | "cortexia";
-  title: string;
-  subtitle: string;
-  items: { label: string; usd: number }[];
-  note: string;
-}) {
-  const t = useT();
-  const total = items.reduce((s, i) => s + i.usd, 0);
-  return (
-    <div
-      className={
-        "rounded-3xl p-7 sm:p-8 border transition-all " +
-        (kind === "cortexia"
-          ? "surface-gradient-border bg-surface-1/70 border-transparent shadow-[0_30px_80px_-30px_oklch(0.78_0.16_70_/_0.25)]"
-          : "border-border bg-surface-0/40 text-muted-foreground")
-      }
-    >
-      <div
-        className={
-          "font-mono text-[10px] uppercase tracking-[0.22em] " +
-          (kind === "cortexia" ? "text-amber-soft" : "text-muted-foreground/70")
-        }
-      >
-        {subtitle}
-      </div>
-      <h3
-        className={
-          "mt-2 font-display text-3xl tracking-[-0.02em] " +
-          (kind === "cortexia" ? "text-foreground" : "text-foreground/70")
-        }
-      >
-        {title}
-      </h3>
-      <ul className="mt-6 space-y-3">
-        {items.map((i) => (
-          <li key={i.label} className="flex items-baseline justify-between gap-4 text-sm">
-            <span className={kind === "cortexia" ? "text-foreground/85" : ""}>{i.label}</span>
-            <PriceDisplay
-              usd={i.usd}
-              className={
-                "text-sm " + (kind === "cortexia" ? "text-foreground" : "line-through decoration-1")
-              }
-            />
-          </li>
-        ))}
-      </ul>
-      <div className="mt-6 pt-6 border-t border-border flex items-baseline justify-between">
-        <span className="text-xs uppercase tracking-wider font-mono">{t("compare.total")}</span>
-        <PriceDisplay
-          usd={total}
-          className={
-            "font-display text-3xl tracking-[-0.02em] " +
-            (kind === "cortexia"
-              ? "text-amber-soft"
-              : "line-through decoration-1 text-muted-foreground")
-          }
-        />
-      </div>
-      <p
-        className={
-          "mt-4 text-xs " +
-          (kind === "cortexia" ? "text-foreground/70" : "text-muted-foreground/70")
-        }
-      >
-        {note}
-      </p>
-    </div>
-  );
-}
+
 
 function SocialProofSection() {
   const t = useT();
@@ -401,27 +390,13 @@ function Testimonial({
   );
 }
 
-const FAQS = [
-  {
-    q: "Vraiment sans abonnement ?",
-    a: "Sans. Tu recharges le montant que tu veux, tu génères, tu repars. Reviens dans 3 mois sans avoir rien perdu.",
-  },
-  {
-    q: "Comment sont fixés les prix ?",
-    a: "Un prix unique par modèle, visible avant chaque génération. Pas de palier caché, pas d'engagement, pas de minimum mensuel.",
-  },
-  {
-    q: "Je peux payer en Mobile Money ?",
-    a: "Oui — Orange Money, MTN, Wave. Aussi carte, crypto (USDT / USDC), Alipay. Le paiement local n'est pas une option de plus, c'est le cœur du produit.",
-  },
-  {
-    q: "Quels modèles au lancement ?",
-    a: "Toute la famille Kling 3, Seedance 2, Nano Banana 2, GPT-5, Claude Sonnet/Opus, Gemini 3, ElevenLabs V3, et une douzaine d'autres. Nouveaux modèles ajoutés dès leur sortie.",
-  },
-  {
-    q: "Vous avez une API ?",
-    a: "Oui, dès le lancement. Endpoints REST, clés self-service, même moteur de facturation à l'usage, sans minimum mensuel.",
-  },
+const FAQ_KEYS = [
+  { q: "faq.q1", a: "faq.a1" },
+  { q: "faq.q2", a: "faq.a2" },
+  { q: "faq.q3", a: "faq.a3" },
+  { q: "faq.q4", a: "faq.a4" },
+  { q: "faq.q5", a: "faq.a5" },
+  { q: "faq.q6", a: "faq.a6" },
 ];
 
 function FaqSection() {
@@ -438,7 +413,7 @@ function FaqSection() {
         </h2>
       </div>
       <div className="divide-y divide-border border-y border-border">
-        {FAQS.map((f, i) => {
+        {FAQ_KEYS.map((f, i) => {
           const isOpen = open === i;
           return (
             <div key={f.q}>
@@ -446,7 +421,7 @@ function FaqSection() {
                 onClick={() => setOpen(isOpen ? null : i)}
                 className="flex w-full items-center justify-between gap-4 py-5 text-left"
               >
-                <span className="font-display text-lg sm:text-xl tracking-[-0.01em]">{f.q}</span>
+                <span className="font-display text-lg sm:text-xl tracking-[-0.01em]">{t(f.q)}</span>
                 <ChevronDown
                   className={
                     "size-5 text-muted-foreground transition-transform " +
@@ -460,7 +435,7 @@ function FaqSection() {
                 transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                 className="overflow-hidden"
               >
-                <p className="pb-5 text-foreground/80 leading-relaxed pr-8">{f.a}</p>
+                <p className="pb-5 text-foreground/80 leading-relaxed pr-8">{t(f.a)}</p>
               </motion.div>
             </div>
           );
