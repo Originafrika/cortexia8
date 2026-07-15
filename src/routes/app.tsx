@@ -1,11 +1,9 @@
-import { createFileRoute, Link, Navigate, Outlet, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { AmbientBackground } from "@/components/ambient-background";
 import { LocalePicker } from "@/components/locale-picker";
 import { PriceDisplay } from "@/components/price-display";
 import { OnboardingOverlay, useOnboarding } from "@/components/onboarding-overlay";
 import { SignedIn, RedirectToSignIn } from "@neondatabase/auth-ui";
-import { authClient } from "@/auth";
-import { isWaitlist } from "@/lib/launch";
 import {
   MessageSquare,
   LayoutGrid,
@@ -26,27 +24,21 @@ export const Route = createFileRoute("/app")({
 });
 
 function AppLayout() {
-  const { data: session, isPending } = authClient.useSession();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const CREDIT_USD = 24.63;
   const t = useT();
   const { open, setOpen } = useOnboarding();
 
-  if (isPending) return null;
-
   return (
     <>
       <SignedIn>
-        {isWaitlist() && session?.user?.role !== "admin" ? (
-          <Navigate to="/" />
-        ) : (
-          <AppShell path={path} CREDIT_USD={CREDIT_USD} t={t} open={open} setOpen={setOpen} />
-        )}
+        <AppShell path={path} CREDIT_USD={CREDIT_USD} t={t} open={open} setOpen={setOpen} />
       </SignedIn>
       <RedirectToSignIn />
     </>
   );
 }
+
 
 function AppShell({
   path,
