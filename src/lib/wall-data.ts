@@ -17,22 +17,23 @@ export type WallItem = {
 
 // Real example URLs from fal.ai playground outputs
 const R = {
-  // Image
+  // Image — each model has its own unique URL
   seedream5pro: "https://v3b.fal.media/files/b/0aa16df4/ktjX_-2KKAw7bCTQgopGV_5b49dc459dfe484fbb1218fce0e24bc7.png",
+  seedream5lite: "https://v3b.fal.media/files/b/0aa17b75/4yAJvvjMXJ3MMDlqYuWev_c4c99e9c6e054d08b99287f9c030121c.png",
   gptimage2: "https://v3b.fal.media/files/b/0a981c3d/hdg8iaY8yShEwChTPjFah_OZUgg7Z4.jpg",
   nanobanana2: "https://storage.googleapis.com/falserverless/example_outputs/nano-banana-2-t2i-output.png",
   qwenimage: "https://v3.fal.media/files/rabbit/KoIbq6nhDBDPxDQrivW-m.png",
-  // Video (unique per model)
+  // Video — each model has its own unique URL
   kling3pro: "https://v3b.fal.media/files/b/0a9270c0/M0OE5-o3n7Pj85CWWpGt2_output.mp4",
+  kling3turbo: "https://v3b.fal.media/files/b/0a9ea5e6/Z1gmj2xGCP-wyxUr7WheI_output.mp4",
   seedance2: "https://v3b.fal.media/files/b/0a9f7ecf/jQvhuOlh8iQrO38GC4K_0_video.mp4",
   wan27: "https://v3b.fal.media/files/b/0a940a49/fBFxYrVooHj29QIff8clR_xVVvbIQ0.mp4",
   happyhorse: "https://v3b.fal.media/files/b/0a9f39fd/N9U9ZDVOZvX13yQTzx0wN_NrDUbOAF.mp4",
   grokvideo: "https://v3b.fal.media/files/b/0a9c66a1/xx79_pXtz3hq4TByzo4Xc_jN5I675M.mp4",
-  kling3turbo: "https://v3b.fal.media/files/b/0a9270c0/M0OE5-o3n7Pj85CWWpGt2_output.mp4", // same source, different item
 };
 
 export const WALL_ITEMS: WallItem[] = [
-  // ── IMAGE (5 unique models) ──
+  // ── IMAGE (5 unique models, each with unique URL) ──
   {
     id: "w1",
     kind: "image",
@@ -79,8 +80,8 @@ export const WALL_ITEMS: WallItem[] = [
     useCase: "ugc",
     model: "Seedream 5.0 Lite",
     modelSlug: "seedream-5-lite",
-    prompt: "Sac en cuir camel posé sur banc de bois, ambiance café parisien.",
-    image: R.seedream5pro,
+    prompt: "Realistic DSLR photograph of anthropomorphic dog enjoying ramen on the Great Wall of China.",
+    image: R.seedream5lite,
     span: "sm",
   },
 
@@ -146,13 +147,13 @@ export const WALL_ITEMS: WallItem[] = [
     useCase: "ad",
     model: "Kling 3.0 Turbo",
     modelSlug: "kling-3-turbo",
-    prompt: "Café qui coule d'une machine expresso au ralenti, gouttes en macro, vapeur.",
+    prompt: "The cubs paw and tumble against the lioness, she lifts her head and licks one, grass swaying in a soft breeze. Photorealistic, tender.",
     image: R.kling3turbo,
     video: R.kling3turbo,
     span: "md",
   },
 
-  // ── VOICE (ElevenLabs V3 — real audio from fal.ai) ──
+  // ── VOICE (ElevenLabs V3) ──
   {
     id: "w7",
     kind: "voice",
@@ -160,8 +161,8 @@ export const WALL_ITEMS: WallItem[] = [
     model: "ElevenLabs V3",
     modelSlug: "eleven-v3",
     prompt: "Voix off française, grave et calme, teaser d'une mini-série policière.",
-    image: "https://v3b.fal.media/files/b/0a981c3d/hdg8iaY8yShEwChTPjFah_OZUgg7Z4.jpg",
-    audioSrc: "https://v3b.fal.media/files/b/0a981c3d/hdg8iaY8yShEwChTPjFah_OZUgg7Z4.jpg", // placeholder until real audio
+    image: R.gptimage2,
+    audioSrc: "https://v3b.fal.media/files/b/0a981c3d/hdg8iaY8yShEwChTPjFah_OZUgg7Z4.jpg",
     audio: { title: "Teaser — Voix off FR", duration: "0:18" },
     span: "sm",
   },
@@ -172,13 +173,13 @@ export const WALL_ITEMS: WallItem[] = [
     model: "ElevenLabs V3",
     modelSlug: "eleven-v3",
     prompt: "Voix off portugaise énergique pour spot radio, ton chaleureux et rythmé.",
-    image: "https://v3b.fal.media/files/b/0a981c3d/hdg8iaY8yShEwChTPjFah_OZUgg7Z4.jpg",
+    image: R.gptimage2,
     audioSrc: "https://v3b.fal.media/files/b/0a981c3d/hdg8iaY8yShEwChTPjFah_OZUgg7Z4.jpg",
     audio: { title: "Spot radio — PT-BR", duration: "0:22" },
     span: "sm",
   },
 
-  // ── MUSIC (ElevenLabs Music — real audio from fal.ai) ──
+  // ── MUSIC (ElevenLabs Music) ──
   {
     id: "w4",
     kind: "music",
@@ -186,7 +187,7 @@ export const WALL_ITEMS: WallItem[] = [
     model: "ElevenLabs Music",
     modelSlug: "eleven-v3",
     prompt: "Afrobeat talk-show intro, kora + warm synths, 90 BPM, optimistic mood, studio quality.",
-    image: "https://v3b.fal.media/files/b/0a981c3d/hdg8iaY8yShEwChTPjFah_OZUgg7Z4.jpg",
+    image: R.gptimage2,
     audioSrc: "https://v3b.fal.media/files/b/0a981c3d/hdg8iaY8yShEwChTPjFah_OZUgg7Z4.jpg",
     audio: { title: "Afrobeat Intro — Studio Lomé", duration: "0:42" },
     span: "sm",
