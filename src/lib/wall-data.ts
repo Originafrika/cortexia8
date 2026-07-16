@@ -168,7 +168,7 @@ export const WALL_ITEMS: WallItem[] = [
     model: "GPT Image 2",
     modelSlug: "gpt-image-2",
     prompt:
-      "Children's book illustration of a veterinarian using a stethoscope to listen to a baby otter's heartbeat.",
+      "The portraits are taken outdoors, indoors, in specific, intimate, suburban settings. Maintain photographic style and realism, shots taken using view cameras with colour film and medium-format cameras, pushing the strangeness of subjects and locations further. Kitsch and middle classes, yet with elements that could not exist in reality, either aesthetically or physically.",
     image: R.gptimage2_a,
     span: "lg",
   },
