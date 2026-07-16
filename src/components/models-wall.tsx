@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "@tanstack/react-router";
 import { Play, Music2, Mic, ImageIcon, X, ArrowRight } from "lucide-react";
@@ -28,7 +28,6 @@ export function ModelsWall() {
     );
   }, [kind, useCase]);
 
-  // Illusion d'infini : batch pattern (répète le pool si l'utilisateur charge encore).
   const BATCH = 12;
   const visible = useMemo(() => {
     const total = page * BATCH;
@@ -44,38 +43,15 @@ export function ModelsWall() {
   return (
     <div>
       <div className="flex flex-wrap items-center gap-2 mb-6">
-        <FilterPill
-          active={kind === "all"}
-          onClick={() => setKind("all")}
-          label={t("wall.filters.all")}
-        />
+        <FilterPill active={kind === "all"} onClick={() => setKind("all")} label={t("wall.filters.all")} />
         {(Object.keys(KIND_META) as WallKind[]).map((k) => {
           const Icon = KIND_META[k].icon;
-          return (
-            <FilterPill
-              key={k}
-              active={kind === k}
-              onClick={() => setKind(k)}
-              icon={<Icon className="size-3" />}
-              label={t(KIND_META[k].labelKey)}
-            />
-          );
+          return <FilterPill key={k} active={kind === k} onClick={() => setKind(k)} icon={<Icon className="size-3" />} label={t(KIND_META[k].labelKey)} />;
         })}
         <span className="mx-2 h-4 w-px bg-border hidden sm:block" />
-        <FilterPill
-          size="sm"
-          active={useCase === "all"}
-          onClick={() => setUseCase("all")}
-          label={t("wall.usecase.all")}
-        />
+        <FilterPill size="sm" active={useCase === "all"} onClick={() => setUseCase("all")} label={t("wall.usecase.all")} />
         {USE_CASES.map((u) => (
-          <FilterPill
-            key={u}
-            size="sm"
-            active={useCase === u}
-            onClick={() => setUseCase(u)}
-            label={t(`wall.usecase.${u}`)}
-          />
+          <FilterPill key={u} size="sm" active={useCase === u} onClick={() => setUseCase(u)} label={t(`wall.usecase.${u}`)} />
         ))}
       </div>
 
@@ -86,12 +62,8 @@ export function ModelsWall() {
       </div>
 
       <div className="mt-10 text-center">
-        <button
-          onClick={() => setPage((p) => p + 1)}
-          className="inline-flex items-center gap-2 rounded-full border border-border bg-surface-1/60 px-5 py-2.5 text-sm hover:border-amber/40 transition"
-        >
-          {t("wall.load_more")}
-          <ArrowRight className="size-4" />
+        <button onClick={() => setPage((p) => p + 1)} className="inline-flex items-center gap-2 rounded-full border border-border bg-surface-1/60 px-5 py-2.5 text-sm hover:border-amber/40 transition">
+          {t("wall.load_more")}<ArrowRight className="size-4" />
         </button>
       </div>
 
@@ -100,81 +72,84 @@ export function ModelsWall() {
   );
 }
 
-function FilterPill({
-  active,
-  onClick,
-  label,
-  icon,
-  size = "md",
-}: {
-  active: boolean;
-  onClick: () => void;
-  label: string;
-  icon?: React.ReactNode;
-  size?: "sm" | "md";
-}) {
+function FilterPill({ active, onClick, label, icon, size = "md" }: { active: boolean; onClick: () => void; label: string; icon?: React.ReactNode; size?: "sm" | "md" }) {
   return (
-    <button
-      onClick={onClick}
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border font-medium transition-all",
-        size === "sm" ? "px-3 py-1 text-[11px]" : "px-3.5 py-1.5 text-xs",
-        active
-          ? "border-amber/60 bg-amber/15 text-amber-soft"
-          : "border-border bg-surface-2/50 text-muted-foreground hover:border-border-strong hover:text-foreground/90",
-      )}
-    >
-      {icon}
-      {label}
+    <button onClick={onClick} className={cn("inline-flex items-center gap-1.5 rounded-full border font-medium transition-all", size === "sm" ? "px-3 py-1 text-[11px]" : "px-3.5 py-1.5 text-xs", active ? "border-amber/60 bg-amber/15 text-amber-soft" : "border-border bg-surface-2/50 text-muted-foreground hover:border-border-strong hover:text-foreground/90")}>
+      {icon}{label}
     </button>
   );
 }
 
 function WallCard({ item, index, onOpen }: { item: WallItem; index: number; onOpen: () => void }) {
   const [hover, setHover] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
   const heights = { sm: "h-56 sm:h-60", md: "h-72 sm:h-80", lg: "h-96 sm:h-[26rem]" } as const;
   const KindIcon = KIND_META[item.kind].icon;
+
+  // Auto-play video on hover
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (hover) {
+      v.play().catch(() => {});
+    } else {
+      v.pause();
+      v.currentTime = 0;
+    }
+  }, [hover]);
+
+  // Auto-play audio on hover
+  useEffect(() => {
+    const a = audioRef.current;
+    if (!a) return;
+    if (hover) {
+      a.play().catch(() => {});
+    } else {
+      a.pause();
+      a.currentTime = 0;
+    }
+  }, [hover]);
 
   return (
     <motion.button
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
-      transition={{
-        duration: 0.5,
-        delay: Math.min(0.5, (index % 12) * 0.04),
-        ease: [0.22, 1, 0.36, 1],
-      }}
+      transition={{ duration: 0.5, delay: Math.min(0.5, (index % 12) * 0.04), ease: [0.22, 1, 0.36, 1] }}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       onClick={onOpen}
-      className={cn(
-        "group mb-4 block w-full break-inside-avoid overflow-hidden rounded-2xl border border-border bg-surface-1/40 text-left relative",
-        heights[item.span ?? "md"],
-      )}
+      className={cn("group mb-4 block w-full break-inside-avoid overflow-hidden rounded-2xl border border-border bg-surface-1/40 text-left relative", heights[item.span ?? "md"])}
     >
-      {/* poster — image items use <img>, video items use <video poster> for thumbnail */}
-      {item.kind === "video" && item.video ? (
+      {/* IMAGE: <img> */}
+      {item.kind === "image" && (
+        <img src={item.image} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]" />
+      )}
+
+      {/* VIDEO: <video> with poster and auto-play on hover */}
+      {item.kind === "video" && item.video && (
         <video
-          poster={item.image || `${item.video}#t=0.1`}
+          ref={videoRef}
+          src={item.video}
+          poster={item.video}
           muted
           loop
           playsInline
-          autoPlay={hover}
-          className={cn(
-            "absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]",
-            hover ? "opacity-100" : "opacity-100",
-          )}
-        />
-      ) : (
-        <img
-          src={item.image}
-          alt=""
-          loading="lazy"
+          preload="metadata"
           className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
         />
       )}
-      {/* video overlay play icon */}
+
+      {/* MUSIC / VOICE: image + hidden audio */}
+      {(item.kind === "music" || item.kind === "voice") && (
+        <>
+          <img src={item.image} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]" />
+          {item.audioSrc && <audio ref={audioRef} src={item.audioSrc} preload="metadata" />}
+        </>
+      )}
+
+      {/* play icon overlay for video */}
       {item.kind === "video" && !hover && (
         <div className="absolute inset-0 grid place-items-center bg-black/20">
           <div className="grid place-items-center size-12 rounded-full bg-white/20 backdrop-blur-sm">
@@ -182,7 +157,8 @@ function WallCard({ item, index, onOpen }: { item: WallItem; index: number; onOp
           </div>
         </div>
       )}
-      {/* audio card */}
+
+      {/* audio waveform card */}
       {(item.kind === "music" || item.kind === "voice") && item.audio && (
         <div className="absolute inset-x-3 bottom-3 rounded-xl bg-black/50 backdrop-blur px-3 py-2.5 border border-white/10">
           <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-white/70">
@@ -192,16 +168,14 @@ function WallCard({ item, index, onOpen }: { item: WallItem; index: number; onOp
           <div className="mt-1 text-xs text-white truncate">{item.audio.title}</div>
         </div>
       )}
+
       {/* gradient + kind badge */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/20 pointer-events-none" />
       <div className="absolute top-3 left-3 flex items-center gap-1.5 rounded-full bg-black/50 backdrop-blur px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.2em] text-white/90 border border-white/10">
-        <KindIcon className="size-3" />
-        {item.kind}
+        <KindIcon className="size-3" />{item.kind}
       </div>
       <div className="absolute bottom-3 left-3 right-3 pointer-events-none">
-        <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/70">
-          {item.model}
-        </div>
+        <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/70">{item.model}</div>
       </div>
     </motion.button>
   );
@@ -211,14 +185,7 @@ function Waveform({ playing }: { playing: boolean }) {
   return (
     <span className="inline-flex items-end gap-[2px] h-3">
       {[0.4, 0.7, 1, 0.6, 0.9, 0.5, 0.8].map((h, i) => (
-        <span
-          key={i}
-          className="w-[2px] bg-amber-soft rounded-full origin-bottom"
-          style={{
-            height: `${h * 100}%`,
-            animation: playing ? `wave 900ms ease-in-out ${i * 90}ms infinite` : undefined,
-          }}
-        />
+        <span key={i} className="w-[2px] bg-amber-soft rounded-full origin-bottom" style={{ height: `${h * 100}%`, animation: playing ? `wave 900ms ease-in-out ${i * 90}ms infinite` : undefined }} />
       ))}
       <style>{`@keyframes wave { 0%,100% { transform: scaleY(0.4); } 50% { transform: scaleY(1); } }`}</style>
     </span>
@@ -230,43 +197,21 @@ function WallModal({ item, onClose }: { item: WallItem | null; onClose: () => vo
   return (
     <AnimatePresence>
       {item && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 grid place-items-center bg-black/80 backdrop-blur-sm p-4"
-          onClick={onClose}
-        >
-          <motion.div
-            initial={{ opacity: 0, y: 12, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 8, scale: 0.98 }}
-            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-4xl max-h-[90vh] overflow-auto rounded-3xl border border-border bg-surface-1 shadow-2xl"
-          >
-            <button
-              onClick={onClose}
-              className="absolute top-3 right-3 z-10 grid place-items-center size-9 rounded-full bg-black/60 backdrop-blur text-white hover:bg-black/80 transition"
-              aria-label="Fermer"
-            >
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 grid place-items-center bg-black/80 backdrop-blur-sm p-4" onClick={onClose}>
+          <motion.div initial={{ opacity: 0, y: 12, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 8, scale: 0.98 }} transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }} onClick={(e) => e.stopPropagation()} className="relative w-full max-w-4xl max-h-[90vh] overflow-auto rounded-3xl border border-border bg-surface-1 shadow-2xl">
+            <button onClick={onClose} className="absolute top-3 right-3 z-10 grid place-items-center size-9 rounded-full bg-black/60 backdrop-blur text-white hover:bg-black/80 transition" aria-label="Fermer">
               <X className="size-4" />
             </button>
             <div className="relative bg-black">
               {item.kind === "video" && item.video ? (
-                <video
-                  src={item.video}
-                  controls
-                  autoPlay
-                  loop
-                  className="w-full max-h-[60vh] object-contain bg-black"
-                />
+                <video src={item.video} controls autoPlay loop className="w-full max-h-[60vh] object-contain bg-black" />
+              ) : item.kind === "music" || item.kind === "voice" ? (
+                <>
+                  <img src={item.image} alt="" className="w-full max-h-[60vh] object-contain bg-black" />
+                  {item.audioSrc && <audio src={item.audioSrc} autoPlay controls className="w-full mt-2" />}
+                </>
               ) : (
-                <img
-                  src={item.image}
-                  alt=""
-                  className="w-full max-h-[60vh] object-contain bg-black"
-                />
+                <img src={item.image} alt="" className="w-full max-h-[60vh] object-contain bg-black" />
               )}
             </div>
             <div className="p-6 sm:p-8">
@@ -278,13 +223,8 @@ function WallModal({ item, onClose }: { item: WallItem | null; onClose: () => vo
               </div>
               <p className="mt-2 text-foreground/90 leading-relaxed">« {item.prompt} »</p>
               <div className="mt-6">
-                <Link
-                  to="/app/models/$slug"
-                  params={{ slug: item.modelSlug }}
-                  className="inline-flex items-center gap-2 rounded-full bg-amber px-5 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-95 transition"
-                >
-                  {t("wall.modal.cta")}
-                  <ArrowRight className="size-4" />
+                <Link to="/app/models/$slug" params={{ slug: item.modelSlug }} className="inline-flex items-center gap-2 rounded-full bg-amber px-5 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-95 transition">
+                  {t("wall.modal.cta")}<ArrowRight className="size-4" />
                 </Link>
               </div>
             </div>
@@ -295,7 +235,6 @@ function WallModal({ item, onClose }: { item: WallItem | null; onClose: () => vo
   );
 }
 
-/** Condensed teaser used above the fold on landings. */
 export function WallPreview() {
   const items = WALL_ITEMS.slice(0, 6);
   return (
@@ -304,23 +243,8 @@ export function WallPreview() {
         {items.map((item, i) => {
           const KindIcon = KIND_META[item.kind].icon;
           return (
-            <motion.div
-              key={item.id}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.05 * i }}
-              className={cn(
-                "relative overflow-hidden rounded-xl border border-border aspect-[3/4]",
-                i === 1 && "sm:row-span-2 sm:aspect-auto",
-                i === 4 && "sm:row-span-2 sm:aspect-auto",
-              )}
-            >
-              <img
-                src={item.image}
-                alt=""
-                className="absolute inset-0 h-full w-full object-cover"
-                loading="lazy"
-              />
+            <motion.div key={item.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.05 * i }} className={cn("relative overflow-hidden rounded-xl border border-border aspect-[3/4]", i === 1 && "sm:row-span-2 sm:aspect-auto", i === 4 && "sm:row-span-2 sm:aspect-auto")}>
+              <img src={item.image} alt="" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
               <div className="absolute top-1.5 left-1.5 grid place-items-center size-5 rounded-full bg-black/60 backdrop-blur border border-white/10">
                 <KindIcon className="size-2.5 text-white" />
