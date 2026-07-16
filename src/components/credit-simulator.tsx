@@ -58,6 +58,11 @@ const ALL_MODELS: SimModel[] = [
   { key: "claude-opus-48", name: "Claude Opus 4.8", category: "text", icon: MessageSquare, unit: "M tokens", unitPriceUSD: 12.6, suffix: "M tokens / mois", max: 20, step: 0.5, defaultValue: 0 },
   { key: "claude-fable-5", name: "Claude Fable 5", category: "text", icon: MessageSquare, unit: "M tokens", unitPriceUSD: 25.2, suffix: "M tokens / mois", max: 20, step: 0.5, defaultValue: 0 },
   { key: "claude-haiku-45", name: "Claude Haiku 4.5", category: "text", icon: MessageSquare, unit: "M tokens", unitPriceUSD: 1.7955, suffix: "M tokens / mois", max: 20, step: 0.5, defaultValue: 0 },
+  { key: "gpt-55", name: "GPT-5.5", category: "text", icon: MessageSquare, unit: "M tokens", unitPriceUSD: 10.584, suffix: "M tokens / mois", max: 20, step: 0.5, defaultValue: 0 },
+  { key: "gpt-54", name: "GPT-5.4", category: "text", icon: MessageSquare, unit: "M tokens", unitPriceUSD: 7.056, suffix: "M tokens / mois", max: 20, step: 0.5, defaultValue: 0 },
+  { key: "gpt-52", name: "GPT-5.2", category: "text", icon: MessageSquare, unit: "M tokens", unitPriceUSD: 4.41, suffix: "M tokens / mois", max: 20, step: 0.5, defaultValue: 0 },
+  { key: "gemini-31-pro", name: "Gemini 3.1 Pro", category: "text", icon: MessageSquare, unit: "M tokens", unitPriceUSD: 4.41, suffix: "M tokens / mois", max: 20, step: 0.5, defaultValue: 0 },
+  { key: "gemini-35-flash", name: "Gemini 3.5 Flash", category: "text", icon: MessageSquare, unit: "M tokens", unitPriceUSD: 3.402, suffix: "M tokens / mois", max: 20, step: 0.5, defaultValue: 0 },
 ];
 
 const CATEGORY_META: Record<string, { label: string; icon: React.ElementType; refSub: { name: string; usd: number } }> = {
