@@ -320,14 +320,7 @@ function SocialProofSection() {
     queryKey: ["waitlist-count"],
     queryFn: () => getWaitlistCount(),
   });
-  const [count, setCount] = useState(4218);
-  useEffect(() => {
-    if (realCount && realCount > 0) setCount(realCount);
-  }, [realCount]);
-  useEffect(() => {
-    const id = setInterval(() => setCount((v) => v + Math.floor(Math.random() * 3)), 8000);
-    return () => clearInterval(id);
-  }, []);
+  const count = realCount ?? 0;
   const displayed = useCountUp(count, 900);
 
   return (
