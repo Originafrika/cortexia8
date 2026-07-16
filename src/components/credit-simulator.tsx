@@ -9,6 +9,8 @@ import {
   MessageSquare,
   AlertTriangle,
   Sparkles,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -66,9 +68,43 @@ const DEFAULT_VALUES: Record<string, number> = Object.fromEntries(
   ALL_MODELS.map((m) => [m.key, m.defaultValue]),
 );
 
+function ModelSlider({ model, value, onChange }: { model: SimModel; value: number; onChange: (v: number) => void }) {
+  const c = useCurrency();
+  const cost = value * model.unitPriceUSD;
+  return (
+    <div>
+      <div className="flex items-baseline justify-between gap-3">
+        <span className="text-sm font-medium text-foreground/90">{model.name}</span>
+        <div className="text-right">
+          <div className="font-mono tabular text-sm text-foreground/90">
+            {model.step < 1 ? value.toFixed(1) : Math.round(value)}
+            <span className="text-muted-foreground ml-1 text-[11px]">{model.suffix}</span>
+          </div>
+          <div className="font-mono tabular text-[11px] text-muted-foreground">
+            {formatMoney(cost, c)}
+          </div>
+        </div>
+      </div>
+      <div className="relative mt-2">
+        <input
+          type="range"
+          min={0}
+          max={model.max}
+          step={model.step}
+          value={value}
+          onChange={(e) => onChange(parseFloat(e.target.value))}
+          className="w-full accent-amber h-1.5 appearance-none rounded-full bg-surface-3 cursor-pointer"
+          aria-label={model.name}
+        />
+      </div>
+    </div>
+  );
+}
+
 export function CreditSimulator({ compact }: { compact?: boolean }) {
   const t = useT();
   const [values, setValues] = useState<Record<string, number>>(DEFAULT_VALUES);
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const c = useCurrency();
 
   const total = useMemo(
@@ -76,7 +112,6 @@ export function CreditSimulator({ compact }: { compact?: boolean }) {
     [values],
   );
 
-  // Group models by category for display
   const categories = useMemo(() => {
     const groups: Record<string, SimModel[]> = {};
     for (const m of ALL_MODELS) {
@@ -86,7 +121,6 @@ export function CreditSimulator({ compact }: { compact?: boolean }) {
     return groups;
   }, []);
 
-  // Reference: sum of all category reference subscriptions
   const referenceMonthly = useMemo(
     () => Object.values(CATEGORY_META).reduce((sum, cat) => sum + cat.refSub.usd, 0),
     [],
@@ -97,6 +131,8 @@ export function CreditSimulator({ compact }: { compact?: boolean }) {
     diff > referenceMonthly * 0.2 ? "save" : diff >= 0 ? "near" : "over";
 
   const hasUsage = Object.values(values).some((v) => v > 0);
+
+  const toggleCat = (cat: string) => setExpanded((p) => ({ ...p, [cat]: !p[cat] }));
 
   return (
     <div
@@ -114,14 +150,25 @@ export function CreditSimulator({ compact }: { compact?: boolean }) {
             <h3 className="mt-1 font-display text-2xl tracking-[-0.02em]">{t("sim.compose")}</h3>
           </div>
         </div>
-        <div className="space-y-8">
+        <div className="space-y-6">
           {Object.entries(categories).map(([catKey, models]) => {
             const meta = CATEGORY_META[catKey];
             if (!meta) return null;
             const catTotal = models.reduce((sum, m) => sum + (values[m.key] || 0) * m.unitPriceUSD, 0);
+            const activeModels = models.filter((m) => (values[m.key] || 0) > 0);
+            const inactiveModels = models.filter((m) => (values[m.key] || 0) === 0);
+            const isExpanded = expanded[catKey] ?? false;
+            const hasInactive = inactiveModels.length > 0;
+
             return (
               <div key={catKey}>
-                <div className="flex items-center gap-2 mb-3">
+                <button
+                  onClick={() => hasInactive && toggleCat(catKey)}
+                  className={cn(
+                    "flex items-center gap-2 w-full mb-3 group",
+                    hasInactive && "cursor-pointer"
+                  )}
+                >
                   <span className="grid place-items-center size-6 rounded-md bg-surface-2 border border-border">
                     <meta.icon className="size-3 text-amber-soft" />
                   </span>
@@ -129,48 +176,44 @@ export function CreditSimulator({ compact }: { compact?: boolean }) {
                     {meta.label}
                   </span>
                   {catTotal > 0 && (
-                    <span className="ml-auto font-mono text-[11px] text-foreground/70 tabular">
+                    <span className="font-mono text-[11px] text-foreground/70 tabular ml-2">
                       {formatMoney(catTotal, c)}
                     </span>
                   )}
-                </div>
+                  <span className="ml-auto text-xs text-muted-foreground/60">
+                    {activeModels.length > 0 && `${activeModels.length} actifs`}
+                  </span>
+                  {hasInactive && (
+                    <ChevronDown
+                      className={cn(
+                        "size-4 text-muted-foreground/60 transition-transform",
+                        isExpanded && "rotate-180"
+                      )}
+                    />
+                  )}
+                </button>
+
                 <div className="space-y-4">
-                  {models.map((m) => {
-                    const val = values[m.key] || 0;
-                    const cost = val * m.unitPriceUSD;
-                    return (
-                      <div key={m.key}>
-                        <div className="flex items-baseline justify-between gap-3">
-                          <label className="flex items-center gap-2 text-sm">
-                            <span className="font-medium text-foreground/90">{m.name}</span>
-                          </label>
-                          <div className="text-right">
-                            <div className="font-mono tabular text-sm text-foreground/90">
-                              {m.step < 1 ? val.toFixed(1) : Math.round(val)}
-                              <span className="text-muted-foreground ml-1 text-[11px]">{m.suffix}</span>
-                            </div>
-                            <div className="font-mono tabular text-[11px] text-muted-foreground">
-                              {formatMoney(cost, c)}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="relative mt-2">
-                          <input
-                            type="range"
-                            min={0}
-                            max={m.max}
-                            step={m.step}
-                            value={val}
-                            onChange={(e) =>
-                              setValues((v) => ({ ...v, [m.key]: parseFloat(e.target.value) }))
-                            }
-                            className="w-full accent-amber h-1.5 appearance-none rounded-full bg-surface-3 cursor-pointer"
-                            aria-label={m.name}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
+                  {/* Active models always shown */}
+                  {activeModels.map((m) => (
+                    <ModelSlider
+                      key={m.key}
+                      model={m}
+                      value={values[m.key] || 0}
+                      onChange={(v) => setValues((prev) => ({ ...prev, [m.key]: v }))}
+                    />
+                  ))}
+
+                  {/* Inactive models shown when expanded */}
+                  {isExpanded &&
+                    inactiveModels.map((m) => (
+                      <ModelSlider
+                        key={m.key}
+                        model={m}
+                        value={values[m.key] || 0}
+                        onChange={(v) => setValues((prev) => ({ ...prev, [m.key]: v }))}
+                      />
+                    ))}
                 </div>
               </div>
             );
