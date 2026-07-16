@@ -233,9 +233,14 @@ export function WallPreview() {
       <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3">
         {items.map((item, i) => {
           const KindIcon = KIND_META[item.kind].icon;
+          const isVideo = item.kind === "video";
           return (
             <motion.div key={item.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.05 * i }} className={cn("relative overflow-hidden rounded-xl border border-border aspect-[3/4]", i === 1 && "sm:row-span-2 sm:aspect-auto", i === 4 && "sm:row-span-2 sm:aspect-auto")}>
-              <img src={item.image} alt="" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+              {isVideo ? (
+                <div className="absolute inset-0 bg-gradient-to-br from-surface-2 to-surface-3" />
+              ) : (
+                <img src={item.image} alt="" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+              )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
               <div className="absolute top-1.5 left-1.5 grid place-items-center size-5 rounded-full bg-black/60 backdrop-blur border border-white/10">
                 <KindIcon className="size-2.5 text-white" />
