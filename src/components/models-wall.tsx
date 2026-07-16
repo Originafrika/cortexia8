@@ -87,15 +87,15 @@ function WallCard({ item, index, onOpen }: { item: WallItem; index: number; onOp
   const heights = { sm: "h-56 sm:h-60", md: "h-72 sm:h-80", lg: "h-96 sm:h-[26rem]" } as const;
   const KindIcon = KIND_META[item.kind].icon;
 
-  // Auto-play video on hover
+  // VIDEO: always autoplay muted in loop. Unmute on hover.
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
     if (hover) {
+      v.muted = false;
       v.play().catch(() => {});
     } else {
-      v.pause();
-      v.currentTime = 0;
+      v.muted = true;
     }
   }, [hover]);
 
@@ -122,32 +122,23 @@ function WallCard({ item, index, onOpen }: { item: WallItem; index: number; onOp
       onClick={onOpen}
       className={cn("group mb-4 block w-full break-inside-avoid overflow-hidden rounded-2xl border border-border bg-surface-1/40 text-left relative", heights[item.span ?? "md"])}
     >
-      {/* IMAGE: <img> */}
+      {/* IMAGE */}
       {item.kind === "image" && (
         <img src={item.image} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]" />
       )}
 
-      {/* VIDEO: gradient background + play icon, video loads on hover */}
+      {/* VIDEO: always rendered, autoplay muted, unmute on hover */}
       {item.kind === "video" && item.video && (
-        <>
-          <div className="absolute inset-0 bg-gradient-to-br from-surface-2 to-surface-3" />
-          {!hover && (
-            <div className="absolute inset-0 grid place-items-center">
-              <div className="grid place-items-center size-14 rounded-full bg-white/10 backdrop-blur-sm border border-white/20">
-                <Play className="size-6 text-white fill-white" />
-              </div>
-            </div>
-          )}
-          {hover && (
-            <video
-              ref={videoRef}
-              src={item.video}
-              loop
-              playsInline
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-          )}
-        </>
+        <video
+          ref={videoRef}
+          src={item.video}
+          muted
+          loop
+          playsInline
+          autoPlay
+          preload="auto"
+          className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+        />
       )}
 
       {/* MUSIC / VOICE: image + hidden audio */}
