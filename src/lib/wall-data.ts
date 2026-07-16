@@ -34,6 +34,9 @@ const REAL = {
   nanobanana2: "https://storage.googleapis.com/falserverless/example_outputs/nano-banana-2-t2i-output.png",
   seedance2: "https://v3b.fal.media/files/b/0a9f7ecf/jQvhuOlh8iQrO38GC4K_0_video.mp4",
   qwenimage: "https://v3.fal.media/files/rabbit/KoIbq6nhDBDPxDQrivW-m.png",
+  happyhorse: "https://v3b.fal.media/files/b/0a9f39fd/N9U9ZDVOZvX13yQTzx0wN_NrDUbOAF.mp4",
+  grokvideo: "https://v3b.fal.media/files/b/0a9c66a1/xx79_pXtz3hq4TByzo4Xc_jN5I675M.mp4",
+  wan27: "https://v3b.fal.media/files/b/0a940a49/fBFxYrVooHj29QIff8clR_xVVvbIQ0.mp4",
 };
 
 export const WALL_ITEMS: WallItem[] = [
@@ -145,7 +148,7 @@ export const WALL_ITEMS: WallItem[] = [
     prompt:
       "Plan aérien d'un désert au coucher du soleil, dunes ondulantes, mouvement de caméra lent.",
     image: img("desert-drone", 900, 1300),
-    video: REAL.kling3pro,
+    video: REAL.wan27,
     span: "lg",
   },
   {
@@ -188,7 +191,7 @@ export const WALL_ITEMS: WallItem[] = [
     modelSlug: "kling-3-motion",
     prompt: "Chef découpe un ananas dans un studio cuisine, plan macro, mouvement de dolly lent.",
     image: img("chef-macro", 900, 900),
-    video: REAL.kling3pro,
+    video: REAL.happyhorse,
     span: "md",
   },
   {
@@ -230,7 +233,7 @@ export const WALL_ITEMS: WallItem[] = [
     modelSlug: "seedance-2-mini",
     prompt: "Yoga au bord d'une piscine à Bali, salutation au soleil, plan large, lumière chaude.",
     image: img("yoga-bali", 900, 1100),
-    video: REAL.seedance2,
+    video: REAL.grokvideo,
     span: "md",
   },
   {
@@ -282,7 +285,7 @@ export const WALL_ITEMS: WallItem[] = [
     modelSlug: "kling-3-turbo",
     prompt: "Café qui coule d'une machine expresso au ralenti, gouttes en macro, vapeur.",
     image: img("coffee-macro", 900, 1000),
-    video: REAL.kling3pro,
+    video: REAL.happyhorse,
     span: "md",
   },
   {
