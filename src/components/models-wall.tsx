@@ -82,22 +82,36 @@ function FilterPill({ active, onClick, label, icon, size = "md" }: { active: boo
 
 function WallCard({ item, index, onOpen }: { item: WallItem; index: number; onOpen: () => void }) {
   const [hover, setHover] = useState(false);
+  const [inView, setInView] = useState(false);
+  const cardRef = useRef<HTMLButtonElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const heights = { sm: "h-56 sm:h-60", md: "h-72 sm:h-80", lg: "h-96 sm:h-[26rem]" } as const;
   const KindIcon = KIND_META[item.kind].icon;
 
-  // VIDEO: always autoplay muted in loop. Unmute on hover.
+  // Only play videos when card is in viewport (saves bandwidth)
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach((e) => setInView(e.isIntersecting)),
+      { rootMargin: "200px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  // VIDEO: autoplay muted in loop when in view. Unmute on hover.
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
-    if (hover) {
-      v.muted = false;
+    if (inView) {
+      v.muted = !hover;
       v.play().catch(() => {});
     } else {
-      v.muted = true;
+      v.pause();
     }
-  }, [hover]);
+  }, [hover, inView]);
 
   // Auto-play audio on hover
   useEffect(() => {
@@ -113,6 +127,7 @@ function WallCard({ item, index, onOpen }: { item: WallItem; index: number; onOp
 
   return (
     <motion.button
+      ref={cardRef}
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
@@ -127,7 +142,7 @@ function WallCard({ item, index, onOpen }: { item: WallItem; index: number; onOp
         <img src={item.image} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]" />
       )}
 
-      {/* VIDEO: always rendered, autoplay muted, unmute on hover */}
+      {/* VIDEO: autoplay muted in loop when in view, unmute on hover */}
       {item.kind === "video" && item.video && (
         <video
           ref={videoRef}
@@ -136,7 +151,7 @@ function WallCard({ item, index, onOpen }: { item: WallItem; index: number; onOp
           loop
           playsInline
           autoPlay
-          preload="auto"
+          preload="metadata"
           className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
         />
       )}

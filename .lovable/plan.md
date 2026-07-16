@@ -1,74 +1,39 @@
-# Cortexia v4 — Finalisation UI complète
 
-Objectif : livrer un produit démontrable de bout en bout, plus rien en placeholder.
+## Objectif
 
-## 1. Corrections urgentes (avant tout ajout)
+Remplir le Wall avec de vraies démos officielles pour **chaque modèle image et vidéo** du catalogue Cortexia, en récupérant les URLs de showcases publiques (fal.ai galleries, pages officielles des providers). Les vidéos jouent déjà en autoplay + loop + muted, et le hover unmute — ce comportement reste, on ajoute juste beaucoup plus de contenu réel et varié.
 
-- **Fix hydratation countdown** : `EditorialCountdown` rend `Date.now()` au SSR → mismatch. Le composant ne calcule le `diff` qu'après montage (état initial = `null`, valeurs affichées `--` jusqu'à l'hydratation).
-- **Nettoyer toute mention de marge/×1.26/kie.ai** dans les textes visibles (simulateur, comparatif, FAQ, catalogue). La majoration reste un commentaire code, jamais un mot UI.
+## Sources de showcases (démos publiques réelles)
 
-## 2. Le Wall — showcase modèles
+Pour chaque modèle je récupérerai 1 à 3 assets réels depuis :
 
-Nouveau composant `ModelsWall` (masonry CSS columns 2/3/4 responsive) présent sur `/` et `/app-preview`.
-- Mix images (Unsplash source stable), vidéos MP4 en autoplay muted loop au hover, cards audio avec waveform SVG animée + cover.
-- Chaque card : badge modèle utilisé, catégorie.
-- Filtres pills au-dessus : catégorie (Image/Vidéo/Musique/Voix) + cas d'usage (Pub/UGC/Émission/Film).
-- Cascade d'apparition au scroll via Framer `whileInView` staggered.
-- Chargement progressif : bouton "Voir plus" qui ajoute un batch de 12 (illusion d'infini avec ~60 items mockés).
-- Clic → modale (Dialog custom) avec grand média, prompt, modèle, CTA "Crée le tien" → `/app/models/$slug`.
-- Version condensée `WallPreview` (bandeau 6 cards + fondu) sous le hero des deux landings.
+- **fal.ai** galleries publiques (`fal.media/files/...`) — Seedream 5 Pro/Lite, Nano Banana 2 (+ Lite), Qwen Image 2, Wan 2.7 Image/Pro, Wan 2.7 Video, Seedance 2 Fast/Mini, Kling 3 Turbo/Standard/Pro/4K/Motion, HappyHorse 1.1, Grok Imagine 1.5, Gemini Omni Video, OmniHuman 1.5, Volcengine Lip Sync
+- **GPT Image 2** → OpenAI cookbook / exemples publics
+- Chaque URL sera vérifiée (HEAD 200, bon Content-Type) avant d'être commit
 
-## 3. Devise + langue combinés (i18n)
+Objectif : ~30–40 items sur le Wall (vs 13 actuellement), avec **au moins 1 asset par modèle du catalogue image/vidéo** et un mix équilibré ad/ugc/show/film.
 
-- Nouveau `src/lib/i18n.ts` : dictionnaire par langue (`fr`, `en`, `pt`, `id`, `es`), hook `useT()`, store Zustand langue + devise unifié.
-- Mapping devise→langue par défaut (USD→en, XOF→fr, EUR→fr, BRL→pt, IDR→id, NGN→en, MXN→es…). Override manuel possible.
-- Composant unique `LocalePicker` (remplace `CurrencyPicker`) : drapeau + code devise + langue, popover avec recherche, deux colonnes (devise / langue) reliées mais dissociables.
-- Toutes les strings des landings + nav app passent par `t("clé")`. Transition texte : fade court sur changement de langue (motion `AnimatePresence` sur `lang` key).
+## Modifications
 
-## 4. Agent (`/app`) amélioré
+### 1. `src/lib/wall-data.ts`
+- Enrichir la constante `R` (registre d'URLs) en ajoutant les nouveaux assets par modèle (2–3 URLs distinctes pour les modèles phares, 1 pour les autres).
+- Étendre `WALL_ITEMS` à ~35 entrées : chaque `modelSlug` du catalogue image/vidéo est représenté au moins une fois, avec `prompt`, `useCase` et `span` variés pour un bon rythme visuel dans le masonry.
+- Vérifier que chaque `modelSlug` correspond à un slug existant dans `src/lib/models.ts` (pour que le CTA "Essayer" du modal ouvre bien la bonne page playground).
 
-- **Onboarding première visite** : overlay 3 étapes (agent / playgrounds / paiement à l'usage) gated par `localStorage("cortexia:onboarded")`, ré-ouvrable via icône aide dans le header. Crédit de bienvenue 5 $ visible dès l'entrée.
-- **Prompt starters** : 6 cards catégorisées (Pub/UGC/Émission/Film) affichées quand le fil est vide, remplissent la textarea au clic.
-- **Carte de décision modèle** dans le fil : icône + justification rédigée + 2-3 alternatives mini-cards cliquables (switch instantané).
-- **Chips d'affinage** après chaque génération : "Plus cinématographique", "Ambiance nuit", "Version 6s", etc. — envoient un message auto qui relance une génération dans le même thread.
-- **Progression réaliste** : barre par type (vidéo = étapes + ETA plus long ; image = réveil par flou décroissant sur un placeholder).
-- **Thread multi-générations** : liste scrollable, chaque résultat gardé avec ancre, mini-nav "sauter au résultat N".
+### 2. `src/components/models-wall.tsx` (petit polish)
+- Confirmer que la logique hover→unmute vidéo est OK sur mobile (fallback : sur mobile, un tap sur la carte ouvre le modal avec son, pas de unmute au survol → comportement actuel déjà correct).
+- `preload="metadata"` au lieu de `preload="auto"` pour les vidéos hors viewport, afin d'éviter de charger 30 MP4 d'un coup.
+- Ajouter `loading="lazy"` sur les `<video>` via un `IntersectionObserver` léger : la vidéo ne commence à jouer que quand la carte entre dans le viewport (économise la bande passante).
+- Pas de changement sur le modal ni sur les filtres.
 
-## 5. Simulateur corrigé
+### 3. Rien d'autre
+Pas de changement backend, pas de changement de routing, pas de changement au flow waitlist/auth.
 
-- Toujours calcul des deux montants (Cortexia à l'usage vs abonnement mensuel de référence par catégorie, ex. Higgsfield-like 39 $, Midjourney 30 $, ElevenLabs 22 $).
-- 3 états d'affichage : économie positive / seuil approché / abonnement compétitif — jamais 0. Message honnête dans le 3ᵉ cas, deux montants toujours visibles.
-- Repère visuel de seuil sur chaque slider (tick + tooltip "seuil abonnement").
-- Marche pour toutes catégories et toutes devises.
+## Détails techniques
 
-## 6. Distinction waitlist / live
+- Toutes les URLs pointent vers des CDN publics (fal.media, storage.googleapis.com, openai) — pas d'upload dans `public/`.
+- Le champ `image` sert toujours de poster pour les vidéos (frame de preview) → pour chaque vidéo je garde une URL image poster distincte si disponible, sinon je réutilise l'URL vidéo (le `<video>` affiche la première frame).
+- L'audio (voix / musique) reste sur les mêmes entrées ElevenLabs V3 existantes — pas de changement, l'utilisateur demande explicitement image + vidéo.
 
-- Constante `src/lib/launch.ts` : `LAUNCH_MODE: "waitlist" | "live"`, `LAUNCH_DATE`.
-- `/` (waitlist) : badge persistant "Pré-lancement · J-N" intégré au header + mini countdown compact, footer "Accès équipe" en lien texte sobre.
-- `/app-preview` : zéro mention waitlist/countdown/rang.
-- Aucun CTA de la waitlist ne pointe vers `/app` ou `/app-preview` sauf le lien discret footer.
-
-## 7. Onboarding waitlist enrichi
-
-- Écran de confirmation reprend le cas d'usage sélectionné ("Parfait pour les créateurs UGC…").
-- Compteur amis invités (mock 0), progression parrainage, partage stylé conservé.
-
-## 8. Détails techniques
-
-- Nouveaux fichiers : `lib/i18n.ts`, `lib/launch.ts`, `lib/wall-data.ts`, `components/models-wall.tsx`, `components/wall-preview.tsx`, `components/wall-modal.tsx`, `components/locale-picker.tsx`, `components/onboarding-overlay.tsx`, `components/prompt-starters.tsx`, `components/model-decision-card.tsx`, `components/refine-chips.tsx`, `components/waveform-card.tsx`.
-- Refactor : `EditorialCountdown` (fix hydration), `SiteHeader` (badge + mini countdown en mode waitlist), `CreditSimulator` (nouvelle logique 3 états), `WaitlistForm` (récap use case), routes `index.tsx`, `app-preview.tsx`, `app.tsx`, `app.index.tsx` (i18n + onboarding + agent enrichi), `app.account.tsx` (LocalePicker), suppression `CurrencyPicker` (remplacé partout).
-- Assets Wall : URLs Unsplash/Pexels/mixkit publiques + covers générées.
-- Aucune dépendance nouvelle (Framer + Zustand déjà présents).
-
-## 9. Ordre d'exécution en un passage
-
-1. Fix countdown + purge mentions marge.
-2. `launch.ts` + `i18n.ts` + `LocalePicker` (remplacement `CurrencyPicker` partout).
-3. `wall-data.ts` + `ModelsWall` + `WallPreview` + `WallModal`.
-4. Refactor `SiteHeader` waitlist-aware + `WaitlistForm` récap.
-5. Refactor `CreditSimulator` 3 états + repère seuil.
-6. Refactor `app.index.tsx` : onboarding, starters, decision card, refine chips, thread multi, progression.
-7. Injection i18n dans routes `/` et `/app-preview`.
-8. Passe responsive rapide + vérif liens/routes.
-
-Livrable : produit prêt à démo, backend seul reste à connecter.
+## Livrable
+Un Wall dense, varié, avec du vrai contenu de chaque modèle du catalogue, autoplay muted en boucle, hover pour le son sur vidéo, clic pour agrandir dans le modal.
