@@ -37,7 +37,7 @@ const R = {
     "https://v3b.fal.media/files/b/0a948161/E43snBsqtEWRB2KGM6723_8b2971637e504a00b4bcf2cec7d544b6.jpg",
   nanobanana2lite:
     "https://v3b.fal.media/files/b/panda/-oMlZo9Yyj_Nzoza_tgds_GmLF86r5bOt50eMMKCszy_eacc949b3933443c9915a83c98fbe85e.png",
-  gptimage2_a: "https://v3b.fal.media/files/b/0a981c3d/hdg8iaY8yShEwChTPjFah_OZUgg7Z4.jpg",
+  gptimage2_a: "https://images.ctfassets.net/kftzwdyauwt9/I1fZJDVIImc76rO9pBrFj/3f941d5b06447057164bb08c2ae0b94a/ChatGPT_Image_Apr_14__2026__09_42_30_PM.png?w=1920&q=90&fm=webp",
   gptimage2_b:
     "https://v3b.fal.media/files/b/0a9486b9/Iti-a7lTmHZW6KlSZ80rU_output_1.png",
   qwenimage_a: "https://v3.fal.media/files/rabbit/KoIbq6nhDBDPxDQrivW-m.png",
