@@ -28,7 +28,7 @@ const R = {
   seedream5pro_c:
     "https://v3b.fal.media/files/b/0a94816f/BhHA2kmKyAQ8vJxw_HPQ4_2b4b35f0fbb0449195d84178ba988112.jpg",
   seedream5lite_a:
-    "https://v3b.fal.media/files/b/0aa17b75/4yAJvvjMXJ3MMDlqYuWev_c4c99e9c6e054d08b99287f9c030121c.png",
+    "https://refinery.fal.media/url/https%3A%2F%2Fv3b.fal.media%2Ffiles%2Fb%2F0aa17b8e%2Fi_MTG_woBCy2l6WUU1LUh_bb01e1ba69ef40ec9d855741eaacd392.png/tr:w-1024,q-80/i_MTG_woBCy2l6WUU1LUh_bb01e1ba69ef40ec9d855741eaacd392.webp",
   seedream5lite_b:
     "https://v3b.fal.media/files/b/0a948152/0UucVYSOBXiyibwSyN3HT_38400743f04344a5b25b1cd9b551a625.jpg",
   nanobanana2_a:
