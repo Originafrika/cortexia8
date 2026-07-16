@@ -23,8 +23,18 @@ export type WallItem = {
   span?: "sm" | "md" | "lg";
 };
 
-// Picsum + Google demo videos (both stable public assets).
+// Real outputs from model playgrounds + placeholder for items without real outputs yet.
 const img = (seed: string, w = 900, h = 1200) => `https://picsum.photos/seed/${seed}/${w}/${h}`;
+
+// Real example URLs from fal.ai playground outputs + official model sites
+const REAL = {
+  seedream5pro: "https://v3b.fal.media/files/b/0aa16df4/ktjX_-2KKAw7bCTQgopGV_5b49dc459dfe484fbb1218fce0e24bc7.png",
+  kling3pro: "https://v3b.fal.media/files/b/0a9270c0/M0OE5-o3n7Pj85CWWpGt2_output.mp4",
+  gptimage2: "https://v3b.fal.media/files/b/0a981c3d/hdg8iaY8yShEwChTPjFah_OZUgg7Z4.jpg",
+  nanobanana2: "https://storage.googleapis.com/falserverless/example_outputs/nano-banana-2-t2i-output.png",
+  seedance2: "https://v3b.fal.media/files/b/0a9f7ecf/jQvhuOlh8iQrO38GC4K_0_video.mp4",
+  qwenimage: "https://v3.fal.media/files/rabbit/KoIbq6nhDBDPxDQrivW-m.png",
+};
 
 export const WALL_ITEMS: WallItem[] = [
   {
@@ -35,7 +45,7 @@ export const WALL_ITEMS: WallItem[] = [
     modelSlug: "seedream-5-pro",
     prompt:
       "Flacon de parfum ambré sur marbre travertin, lumière rasante d'aube, contre-jour doux, éditorial mode.",
-    image: img("perfume-amber", 900, 1300),
+    image: REAL.seedream5pro,
     span: "lg",
   },
   {
@@ -47,7 +57,7 @@ export const WALL_ITEMS: WallItem[] = [
     prompt:
       "Créatrice UGC déballe une paire de sneakers en unboxing, plan serré, lumière naturelle, ambiance matinale.",
     image: img("sneakers-ugc", 900, 900),
-    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    video: REAL.kling3pro,
     span: "md",
   },
   {
@@ -58,7 +68,7 @@ export const WALL_ITEMS: WallItem[] = [
     modelSlug: "gpt-image-2",
     prompt:
       "Portrait cinématographique d'une comédienne en costume 1940, cheveux au vent, tempête à l'horizon.",
-    image: img("actress-film", 900, 1400),
+    image: REAL.gptimage2,
     span: "lg",
   },
   {
@@ -79,7 +89,7 @@ export const WALL_ITEMS: WallItem[] = [
     model: "Nano Banana 2",
     modelSlug: "nano-banana-2",
     prompt: "Boîte de céréales bio flottant dans un ciel pastel, style pub magazine 2000s.",
-    image: img("cereal-ad", 900, 1100),
+    image: REAL.nanobanana2,
     span: "md",
   },
   {
@@ -91,8 +101,7 @@ export const WALL_ITEMS: WallItem[] = [
     prompt:
       "Voiture électrique traverse une ville de nuit sous la pluie, reflets néons, plan travelling.",
     image: img("car-neon", 900, 1100),
-    video:
-      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
+    video: REAL.seedance2,
     span: "md",
   },
   {
@@ -114,7 +123,7 @@ export const WALL_ITEMS: WallItem[] = [
     modelSlug: "seedream-5-pro",
     prompt:
       "Assiette de pâtisserie fine posée sur nappe lin blanc, plan zénithal, lumière du matin.",
-    image: img("pastry-ugc", 900, 900),
+    image: REAL.seedream5pro,
     span: "sm",
   },
   {
@@ -136,7 +145,7 @@ export const WALL_ITEMS: WallItem[] = [
     prompt:
       "Plan aérien d'un désert au coucher du soleil, dunes ondulantes, mouvement de caméra lent.",
     image: img("desert-drone", 900, 1300),
-    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+    video: REAL.kling3pro,
     span: "lg",
   },
   {
@@ -146,7 +155,7 @@ export const WALL_ITEMS: WallItem[] = [
     model: "Qwen Image 2.0",
     modelSlug: "qwen-image-2",
     prompt: "Bouteille de kombucha rose sur fond bleu ciel, ombres nettes, style pub minimaliste.",
-    image: img("kombucha-ad", 900, 900),
+    image: REAL.qwenimage,
     span: "sm",
   },
   {
@@ -168,7 +177,7 @@ export const WALL_ITEMS: WallItem[] = [
     modelSlug: "nano-banana-2",
     prompt:
       "Enfant lit un livre sur un toit de Jakarta au crépuscule, silhouette contre-jour orange.",
-    image: img("kid-jakarta", 900, 1200),
+    image: REAL.nanobanana2,
     span: "md",
   },
   {
@@ -179,7 +188,7 @@ export const WALL_ITEMS: WallItem[] = [
     modelSlug: "kling-3-motion",
     prompt: "Chef découpe un ananas dans un studio cuisine, plan macro, mouvement de dolly lent.",
     image: img("chef-macro", 900, 900),
-    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+    video: REAL.kling3pro,
     span: "md",
   },
   {
@@ -189,7 +198,7 @@ export const WALL_ITEMS: WallItem[] = [
     model: "Seedream 5.0 Pro",
     modelSlug: "seedream-5-pro",
     prompt: "Basket haute rouge suspendue par un fil, fond papier crème, lumière studio.",
-    image: img("shoe-red", 900, 1100),
+    image: REAL.seedream5pro,
     span: "md",
   },
   {
@@ -221,8 +230,7 @@ export const WALL_ITEMS: WallItem[] = [
     modelSlug: "seedance-2-mini",
     prompt: "Yoga au bord d'une piscine à Bali, salutation au soleil, plan large, lumière chaude.",
     image: img("yoga-bali", 900, 1100),
-    video:
-      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
+    video: REAL.seedance2,
     span: "md",
   },
   {
@@ -263,7 +271,7 @@ export const WALL_ITEMS: WallItem[] = [
     model: "Nano Banana 2",
     modelSlug: "nano-banana-2",
     prompt: "Titre d'émission « Nuits de Dakar » en typographie art déco dorée sur fond noir.",
-    image: img("show-title", 900, 900),
+    image: REAL.nanobanana2,
     span: "md",
   },
   {
@@ -274,7 +282,7 @@ export const WALL_ITEMS: WallItem[] = [
     modelSlug: "kling-3-turbo",
     prompt: "Café qui coule d'une machine expresso au ralenti, gouttes en macro, vapeur.",
     image: img("coffee-macro", 900, 1000),
-    video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
+    video: REAL.kling3pro,
     span: "md",
   },
   {
@@ -284,7 +292,7 @@ export const WALL_ITEMS: WallItem[] = [
     model: "Qwen Image 2.0",
     modelSlug: "qwen-image-2",
     prompt: "Plante monstera dans un intérieur chaleureux, lumière du soir dorée.",
-    image: img("plant-warm", 900, 1200),
+    image: REAL.qwenimage,
     span: "md",
   },
 ];
