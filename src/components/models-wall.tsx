@@ -127,18 +127,27 @@ function WallCard({ item, index, onOpen }: { item: WallItem; index: number; onOp
         <img src={item.image} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]" />
       )}
 
-      {/* VIDEO: <video> with poster and auto-play on hover */}
+      {/* VIDEO: gradient background + play icon, video loads on hover */}
       {item.kind === "video" && item.video && (
-        <video
-          ref={videoRef}
-          src={item.video}
-          poster={item.video}
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-        />
+        <>
+          <div className="absolute inset-0 bg-gradient-to-br from-surface-2 to-surface-3" />
+          {!hover && (
+            <div className="absolute inset-0 grid place-items-center">
+              <div className="grid place-items-center size-14 rounded-full bg-white/10 backdrop-blur-sm border border-white/20">
+                <Play className="size-6 text-white fill-white" />
+              </div>
+            </div>
+          )}
+          {hover && (
+            <video
+              ref={videoRef}
+              src={item.video}
+              loop
+              playsInline
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+          )}
+        </>
       )}
 
       {/* MUSIC / VOICE: image + hidden audio */}
@@ -147,15 +156,6 @@ function WallCard({ item, index, onOpen }: { item: WallItem; index: number; onOp
           <img src={item.image} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]" />
           {item.audioSrc && <audio ref={audioRef} src={item.audioSrc} preload="metadata" />}
         </>
-      )}
-
-      {/* play icon overlay for video */}
-      {item.kind === "video" && !hover && (
-        <div className="absolute inset-0 grid place-items-center bg-black/20">
-          <div className="grid place-items-center size-12 rounded-full bg-white/20 backdrop-blur-sm">
-            <Play className="size-5 text-white fill-white" />
-          </div>
-        </div>
       )}
 
       {/* audio waveform card */}
