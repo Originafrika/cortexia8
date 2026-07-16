@@ -55,6 +55,9 @@ const ALL_MODELS: SimModel[] = [
   { key: "eleven-v3", name: "ElevenLabs V3", category: "voice", icon: Mic, unit: "1k caractères", unitPriceUSD: 0.0882, suffix: "×1k car. / mois", max: 200, step: 2, defaultValue: 6 },
   // Text
   { key: "claude-sonnet-5", name: "Claude Sonnet 5", category: "text", icon: MessageSquare, unit: "M tokens", unitPriceUSD: 5.3865, suffix: "M tokens / mois", max: 20, step: 0.5, defaultValue: 0.8 },
+  { key: "claude-opus-48", name: "Claude Opus 4.8", category: "text", icon: MessageSquare, unit: "M tokens", unitPriceUSD: 12.6, suffix: "M tokens / mois", max: 20, step: 0.5, defaultValue: 0 },
+  { key: "claude-fable-5", name: "Claude Fable 5", category: "text", icon: MessageSquare, unit: "M tokens", unitPriceUSD: 25.2, suffix: "M tokens / mois", max: 20, step: 0.5, defaultValue: 0 },
+  { key: "claude-haiku-45", name: "Claude Haiku 4.5", category: "text", icon: MessageSquare, unit: "M tokens", unitPriceUSD: 1.7955, suffix: "M tokens / mois", max: 20, step: 0.5, defaultValue: 0 },
 ];
 
 const CATEGORY_META: Record<string, { label: string; icon: React.ElementType; refSub: { name: string; usd: number } }> = {

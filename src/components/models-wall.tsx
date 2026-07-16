@@ -153,26 +153,34 @@ function WallCard({ item, index, onOpen }: { item: WallItem; index: number; onOp
         heights[item.span ?? "md"],
       )}
     >
-      {/* poster */}
-      <img
-        src={item.image}
-        alt=""
-        loading="lazy"
-        className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-      />
-      {/* video overlay */}
-      {item.kind === "video" && item.video && (
+      {/* poster — image items use <img>, video items use <video poster> for thumbnail */}
+      {item.kind === "video" && item.video ? (
         <video
-          src={hover ? item.video : undefined}
+          poster={item.image || `${item.video}#t=0.1`}
           muted
           loop
           playsInline
           autoPlay={hover}
           className={cn(
-            "absolute inset-0 h-full w-full object-cover transition-opacity duration-300",
-            hover ? "opacity-100" : "opacity-0",
+            "absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]",
+            hover ? "opacity-100" : "opacity-100",
           )}
         />
+      ) : (
+        <img
+          src={item.image}
+          alt=""
+          loading="lazy"
+          className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+        />
+      )}
+      {/* video overlay play icon */}
+      {item.kind === "video" && !hover && (
+        <div className="absolute inset-0 grid place-items-center bg-black/20">
+          <div className="grid place-items-center size-12 rounded-full bg-white/20 backdrop-blur-sm">
+            <Play className="size-5 text-white fill-white" />
+          </div>
+        </div>
       )}
       {/* audio card */}
       {(item.kind === "music" || item.kind === "voice") && item.audio && (

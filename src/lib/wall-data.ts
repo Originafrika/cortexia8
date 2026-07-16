@@ -27,8 +27,8 @@ const R = {
   wan27: "https://v3b.fal.media/files/b/0a940a49/fBFxYrVooHj29QIff8clR_xVVvbIQ0.mp4",
 };
 
-// Video thumbnails: use the video URL directly (browser will show first frame)
-const vidThumb = (videoUrl: string) => videoUrl;
+// Video thumbnails: empty string so <video poster> uses the video URL itself
+const vidThumb = () => "";
 
 export const WALL_ITEMS: WallItem[] = [
   // ── IMAGE (7 unique models) ──
@@ -91,7 +91,7 @@ export const WALL_ITEMS: WallItem[] = [
     model: "Kling 3.0 Pro",
     modelSlug: "kling-3-pro",
     prompt: "Slow cinematic push-in through empty ancient temple, fog drifts, golden light catches dust particles, atmospheric, haunting.",
-    image: vidThumb(R.kling3pro),
+    image: vidThumb(),
     video: R.kling3pro,
     span: "md",
   },
@@ -102,7 +102,7 @@ export const WALL_ITEMS: WallItem[] = [
     model: "Seedance 2.0",
     modelSlug: "seedance-2-fast",
     prompt: "Ultra-detailed 4K wildlife macro video of a Bengal tiger resting in golden morning light, slow rack focus from fur to eye.",
-    image: vidThumb(R.seedance2),
+    image: vidThumb(),
     video: R.seedance2,
     span: "md",
   },
@@ -113,7 +113,7 @@ export const WALL_ITEMS: WallItem[] = [
     model: "Wan 2.7",
     modelSlug: "wan-27-video",
     prompt: "Extreme close-up of rich dark chocolate being poured in slow motion over a layered cake, glossy sheen, cocoa powder dusting.",
-    image: vidThumb(R.wan27),
+    image: vidThumb(),
     video: R.wan27,
     span: "lg",
   },
@@ -124,7 +124,7 @@ export const WALL_ITEMS: WallItem[] = [
     model: "HappyHorse 1.1",
     modelSlug: "happyhorse-11",
     prompt: "Character in a cozy dim room strums once, looks up and says: 'This next one I wrote at three in the morning.' Warm intimate cinematic.",
-    image: vidThumb(R.happyhorse),
+    image: vidThumb(),
     video: R.happyhorse,
     span: "md",
   },
@@ -135,7 +135,7 @@ export const WALL_ITEMS: WallItem[] = [
     model: "Grok Imagine Video 1.5",
     modelSlug: "grok-imagine-15",
     prompt: "Medium shot, she speaks warmly while gesturing to a product. Slow push-in to a close-up, glossy, warm, cinematic.",
-    image: vidThumb(R.grokvideo),
+    image: vidThumb(),
     video: R.grokvideo,
     span: "md",
   },
@@ -146,7 +146,7 @@ export const WALL_ITEMS: WallItem[] = [
     model: "Kling 3.0 Turbo",
     modelSlug: "kling-3-turbo",
     prompt: "Café qui coule d'une machine expresso au ralenti, gouttes en macro, vapeur.",
-    image: vidThumb(R.kling3pro),
+    image: vidThumb(),
     video: R.kling3pro,
     span: "md",
   },
