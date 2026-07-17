@@ -1,9 +1,11 @@
-import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, redirect, useRouterState } from "@tanstack/react-router";
 import { AmbientBackground } from "@/components/ambient-background";
 import { LocalePicker } from "@/components/locale-picker";
 import { PriceDisplay } from "@/components/price-display";
 import { OnboardingOverlay, useOnboarding } from "@/components/onboarding-overlay";
 import { SignedIn, RedirectToSignIn } from "@neondatabase/auth-ui";
+import { authClient } from "@/auth";
+import { getUserRole } from "@/lib/auth/role";
 import {
   MessageSquare,
   LayoutGrid,
@@ -21,6 +23,19 @@ export const Route = createFileRoute("/app")({
   head: () => ({
     meta: [{ title: "Cortexia — App" }, { name: "robots", content: "noindex,nofollow" }],
   }),
+  beforeLoad: async ({ location }) => {
+    const session = await authClient.getSession();
+    if (!session?.user) {
+      throw redirect({
+        to: "/auth/sign-in",
+        search: { next: location.href },
+      });
+    }
+    const role = await getUserRole(session.user.id);
+    if (role !== "admin") {
+      throw redirect({ to: "/access-denied" });
+    }
+  },
   component: AppLayout,
 });
 

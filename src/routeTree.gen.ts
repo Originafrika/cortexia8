@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppPreviewRouteImport } from './routes/app-preview'
 import { Route as AppRouteImport } from './routes/app'
+import { Route as AccessDeniedRouteImport } from './routes/access-denied'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CanvasIndexRouteImport } from './routes/canvas/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
@@ -31,6 +32,11 @@ const AppPreviewRoute = AppPreviewRouteImport.update({
 const AppRoute = AppRouteImport.update({
   id: '/app',
   path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccessDeniedRoute = AccessDeniedRouteImport.update({
+  id: '/access-denied',
+  path: '/access-denied',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -91,6 +97,7 @@ const AppModelsSlugRoute = AppModelsSlugRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/access-denied': typeof AccessDeniedRoute
   '/app': typeof AppRouteWithChildren
   '/app-preview': typeof AppPreviewRoute
   '/account/$pathname': typeof AccountPathnameRoute
@@ -106,6 +113,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/access-denied': typeof AccessDeniedRoute
   '/app-preview': typeof AppPreviewRoute
   '/account/$pathname': typeof AccountPathnameRoute
   '/app/account': typeof AppAccountRoute
@@ -121,6 +129,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/access-denied': typeof AccessDeniedRoute
   '/app': typeof AppRouteWithChildren
   '/app-preview': typeof AppPreviewRoute
   '/account/$pathname': typeof AccountPathnameRoute
@@ -138,6 +147,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/access-denied'
     | '/app'
     | '/app-preview'
     | '/account/$pathname'
@@ -153,6 +163,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/access-denied'
     | '/app-preview'
     | '/account/$pathname'
     | '/app/account'
@@ -167,6 +178,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/access-denied'
     | '/app'
     | '/app-preview'
     | '/account/$pathname'
@@ -183,6 +195,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AccessDeniedRoute: typeof AccessDeniedRoute
   AppRoute: typeof AppRouteWithChildren
   AppPreviewRoute: typeof AppPreviewRoute
   AccountPathnameRoute: typeof AccountPathnameRoute
@@ -205,6 +218,13 @@ declare module '@tanstack/react-router' {
       path: '/app'
       fullPath: '/app'
       preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/access-denied': {
+      id: '/access-denied'
+      path: '/access-denied'
+      fullPath: '/access-denied'
+      preLoaderRoute: typeof AccessDeniedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -319,6 +339,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AccessDeniedRoute: AccessDeniedRoute,
   AppRoute: AppRouteWithChildren,
   AppPreviewRoute: AppPreviewRoute,
   AccountPathnameRoute: AccountPathnameRoute,
