@@ -1,50 +1,53 @@
 import { neon, Pool, neonConfig, type PoolClient } from "@neondatabase/serverless";
 
 if (typeof process !== "undefined" && process.env.NODE_ENV !== "production") {
-  // The dev pool can otherwise spew "WebSocket" warnings in TanStack
-  // Start's Vite dev server. Keep it quiet.
   neonConfig.disableWarningInBrowsers = true;
 }
 
-const connectionString = process.env.DATABASE_URL;
-if (!connectionString) {
-  // The rest of the system is meaningless without a DB. Fail loud at
-  // module load time so we don't discover this on the first request.
-  throw new Error("DATABASE_URL is not set");
+function getConnectionString(): string {
+  const cs = process.env.DATABASE_URL;
+  if (!cs) {
+    throw new Error("DATABASE_URL is not set in environment variables. Add it in Vercel Dashboard → Settings → Environment Variables.");
+  }
+  return cs;
+}
+
+let _sql: ReturnType<typeof neon> | null = null;
+let _pool: Pool | null = null;
+
+function getSql() {
+  if (!_sql) _sql = neon(getConnectionString());
+  return _sql;
+}
+
+function getPool() {
+  if (!_pool) _pool = new Pool({ connectionString: getConnectionString() });
+  return _pool;
 }
 
 /**
- * Stateless query function. One-shot HTTP calls, no transactions.
- * This is what the existing code already used.
+ * Stateless query function proxy. Lazy-instantiates on first call so module
+ * load does NOT crash when DATABASE_URL is absent.
  */
-export const sql = neon(connectionString);
+export const sql = new Proxy({} as ReturnType<typeof neon>, {
+  get(_target, prop) {
+    return Reflect.get(getSql() as object, prop);
+  },
+}) as unknown as ReturnType<typeof neon>;
 
 /**
- * Connection pool. Use when you need multi-statement transactions
- * (BEGIN / COMMIT / ROLLBACK) or want to share a connection.
- *
- * Example:
- *   const client = await pool.connect();
- *   try {
- *     await client.query("BEGIN");
- *     await client.query("INSERT …");
- *     await client.query("COMMIT");
- *   } catch (e) {
- *     await client.query("ROLLBACK");
- *     throw e;
- *   } finally {
- *     client.release();
- *   }
+ * Connection pool proxy. Lazy-instantiates on first call.
  */
-export const pool = new Pool({ connectionString });
+export const pool = new Proxy({} as Pool, {
+  get(_target, prop) {
+    return Reflect.get(getPool() as object, prop);
+  },
+}) as unknown as Pool;
 
-/** Re-export the PoolClient type so callers don't have to know the
- * underlying package directly. */
 export type { PoolClient } from "@neondatabase/serverless";
 
-/** Convenience helper: run a function inside a transaction. */
 export async function withTransaction<T>(fn: (client: PoolClient) => Promise<T>): Promise<T> {
-  const client = await pool.connect();
+  const client = await getPool().connect();
   try {
     await client.query("BEGIN");
     const result = await fn(client);
