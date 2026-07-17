@@ -5,7 +5,6 @@ import { PriceDisplay } from "@/components/price-display";
 import { OnboardingOverlay, useOnboarding } from "@/components/onboarding-overlay";
 import { SignedIn, RedirectToSignIn } from "@neondatabase/auth-ui";
 import { authClient } from "@/auth";
-import { getUserRole } from "@/lib/auth/role";
 import {
   MessageSquare,
   LayoutGrid,
@@ -31,6 +30,8 @@ export const Route = createFileRoute("/app")({
         search: { next: location.href },
       });
     }
+    // Dynamic import — keeps @neondatabase/serverless out of the client bundle
+    const { getUserRole } = await import("@/lib/auth/role");
     const role = await getUserRole(session.user.email);
     if (role !== "admin") {
       throw redirect({ to: "/access-denied" });
