@@ -468,20 +468,8 @@ function FaqSection() {
 function FooterSection() {
   const t = useT();
   const { data: session } = authClient.useSession();
-  const user = session?.user as { role?: string } | undefined;
-  const isAdmin = user?.role === "admin";
   const isSignedIn = !!session?.user;
-  const [toast, setToast] = useState(false);
-
-  const handleTeamClick = (e: React.MouseEvent) => {
-    if (isSignedIn && !isAdmin) {
-      e.preventDefault();
-      setToast(true);
-      setTimeout(() => setToast(false), 3200);
-    }
-  };
-
-  const teamHref = !isSignedIn ? "/auth/sign-in" : isAdmin ? "/app" : "#";
+  const teamHref = !isSignedIn ? "/auth/sign-in" : "/app";
 
   return (
     <footer className="mt-8 border-t border-border">
@@ -502,28 +490,12 @@ function FooterSection() {
           </a>
           <a
             href={teamHref}
-            onClick={handleTeamClick}
-            title={
-              isSignedIn && !isAdmin ? "Accès limité à l'équipe jusqu'au 1er août" : undefined
-            }
             className="opacity-40 hover:opacity-80 transition inline-flex items-center gap-1"
           >
             {t("footer.team")} <ArrowRight className="size-3" />
           </a>
         </div>
       </div>
-      <AnimatePresence>
-        {toast && (
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 12 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 rounded-full border border-amber/40 bg-surface-1/95 backdrop-blur px-4 py-2 text-xs text-foreground shadow-lg"
-          >
-            Accès limité à l'équipe jusqu'au 1<sup>er</sup> août
-          </motion.div>
-        )}
-      </AnimatePresence>
     </footer>
   );
 }

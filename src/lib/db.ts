@@ -29,11 +29,16 @@ function getPool() {
  * Stateless query function proxy. Lazy-instantiates on first call so module
  * load does NOT crash when DATABASE_URL is absent.
  */
-export const sql = new Proxy({} as ReturnType<typeof neon>, {
-  get(_target, prop) {
-    return Reflect.get(getSql() as object, prop);
+const sqlEmitter: any = new Proxy(function taggedTemplate() {} as any, {
+  get(_t, prop) {
+    const v = (getSql() as any)[prop];
+    return typeof v === "function" ? v.bind(getSql()) : v;
   },
-}) as unknown as ReturnType<typeof neon>;
+  apply(_t, _thisArg, args) {
+    return (getSql() as any)(...args);
+  },
+});
+export const sql = sqlEmitter as unknown as ReturnType<typeof neon>;
 
 /**
  * Connection pool proxy. Lazy-instantiates on first call.
