@@ -1,8 +1,9 @@
 // Cortexia model catalog — prices already include the 26% margin over provider cost.
-// Source of truth for pricing everywhere in the app.
+// Provider: kie.ai. Source of truth for pricing everywhere in the app.
+// Endpoint paths are relative to the kie.ai API base URL.
 
 export type ModelCategory = "image" | "video" | "audio" | "text";
-export type Unit = "image" | "second" | "clip" | "1k-chars" | "1m-tokens-io";
+export type Unit = "image" | "second" | "1k-chars" | "1m-tokens-io";
 
 export type ParamSpec =
   | { kind: "prompt"; label: string; placeholder?: string }
@@ -30,12 +31,14 @@ export type Model = {
   provider: string;
   category: ModelCategory;
   unit: Unit;
-  /** Simple flat price (used when no tiers). Cortexia price, ×1.26. */
+  /** Simple flat price (used when no tiers). Cortexia price, x1.26. */
   priceUSD?: number;
   /** Multiple tiers (resolution, quality). */
   tiers?: PriceTier[];
   /** For LLMs: input/output per 1M tokens. */
   io?: { inputUSD: number; outputUSD: number };
+  /** kie.ai endpoint path. */
+  kieEndpoint: string;
   badge?: "popular" | "new" | "pro";
   blurb: string;
   params: ParamSpec[];
@@ -89,28 +92,16 @@ const commonVideoParams: ParamSpec[] = [
 ];
 
 export const MODELS: Model[] = [
-  // IMAGE
-  {
-    slug: "qwen-image-2",
-    name: "Qwen Image 2.0",
-    provider: "Alibaba",
-    category: "image",
-    unit: "image",
-    priceUSD: 0.0378,
-    blurb: "Rendu propre, réponse rapide, imbattable en rapport détail/prix.",
-    params: commonImageParams,
-  },
+  // ── IMAGE ────────────────────────────────────────────────────────────
   {
     slug: "seedream-5-pro",
     name: "Seedream 5.0 Pro",
     provider: "ByteDance",
     category: "image",
     unit: "image",
+    priceUSD: 0.0675,
+    kieEndpoint: "/seedream/5-pro-text-to-image",
     badge: "popular",
-    tiers: [
-      { label: "1K", priceUSD: 0.0441 },
-      { label: "2K", priceUSD: 0.0882 },
-    ],
     blurb: "Texte lisible dans l'image, compositions maîtrisées.",
     params: commonImageParams,
   },
@@ -120,7 +111,8 @@ export const MODELS: Model[] = [
     provider: "ByteDance",
     category: "image",
     unit: "image",
-    priceUSD: 0.0347,
+    priceUSD: 0.035,
+    kieEndpoint: "/seedream/5-lite-text-to-image",
     blurb: "Version économique de Seedream, parfaite pour itérer.",
     params: commonImageParams,
   },
@@ -131,10 +123,11 @@ export const MODELS: Model[] = [
     category: "image",
     unit: "image",
     badge: "new",
+    kieEndpoint: "/google/nanobanana2",
     tiers: [
-      { label: "1K", priceUSD: 0.0504 },
-      { label: "2K", priceUSD: 0.0756 },
-      { label: "4K", priceUSD: 0.1134 },
+      { label: "1K", priceUSD: 0.04 },
+      { label: "2K", priceUSD: 0.06 },
+      { label: "4K", priceUSD: 0.09 },
     ],
     blurb: "Editing conversationnel, cohérence de personnages hors norme.",
     params: commonImageParams,
@@ -145,8 +138,9 @@ export const MODELS: Model[] = [
     provider: "Google",
     category: "image",
     unit: "image",
-    priceUSD: 0.0252,
-    blurb: "Le même moteur, en mode brouillon rapide.",
+    priceUSD: 0.025,
+    kieEndpoint: "/google/nano-banana-2-lite",
+    blurb: "Version légère rapide pour itérations.",
     params: commonImageParams,
   },
   {
@@ -155,12 +149,24 @@ export const MODELS: Model[] = [
     provider: "OpenAI",
     category: "image",
     unit: "image",
+    kieEndpoint: "/gpt/gpt-image-2-text-to-image",
     tiers: [
-      { label: "1K", priceUSD: 0.0378 },
-      { label: "2K", priceUSD: 0.063 },
-      { label: "4K", priceUSD: 0.1008 },
+      { label: "1K", priceUSD: 0.03 },
+      { label: "2K", priceUSD: 0.05 },
+      { label: "4K", priceUSD: 0.08 },
     ],
     blurb: "Le meilleur pour la typographie et les mockups produit.",
+    params: commonImageParams,
+  },
+  {
+    slug: "qwen-image-20",
+    name: "Qwen Image 2.0",
+    provider: "Alibaba",
+    category: "image",
+    unit: "image",
+    priceUSD: 0.02,
+    kieEndpoint: "/qwen/text-to-image",
+    blurb: "Génération d'images haute qualité par megapixel.",
     params: commonImageParams,
   },
   {
@@ -169,8 +175,9 @@ export const MODELS: Model[] = [
     provider: "Alibaba",
     category: "image",
     unit: "image",
-    priceUSD: 0.0302,
-    blurb: "Rendus stylisés, très bon pour l'illustration commerciale.",
+    priceUSD: 0.03,
+    kieEndpoint: "/wan/2-7-image",
+    blurb: "Génération d'images par Wan 2.7.",
     params: commonImageParams,
   },
   {
@@ -179,24 +186,23 @@ export const MODELS: Model[] = [
     provider: "Alibaba",
     category: "image",
     unit: "image",
-    priceUSD: 0.0756,
+    priceUSD: 0.08,
+    kieEndpoint: "/wan/2-7-image-pro",
     badge: "pro",
-    blurb: "La version premium de Wan, détails haute fréquence.",
+    blurb: "Version pro de Wan 2.7 pour qualité supérieure.",
     params: commonImageParams,
   },
 
-  // VIDEO
+  // ── VIDEO ────────────────────────────────────────────────────────────
   {
-    slug: "seedance-2-mini",
-    name: "Seedance 2.0 Mini",
+    slug: "seedance-2",
+    name: "Seedance 2.0",
     provider: "ByteDance",
     category: "video",
     unit: "second",
-    tiers: [
-      { label: "480p", priceUSD: 0.0378 },
-      { label: "720p", priceUSD: 0.0788 },
-    ],
-    blurb: "Le plancher qualité/prix en vidéo IA. Bluffant sur les tests UGC.",
+    priceUSD: 0.057,
+    kieEndpoint: "/bytedance/seedance-2",
+    blurb: "Mouvement fluide et naturel, idéal pour le UGC.",
     params: commonVideoParams,
   },
   {
@@ -205,25 +211,32 @@ export const MODELS: Model[] = [
     provider: "ByteDance",
     category: "video",
     unit: "second",
-    badge: "popular",
-    tiers: [
-      { label: "480p", priceUSD: 0.0567 },
-      { label: "720p", priceUSD: 0.126 },
-    ],
-    blurb: "Plus rapide, mouvements plus fluides. Le workhorse quotidien.",
+    priceUSD: 0.04,
+    kieEndpoint: "/bytedance/seedance-2-fast",
+    blurb: "Seedance optimisé pour la vitesse.",
     params: commonVideoParams,
   },
   {
-    slug: "happyhorse-11",
-    name: "HappyHorse-1.1",
-    provider: "HappyHorse",
+    slug: "seedance-2-mini",
+    name: "Seedance 2.0 Mini",
+    provider: "ByteDance",
     category: "video",
     unit: "second",
-    tiers: [
-      { label: "720p", priceUSD: 0.1418 },
-      { label: "1080p", priceUSD: 0.1827 },
-    ],
-    blurb: "Rendus mode et beauté, textures peau très propres.",
+    priceUSD: 0.019,
+    kieEndpoint: "/bytedance/seedance-2-mini",
+    blurb: "Version économique pour itérations rapides.",
+    params: commonVideoParams,
+  },
+  {
+    slug: "kling-3",
+    name: "Kling 3.0",
+    provider: "Kuaishou",
+    category: "video",
+    unit: "second",
+    priceUSD: 0.07,
+    kieEndpoint: "/kling/kling-3-0",
+    badge: "popular",
+    blurb: "La référence en cinématique IA, audio inclus.",
     params: commonVideoParams,
   },
   {
@@ -232,10 +245,8 @@ export const MODELS: Model[] = [
     provider: "Kuaishou",
     category: "video",
     unit: "second",
-    tiers: [
-      { label: "720p", priceUSD: 0.1134 },
-      { label: "1080p", priceUSD: 0.1418 },
-    ],
+    priceUSD: 0.056,
+    kieEndpoint: "/kling/v3-turbo-text-to-video",
     blurb: "Kling qui rentre dans les délais serrés.",
     params: commonVideoParams,
   },
@@ -245,19 +256,9 @@ export const MODELS: Model[] = [
     provider: "Kuaishou",
     category: "video",
     unit: "second",
-    priceUSD: 0.126,
+    priceUSD: 0.063,
+    kieEndpoint: "/kling/text-to-video",
     blurb: "Version standard avec audio synchronisé.",
-    params: commonVideoParams,
-  },
-  {
-    slug: "kling-3-pro",
-    name: "Kling 3.0 Pro",
-    provider: "Kuaishou",
-    category: "video",
-    unit: "second",
-    priceUSD: 0.1701,
-    badge: "pro",
-    blurb: "La référence en cinématique IA, audio inclus.",
     params: commonVideoParams,
   },
   {
@@ -266,7 +267,8 @@ export const MODELS: Model[] = [
     provider: "Kuaishou",
     category: "video",
     unit: "second",
-    priceUSD: 0.4221,
+    priceUSD: 0.21,
+    kieEndpoint: "/kling/kling-3-0-4k",
     blurb: "Kling en 4K pour livrables broadcast.",
     params: commonVideoParams,
   },
@@ -276,24 +278,9 @@ export const MODELS: Model[] = [
     provider: "Kuaishou",
     category: "video",
     unit: "second",
-    tiers: [
-      { label: "720p", priceUSD: 0.126 },
-      { label: "1080p", priceUSD: 0.1701 },
-    ],
+    priceUSD: 0.063,
+    kieEndpoint: "/kling/motion-control-v3",
     blurb: "Contrôle précis du mouvement caméra et sujet.",
-    params: commonVideoParams,
-  },
-  {
-    slug: "grok-imagine-15",
-    name: "Grok Imagine Video 1.5",
-    provider: "xAI",
-    category: "video",
-    unit: "second",
-    tiers: [
-      { label: "480p", priceUSD: 0.0101 },
-      { label: "720p", priceUSD: 0.0189 },
-    ],
-    blurb: "Le prix le plus bas du marché pour itérer sans compter.",
     params: commonVideoParams,
   },
   {
@@ -302,11 +289,31 @@ export const MODELS: Model[] = [
     provider: "Alibaba",
     category: "video",
     unit: "second",
-    tiers: [
-      { label: "720p", priceUSD: 0.1008 },
-      { label: "1080p", priceUSD: 0.1512 },
-    ],
-    blurb: "Mouvement stable, cohérent, prêt pour les pubs sociales.",
+    priceUSD: 0.05,
+    kieEndpoint: "/wan/2-7-text-to-video",
+    blurb: "Génération vidéo par Wan 2.7.",
+    params: commonVideoParams,
+  },
+  {
+    slug: "happyhorse-11",
+    name: "HappyHorse 1.1",
+    provider: "HappyHorse",
+    category: "video",
+    unit: "second",
+    priceUSD: 0.09,
+    kieEndpoint: "/happyhorse-1-1/text-to-video",
+    blurb: "Génération vidéo créative par HappyHorse.",
+    params: commonVideoParams,
+  },
+  {
+    slug: "grok-video-15",
+    name: "Grok Video 1.5",
+    provider: "xAI",
+    category: "video",
+    unit: "second",
+    priceUSD: 0.015,
+    kieEndpoint: "/grok-imagine/1-5-preview",
+    blurb: "Le prix le plus bas du marché pour itérer sans compter.",
     params: commonVideoParams,
   },
   {
@@ -314,12 +321,10 @@ export const MODELS: Model[] = [
     name: "Gemini Omni Video",
     provider: "Google",
     category: "video",
-    unit: "clip",
-    tiers: [
-      { label: "8s sans référence", priceUSD: 0.6615 },
-      { label: "8s avec vidéo", priceUSD: 1.0584 },
-    ],
-    blurb: "Vidéo + audio + suite logique. Le tout-en-un premium.",
+    unit: "second",
+    priceUSD: 0.66,
+    kieEndpoint: "/gemini-omni-video",
+    blurb: "Modèle vidéo Gemini, réalisme exceptionnel.",
     params: commonVideoParams,
   },
   {
@@ -328,29 +333,32 @@ export const MODELS: Model[] = [
     provider: "ByteDance",
     category: "video",
     unit: "second",
-    priceUSD: 0.1701,
-    blurb: "Personnages parlants réalistes à partir d'une seule photo.",
+    priceUSD: 0.085,
+    kieEndpoint: "/omnihuman-1-5",
+    blurb: "Génération de personnages réalistes.",
     params: commonVideoParams,
   },
   {
-    slug: "volc-lip-sync",
+    slug: "volcengine-lip-sync",
     name: "Volcengine Lip Sync",
-    provider: "Volcengine",
+    provider: "ByteDance",
     category: "video",
     unit: "second",
-    priceUSD: 0.0504,
-    blurb: "Synchronisation labiale sur vidéo existante.",
+    priceUSD: 0.025,
+    kieEndpoint: "/volcengine/video-to-video-lip-sync",
+    blurb: "Synchronisation labiale précise.",
     params: commonVideoParams,
   },
 
-  // AUDIO
+  // ── AUDIO ────────────────────────────────────────────────────────────
   {
     slug: "eleven-v3",
     name: "ElevenLabs Text-to-Dialogue V3",
     provider: "ElevenLabs",
     category: "audio",
     unit: "1k-chars",
-    priceUSD: 0.0882,
+    priceUSD: 0.07,
+    kieEndpoint: "/elevenlabs/text-to-dialogue-v3",
     badge: "popular",
     blurb: "Voix off multilingues au niveau studio, dialogues naturels.",
     params: [
@@ -402,79 +410,17 @@ export const MODELS: Model[] = [
     ],
   },
 
-  // LLM
-  {
-    slug: "claude-sonnet-5",
-    name: "Claude Sonnet 5",
-    provider: "Anthropic",
-    category: "text",
-    unit: "1m-tokens-io",
-    io: { inputUSD: 1.071, outputUSD: 5.3865 },
-    badge: "popular",
-    blurb: "Le meilleur compromis raisonnement/vitesse d'Anthropic.",
-    params: [
-      {
-        kind: "prompt",
-        label: "Prompt système + message",
-        placeholder: "Explique le brief client en trois puces.",
-      },
-    ],
-  },
-  {
-    slug: "claude-fable-5",
-    name: "Claude Fable 5",
-    provider: "Anthropic",
-    category: "text",
-    unit: "1m-tokens-io",
-    io: { inputUSD: 5.04, outputUSD: 25.2 },
-    badge: "pro",
-    blurb: "Modèle narratif : storyboards, scripts longs.",
-    params: [
-      {
-        kind: "prompt",
-        label: "Prompt",
-        placeholder: "Écris un pitch de mini-série en 4 épisodes.",
-      },
-    ],
-  },
-  {
-    slug: "claude-opus-48",
-    name: "Claude Opus 4.8",
-    provider: "Anthropic",
-    category: "text",
-    unit: "1m-tokens-io",
-    io: { inputUSD: 2.52, outputUSD: 12.6 },
-    blurb: "Raisonnement profond, analyses stratégiques.",
-    params: [{ kind: "prompt", label: "Prompt" }],
-  },
+  // ── LLM ──────────────────────────────────────────────────────────────
   {
     slug: "claude-opus-47",
     name: "Claude Opus 4.7",
     provider: "Anthropic",
     category: "text",
     unit: "1m-tokens-io",
-    io: { inputUSD: 1.7955, outputUSD: 9.009 },
-    blurb: "Opus stable pour code et docs longues.",
-    params: [{ kind: "prompt", label: "Prompt" }],
-  },
-  {
-    slug: "claude-opus-46",
-    name: "Claude Opus 4.6",
-    provider: "Anthropic",
-    category: "text",
-    unit: "1m-tokens-io",
-    io: { inputUSD: 1.7955, outputUSD: 9.009 },
-    blurb: "Version précédente d'Opus, toujours excellente.",
-    params: [{ kind: "prompt", label: "Prompt" }],
-  },
-  {
-    slug: "claude-opus-45",
-    name: "Claude Opus 4.5",
-    provider: "Anthropic",
-    category: "text",
-    unit: "1m-tokens-io",
-    io: { inputUSD: 1.7955, outputUSD: 9.009 },
-    blurb: "Bon rapport qualité/prix sur Opus.",
+    io: { inputUSD: 1.425, outputUSD: 7.15 },
+    kieEndpoint: "/claude/claude-opus-4-7",
+    badge: "pro",
+    blurb: "Raisonnement profond, analyses stratégiques, code exigeant.",
     params: [{ kind: "prompt", label: "Prompt" }],
   },
   {
@@ -483,28 +429,10 @@ export const MODELS: Model[] = [
     provider: "Anthropic",
     category: "text",
     unit: "1m-tokens-io",
-    io: { inputUSD: 1.071, outputUSD: 5.3865 },
-    blurb: "Sonnet précédent, très solide.",
-    params: [{ kind: "prompt", label: "Prompt" }],
-  },
-  {
-    slug: "claude-sonnet-45",
-    name: "Claude Sonnet 4.5",
-    provider: "Anthropic",
-    category: "text",
-    unit: "1m-tokens-io",
-    io: { inputUSD: 1.071, outputUSD: 5.3865 },
-    blurb: "Sonnet stable pour production.",
-    params: [{ kind: "prompt", label: "Prompt" }],
-  },
-  {
-    slug: "claude-haiku-45",
-    name: "Claude Haiku 4.5",
-    provider: "Anthropic",
-    category: "text",
-    unit: "1m-tokens-io",
-    io: { inputUSD: 0.3465, outputUSD: 1.7955 },
-    blurb: "Ultra-rapide, parfait pour du routage.",
+    io: { inputUSD: 0.85, outputUSD: 4.275 },
+    kieEndpoint: "/claude/claude-sonnet-4-6",
+    badge: "popular",
+    blurb: "Le meilleur compromis raisonnement/vitesse d'Anthropic.",
     params: [{ kind: "prompt", label: "Prompt" }],
   },
   {
@@ -513,49 +441,10 @@ export const MODELS: Model[] = [
     provider: "OpenAI",
     category: "text",
     unit: "1m-tokens-io",
-    io: { inputUSD: 1.764, outputUSD: 10.584 },
+    io: { inputUSD: 1.4, outputUSD: 8.4 },
+    kieEndpoint: "/chat/gpt-5-5",
     badge: "new",
     blurb: "Le nouveau flagship OpenAI, raisonnement lourd.",
-    params: [{ kind: "prompt", label: "Prompt" }],
-  },
-  {
-    slug: "gpt-54",
-    name: "GPT-5.4",
-    provider: "OpenAI",
-    category: "text",
-    unit: "1m-tokens-io",
-    io: { inputUSD: 0.882, outputUSD: 7.056 },
-    blurb: "Le sweet spot GPT-5.",
-    params: [{ kind: "prompt", label: "Prompt" }],
-  },
-  {
-    slug: "gpt-52",
-    name: "GPT-5.2",
-    provider: "OpenAI",
-    category: "text",
-    unit: "1m-tokens-io",
-    io: { inputUSD: 0.5544, outputUSD: 4.41 },
-    blurb: "GPT-5 léger, très rentable.",
-    params: [{ kind: "prompt", label: "Prompt" }],
-  },
-  {
-    slug: "gpt-5-codex-a",
-    name: "GPT-5 Codex 5.2–5.4",
-    provider: "OpenAI",
-    category: "text",
-    unit: "1m-tokens-io",
-    io: { inputUSD: 0.882, outputUSD: 7.056 },
-    blurb: "Spécialisé code, refactor et review.",
-    params: [{ kind: "prompt", label: "Prompt" }],
-  },
-  {
-    slug: "gpt-5-codex-b",
-    name: "GPT-5 Codex 5–5.1",
-    provider: "OpenAI",
-    category: "text",
-    unit: "1m-tokens-io",
-    io: { inputUSD: 0.63, outputUSD: 5.04 },
-    blurb: "Codex à moindre coût.",
     params: [{ kind: "prompt", label: "Prompt" }],
   },
   {
@@ -564,28 +453,9 @@ export const MODELS: Model[] = [
     provider: "Google",
     category: "text",
     unit: "1m-tokens-io",
-    io: { inputUSD: 0.63, outputUSD: 4.41 },
-    blurb: "Contexte long, multimodal natif.",
-    params: [{ kind: "prompt", label: "Prompt" }],
-  },
-  {
-    slug: "gemini-35-flash",
-    name: "Gemini 3.5 Flash",
-    provider: "Google",
-    category: "text",
-    unit: "1m-tokens-io",
-    io: { inputUSD: 0.567, outputUSD: 3.402 },
-    blurb: "Rapide et pas cher, pour le volume.",
-    params: [{ kind: "prompt", label: "Prompt" }],
-  },
-  {
-    slug: "gemini-25-flash",
-    name: "Gemini 2.5 Flash",
-    provider: "Google",
-    category: "text",
-    unit: "1m-tokens-io",
-    io: { inputUSD: 0.1134, outputUSD: 0.945 },
-    blurb: "Le tarif plancher pour du LLM en masse.",
+    io: { inputUSD: 0.5, outputUSD: 0.5 },
+    kieEndpoint: "/gemini/gemini-3-1-pro",
+    blurb: "Contexte long, multimodal natif, très performant.",
     params: [{ kind: "prompt", label: "Prompt" }],
   },
 ];
@@ -609,8 +479,6 @@ export function unitLabel(m: Model): string {
       return "/ image";
     case "second":
       return "/ seconde";
-    case "clip":
-      return "/ clip";
     case "1k-chars":
       return "/ 1 000 caractères";
     case "1m-tokens-io":

@@ -123,7 +123,7 @@ function AgentPage() {
         chosen: getModel("eleven-v3")!,
         reason:
           "ElevenLabs V3 gère six langues avec une intonation naturelle — c'est l'option la plus solide pour une voix off éditoriale.",
-        alts: [getModel("kling-3-pro")!],
+        alts: [getModel("kling-3")!],
       };
     }
     if (kind === "image") {
@@ -135,9 +135,9 @@ function AgentPage() {
       };
     }
     return {
-      chosen: getModel("claude-sonnet-5")!,
+      chosen: getModel("claude-sonnet-46")!,
       reason:
-        "Claude Sonnet 5 est le meilleur équilibre raisonnement/vitesse pour du texte structuré.",
+        "Claude Sonnet 4.6 est le meilleur équilibre raisonnement/vitesse pour du texte structuré.",
       alts: [getModel("gpt-55")!, getModel("gemini-31-pro")!],
     };
   }
