@@ -10,6 +10,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 import { NeonAuthUIProvider } from "@neondatabase/auth-ui";
 import { authClient } from "../auth";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -143,6 +144,7 @@ function RootShell({ children }: { children: ReactNode }) {
       <body>
         {children}
         <Scripts />
+        <SpeedInsights />
       </body>
     </html>
   );
