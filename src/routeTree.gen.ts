@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppPreviewRouteImport } from './routes/app-preview'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CanvasIndexRouteImport } from './routes/canvas/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as RCodeRouteImport } from './routes/r.$code'
 import { Route as AuthPathnameRouteImport } from './routes/auth.$pathname'
@@ -35,6 +36,11 @@ const AppRoute = AppRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CanvasIndexRoute = CanvasIndexRouteImport.update({
+  id: '/canvas/',
+  path: '/canvas/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppIndexRoute = AppIndexRouteImport.update({
@@ -95,6 +101,7 @@ export interface FileRoutesByFullPath {
   '/auth/$pathname': typeof AuthPathnameRoute
   '/r/$code': typeof RCodeRoute
   '/app/': typeof AppIndexRoute
+  '/canvas/': typeof CanvasIndexRoute
   '/app/models/$slug': typeof AppModelsSlugRoute
 }
 export interface FileRoutesByTo {
@@ -108,6 +115,7 @@ export interface FileRoutesByTo {
   '/auth/$pathname': typeof AuthPathnameRoute
   '/r/$code': typeof RCodeRoute
   '/app': typeof AppIndexRoute
+  '/canvas': typeof CanvasIndexRoute
   '/app/models/$slug': typeof AppModelsSlugRoute
 }
 export interface FileRoutesById {
@@ -123,6 +131,7 @@ export interface FileRoutesById {
   '/auth/$pathname': typeof AuthPathnameRoute
   '/r/$code': typeof RCodeRoute
   '/app/': typeof AppIndexRoute
+  '/canvas/': typeof CanvasIndexRoute
   '/app/models/$slug': typeof AppModelsSlugRoute
 }
 export interface FileRouteTypes {
@@ -139,6 +148,7 @@ export interface FileRouteTypes {
     | '/auth/$pathname'
     | '/r/$code'
     | '/app/'
+    | '/canvas/'
     | '/app/models/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -152,6 +162,7 @@ export interface FileRouteTypes {
     | '/auth/$pathname'
     | '/r/$code'
     | '/app'
+    | '/canvas'
     | '/app/models/$slug'
   id:
     | '__root__'
@@ -166,6 +177,7 @@ export interface FileRouteTypes {
     | '/auth/$pathname'
     | '/r/$code'
     | '/app/'
+    | '/canvas/'
     | '/app/models/$slug'
   fileRoutesById: FileRoutesById
 }
@@ -176,6 +188,7 @@ export interface RootRouteChildren {
   AccountPathnameRoute: typeof AccountPathnameRoute
   AuthPathnameRoute: typeof AuthPathnameRoute
   RCodeRoute: typeof RCodeRoute
+  CanvasIndexRoute: typeof CanvasIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -199,6 +212,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/canvas/': {
+      id: '/canvas/'
+      path: '/canvas'
+      fullPath: '/canvas/'
+      preLoaderRoute: typeof CanvasIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/': {
@@ -304,6 +324,7 @@ const rootRouteChildren: RootRouteChildren = {
   AccountPathnameRoute: AccountPathnameRoute,
   AuthPathnameRoute: AuthPathnameRoute,
   RCodeRoute: RCodeRoute,
+  CanvasIndexRoute: CanvasIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

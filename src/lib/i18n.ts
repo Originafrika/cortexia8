@@ -162,6 +162,7 @@ const fr: Dict = {
   // App
   "app.nav.agent": "Agent",
   "app.nav.models": "Modèles",
+  "app.nav.canvas": "Canvas",
   "app.nav.history": "Historique",
   "app.nav.dev": "Développeur",
   "app.nav.account": "Compte",
@@ -330,6 +331,7 @@ const en: Dict = {
 
   "app.nav.agent": "Agent",
   "app.nav.models": "Models",
+  "app.nav.canvas": "Canvas",
   "app.nav.history": "History",
   "app.nav.dev": "Developer",
   "app.nav.account": "Account",
