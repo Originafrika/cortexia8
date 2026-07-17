@@ -31,7 +31,7 @@ export const Route = createFileRoute("/app")({
         search: { next: location.href },
       });
     }
-    const role = await getUserRole(session.user.id);
+    const role = await getUserRole(session.user.email);
     if (role !== "admin") {
       throw redirect({ to: "/access-denied" });
     }
