@@ -23,20 +23,15 @@ export const Route = createFileRoute("/app")({
     meta: [{ title: "Cortexia — App" }, { name: "robots", content: "noindex,nofollow" }],
   }),
   beforeLoad: async ({ location }) => {
-    console.log("[app:beforeLoad] fired, path:", location.pathname);
     const session = await authClient.getSession();
-    console.log("[app:beforeLoad] session:", session?.user ? " authenticated" : " no session");
     if (!session?.user) {
-      console.log("[app:beforeLoad] → redirect to /auth/sign-in");
       throw redirect({
         to: "/auth/sign-in",
         search: { next: location.href },
       });
     }
-    // Dynamic import — keeps @neondatabase/serverless out of the client bundle
     const { getUserRole } = await import("@/lib/auth/role");
     const role = await getUserRole(session.user.email);
-    console.log("[app:beforeLoad] role:", role, "→", role === "admin" ? "ALLOWED" : "→ /access-denied");
     if (role !== "admin") {
       throw redirect({ to: "/access-denied" });
     }

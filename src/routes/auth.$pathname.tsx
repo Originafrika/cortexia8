@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useState, useEffect, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { authClient } from "@/auth";
 import { ArrowRight, Mail, KeyRound, AlertCircle } from "lucide-react";
 import { AmbientBackground } from "@/components/ambient-background";
@@ -32,13 +32,6 @@ function Auth() {
     setInfo("");
   };
 
-  useEffect(() => {
-    console.log("[auth] mounted, mode:", mode);
-    console.log("[auth] VITE_NEON_AUTH_URL:", import.meta.env.VITE_NEON_AUTH_URL ? "SET" : "UNSET");
-    console.log("[auth] authClient:", authClient);
-    console.log("[auth] authClient.signIn:", authClient?.signIn);
-  }, []);
-
   async function handleSignUp(e: FormEvent) {
     e.preventDefault();
     reset();
@@ -69,13 +62,10 @@ function Auth() {
     reset();
     setLoading(true);
     try {
-      console.log("[auth] calling authClient.signIn.email...");
-      const result = await authClient.signIn.email({ email, password });
-      console.log("[auth] signIn result:", JSON.stringify(result));
-      if (result.error) throw result.error;
+      const { error } = await authClient.signIn.email({ email, password });
+      if (error) throw error;
       navigate({ to: "/app" });
     } catch (err) {
-      console.error("[auth] signIn error:", err);
       const msg = err instanceof Error ? err.message : "Identifiants invalides.";
       // If Neon returned "email not verified", switch to the verify step and send a code.
       if (/verif/i.test(msg)) {
@@ -221,12 +211,7 @@ function Auth() {
                   {info && <Alert kind="info">{info}</Alert>}
 
                   <button
-                    type="button"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (mode === "sign-up") { console.log("[auth] sign-up clicked"); handleSignUp(e as unknown as FormEvent).catch(console.error); }
-                      else { console.log("[auth] sign-in clicked"); handleSignIn(e as unknown as FormEvent).catch(console.error); }
-                    }}
+                    type="submit"
                     disabled={loading || !email || !password}
                     className="group mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-amber px-5 py-3 text-sm font-medium text-primary-foreground disabled:opacity-40 hover:opacity-95 transition"
                   >
