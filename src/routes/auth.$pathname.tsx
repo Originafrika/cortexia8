@@ -32,7 +32,12 @@ function Auth() {
     setInfo("");
   };
 
-  useEffect(() => { console.log("[auth] mounted, mode:", mode); }, []);
+  useEffect(() => {
+    console.log("[auth] mounted, mode:", mode);
+    console.log("[auth] VITE_NEON_AUTH_URL:", import.meta.env.VITE_NEON_AUTH_URL ? "SET" : "UNSET");
+    console.log("[auth] authClient:", authClient);
+    console.log("[auth] authClient.signIn:", authClient?.signIn);
+  }, []);
 
   async function handleSignUp(e: FormEvent) {
     e.preventDefault();
@@ -64,10 +69,13 @@ function Auth() {
     reset();
     setLoading(true);
     try {
-      const { error } = await authClient.signIn.email({ email, password });
-      if (error) throw error;
+      console.log("[auth] calling authClient.signIn.email...");
+      const result = await authClient.signIn.email({ email, password });
+      console.log("[auth] signIn result:", JSON.stringify(result));
+      if (result.error) throw result.error;
       navigate({ to: "/app" });
     } catch (err) {
+      console.error("[auth] signIn error:", err);
       const msg = err instanceof Error ? err.message : "Identifiants invalides.";
       // If Neon returned "email not verified", switch to the verify step and send a code.
       if (/verif/i.test(msg)) {
