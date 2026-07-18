@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { authClient } from "@/auth";
 import { ArrowRight, Mail, KeyRound, AlertCircle } from "lucide-react";
 import { AmbientBackground } from "@/components/ambient-background";
@@ -31,6 +31,8 @@ function Auth() {
     setError("");
     setInfo("");
   };
+
+  useEffect(() => { console.log("[auth] mounted, mode:", mode); }, []);
 
   async function handleSignUp(e: FormEvent) {
     e.preventDefault();
@@ -214,8 +216,8 @@ function Auth() {
                     type="button"
                     onClick={(e) => {
                       e.preventDefault();
-                      if (mode === "sign-up") handleSignUp(e as unknown as FormEvent);
-                      else handleSignIn(e as unknown as FormEvent);
+                      if (mode === "sign-up") { console.log("[auth] sign-up clicked"); handleSignUp(e as unknown as FormEvent).catch(console.error); }
+                      else { console.log("[auth] sign-in clicked"); handleSignIn(e as unknown as FormEvent).catch(console.error); }
                     }}
                     disabled={loading || !email || !password}
                     className="group mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-amber px-5 py-3 text-sm font-medium text-primary-foreground disabled:opacity-40 hover:opacity-95 transition"
