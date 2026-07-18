@@ -211,7 +211,12 @@ function Auth() {
                   {info && <Alert kind="info">{info}</Alert>}
 
                   <button
-                    type="submit"
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (mode === "sign-up") handleSignUp(e as unknown as FormEvent);
+                      else handleSignIn(e as unknown as FormEvent);
+                    }}
                     disabled={loading || !email || !password}
                     className="group mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-amber px-5 py-3 text-sm font-medium text-primary-foreground disabled:opacity-40 hover:opacity-95 transition"
                   >
