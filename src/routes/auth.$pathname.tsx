@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { authClient } from "@/auth";
+import { saveSession } from "@/lib/auth-store";
 import { ArrowRight, Mail, KeyRound, AlertCircle } from "lucide-react";
 import { AmbientBackground } from "@/components/ambient-background";
 
@@ -62,8 +63,20 @@ function Auth() {
     reset();
     setLoading(true);
     try {
-      const { error } = await authClient.signIn.email({ email, password });
-      if (error) throw error;
+      const result = await authClient.signIn.email({ email, password });
+      if (result.error) throw result.error;
+      if (result.data?.user) {
+        saveSession({
+          token: result.data.token,
+          user: {
+            id: result.data.user.id,
+            name: result.data.user.name,
+            email: result.data.user.email,
+            role: result.data.user.role ?? "user",
+            emailVerified: result.data.user.emailVerified ?? false,
+          },
+        });
+      }
       navigate({ to: "/app" });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Identifiants invalides.";

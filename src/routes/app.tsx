@@ -3,8 +3,7 @@ import { AmbientBackground } from "@/components/ambient-background";
 import { LocalePicker } from "@/components/locale-picker";
 import { PriceDisplay } from "@/components/price-display";
 import { OnboardingOverlay, useOnboarding } from "@/components/onboarding-overlay";
-import { SignedIn, RedirectToSignIn } from "@neondatabase/auth-ui";
-import { authClient } from "@/auth";
+import { loadSession, clearSession } from "@/lib/auth-store";
 import {
   MessageSquare,
   LayoutGrid,
@@ -23,15 +22,16 @@ export const Route = createFileRoute("/app")({
     meta: [{ title: "Cortexia — App" }, { name: "robots", content: "noindex,nofollow" }],
   }),
   beforeLoad: async ({ location }) => {
-    const session = await authClient.getSession();
-    if (!session?.user) {
+    const stored = loadSession();
+    if (!stored?.user?.email) {
+      clearSession();
       throw redirect({
         to: "/auth/sign-in",
         search: { next: location.href },
       });
     }
     const { getUserRole } = await import("@/lib/auth/role");
-    const role = await getUserRole(session.user.email);
+    const role = await getUserRole(stored.user.email);
     if (role !== "admin") {
       throw redirect({ to: "/access-denied" });
     }
