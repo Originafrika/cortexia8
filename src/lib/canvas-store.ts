@@ -193,7 +193,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
         ),
       });
 
-      await pollGenerationStatus(id, runNodeExecId);
+      await pollGenerationStatus(set, get, id, runNodeExecId);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Erreur inconnue";
       set({
@@ -209,10 +209,36 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
   runAll: async () => {
     if (get().readOnly) return;
     const order = topoSort(get().nodes, get().edges);
+    const failedNodes = new Set<string>();
     for (const id of order) {
       const node = get().nodes.find((n) => n.id === id);
-      if (node && node.data.status !== "running") {
-        await get().runNode(id);
+      if (!node || node.data.status === "running") continue;
+      const upstreamFailed = get().edges.some(
+        (e) => e.target === id && failedNodes.has(e.source),
+      );
+      if (upstreamFailed) {
+        set({
+          nodes: get().nodes.map((n) =>
+            n.id === id
+              ? {
+                  ...n,
+                  data: {
+                    ...n.data,
+                    status: "error",
+                    step: "Dépendance en échec",
+                    progress: 0,
+                  },
+                }
+              : n,
+          ),
+        });
+        failedNodes.add(id);
+        continue;
+      }
+      await get().runNode(id);
+      const updated = get().nodes.find((n) => n.id === id);
+      if (updated?.data.status === "error") {
+        failedNodes.add(id);
       }
     }
   },
@@ -234,108 +260,140 @@ function initStateForModel(m: Model): Record<string, unknown> {
 
 const POLL_INTERVAL_MS = 2000;
 const MAX_POLL_ATTEMPTS = 150;
+const MAX_CONSECUTIVE_ERRORS = 5;
 
-async function pollGenerationStatus(nodeId: string, runNodeExecId: number) {
-  for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++) {
-    await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
+function pollGenerationStatus(
+  set: (partial: CanvasState | ((s: CanvasState) => Partial<CanvasState>)) => void,
+  get: () => CanvasState,
+  nodeId: string,
+  runNodeExecId: number,
+) {
+  let consecutiveErrors = 0;
 
-    try {
-      const status = await generationStatus({ data: { id: runNodeExecId } });
+  return (async () => {
+    for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++) {
+      await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
 
-      const nodeExec = status.nodes.find((n) => n.id === runNodeExecId);
-      if (!nodeExec) continue;
+      try {
+        const status = await generationStatus({ data: { id: runNodeExecId } });
+        consecutiveErrors = 0;
 
-      const kieStatus = nodeExec.status;
-      const progress = kieStatus === "running" ? 60 : kieStatus === "queued" ? 30 : 0;
-      const stepLabel =
-        kieStatus === "running"
-          ? "Génération en cours…"
-          : kieStatus === "queued"
-            ? "En file d'attente…"
-            : "";
+        const nodeExec = status.nodes.find((n) => n.id === runNodeExecId);
+        if (!nodeExec) continue;
 
-      if (kieStatus === "running" || kieStatus === "queued") {
-        set({
-          nodes: get().nodes.map((n) =>
-            n.id === nodeId
-              ? { ...n, data: { ...n.data, progress, step: stepLabel } }
-              : n,
-          ),
-        });
-        continue;
-      }
+        const kieStatus = nodeExec.status;
+        const progress = kieStatus === "running" ? 60 : kieStatus === "queued" ? 30 : 0;
+        const stepLabel =
+          kieStatus === "running"
+            ? "Génération en cours…"
+            : kieStatus === "queued"
+              ? "En file d'attente…"
+              : "";
 
-      if (kieStatus === "success" || kieStatus === "succeeded") {
-        const asset = nodeExec.asset;
-        let result: NodeResult | null = null;
-        if (asset) {
-          const url = asset.previewUrl || asset.storageUrl;
-          if (asset.type === "image") {
-            result = { kind: "image", url };
-          } else if (asset.type === "video") {
-            result = { kind: "video", url };
-          } else if (asset.type === "audio") {
-            result = { kind: "audio", url };
-          }
+        if (kieStatus === "running" || kieStatus === "queued") {
+          set({
+            nodes: get().nodes.map((n) =>
+              n.id === nodeId
+                ? { ...n, data: { ...n.data, progress, step: stepLabel } }
+                : n,
+            ),
+          });
+          continue;
         }
-        set({
-          nodes: get().nodes.map((n) =>
-            n.id === nodeId
-              ? {
-                  ...n,
-                  data: {
-                    ...n.data,
-                    status: "done",
-                    progress: 100,
-                    step: "",
-                    result,
-                    lastRunAt: new Date().toISOString(),
-                  },
-                }
-              : n,
-          ),
-        });
-        return;
-      }
 
-      if (kieStatus === "failed" || kieStatus === "error") {
-        set({
-          nodes: get().nodes.map((n) =>
-            n.id === nodeId
-              ? {
-                  ...n,
-                  data: {
-                    ...n.data,
-                    status: "error",
-                    step: nodeExec.errorMessage || "Échec de la génération",
-                    progress: 0,
-                  },
-                }
-              : n,
-          ),
-        });
-        return;
-      }
-    } catch {
-      // Polling error — retry
-    }
-  }
-
-  set({
-    nodes: get().nodes.map((n) =>
-      n.id === nodeId
-        ? {
-            ...n,
-            data: {
-              ...n.data,
-              status: "error",
-              step: "Délai d'attente dépassé",
-              progress: 0,
-            },
+        if (kieStatus === "success" || kieStatus === "succeeded") {
+          const asset = nodeExec.asset;
+          let result: NodeResult | null = null;
+          if (asset) {
+            const url = asset.previewUrl || asset.storageUrl;
+            if (asset.type === "image") {
+              result = { kind: "image", url };
+            } else if (asset.type === "video") {
+              result = { kind: "video", url };
+            } else if (asset.type === "audio") {
+              result = { kind: "audio", url };
+            } else if (asset.type === "text") {
+              result = { kind: "text", text: url };
+            }
           }
-        : n,
-    ),
-  });
+          set({
+            nodes: get().nodes.map((n) =>
+              n.id === nodeId
+                ? {
+                    ...n,
+                    data: {
+                      ...n.data,
+                      status: "done",
+                      progress: 100,
+                      step: "",
+                      result,
+                      lastRunAt: new Date().toISOString(),
+                    },
+                  }
+                : n,
+            ),
+          });
+          return;
+        }
+
+        if (kieStatus === "failed" || kieStatus === "error") {
+          set({
+            nodes: get().nodes.map((n) =>
+              n.id === nodeId
+                ? {
+                    ...n,
+                    data: {
+                      ...n.data,
+                      status: "error",
+                      step: nodeExec.errorMessage || "Échec de la génération",
+                      progress: 0,
+                    },
+                  }
+                : n,
+            ),
+          });
+          return;
+        }
+      } catch (err) {
+        consecutiveErrors++;
+        if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+          const message = err instanceof Error ? err.message : "Erreur de polling persistante";
+          set({
+            nodes: get().nodes.map((n) =>
+              n.id === nodeId
+                ? {
+                    ...n,
+                    data: {
+                      ...n.data,
+                      status: "error",
+                      step: message,
+                      progress: 0,
+                    },
+                  }
+                : n,
+            ),
+          });
+          return;
+        }
+      }
+    }
+
+    set({
+      nodes: get().nodes.map((n) =>
+        n.id === nodeId
+          ? {
+              ...n,
+              data: {
+                ...n.data,
+                status: "error",
+                step: "Délai d'attente dépassé",
+                progress: 0,
+              },
+            }
+          : n,
+      ),
+    });
+  })();
 }
 
 /** Topological order respecting edge direction (sources first). */
