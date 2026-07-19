@@ -2,9 +2,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { PriceDisplay } from "@/components/price-display";
 import { CurrencyPicker } from "@/components/currency-picker";
-import { CreditCard, Smartphone, Bitcoin, Wallet, Check } from "lucide-react";
+import { CreditCard, Smartphone, Bitcoin, Wallet, Check, Loader2 } from "lucide-react";
 import { useCurrency, formatMoney } from "@/lib/currency";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { verifyFedaPayTransaction, createStripeCheckout } from "@/lib/api/payments";
 
 export const Route = createFileRoute("/app/account")({
   component: AccountPage,
@@ -35,7 +37,62 @@ function AccountPage() {
   const c = useCurrency();
   const [method, setMethod] = useState<string>("mm");
   const [amount, setAmount] = useState<number>(10);
+  const [loading, setLoading] = useState(false);
   const balance = 24.63;
+
+  const fedapayKey = import.meta.env.VITE_FEDAPAY_PUBLIC_KEY as string | undefined;
+
+  async function handleRecharge() {
+    setLoading(true);
+    try {
+      if (method === "mm") {
+        // FedaPay: the button handles its own flow.
+        // We only reach here if FedaPay isn't loaded — fall through.
+        toast.info("Veuillez utiliser le bouton FedaPay ci-dessous.");
+        return;
+      }
+
+      if (method === "card") {
+        const result = await createStripeCheckout({
+          data: { amount, currency: "usd" },
+        });
+        if (result.ok && result.url) {
+          window.location.href = result.url;
+        } else {
+          toast.error(result.error ?? "Impossible de créer la session Stripe.");
+        }
+        return;
+      }
+
+      toast.info("Ce mode de paiement n'est pas encore disponible.");
+    } catch (err) {
+      console.error(err);
+      toast.error("Une erreur est survenue. Réessaie.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleFedaPayComplete(transactionId: string) {
+    try {
+      const result = await verifyFedaPayTransaction({
+        data: { transactionId, amount },
+      });
+      if (result.ok) {
+        toast.success("Crédits ajoutés avec succès !");
+      } else {
+        toast.error(result.message ?? "Vérification échouée.");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Erreur lors de la vérification FedaPay.");
+    }
+  }
+
+  const isFedaPayReady = method === "mm" && !!fedapayKey;
+  const isStripeReady = method === "card";
+  const canRecharge = isStripeReady || method === "mm";
+  const isUnsupported = method === "crypto" || method === "ali";
 
   return (
     <div className="mx-auto max-w-6xl px-5 sm:px-8 py-10 space-y-10">
@@ -135,9 +192,43 @@ function AccountPage() {
                 </button>
               ))}
             </div>
-            <button className="mt-5 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber px-5 py-3 text-sm font-medium text-primary-foreground hover:opacity-95 transition">
-              Recharger {formatMoney(amount, c)}
-            </button>
+
+            {/* FedaPay button (Mobile Money) */}
+            {isFedaPayReady && (
+              <div className="mt-5">
+                <FedaPayWidget
+                  amount={amount}
+                  public_key={fedapayKey!}
+                  onComplete={handleFedaPayComplete}
+                />
+              </div>
+            )}
+
+            {/* Generic recharge button (Stripe / unsupported) */}
+            {!isFedaPayReady && (
+              <button
+                onClick={handleRecharge}
+                disabled={loading || isUnsupported}
+                className={cn(
+                  "mt-5 w-full inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-medium transition",
+                  isUnsupported
+                    ? "bg-surface-3 text-muted-foreground cursor-not-allowed"
+                    : "bg-amber text-primary-foreground hover:opacity-95",
+                )}
+              >
+                {loading ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  `Recharger ${formatMoney(amount, c)}`
+                )}
+              </button>
+            )}
+
+            {isUnsupported && (
+              <p className="mt-2 text-[11px] text-muted-foreground">
+                Bientôt disponible.
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -185,4 +276,62 @@ function AccountPage() {
       </div>
     </div>
   );
+}
+
+// ---------------------------------------------------------------------------
+// FedaPay wrapper (lazy-loads the button to avoid SSR issues)
+// ---------------------------------------------------------------------------
+
+function FedaPayWidget({
+  amount,
+  public_key,
+  onComplete,
+}: {
+  amount: number;
+  public_key: string;
+  onComplete: (transactionId: string) => void;
+}) {
+  const [FedaCheckoutButton, setFedaCheckoutButton] = useState<any>(null);
+
+  // Dynamic import to avoid SSR issues with the FedaPay CDN script
+  useState(() => {
+    if (typeof window !== "undefined") {
+      import("fedapay-reactjs").then((mod) => {
+        setFedaCheckoutButton(() => mod.FedaCheckoutButton);
+      });
+    }
+  });
+
+  if (!FedaCheckoutButton) {
+    return (
+      <button disabled className="mt-5 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber px-5 py-3 text-sm font-medium text-primary-foreground opacity-60 cursor-wait">
+        <Loader2 className="size-4 animate-spin" />
+        Chargement FedaPay…
+      </button>
+    );
+  }
+
+  const options = {
+    public_key,
+    transaction: {
+      amount,
+      description: "Recharge de crédits Cortexia",
+    },
+    currency: {
+      iso: "XOF" as const,
+    },
+    button: {
+      class: "mt-5 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber px-5 py-3 text-sm font-medium text-primary-foreground hover:opacity-95 transition",
+      text: `Recharger ${amount} XOF`,
+    },
+    onComplete(resp: { reason?: string; transaction?: { id?: number } }) {
+      const FedaPay = window.FedaPay;
+      if (FedaPay && resp.reason === FedaPay.DIALOG_DISMISSED) return;
+      if (resp.transaction?.id) {
+        onComplete(String(resp.transaction.id));
+      }
+    },
+  };
+
+  return <FedaCheckoutButton options={options as any} />;
 }

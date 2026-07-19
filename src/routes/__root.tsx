@@ -143,6 +143,7 @@ function RootShell({ children }: { children: ReactNode }) {
       <body>
         {children}
         <Scripts />
+        <script src="https://cdn.fedapay.com/checkout.js?v=1.1.7" />
       </body>
     </html>
   );

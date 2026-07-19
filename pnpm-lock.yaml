@@ -142,6 +142,9 @@ importers:
       embla-carousel-react:
         specifier: ^8.6.0
         version: 8.6.0(react@19.2.7)
+      fedapay-reactjs:
+        specifier: ^1.1.2
+        version: 1.1.2(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       framer-motion:
         specifier: ^12.42.2
         version: 12.42.2(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -2789,6 +2792,13 @@ packages:
     peerDependenciesMeta:
       picomatch:
         optional: true
+
+  fedapay-reactjs@1.1.2:
+    resolution: {integrity: sha512-sqI0IHDdMjrtLmBtEb7t2rnZ/YX7vv1/9XTOp3pt9ryQW3jADa8vaUEZ2LvJ1F2VKf/h5c0ZMhdM0ZSIeuQrcQ==}
+    engines: {node: '>=8', npm: '>=5'}
+    peerDependencies:
+      react: ^18.3.1
+      react-dom: ^18.3.1
 
   fetchdts@0.1.7:
     resolution: {integrity: sha512-YoZjBdafyLIop9lSxXVI33oLD5kN31q4Td+CasofLLYeLXRFeOsuOw0Uo+XNRi9PZlbfdlN2GmRtm4tCEQ9/KA==}
@@ -6566,6 +6576,11 @@ snapshots:
   fdir@6.5.0(picomatch@4.0.5):
     optionalDependencies:
       picomatch: 4.0.5
+
+  fedapay-reactjs@1.1.2(react-dom@19.2.7(react@19.2.7))(react@19.2.7):
+    dependencies:
+      react: 19.2.7
+      react-dom: 19.2.7(react@19.2.7)
 
   fetchdts@0.1.7: {}
 

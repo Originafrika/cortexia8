@@ -29,6 +29,14 @@ export { kieWebhook } from "./webhooks-kie";
 export type { WebhookInput, WebhookResponse };
 export { generationStatus } from "./generation-status";
 export type { StatusInput, GenerationStatus };
+export { verifyFedaPayTransaction, createStripeCheckout, stripeWebhook } from "./payments";
+export type {
+  FedaPayVerifyInput,
+  PaymentResponse,
+  StripeCheckoutInput,
+  StripeCheckoutResponse,
+  StripeWebhookResponse,
+} from "./payments";
 
 export {
   getActiveModelBySlug,
