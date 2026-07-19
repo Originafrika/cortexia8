@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { loadSession } from "@/lib/auth-store";
 import { AmbientBackground } from "@/components/ambient-background";
 import { SiteHeader } from "@/components/site-header";
 import { CreditSimulator } from "@/components/credit-simulator";
@@ -25,6 +26,8 @@ export const Route = createFileRoute("/app-preview")({
 
 function AppPreview() {
   const t = useT();
+  const storedSession = loadSession();
+  const isAdmin = storedSession?.user?.role === "admin";
   return (
     <div className="relative min-h-screen">
       <AmbientBackground />
@@ -109,12 +112,14 @@ function AppPreview() {
       <footer className="mt-8 border-t border-border">
         <div className="mx-auto max-w-7xl px-5 sm:px-8 py-10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
           <span>© 2026 Cortexia — construit pour les créateurs, partout.</span>
-          <Link
-            to="/app"
-            className="hover:text-foreground transition inline-flex items-center gap-1"
-          >
-            Ouvrir l'app <ArrowRight className="size-3" />
-          </Link>
+          {isAdmin && (
+            <Link
+              to="/app"
+              className="hover:text-foreground transition inline-flex items-center gap-1"
+            >
+              Ouvrir l'app <ArrowRight className="size-3" />
+            </Link>
+          )}
         </div>
       </footer>
     </div>
