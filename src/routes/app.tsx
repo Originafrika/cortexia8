@@ -1,4 +1,5 @@
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
+import { SignedIn } from "@neondatabase/auth-ui";
 import { AmbientBackground } from "@/components/ambient-background";
 import { LocalePicker } from "@/components/locale-picker";
 import { PriceDisplay } from "@/components/price-display";
