@@ -312,8 +312,6 @@ function pollGenerationStatus(
               result = { kind: "video", url };
             } else if (asset.type === "audio") {
               result = { kind: "audio", url };
-            } else if (asset.type === "text") {
-              result = { kind: "text", text: url };
             }
           }
           set({
