@@ -1,5 +1,4 @@
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
-import { SignedIn } from "@neondatabase/auth-ui";
 import { AmbientBackground } from "@/components/ambient-background";
 import { LocalePicker } from "@/components/locale-picker";
 import { PriceDisplay } from "@/components/price-display";
@@ -32,10 +31,7 @@ function AppLayout() {
 
   return (
     <>
-      <SignedIn>
-        <AppShell path={path} CREDIT_USD={CREDIT_USD} t={t} open={open} setOpen={setOpen} />
-      </SignedIn>
-      <RedirectToSignIn />
+      <AppShell path={path} CREDIT_USD={CREDIT_USD} t={t} open={open} setOpen={setOpen} />
     </>
   );
 }
