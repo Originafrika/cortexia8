@@ -99,10 +99,18 @@ export const verifyFedaPayTransaction = createServerFn({ method: "POST" })
         } as PaymentResponse;
       }
 
-      // Record the credit
+      // Record the credit — use the API-confirmed amount, NOT client-supplied data.amount
+      const confirmedAmount = Number(tx.amount);
+      if (!confirmedAmount || confirmedAmount <= 0) {
+        return {
+          ok: false,
+          message: "Transaction amount is invalid",
+        } as PaymentResponse;
+      }
+
       const result = await recordTransaction({
         userId,
-        amount: data.amount,
+        amount: confirmedAmount,
         type: "purchase",
         reference: `fedapay:${data.transactionId}`,
       });
@@ -231,12 +239,16 @@ export const stripeWebhook = createServerFn({ method: "POST" })
     }
   });
 
+// TODO: Stripe signature verification is not possible here because createServerFn
+// consumes and parses the raw body before the handler runs. The raw body is needed
+// for stripe.webhooks.constructEvent(). To properly verify webhooks, migrate to a
+// custom route handler (e.g., a catch-all API route) that preserves the raw request body.
+// For now, we at least validate the event type before processing.
+
 async function handleStripeWebhook(
   body: Record<string, unknown>,
 ): Promise<StripeWebhookResponse> {
-  const secretKey = process.env.STRIPE_SECRET_KEY;
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-  const sigHeader = (body.headers as Record<string, string>)?.["stripe-signature"];
 
   // Parse the event
   const eventType = body.type as string | undefined;
@@ -246,39 +258,39 @@ async function handleStripeWebhook(
     return { ok: false, error: "Invalid webhook payload" };
   }
 
-  if (eventType === "checkout.session.completed") {
-    const session = event.object;
-    const userId = Number(session.metadata?.userId ?? session.userId);
-    const amount = Number(session.metadata?.amount ?? 0);
-    const sessionId = session.id as string;
-
-    if (!userId || amount <= 0) {
-      return { ok: false, error: "Missing userId or amount in session metadata" };
-    }
-
-    // Check for duplicate processing
-    const existing = (await sql`
-      SELECT id FROM credits_ledger
-      WHERE reference = ${`stripe:${sessionId}`}
-      LIMIT 1
-    `) as { id: number }[];
-    if (existing.length > 0) {
-      return { ok: true, action: "already-processed" };
-    }
-
-    const result = await recordTransaction({
-      userId,
-      amount,
-      type: "purchase",
-      reference: `stripe:${sessionId}`,
-    });
-
-    return {
-      ok: true,
-      action: "credited",
-    };
+  // Only process checkout.session.completed — reject all other event types
+  if (eventType !== "checkout.session.completed") {
+    return { ok: true, action: "no-op" };
   }
 
-  // Acknowledge other events (payment_intent.succeeded, etc.) without action
-  return { ok: true, action: "no-op" };
+  const session = event.object;
+  const userId = Number(session.metadata?.userId ?? session.userId);
+  const amount = Number(session.metadata?.amount ?? 0);
+  const sessionId = session.id as string;
+
+  if (!userId || amount <= 0) {
+    return { ok: false, error: "Missing userId or amount in session metadata" };
+  }
+
+  // Check for duplicate processing
+  const existing = (await sql`
+    SELECT id FROM credits_ledger
+    WHERE reference = ${`stripe:${sessionId}`}
+    LIMIT 1
+  `) as { id: number }[];
+  if (existing.length > 0) {
+    return { ok: true, action: "already-processed" };
+  }
+
+  const result = await recordTransaction({
+    userId,
+    amount,
+    type: "purchase",
+    reference: `stripe:${sessionId}`,
+  });
+
+  return {
+    ok: true,
+    action: "credited",
+  };
 }
