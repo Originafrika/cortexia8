@@ -62,8 +62,8 @@ export type CatalogueEntry = {
   blurb: string;
   badge?: "popular" | "new" | "pro";
   unit: Unit;
-  outputType: string;
-  pricingUnit: string;
+  outputType?: string;
+  pricingUnit?: string;
   tiers?: PriceTier[];
   io?: { inputUSD: number; outputUSD: number };
   inputSchema: InputSchemaField[];
