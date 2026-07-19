@@ -1,9 +1,8 @@
-import { createFileRoute, Link, Outlet, redirect, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { AmbientBackground } from "@/components/ambient-background";
 import { LocalePicker } from "@/components/locale-picker";
 import { PriceDisplay } from "@/components/price-display";
 import { OnboardingOverlay, useOnboarding } from "@/components/onboarding-overlay";
-import { loadSession, clearSession } from "@/lib/auth-store";
 import {
   MessageSquare,
   LayoutGrid,
@@ -21,19 +20,6 @@ export const Route = createFileRoute("/app")({
   head: () => ({
     meta: [{ title: "Cortexia — App" }, { name: "robots", content: "noindex,nofollow" }],
   }),
-  beforeLoad: async ({ location }) => {
-    const stored = loadSession();
-    if (!stored?.user?.email) {
-      clearSession();
-      throw redirect({
-        to: "/auth/sign-in",
-        search: { next: location.href },
-      });
-    }
-    if (stored.user.role !== "admin") {
-      throw redirect({ to: "/access-denied" });
-    }
-  },
   component: AppLayout,
 });
 
