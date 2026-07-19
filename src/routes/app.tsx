@@ -4,7 +4,6 @@ import { LocalePicker } from "@/components/locale-picker";
 import { PriceDisplay } from "@/components/price-display";
 import { OnboardingOverlay, useOnboarding } from "@/components/onboarding-overlay";
 import { loadSession, clearSession } from "@/lib/auth-store";
-import { checkUserRole } from "@/lib/api/check-role";
 import {
   MessageSquare,
   LayoutGrid,
@@ -31,8 +30,7 @@ export const Route = createFileRoute("/app")({
         search: { next: location.href },
       });
     }
-    const { role } = await checkUserRole({ data: stored.user.email });
-    if (role !== "admin") {
+    if (stored.user.role !== "admin") {
       throw redirect({ to: "/access-denied" });
     }
   },
