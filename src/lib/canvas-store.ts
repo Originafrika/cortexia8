@@ -9,12 +9,15 @@ import {
   applyNodeChanges,
 } from "@xyflow/react";
 import { getModel, type Model } from "@/lib/models";
+import { generate } from "@/lib/api/generate";
+import { generationStatus } from "@/lib/api/generation-status";
 import {
   estimateNodePrice,
   portsForCategory,
   type CanvasEdge,
   type CanvasNode,
   type NodeStatus,
+  type NodeResult,
 } from "@/lib/canvas-types";
 
 let _seq = 0;
@@ -162,56 +165,55 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
   runNode: async (id) => {
     const node = get().nodes.find((n) => n.id === id);
     if (!node) return;
-    const m = getModel(node.data.modelSlug);
-    if (!m) return;
     if (get().readOnly) return;
 
     set({
       nodes: get().nodes.map((n) =>
-        n.id === id ? { ...n, data: { ...n.data, status: "running", progress: 0, step: "" } } : n,
-      ),
-    });
-
-    const steps = stepsForCategory(m.category);
-    const totalMs = durationForCategory(m.category);
-    const stepMs = totalMs / steps.length;
-
-    for (let i = 0; i < steps.length; i++) {
-      const p = Math.round(((i + 1) / steps.length) * 100);
-      const step = steps[i];
-      set({
-        nodes: get().nodes.map((n) =>
-          n.id === id ? { ...n, data: { ...n.data, progress: p, step } } : n,
-        ),
-      });
-      await new Promise((r) => setTimeout(r, stepMs));
-    }
-
-    const result = makeMockResult(m, id);
-    set({
-      nodes: get().nodes.map((n) =>
         n.id === id
-          ? {
-              ...n,
-              data: {
-                ...n.data,
-                status: "done",
-                progress: 100,
-                step: "",
-                result,
-                lastRunAt: new Date().toISOString(),
-              },
-            }
+          ? { ...n, data: { ...n.data, status: "running", progress: 0, step: "Soumission…" } }
           : n,
       ),
     });
+
+    try {
+      const res = await generate({
+        data: {
+          modelSlug: node.data.modelSlug,
+          input: node.data.params,
+        },
+      });
+
+      const runNodeExecId = res.runNodeExecutionId;
+
+      set({
+        nodes: get().nodes.map((n) =>
+          n.id === id
+            ? { ...n, data: { ...n.data, step: "En file d'attente…", progress: 10 } }
+            : n,
+        ),
+      });
+
+      await pollGenerationStatus(id, runNodeExecId);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Erreur inconnue";
+      set({
+        nodes: get().nodes.map((n) =>
+          n.id === id
+            ? { ...n, data: { ...n.data, status: "error", step: message, progress: 0 } }
+            : n,
+        ),
+      });
+    }
   },
 
   runAll: async () => {
     if (get().readOnly) return;
     const order = topoSort(get().nodes, get().edges);
     for (const id of order) {
-      await get().runNode(id);
+      const node = get().nodes.find((n) => n.id === id);
+      if (node && node.data.status !== "running") {
+        await get().runNode(id);
+      }
     }
   },
 
@@ -230,47 +232,110 @@ function initStateForModel(m: Model): Record<string, unknown> {
   return init;
 }
 
-function stepsForCategory(c: Model["category"]): string[] {
-  switch (c) {
-    case "video":
-      return ["Analyse du prompt…", "Sélection du modèle…", "Génération des frames…", "Encodage final…"];
-    case "audio":
-      return ["Analyse du texte…", "Choix de la voix…", "Synthèse acoustique…", "Post-traitement…"];
-    case "image":
-      return ["Analyse du prompt…", "Sélection du modèle…", "Débruitage progressif…", "Finalisation…"];
-    case "text":
-      return ["Analyse du prompt…", "Raisonnement…", "Rédaction…"];
-  }
-}
+const POLL_INTERVAL_MS = 2000;
+const MAX_POLL_ATTEMPTS = 150;
 
-function durationForCategory(c: Model["category"]): number {
-  switch (c) {
-    case "video":
-      return 3600;
-    case "audio":
-      return 1800;
-    case "image":
-      return 1600;
-    case "text":
-      return 1100;
-  }
-}
+async function pollGenerationStatus(nodeId: string, runNodeExecId: number) {
+  for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt++) {
+    await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
 
-function makeMockResult(m: Model, id: string) {
-  const seed = id.replace(/[^a-z0-9]/gi, "");
-  if (m.category === "image") {
-    return { kind: "image" as const, url: `https://picsum.photos/seed/${seed}/720/720` };
+    try {
+      const status = await generationStatus({ data: { id: runNodeExecId } });
+
+      const nodeExec = status.nodes.find((n) => n.id === runNodeExecId);
+      if (!nodeExec) continue;
+
+      const kieStatus = nodeExec.status;
+      const progress = kieStatus === "running" ? 60 : kieStatus === "queued" ? 30 : 0;
+      const stepLabel =
+        kieStatus === "running"
+          ? "Génération en cours…"
+          : kieStatus === "queued"
+            ? "En file d'attente…"
+            : "";
+
+      if (kieStatus === "running" || kieStatus === "queued") {
+        set({
+          nodes: get().nodes.map((n) =>
+            n.id === nodeId
+              ? { ...n, data: { ...n.data, progress, step: stepLabel } }
+              : n,
+          ),
+        });
+        continue;
+      }
+
+      if (kieStatus === "success" || kieStatus === "succeeded") {
+        const asset = nodeExec.asset;
+        let result: NodeResult | null = null;
+        if (asset) {
+          const url = asset.previewUrl || asset.storageUrl;
+          if (asset.type === "image") {
+            result = { kind: "image", url };
+          } else if (asset.type === "video") {
+            result = { kind: "video", url };
+          } else if (asset.type === "audio") {
+            result = { kind: "audio", url };
+          }
+        }
+        set({
+          nodes: get().nodes.map((n) =>
+            n.id === nodeId
+              ? {
+                  ...n,
+                  data: {
+                    ...n.data,
+                    status: "done",
+                    progress: 100,
+                    step: "",
+                    result,
+                    lastRunAt: new Date().toISOString(),
+                  },
+                }
+              : n,
+          ),
+        });
+        return;
+      }
+
+      if (kieStatus === "failed" || kieStatus === "error") {
+        set({
+          nodes: get().nodes.map((n) =>
+            n.id === nodeId
+              ? {
+                  ...n,
+                  data: {
+                    ...n.data,
+                    status: "error",
+                    step: nodeExec.errorMessage || "Échec de la génération",
+                    progress: 0,
+                  },
+                }
+              : n,
+          ),
+        });
+        return;
+      }
+    } catch {
+      // Polling error — retry
+    }
   }
-  if (m.category === "video") {
-    return { kind: "video" as const, url: `https://picsum.photos/seed/${seed}/720/405` };
-  }
-  if (m.category === "audio") {
-    return { kind: "audio" as const, url: "" };
-  }
-  return {
-    kind: "text" as const,
-    text: `Rédaction générée avec ${m.name} — résultat factice pour démonstration.`,
-  };
+
+  set({
+    nodes: get().nodes.map((n) =>
+      n.id === nodeId
+        ? {
+            ...n,
+            data: {
+              ...n.data,
+              status: "error",
+              step: "Délai d'attente dépassé",
+              progress: 0,
+            },
+          }
+        : n,
+    ),
+  });
 }
 
 /** Topological order respecting edge direction (sources first). */
