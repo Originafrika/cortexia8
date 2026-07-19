@@ -1,6 +1,7 @@
 import {
   boolean,
   index,
+  integer,
   jsonb,
   numeric,
   pgTable,
@@ -169,7 +170,7 @@ export const runNodeExecutions = pgTable(
     status: text("status").notNull().default("pending"),
     kieTaskId: text("kie_task_id"),
     inputParams: jsonb("input_params").notNull().default({}),
-    outputAssetId: serial("output_asset_id"),
+    outputAssetId: integer("output_asset_id"),
     errorMessage: text("error_message"),
     startedAt: timestamp("started_at"),
     completedAt: timestamp("completed_at"),
