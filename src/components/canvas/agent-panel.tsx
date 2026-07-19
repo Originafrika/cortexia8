@@ -1,15 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCanvasStore } from "@/lib/canvas-store";
-import { Sparkles, Send, Check, Loader2, Wand2, ChevronDown, ChevronUp } from "lucide-react";
+import { Sparkles, Send, Check, Loader2, Wand2, ChevronDown, ChevronUp, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { MODELS, getModel } from "@/lib/models";
+import { getModel } from "@/lib/models";
+import {
+  runAgent,
+  shouldConfirmOperation,
+  AGENT_MODELS,
+  COST_THRESHOLD,
+  type AgentModel,
+  type AgentResponse,
+  type GraphOperation,
+} from "@/lib/agent";
 
-type AgentOp =
-  | { type: "add"; slug: string; position: { x: number; y: number } }
-  | { type: "connect"; source: string; target: string }
-  | { type: "describe"; text: string };
+const STORAGE_KEY_AGENT_MODEL = "cortexia-agent-model";
 
 const STARTERS = [
   "Un mockup produit puis une vidéo UGC à partir de l'image.",
@@ -20,66 +26,181 @@ const STARTERS = [
 export function AgentPanel({ className }: { className?: string }) {
   const [prompt, setPrompt] = useState("");
   const [busy, setBusy] = useState(false);
-  const [log, setLog] = useState<{ text: string; tone: "info" | "ok" | "muted" }[]>([]);
+  const [log, setLog] = useState<{ text: string; tone: "info" | "ok" | "muted" | "warn" }[]>([]);
   const [expanded, setExpanded] = useState(true);
+  const [selectedModel, setSelectedModel] = useState<AgentModel>("claude-sonnet-4-5");
+  const [pendingOperations, setPendingOperations] = useState<AgentResponse | null>(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const readOnly = useCanvasStore((s) => s.readOnly);
   const addNode = useCanvasStore((s) => s.addNode);
   const nodes = useCanvasStore((s) => s.nodes);
+  const edges = useCanvasStore((s) => s.edges);
+
+  // Load saved model from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY_AGENT_MODEL);
+    if (saved && AGENT_MODELS.some((m) => m.value === saved)) {
+      setSelectedModel(saved as AgentModel);
+    }
+  }, []);
+
+  // Save model to localStorage when changed
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY_AGENT_MODEL, selectedModel);
+  }, [selectedModel]);
 
   if (readOnly) return null;
 
-  function pushLog(text: string, tone: "info" | "ok" | "muted" = "info") {
+  function pushLog(text: string, tone: "info" | "ok" | "muted" | "warn" = "info") {
     setLog((l) => [...l, { text, tone }]);
   }
 
-  function applyOps(ops: AgentOp[]) {
-    const newIds: string[] = [];
+  function applyOps(ops: GraphOperation[]) {
+    const idMap = new Map<string, string>();
+
     for (const op of ops) {
-      if (op.type === "add") {
-        const id = addNode(op.slug, op.position);
-        if (id) newIds.push(id);
+      switch (op.type) {
+        case "ADD_NODE": {
+          const position = op.position ?? {
+            x: 120 + Math.random() * 80,
+            y: 120 + Math.random() * 80,
+          };
+          const id = addNode(op.modelSlug, position);
+          if (id) {
+            // Store mapping from temporary ID to real ID
+            idMap.set(op.modelSlug, id);
+            const model = getModel(op.modelSlug);
+            pushLog(`+ ${model?.name ?? op.modelSlug}`, "ok");
+          }
+          break;
+        }
+        case "CONNECT_NODES": {
+          // Find source and target nodes by their temporary or real IDs
+          const sourceId = idMap.get(op.source) ?? op.source;
+          const targetId = idMap.get(op.target) ?? op.target;
+
+          // Check if nodes exist
+          const sourceNode = nodes.find((n) => n.id === sourceId);
+          const targetNode = nodes.find((n) => n.id === targetId);
+
+          if (sourceNode && targetNode) {
+            useCanvasStore.getState().onConnect({
+              source: sourceId,
+              target: targetId,
+              sourceHandle: null,
+              targetHandle: null,
+            });
+            pushLog(`↔ liaison ${sourceNode.data.modelName} → ${targetNode.data.modelName}`, "ok");
+          }
+          break;
+        }
+        case "UPDATE_NODE": {
+          const realId = idMap.get(op.nodeId) ?? op.nodeId;
+          useCanvasStore.getState().updateNodeParams(realId, op.params);
+          pushLog(`✎ mise à jour des paramètres`, "muted");
+          break;
+        }
+        case "REMOVE_NODE": {
+          const realId = idMap.get(op.nodeId) ?? op.nodeId;
+          useCanvasStore.getState().removeNode(realId);
+          pushLog(`✗ nœud supprimé`, "warn");
+          break;
+        }
       }
     }
-    // After all nodes added, connect them sequentially
-    for (let i = 0; i < newIds.length - 1; i++) {
-      useCanvasStore.getState().onConnect({
-        source: newIds[i],
-        target: newIds[i + 1],
-        sourceHandle: null,
-        targetHandle: null,
-      });
+  }
+
+  async function executeWithConfirmation(response: AgentResponse) {
+    if (shouldConfirmOperation(response.estimatedCost, COST_THRESHOLD)) {
+      setPendingOperations(response);
+      setShowConfirmDialog(true);
+      pushLog(
+        `⚠ Coût estimé: $${response.estimatedCost.toFixed(4)} (seuil: $${COST_THRESHOLD})`,
+        "warn"
+      );
+      return;
+    }
+
+    // Execute directly if under threshold
+    await executeOperations(response);
+  }
+
+  async function executeOperations(response: AgentResponse) {
+    setBusy(true);
+    pushLog(`Exécution de ${response.operations.length} opération(s)…`, "info");
+
+    try {
+      applyOps(response.operations);
+      pushLog(`Canvas mis à jour.`, "ok");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Erreur inconnue";
+      pushLog(`Erreur: ${message}`, "warn");
+    } finally {
+      setBusy(false);
+      setPendingOperations(null);
+      setShowConfirmDialog(false);
     }
   }
 
   async function build(textArg?: string) {
     const text = (textArg ?? prompt).trim();
     if (!text || busy) return;
+
     setBusy(true);
     setLog([]);
     setPrompt("");
     pushLog(`Analyse de la demande…`, "muted");
-    await wait(550);
-    pushLog(`Cible détectée : ${inferKindLabel(text)}`, "info");
-    await wait(450);
 
-    // Build a small plan from prompt heuristics
-    const plan = buildPlan(text);
-    pushLog(`Plan retenu · ${plan.length} opération${plan.length > 1 ? "s" : ""}`, "info");
-    await wait(350);
-    for (const op of plan) {
-      if (op.type === "add") {
-        const m = getModel(op.slug);
-        pushLog(`+ ${m?.name ?? op.slug}`, "ok");
-      } else if (op.type === "connect") {
-        pushLog(`↔ liaison`, "muted");
-      } else if (op.type === "describe") {
-        pushLog(op.text, "muted");
+    try {
+      // Get current graph state for context
+      const currentGraphState = {
+        nodes: nodes.map((n) => ({ id: n.id, slug: n.data.modelSlug })),
+        edges: edges.map((e) => ({ source: e.source, target: e.target })),
+      };
+
+      const response = await runAgent(
+        text,
+        {
+          model: selectedModel,
+          maxTokens: 2048,
+          costThreshold: COST_THRESHOLD,
+        },
+        currentGraphState
+      );
+
+      pushLog(`Réponse reçue (${response.language})`, "info");
+      pushLog(response.text, "info");
+
+      if (response.operations.length === 0) {
+        pushLog(`Aucune opération générée.`, "warn");
+        setBusy(false);
+        return;
       }
-      await wait(200);
+
+      pushLog(
+        `${response.operations.length} opération(s) proposée(s) · ~$${response.estimatedCost.toFixed(4)}`,
+        "info"
+      );
+
+      await executeWithConfirmation(response);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Erreur inconnue";
+      pushLog(`Erreur: ${message}`, "warn");
+    } finally {
+      setBusy(false);
     }
-    applyOps(plan);
-    pushLog(`Canvas mis à jour.`, "ok");
-    setBusy(false);
+  }
+
+  function handleConfirm() {
+    if (pendingOperations) {
+      executeOperations(pendingOperations);
+    }
+  }
+
+  function handleCancel() {
+    setPendingOperations(null);
+    setShowConfirmDialog(false);
+    pushLog(`Opération annulée.`, "muted");
   }
 
   return (
@@ -109,6 +230,26 @@ export function AgentPanel({ className }: { className?: string }) {
       {expanded && (
         <div className="flex-1 min-h-0 flex flex-col">
           <div className="px-4 py-3 space-y-2">
+            {/* Model Selector */}
+            <div className="flex items-center gap-2">
+              <label htmlFor="agent-model" className="text-xs text-muted-foreground whitespace-nowrap">
+                Modèle:
+              </label>
+              <select
+                id="agent-model"
+                value={selectedModel}
+                onChange={(e) => setSelectedModel(e.target.value as AgentModel)}
+                disabled={busy}
+                className="flex-1 text-xs bg-surface-2 border border-border rounded-md px-2 py-1.5 text-foreground disabled:opacity-50"
+              >
+                {AGENT_MODELS.map((m) => (
+                  <option key={m.value} value={m.value}>
+                    {m.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <Textarea
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
@@ -156,6 +297,44 @@ export function AgentPanel({ className }: { className?: string }) {
             )}
           </div>
 
+          {/* Confirmation Dialog */}
+          {showConfirmDialog && pendingOperations && (
+            <div className="px-4 py-3 border-t border-amber/30 bg-amber/5">
+              <div className="flex items-start gap-2 mb-3">
+                <AlertTriangle className="size-4 text-amber mt-0.5 shrink-0" />
+                <div className="text-xs text-foreground">
+                  <div className="font-medium mb-1">Confirmation requise</div>
+                  <div className="text-muted-foreground">
+                    Coût estimé: <span className="font-medium text-amber">${pendingOperations.estimatedCost.toFixed(4)}</span>
+                    <br />
+                    Seuil de confirmation: ${COST_THRESHOLD}
+                    <br />
+                    {pendingOperations.operations.length} opération(s) seront exécutées.
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  onClick={handleConfirm}
+                  size="sm"
+                  className="flex-1 bg-amber text-primary-foreground hover:bg-amber/90"
+                >
+                  Confirmer
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleCancel}
+                  size="sm"
+                  variant="outline"
+                  className="flex-1"
+                >
+                  Annuler
+                </Button>
+              </div>
+            </div>
+          )}
+
           {log.length > 0 && (
             <div className="flex-1 min-h-0 overflow-y-auto border-t border-border px-4 py-3 space-y-1.5">
               <div className="font-mono text-[9px] uppercase tracking-[0.22em] text-muted-foreground sticky top-0 bg-surface-1/95 backdrop-blur py-1 -mt-1">
@@ -169,10 +348,13 @@ export function AgentPanel({ className }: { className?: string }) {
                     l.tone === "ok" && "text-emerald",
                     l.tone === "muted" && "text-muted-foreground",
                     l.tone === "info" && "text-foreground/85",
+                    l.tone === "warn" && "text-amber"
                   )}
                 >
                   {l.tone === "ok" ? (
                     <Check className="size-3 mt-0.5 shrink-0" />
+                  ) : l.tone === "warn" ? (
+                    <AlertTriangle className="size-3 mt-0.5 shrink-0" />
                   ) : l.tone === "info" ? (
                     <Sparkles className="size-3 mt-0.5 shrink-0 text-amber" />
                   ) : (
@@ -193,44 +375,4 @@ export function AgentPanel({ className }: { className?: string }) {
       )}
     </div>
   );
-}
-
-function wait(ms: number) {
-  return new Promise<void>((r) => setTimeout(r, ms));
-}
-
-function inferKindLabel(p: string): string {
-  const l = p.toLowerCase();
-  if (/(vidéo|video|pub|teaser|reel)/.test(l)) return "Vidéo";
-  if (/(voix|voice|voix off|narration|teaser)/.test(l)) return "Voix off";
-  if (/(image|photo|mockup|storyboard|flacon|packaging)/.test(l)) return "Image";
-  if (/(storyboard|scénario)/.test(l)) return "Texte structuré";
-  return "Pipeline multi-étapes";
-}
-
-function buildPlan(text: string): AgentOp[] {
-  const l = text.toLowerCase();
-  const ops: AgentOp[] = [];
-  const baseX = 180;
-  const baseY = 180;
-  const gap = 240;
-
-  if (/(mockup|image|photo|flacon|packaging|storyboard)/.test(l)) {
-    ops.push({ type: "add", slug: "seedream-5-pro", position: { x: baseX, y: baseY } });
-  }
-  if (/(vidéo|video|pub|reel|animer|ugc)/.test(l)) {
-    ops.push({ type: "add", slug: "kling-3-turbo", position: { x: baseX + gap, y: baseY } });
-  }
-  if (/(voix|voice|voix off|narration)/.test(l)) {
-    ops.push({ type: "add", slug: "eleven-v3", position: { x: baseX, y: baseY + gap } });
-  }
-  if (/(scénario|script|storyboard|article|texte|brief|éditorial)/.test(l)) {
-    ops.push({ type: "add", slug: "claude-sonnet-46", position: { x: baseX, y: baseY - gap } });
-  }
-  // Fallback: at least one model
-  if (ops.length === 0) {
-    const m = MODELS[0];
-    ops.push({ type: "add", slug: m.slug, position: { x: baseX, y: baseY } });
-  }
-  return ops;
 }
