@@ -49,7 +49,7 @@ function Auth() {
         setInfo("Un code de vérification vient de t'être envoyé par email.");
         setStep("verify");
       } else {
-        navigate({ to: "/app" });
+        navigate({ to: "/app-preview" });
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Une erreur est survenue.");
@@ -77,7 +77,7 @@ function Auth() {
           },
         });
       }
-      navigate({ to: "/app" });
+      navigate({ to: "/app-preview" });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Identifiants invalides.";
       // If Neon returned "email not verified", switch to the verify step and send a code.
@@ -110,14 +110,14 @@ function Auth() {
 
       const anyData = data as { session?: unknown; token?: string } | null;
       if (anyData?.session || anyData?.token) {
-        navigate({ to: "/app" });
+        navigate({ to: "/app-preview" });
         return;
       }
       // Auto-sign-in disabled — try to sign the user in with their password.
       if (password) {
         const { error: signErr } = await authClient.signIn.email({ email, password });
         if (!signErr) {
-          navigate({ to: "/app" });
+          navigate({ to: "/app-preview" });
           return;
         }
       }
