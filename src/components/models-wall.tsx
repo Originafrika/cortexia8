@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "@tanstack/react-router";
 import { Play, Music2, Mic, ImageIcon, X, ArrowRight } from "lucide-react";
 import { WALL_ITEMS, type WallItem, type WallKind, type UseCase } from "@/lib/wall-data";
+import { getPublicWallAssets } from "@/lib/api/wall";
 import { useT } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
@@ -21,12 +22,23 @@ export function ModelsWall() {
   const [useCase, setUseCase] = useState<UseCase | "all">("all");
   const [page, setPage] = useState(1);
   const [active, setActive] = useState<WallItem | null>(null);
+  const [dbItems, setDbItems] = useState<WallItem[]>([]);
+
+  useEffect(() => {
+    getPublicWallAssets().then((items) => {
+      if (items.length > 0) setDbItems(items);
+    });
+  }, []);
+
+  const allItems = useMemo(() => {
+    return dbItems.length > 0 ? dbItems : WALL_ITEMS;
+  }, [dbItems]);
 
   const filtered = useMemo(() => {
-    return WALL_ITEMS.filter(
+    return allItems.filter(
       (w) => (kind === "all" || w.kind === kind) && (useCase === "all" || w.useCase === useCase),
     );
-  }, [kind, useCase]);
+  }, [allItems, kind, useCase]);
 
   const BATCH = 12;
   const visible = useMemo(() => {

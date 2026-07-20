@@ -201,6 +201,7 @@ export const assets = pgTable(
     storageUrl: text("storage_url").notNull(),
     previewUrl: text("preview_url"),
     metadata: jsonb("metadata").notNull().default({}),
+    isPublicWall: boolean("is_public_wall").notNull().default(false),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => ({
