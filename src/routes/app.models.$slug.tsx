@@ -557,7 +557,8 @@ function ParamEditor({
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           className={cn(
-            "rounded-xl border border-dashed px-3 py-6 text-center text-xs cursor-pointer transition",
+            "rounded-xl border px-3 py-6 text-center text-xs cursor-pointer transition",
+            files.length === 0 && !isDragOver ? "border-dashed" : "border-solid",
             files.length > 0 || isDragOver
               ? "border-amber/60 bg-amber/5 text-amber-soft"
               : "border-border bg-surface-0/40 text-muted-foreground hover:border-amber/40",
