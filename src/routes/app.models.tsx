@@ -25,6 +25,7 @@ const CATS: { key: ModelCategory | "all"; label: string }[] = [
   { key: "image", label: "Image" },
   { key: "video", label: "Vidéo" },
   { key: "audio", label: "Voix" },
+  { key: "music", label: "Musique" },
   { key: "text", label: "Texte" },
 ];
 
