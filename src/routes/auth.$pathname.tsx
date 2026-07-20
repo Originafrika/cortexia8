@@ -66,18 +66,25 @@ function Auth() {
       const result = await authClient.signIn.email({ email, password });
       if (result.error) throw result.error;
       if (result.data?.user) {
+        const role = result.data.user.role ?? "user";
         saveSession({
           token: result.data.token,
           user: {
             id: result.data.user.id,
             name: result.data.user.name,
             email: result.data.user.email,
-            role: result.data.user.role ?? "user",
+            role,
             emailVerified: result.data.user.emailVerified ?? false,
           },
         });
+        if (role === "admin") {
+          navigate({ to: "/app-preview" });
+        } else {
+          navigate({ to: "/access-denied" });
+        }
+      } else {
+        navigate({ to: "/app-preview" });
       }
-      navigate({ to: "/app-preview" });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Identifiants invalides.";
       // If Neon returned "email not verified", switch to the verify step and send a code.
