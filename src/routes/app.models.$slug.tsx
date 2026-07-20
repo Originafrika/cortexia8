@@ -348,6 +348,7 @@ function initState(model: Model): Record<string, unknown> {
     if (p.kind === "slider") init[p.key] = p.default;
     if (p.kind === "select") init[p.key] = p.options[0];
     if (p.kind === "toggle") init[p.key] = !!p.default;
+    if (p.kind === "seed") init[p.key] = undefined;
     if (p.kind === "upload") init[p.key] = [];
   });
   return init;
@@ -650,11 +651,30 @@ function ParamEditor({
     );
   }
   if (p.kind === "seed") {
+    const val = state[p.key] as number | undefined;
     return (
-      <input
-        placeholder="aléatoire"
-        className="w-full rounded-xl border border-border bg-surface-0/60 px-3 py-2 text-xs font-mono outline-none focus:border-amber/50"
-      />
+      <div className="flex items-center gap-2">
+        <input
+          type="number"
+          value={val ?? ""}
+          placeholder="aléatoire"
+          onChange={(e) =>
+            setState((s) => ({
+              ...s,
+              [p.key]: e.target.value === "" ? undefined : parseInt(e.target.value, 10),
+            }))
+          }
+          className="w-full rounded-xl border border-border bg-surface-0/60 px-3 py-2 text-xs font-mono outline-none focus:border-amber/50"
+        />
+        <button
+          type="button"
+          onClick={() => setState((s) => ({ ...s, [p.key]: Math.floor(Math.random() * 0xffffffff) }))}
+          className="shrink-0 rounded-xl border border-border bg-surface-0/60 px-3 py-2 text-xs hover:border-amber/50 hover:bg-amber/5 transition"
+          title="Seed aléatoire"
+        >
+          🎲
+        </button>
+      </div>
     );
   }
   if (p.kind === "toggle") {
