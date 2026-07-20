@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { getModel, basePrice, unitLabel, type Model, type ParamSpec } from "@/lib/models";
+import { getModel, basePrice, unitLabel, MODELS, type Model, type ParamSpec } from "@/lib/models";
 import { PriceDisplay } from "@/components/price-display";
 import {
   ArrowLeft,
@@ -389,6 +389,8 @@ export function ModelPlaygroundContent({
           ) : (
             status !== "loading" && !active && <EmptyState model={model} />
           )}
+
+          <SimilarModels model={model} />
         </div>
       </div>
 
@@ -983,4 +985,65 @@ function estimatePrice(m: Model, state: Record<string, unknown>): number {
     return unit * d;
   }
   return unit;
+}
+
+function SimilarModels({ model }: { model: Model }) {
+  const similar = useMemo(
+    () =>
+      MODELS.filter((m) => m.category === model.category && m.slug !== model.slug).slice(0, 6),
+    [model.category, model.slug],
+  );
+
+  if (similar.length === 0) return null;
+
+  return (
+    <div className="mt-10">
+      <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-4">
+        Modèles similaires
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {similar.map((m) => (
+          <Link
+            key={m.slug}
+            to="/app/models/$slug"
+            params={{ slug: m.slug }}
+            className="group surface-gradient-border rounded-2xl bg-surface-1/60 backdrop-blur p-4 hover:bg-surface-1/80 transition-all hover:-translate-y-0.5 hover:shadow-[0_20px_60px_-20px_oklch(0.78_0.16_70_/_0.25)]"
+          >
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-display text-base tracking-[-0.01em] truncate">{m.name}</span>
+                  {m.badge && (
+                    <span
+                      className={
+                        "shrink-0 rounded-full px-2 py-0.5 text-[9px] font-mono uppercase tracking-wider " +
+                        (m.badge === "popular"
+                          ? "bg-amber/20 text-amber-soft"
+                          : m.badge === "new"
+                            ? "bg-emerald/20 text-emerald"
+                            : "bg-surface-3 text-muted-foreground")
+                      }
+                    >
+                      {m.badge === "popular" ? "Populaire" : m.badge === "new" ? "Nouveau" : "Pro"}
+                    </span>
+                  )}
+                </div>
+                <div className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                  {m.provider}
+                </div>
+              </div>
+            </div>
+            <div className="mt-3 pt-3 border-t border-border flex items-baseline justify-between">
+              <PriceDisplay
+                usd={basePrice(m)}
+                className="font-display text-xl tracking-[-0.02em]"
+                emphasize
+              />
+              <span className="text-[10px] text-muted-foreground font-mono">{unitLabel(m)}</span>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
 }
