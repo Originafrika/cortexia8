@@ -348,6 +348,7 @@ function initState(model: Model): Record<string, unknown> {
     if (p.kind === "slider") init[p.key] = p.default;
     if (p.kind === "select") init[p.key] = p.options[0];
     if (p.kind === "toggle") init[p.key] = !!p.default;
+    if (p.kind === "upload") init[p.key] = [];
   });
   return init;
 }
@@ -457,10 +458,13 @@ function ParamIconButton({
     preview = `${state[p.key] ?? p.default}${p.suffix ?? ""}`;
   else if (p.kind === "toggle") preview = state[p.key] ? "On" : null;
 
+  const uploadCount = p.kind === "upload" ? ((state[p.key] as File[]) ?? []).length : 0;
+
   const isActive =
     (p.kind === "toggle" && !!state[p.key]) ||
     (p.kind === "select" && p.options[0] !== state[p.key]) ||
-    (p.kind === "slider" && state[p.key] !== p.default);
+    (p.kind === "slider" && state[p.key] !== p.default) ||
+    (p.kind === "upload" && uploadCount > 0);
 
   return (
     <Popover>
@@ -477,6 +481,11 @@ function ParamIconButton({
           <Icon className="size-3.5" />
           {preview && (
             <span className="font-mono text-[10px] uppercase tracking-wider">{preview}</span>
+          )}
+          {p.kind === "upload" && uploadCount > 0 && (
+            <span className="inline-flex items-center justify-center size-4 rounded-full bg-amber text-[9px] font-bold text-primary-foreground">
+              {uploadCount}
+            </span>
           )}
         </button>
       </PopoverTrigger>
@@ -505,9 +514,89 @@ function ParamEditor({
   setState: React.Dispatch<React.SetStateAction<Record<string, unknown>>>;
 }) {
   if (p.kind === "upload") {
+    const files = (state[p.key] as File[]) ?? [];
+    const inputRef = useRef<HTMLInputElement>(null);
+    const [isDragOver, setIsDragOver] = useState(false);
+
+    function handleFiles(fileList: FileList | null) {
+      if (!fileList) return;
+      const newFiles = Array.from(fileList);
+      setState((s) => ({
+        ...s,
+        [p.key]: p.multiple ? [...((s[p.key] as File[]) ?? []), ...newFiles] : newFiles,
+      }));
+    }
+
+    function handleDrop(e: React.DragEvent) {
+      e.preventDefault();
+      setIsDragOver(false);
+      handleFiles(e.dataTransfer.files);
+    }
+
+    function handleDragOver(e: React.DragEvent) {
+      e.preventDefault();
+      setIsDragOver(true);
+    }
+
+    function handleDragLeave() {
+      setIsDragOver(false);
+    }
+
+    function removeFile(index: number) {
+      setState((s) => ({
+        ...s,
+        [p.key]: ((s[p.key] as File[]) ?? []).filter((_, i) => i !== index),
+      }));
+    }
+
     return (
-      <div className="rounded-xl border border-dashed border-border bg-surface-0/40 px-3 py-6 text-center text-xs text-muted-foreground cursor-pointer hover:border-amber/40">
-        Glisse un fichier ou clique pour choisir
+      <div>
+        <div
+          onClick={() => inputRef.current?.click()}
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          className={cn(
+            "rounded-xl border border-dashed px-3 py-6 text-center text-xs cursor-pointer transition",
+            files.length > 0 || isDragOver
+              ? "border-amber/60 bg-amber/5 text-amber-soft"
+              : "border-border bg-surface-0/40 text-muted-foreground hover:border-amber/40",
+          )}
+        >
+          <input
+            ref={inputRef}
+            type="file"
+            accept={p.accepts}
+            multiple={p.multiple}
+            className="hidden"
+            onChange={(e) => handleFiles(e.target.files)}
+          />
+          {files.length > 0 ? (
+            <div className="space-y-1">
+              <Upload className="size-4 mx-auto text-amber" />
+              <span>
+                {files.length} fichier{files.length > 1 ? "s" : ""} sélectionné{files.length > 1 ? "s" : ""}
+              </span>
+            </div>
+          ) : (
+            <span>Glisse un fichier ou clique pour choisir</span>
+          )}
+        </div>
+        {files.length > 0 && (
+          <div className="mt-2 space-y-1">
+            {files.map((f, i) => (
+              <div key={i} className="flex items-center justify-between rounded-lg bg-surface-2/40 px-2.5 py-1.5 text-[11px]">
+                <span className="truncate text-foreground">{f.name}</span>
+                <button
+                  onClick={(e) => { e.stopPropagation(); removeFile(i); }}
+                  className="ml-2 text-muted-foreground hover:text-foreground cursor-pointer"
+                >
+                  <X className="size-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     );
   }
