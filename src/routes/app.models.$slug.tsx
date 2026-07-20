@@ -146,7 +146,7 @@ export function ModelPlaygroundContent({
     timers.current = [];
   }
 
-  function generate() {
+  function handleGenerate() {
     if (status === "loading") return;
 
     const missingFields: string[] = [];
@@ -297,7 +297,7 @@ export function ModelPlaygroundContent({
                   setPrompt(active.prompt);
                   setState(active.state);
                   setActiveId(null);
-                  setTimeout(generate, 40);
+                  setTimeout(handleGenerate, 40);
                 }}
               />
             </div>
@@ -403,7 +403,7 @@ export function ModelPlaygroundContent({
             prompt={prompt}
             setPrompt={setPrompt}
             hasPrompt={hasPrompt}
-            onGenerate={generate}
+            onGenerate={handleGenerate}
             status={status}
             progress={progress}
             currentPrice={currentPrice}
