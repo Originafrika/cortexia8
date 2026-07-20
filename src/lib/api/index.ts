@@ -39,6 +39,8 @@ export type {
   StripeCheckoutResponse,
   StripeWebhookResponse,
 } from "./payments";
+export { getUserBalance } from "./balance";
+export type { BalanceInput, BalanceResponse } from "./balance";
 
 export {
   getActiveModelBySlug,

@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PriceDisplay } from "@/components/price-display";
 import { CurrencyPicker } from "@/components/currency-picker";
 import { CreditCard, Smartphone, Bitcoin, Wallet, Check, Loader2 } from "lucide-react";
@@ -7,6 +7,8 @@ import { useCurrency, formatMoney } from "@/lib/currency";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { verifyFedaPayTransaction, createStripeCheckout } from "@/lib/api/payments";
+import { getUserBalance } from "@/lib/api/balance";
+import { loadSession } from "@/lib/auth-store";
 
 export const Route = createFileRoute("/app/account")({
   component: AccountPage,
@@ -38,9 +40,30 @@ function AccountPage() {
   const [method, setMethod] = useState<string>("mm");
   const [amount, setAmount] = useState<number>(10);
   const [loading, setLoading] = useState(false);
-  const balance = 24.63;
+  const [balance, setBalance] = useState<number | null>(null);
 
   const fedapayKey = import.meta.env.VITE_FEDAPAY_PUBLIC_KEY as string | undefined;
+
+  async function fetchBalance() {
+    try {
+      const session = loadSession();
+      if (!session?.user?.id) return;
+      const userId = Number(session.user.id);
+      if (isNaN(userId)) return;
+      const result = await getUserBalance({ data: { userId } });
+      setBalance(result.balance);
+    } catch {
+      // silently ignore — balance stays null
+    }
+  }
+
+  useEffect(() => {
+    fetchBalance();
+    // Refetch balance after returning from Stripe checkout
+    if (window.location.search.includes("payment=success")) {
+      fetchBalance();
+    }
+  }, []);
 
   async function handleRecharge() {
     setLoading(true);
@@ -79,6 +102,11 @@ function AccountPage() {
         data: { transactionId, amount },
       });
       if (result.ok) {
+        if (result.balance != null) {
+          setBalance(result.balance);
+        } else {
+          fetchBalance();
+        }
         toast.success("Crédits ajoutés avec succès !");
       } else {
         toast.error(result.message ?? "Vérification échouée.");
@@ -113,7 +141,7 @@ function AccountPage() {
                 Solde disponible
               </div>
               <PriceDisplay
-                usd={balance}
+                usd={balance ?? 0}
                 className="mt-2 font-display text-5xl tracking-[-0.03em]"
                 emphasize
               />
