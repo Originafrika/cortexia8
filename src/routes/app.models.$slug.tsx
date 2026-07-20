@@ -602,6 +602,103 @@ function ParamIconButton({
   );
 }
 
+function UploadParamEditor({
+  p,
+  state,
+  setState,
+}: {
+  p: ParamSpec;
+  state: Record<string, unknown>;
+  setState: React.Dispatch<React.SetStateAction<Record<string, unknown>>>;
+}) {
+  const files = (state[p.key] as File[]) ?? [];
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
+
+  function handleFiles(fileList: FileList | null) {
+    if (!fileList) return;
+    const newFiles = Array.from(fileList);
+    setState((s) => ({
+      ...s,
+      [p.key]: p.multiple ? [...((s[p.key] as File[]) ?? []), ...newFiles] : newFiles,
+    }));
+  }
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault();
+    setIsDragOver(false);
+    handleFiles(e.dataTransfer.files);
+  }
+
+  function handleDragOver(e: React.DragEvent) {
+    e.preventDefault();
+    setIsDragOver(true);
+  }
+
+  function handleDragLeave() {
+    setIsDragOver(false);
+  }
+
+  function removeFile(index: number) {
+    setState((s) => ({
+      ...s,
+      [p.key]: ((s[p.key] as File[]) ?? []).filter((_, i) => i !== index),
+    }));
+  }
+
+  return (
+    <div>
+      <div
+        onClick={() => inputRef.current?.click()}
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        className={cn(
+          "rounded-xl border px-3 py-6 text-center text-xs cursor-pointer transition",
+          files.length === 0 && !isDragOver ? "border-dashed" : "border-solid",
+          files.length > 0 || isDragOver
+            ? "border-amber/60 bg-amber/5 text-amber-soft"
+            : "border-border bg-surface-0/40 text-muted-foreground hover:border-amber/40",
+        )}
+      >
+        <input
+          ref={inputRef}
+          type="file"
+          accept={p.accepts}
+          multiple={p.multiple}
+          className="hidden"
+          onChange={(e) => handleFiles(e.target.files)}
+        />
+        {files.length > 0 ? (
+          <div className="space-y-1">
+            <Upload className="size-4 mx-auto text-amber" />
+            <span>
+              {files.length} fichier{files.length > 1 ? "s" : ""} sélectionné{files.length > 1 ? "s" : ""}
+            </span>
+          </div>
+        ) : (
+          <span>Glisse un fichier ou clique pour choisir</span>
+        )}
+      </div>
+      {files.length > 0 && (
+        <div className="mt-2 space-y-1">
+          {files.map((f, i) => (
+            <div key={i} className="flex items-center justify-between rounded-lg bg-surface-2/40 px-2.5 py-1.5 text-[11px]">
+              <span className="truncate text-foreground">{f.name}</span>
+              <button
+                onClick={(e) => { e.stopPropagation(); removeFile(i); }}
+                className="ml-2 text-muted-foreground hover:text-foreground cursor-pointer"
+              >
+                <X className="size-3" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ParamEditor({
   p,
   state,
@@ -612,92 +709,7 @@ function ParamEditor({
   setState: React.Dispatch<React.SetStateAction<Record<string, unknown>>>;
 }) {
   if (p.kind === "upload") {
-    const files = (state[p.key] as File[]) ?? [];
-    const inputRef = useRef<HTMLInputElement>(null);
-    const [isDragOver, setIsDragOver] = useState(false);
-
-    function handleFiles(fileList: FileList | null) {
-      if (!fileList) return;
-      const newFiles = Array.from(fileList);
-      setState((s) => ({
-        ...s,
-        [p.key]: p.multiple ? [...((s[p.key] as File[]) ?? []), ...newFiles] : newFiles,
-      }));
-    }
-
-    function handleDrop(e: React.DragEvent) {
-      e.preventDefault();
-      setIsDragOver(false);
-      handleFiles(e.dataTransfer.files);
-    }
-
-    function handleDragOver(e: React.DragEvent) {
-      e.preventDefault();
-      setIsDragOver(true);
-    }
-
-    function handleDragLeave() {
-      setIsDragOver(false);
-    }
-
-    function removeFile(index: number) {
-      setState((s) => ({
-        ...s,
-        [p.key]: ((s[p.key] as File[]) ?? []).filter((_, i) => i !== index),
-      }));
-    }
-
-    return (
-      <div>
-        <div
-          onClick={() => inputRef.current?.click()}
-          onDrop={handleDrop}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          className={cn(
-            "rounded-xl border px-3 py-6 text-center text-xs cursor-pointer transition",
-            files.length === 0 && !isDragOver ? "border-dashed" : "border-solid",
-            files.length > 0 || isDragOver
-              ? "border-amber/60 bg-amber/5 text-amber-soft"
-              : "border-border bg-surface-0/40 text-muted-foreground hover:border-amber/40",
-          )}
-        >
-          <input
-            ref={inputRef}
-            type="file"
-            accept={p.accepts}
-            multiple={p.multiple}
-            className="hidden"
-            onChange={(e) => handleFiles(e.target.files)}
-          />
-          {files.length > 0 ? (
-            <div className="space-y-1">
-              <Upload className="size-4 mx-auto text-amber" />
-              <span>
-                {files.length} fichier{files.length > 1 ? "s" : ""} sélectionné{files.length > 1 ? "s" : ""}
-              </span>
-            </div>
-          ) : (
-            <span>Glisse un fichier ou clique pour choisir</span>
-          )}
-        </div>
-        {files.length > 0 && (
-          <div className="mt-2 space-y-1">
-            {files.map((f, i) => (
-              <div key={i} className="flex items-center justify-between rounded-lg bg-surface-2/40 px-2.5 py-1.5 text-[11px]">
-                <span className="truncate text-foreground">{f.name}</span>
-                <button
-                  onClick={(e) => { e.stopPropagation(); removeFile(i); }}
-                  className="ml-2 text-muted-foreground hover:text-foreground cursor-pointer"
-                >
-                  <X className="size-3" />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    );
+    return <UploadParamEditor p={p} state={state} setState={setState} />;
   }
   if (p.kind === "select") {
     const val = state[p.key] as string;
