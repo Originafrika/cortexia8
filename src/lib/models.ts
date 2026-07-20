@@ -25,9 +25,9 @@ export type Unit =
   | "track";
 
 export type ParamSpec =
-  | { kind: "prompt"; label: string; placeholder?: string }
-  | { kind: "upload"; label: string; multiple?: boolean; accepts?: string }
-  | { kind: "select"; label: string; key: string; options: string[]; advanced?: boolean }
+  | { kind: "prompt"; label: string; placeholder?: string; required?: boolean }
+  | { kind: "upload"; label: string; multiple?: boolean; accepts?: string; required?: boolean }
+  | { kind: "select"; label: string; key: string; options: string[]; advanced?: boolean; required?: boolean }
   | {
       kind: "slider";
       label: string;
@@ -38,9 +38,10 @@ export type ParamSpec =
       default: number;
       suffix?: string;
       advanced?: boolean;
+      required?: boolean;
     }
-  | { kind: "seed"; label: string; advanced?: boolean }
-  | { kind: "toggle"; label: string; key: string; default?: boolean; advanced?: boolean };
+  | { kind: "seed"; label: string; advanced?: boolean; required?: boolean }
+  | { kind: "toggle"; label: string; key: string; default?: boolean; advanced?: boolean; required?: boolean };
 
 export type PriceTier = _PriceTier;
 
@@ -87,12 +88,13 @@ function deriveParams(schema: InputSchemaField[]): ParamSpec[] {
     switch (f.type) {
       case "text":
       case "longtext":
-        out.push({ kind: "prompt", label });
+        out.push({ kind: "prompt", label, required: f.required });
         break;
       case "upload":
         out.push({
           kind: "upload",
           label,
+          required: f.required,
           ...(f.multiple ? { multiple: true } : {}),
           ...(f.accepts ? { accepts: f.accepts } : {}),
         });
@@ -104,12 +106,13 @@ function deriveParams(schema: InputSchemaField[]): ParamSpec[] {
           key: f.key,
           options: f.options ?? [],
           advanced,
+          required: f.required,
         });
         break;
       case "number":
         // Treat wide-range unsigned integers as a seed control.
         if (f.min === 0 && f.max === 4294967295) {
-          out.push({ kind: "seed", label, advanced: true });
+          out.push({ kind: "seed", label, advanced: true, required: f.required });
         } else {
           out.push({
             kind: "slider",
@@ -120,6 +123,7 @@ function deriveParams(schema: InputSchemaField[]): ParamSpec[] {
             step: f.step ?? 1,
             default: typeof f.default === "number" ? f.default : (f.min ?? 0),
             advanced,
+            required: f.required,
           });
         }
         break;
@@ -130,6 +134,7 @@ function deriveParams(schema: InputSchemaField[]): ParamSpec[] {
           key: f.key,
           ...(typeof f.default === "boolean" ? { default: f.default } : {}),
           advanced,
+          required: f.required,
         });
         break;
     }

@@ -133,6 +133,22 @@ export function ModelPlaygroundContent({
   const hasPrompt = model.params.some((p) => p.kind === "prompt");
   const active = history.find((h) => h.id === activeId) ?? null;
 
+  const canGenerate = useMemo(() => {
+    for (const p of model.params) {
+      if (!p.required) continue;
+      if (p.kind === "prompt") {
+        if (prompt.trim().length < 3) return false;
+      } else if (p.kind === "upload") {
+        const val = state[p.key ?? ""] ?? [];
+        if (!Array.isArray(val) || val.length === 0) return false;
+      } else if ("key" in p && p.key) {
+        const val = state[p.key];
+        if (val === undefined || val === null || val === "") return false;
+      }
+    }
+    return true;
+  }, [model.params, prompt, state]);
+
   const iconParams = model.params.filter((p) => {
     if (p.kind === "prompt") return false;
     if (!showAdvanced && "advanced" in p && p.advanced) return false;
@@ -146,11 +162,26 @@ export function ModelPlaygroundContent({
 
   function generate() {
     if (status === "loading") return;
-    if (hasPrompt && prompt.trim().length < 3) {
+
+    const missingFields: string[] = [];
+    for (const p of model.params) {
+      if (!p.required) continue;
+      if (p.kind === "prompt") {
+        if (prompt.trim().length < 3) missingFields.push(p.label);
+      } else if (p.kind === "upload") {
+        const val = state[p.key ?? ""] ?? [];
+        if (!Array.isArray(val) || val.length === 0) missingFields.push(p.label);
+      } else if ("key" in p && p.key) {
+        const val = state[p.key];
+        if (val === undefined || val === null || val === "") missingFields.push(p.label);
+      }
+    }
+    if (missingFields.length > 0) {
       setStatus("error");
-      setError("Ajoute un prompt d'au moins quelques mots pour lancer la génération.");
+      setError(`Champs requis manquants : ${missingFields.join(", ")}`);
       return;
     }
+
     clearTimers();
     setStatus("loading");
     setError(null);
@@ -342,6 +373,7 @@ export function ModelPlaygroundContent({
             currentPrice={currentPrice}
             showAdvanced={showAdvanced}
             onToggleAdvanced={() => setShowAdvanced((v) => !v)}
+            canGenerate={canGenerate}
           />
         </div>
       </div>
@@ -375,6 +407,7 @@ function PromptBar({
   currentPrice,
   showAdvanced,
   onToggleAdvanced,
+  canGenerate,
 }: {
   model: Model;
   iconParams: ParamSpec[];
@@ -389,6 +422,7 @@ function PromptBar({
   currentPrice: number;
   showAdvanced: boolean;
   onToggleAdvanced: () => void;
+  canGenerate: boolean;
 }) {
   const promptSpec = model.params.find((p) => p.kind === "prompt");
   const placeholder =
@@ -445,7 +479,7 @@ function PromptBar({
           </div>
           <button
             onClick={onGenerate}
-            disabled={status === "loading"}
+            disabled={status === "loading" || !canGenerate}
             className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber px-4 h-9 text-sm font-medium text-primary-foreground hover:opacity-95 transition disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
           >
             {status === "loading" ? (
