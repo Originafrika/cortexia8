@@ -67,10 +67,23 @@ export type Model = {
 
 // ── Derive legacy `params` from `inputSchema` ────────────────────────────
 
+const ADVANCED_KEYS = new Set([
+  "negative_prompt",
+  "guidance_scale",
+  "strength",
+  "num_images",
+  "temperature",
+  "max_tokens",
+  "top_p",
+  "instrumental",
+  "scale",
+]);
+
 function deriveParams(schema: InputSchemaField[]): ParamSpec[] {
   const out: ParamSpec[] = [];
   for (const f of schema) {
     const label = f.label ?? f.key;
+    const advanced = ADVANCED_KEYS.has(f.key);
     switch (f.type) {
       case "text":
       case "longtext":
@@ -90,12 +103,13 @@ function deriveParams(schema: InputSchemaField[]): ParamSpec[] {
           label,
           key: f.key,
           options: f.options ?? [],
+          advanced,
         });
         break;
       case "number":
         // Treat wide-range unsigned integers as a seed control.
         if (f.min === 0 && f.max === 4294967295) {
-          out.push({ kind: "seed", label });
+          out.push({ kind: "seed", label, advanced: true });
         } else {
           out.push({
             kind: "slider",
@@ -105,6 +119,7 @@ function deriveParams(schema: InputSchemaField[]): ParamSpec[] {
             max: f.max ?? 100,
             step: f.step ?? 1,
             default: typeof f.default === "number" ? f.default : (f.min ?? 0),
+            advanced,
           });
         }
         break;
@@ -114,6 +129,7 @@ function deriveParams(schema: InputSchemaField[]): ParamSpec[] {
           label,
           key: f.key,
           ...(typeof f.default === "boolean" ? { default: f.default } : {}),
+          advanced,
         });
         break;
     }

@@ -127,12 +127,17 @@ export function ModelPlaygroundContent({
   const timers = useRef<number[]>([]);
   const galleryRef = useRef<HTMLDivElement>(null);
 
+  const [showAdvanced, setShowAdvanced] = useState(false);
+
   const currentPrice = useMemo(() => estimatePrice(model, state), [model, state]);
   const hasPrompt = model.params.some((p) => p.kind === "prompt");
   const active = history.find((h) => h.id === activeId) ?? null;
 
-  // Group all non-prompt params for icon buttons
-  const iconParams = model.params.filter((p) => p.kind !== "prompt");
+  const iconParams = model.params.filter((p) => {
+    if (p.kind === "prompt") return false;
+    if (!showAdvanced && "advanced" in p && p.advanced) return false;
+    return true;
+  });
 
   function clearTimers() {
     timers.current.forEach((t) => window.clearTimeout(t));
@@ -335,6 +340,8 @@ export function ModelPlaygroundContent({
             status={status}
             progress={progress}
             currentPrice={currentPrice}
+            showAdvanced={showAdvanced}
+            onToggleAdvanced={() => setShowAdvanced((v) => !v)}
           />
         </div>
       </div>
@@ -366,6 +373,8 @@ function PromptBar({
   status,
   progress,
   currentPrice,
+  showAdvanced,
+  onToggleAdvanced,
 }: {
   model: Model;
   iconParams: ParamSpec[];
@@ -378,6 +387,8 @@ function PromptBar({
   status: Status;
   progress: number;
   currentPrice: number;
+  showAdvanced: boolean;
+  onToggleAdvanced: () => void;
 }) {
   const promptSpec = model.params.find((p) => p.kind === "prompt");
   const placeholder =
@@ -410,6 +421,22 @@ function PromptBar({
         {iconParams.map((p, i) => (
           <ParamIconButton key={i} p={p} state={state} setState={setState} />
         ))}
+
+        {model.params.some((p) => "advanced" in p && p.advanced) && (
+          <button
+            type="button"
+            onClick={onToggleAdvanced}
+            className={cn(
+              "inline-flex items-center gap-1 rounded-full border h-8 px-2.5 text-[11px] transition cursor-pointer",
+              showAdvanced
+                ? "border-amber/60 bg-amber/10 text-amber-soft"
+                : "border-border bg-surface-2/40 text-muted-foreground hover:text-foreground hover:border-border-strong",
+            )}
+          >
+            <Settings2 className="size-3" />
+            <span className="hidden sm:inline">{showAdvanced ? "Advanced" : "Simple"}</span>
+          </button>
+        )}
 
         <div className="ml-auto flex items-center gap-2">
           <div className="hidden sm:flex items-center gap-1 text-[11px] text-muted-foreground font-mono">
