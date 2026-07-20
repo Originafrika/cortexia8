@@ -1,5 +1,4 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { authClient } from "@/auth";
 import { loadSession } from "@/lib/auth-store";
 import { AmbientBackground } from "@/components/ambient-background";
 import { SiteHeader } from "@/components/site-header";
@@ -468,11 +467,9 @@ function FaqSection() {
 
 function FooterSection() {
   const t = useT();
-  const { data: session } = authClient.useSession();
-  const isSignedIn = !!session?.user;
-  const teamHref = !isSignedIn ? "/auth/sign-in" : "/app";
   const storedSession = loadSession();
-  const isAdmin = storedSession?.user?.role === "admin";
+  const isSignedIn = !!storedSession?.user;
+  const teamHref = !isSignedIn ? "/auth/sign-in" : "/app-preview";
 
   return (
     <footer className="mt-8 border-t border-border">
@@ -491,14 +488,12 @@ function FooterSection() {
           <a href="#" className="hover:text-foreground transition">
             {t("footer.contact")}
           </a>
-          {isAdmin && (
-            <a
-              href={teamHref}
-              className="opacity-40 hover:opacity-80 transition inline-flex items-center gap-1"
-            >
-              {t("footer.team")} <ArrowRight className="size-3" />
-            </a>
-          )}
+          <a
+            href={teamHref}
+            className="opacity-40 hover:opacity-80 transition inline-flex items-center gap-1"
+          >
+            {t("footer.team")} <ArrowRight className="size-3" />
+          </a>
         </div>
       </div>
     </footer>
