@@ -15,7 +15,13 @@
 
 import { createServerFn } from "@tanstack/react-start";
 import { sql } from "@/lib/db";
-import { buildCallbackUrl, createTask } from "@/lib/kie-api/client";
+import {
+  buildCallbackUrl,
+  createTask,
+  chatCompletion,
+  chatAnthropic,
+  chatGoogleNative,
+} from "@/lib/kie-api/client";
 import {
   ensureSufficientCredits,
   InsufficientCreditsError,
@@ -26,6 +32,7 @@ import {
   nodeCostUsd,
   resolveUploads,
   toNumber,
+  type ApiFamily,
   type ModelRow,
 } from "./shared";
 import { getRequestContext, HttpError, requireUserId, toJsonResponse } from "./auth";
@@ -135,12 +142,13 @@ async function runGenerate(
     };
   }
 
-  // 4. Submit to kie.ai.
+  // 4. Submit to kie.ai — branch on api_family.
   const callback = tryBuildCallback();
-  const { taskId } = await createTask({
-    model: model.kie_endpoint,
+  const taskId = await submitTask({
+    apiFamily: model.api_family,
+    model,
     input: resolvedInput,
-    ...(callback ? { callBackUrl: callback } : {}),
+    callback,
   });
 
   // 5. Persist run + execution rows so the webhook can find them.
@@ -181,9 +189,86 @@ function tryBuildCallback(): string | undefined {
   try {
     return buildCallbackUrl();
   } catch {
-    // Without APP_URL we still accept the task; the client can poll the
-    // status endpoint. Webhook just becomes optional.
     return undefined;
+  }
+}
+
+/**
+ * Route a generation request to the correct kie.ai endpoint based on
+ * the model's api_family. Returns a taskId that the webhook can track.
+ */
+async function submitTask(opts: {
+  apiFamily: ApiFamily | null;
+  model: ModelRow;
+  input: Record<string, unknown>;
+  callback?: string;
+}): Promise<string> {
+  const family = opts.apiFamily ?? "market_unified";
+
+  switch (family) {
+    case "market_unified": {
+      const { taskId } = await createTask({
+        model: opts.model.kie_endpoint,
+        input: opts.input,
+        ...(opts.callback ? { callBackUrl: opts.callback } : {}),
+      });
+      return taskId;
+    }
+
+    case "chat_openai": {
+      const { taskId } = await chatCompletion({
+        model: opts.model.kie_endpoint,
+        messages: (opts.input.messages as unknown[]) ?? [],
+        tools: opts.input.tools as unknown[] | undefined,
+        reasoning_effort: opts.input.reasoning_effort as string | undefined,
+        stream: false,
+      });
+      return taskId;
+    }
+
+    case "chat_anthropic": {
+      const { taskId } = await chatAnthropic({
+        model: opts.model.kie_endpoint,
+        messages: (opts.input.messages as unknown[]) ?? [],
+        max_tokens: opts.input.max_tokens as number | undefined,
+        thinking: opts.input.thinking as boolean | undefined,
+        stream: false,
+      });
+      return taskId;
+    }
+
+    case "chat_google_native": {
+      const { taskId } = await chatGoogleNative({
+        model: opts.model.kie_endpoint,
+        contents: (opts.input.contents as unknown[]) ?? [],
+        tools: opts.input.tools as unknown[] | undefined,
+        generationConfig: opts.input.generationConfig as Record<string, unknown> | undefined,
+      });
+      return taskId;
+    }
+
+    case "dedicated": {
+      // Dedicated models (Runway, Veo, GPT Image 4o, Flux Kontext,
+      // Aleph, Luma, Suno/Voice) use createTask with a model-specific
+      // endpoint stored in kie_endpoint. The routing distinction here
+      // is that dedicated models don't support callback URLs — the
+      // client must poll for status.
+      const { taskId } = await createTask({
+        model: opts.model.kie_endpoint,
+        input: opts.input,
+      });
+      return taskId;
+    }
+
+    default: {
+      // Unknown family — fall back to market_unified.
+      const { taskId } = await createTask({
+        model: opts.model.kie_endpoint,
+        input: opts.input,
+        ...(opts.callback ? { callBackUrl: opts.callback } : {}),
+      });
+      return taskId;
+    }
   }
 }
 

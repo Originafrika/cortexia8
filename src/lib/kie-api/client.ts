@@ -165,6 +165,93 @@ export function parseResultJson(raw: string | undefined): {
   }
 }
 
+/** Chat completion via OpenAI-compatible endpoint. */
+export async function chatCompletion(opts: {
+  model: string;
+  messages: unknown[];
+  tools?: unknown[];
+  reasoning_effort?: string;
+  stream?: boolean;
+}): Promise<{ taskId: string; response?: unknown }> {
+  const endpoint = "/v1/chat/completions";
+  const body: Record<string, unknown> = {
+    model: opts.model,
+    messages: opts.messages,
+    stream: opts.stream ?? false,
+  };
+  if (opts.tools) body.tools = opts.tools;
+  if (opts.reasoning_effort) body.reasoning_effort = opts.reasoning_effort;
+
+  const res = await fetch(`${kieApiBase()}${endpoint}`, {
+    method: "POST",
+    headers: {
+      ...authHeaders(),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) await readError(res, endpoint);
+  const json = (await res.json()) as Record<string, unknown>;
+  return { taskId: String(json.id ?? ""), response: json };
+}
+
+/** Chat completion via Anthropic Messages endpoint. */
+export async function chatAnthropic(opts: {
+  model: string;
+  messages: unknown[];
+  max_tokens?: number;
+  thinking?: boolean;
+  stream?: boolean;
+}): Promise<{ taskId: string; response?: unknown }> {
+  const endpoint = "/claude/v1/messages";
+  const body: Record<string, unknown> = {
+    model: opts.model,
+    messages: opts.messages,
+    max_tokens: opts.max_tokens ?? 4096,
+    stream: opts.stream ?? false,
+  };
+  if (opts.thinking) body.thinking = { type: "enabled", budget_tokens: opts.max_tokens ?? 4096 };
+
+  const res = await fetch(`${kieApiBase()}${endpoint}`, {
+    method: "POST",
+    headers: {
+      ...authHeaders(),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) await readError(res, endpoint);
+  const json = (await res.json()) as Record<string, unknown>;
+  return { taskId: String(json.id ?? ""), response: json };
+}
+
+/** Chat completion via Google native streaming endpoint. */
+export async function chatGoogleNative(opts: {
+  model: string;
+  contents: unknown[];
+  tools?: unknown[];
+  generationConfig?: Record<string, unknown>;
+}): Promise<{ taskId: string; response?: unknown }> {
+  const endpoint = `/streamGenerateContent?alt=sse&key=${encodeURIComponent(process.env.GOOGLE_API_KEY ?? "")}`;
+  const body: Record<string, unknown> = {
+    contents: opts.contents,
+  };
+  if (opts.tools) body.tools = opts.tools;
+  if (opts.generationConfig) body.generationConfig = opts.generationConfig;
+
+  const res = await fetch(`${kieApiBase()}${endpoint}`, {
+    method: "POST",
+    headers: {
+      ...authHeaders(),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) await readError(res, endpoint);
+  const json = (await res.json()) as Record<string, unknown>;
+  return { taskId: String(json.id ?? ""), response: json };
+}
+
 /**
  * Build the absolute callback URL we send to kie.ai. In dev we hit
  * localhost; in prod we trust the APP_URL env var.

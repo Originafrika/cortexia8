@@ -11,12 +11,20 @@ import { UploadSource, upload as kieUpload } from "@/lib/kie-api/upload";
 
 export type ModelCategory = "image" | "video" | "audio" | "text" | "music";
 
+export type ApiFamily =
+  | "market_unified"
+  | "dedicated"
+  | "chat_openai"
+  | "chat_anthropic"
+  | "chat_google_native";
+
 export type ModelRow = {
   id: number;
   slug: string;
   name: string;
   provider: string;
   category: ModelCategory;
+  api_family: ApiFamily | null;
   kie_endpoint: string;
   input_schema: Record<string, unknown>;
   output_type: string;
@@ -31,8 +39,8 @@ export type ModelRow = {
 /** Resolve a model by slug. Returns null if not found or inactive. */
 export async function getActiveModelBySlug(slug: string): Promise<ModelRow | null> {
   const rows = (await sql`
-    SELECT id, slug, name, provider, category, kie_endpoint, input_schema,
-           output_type, pricing_unit,
+    SELECT id, slug, name, provider, category, api_family, kie_endpoint,
+           input_schema, output_type, pricing_unit,
            provider_cost_usd::text AS provider_cost_usd,
            cortexia_price_usd::text AS cortexia_price_usd,
            fidelity_status, supports_reference_upload, active
