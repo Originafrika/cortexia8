@@ -29,6 +29,8 @@ export { kieWebhook } from "./webhooks-kie";
 export type { WebhookInput, WebhookResponse };
 export { generationStatus } from "./generation-status";
 export type { StatusInput, GenerationStatus };
+export { getHistory } from "./history";
+export type { HistoryInput, HistoryItem, HistoryResponse };
 export { verifyFedaPayTransaction, createStripeCheckout, stripeWebhook } from "./payments";
 export type {
   FedaPayVerifyInput,

@@ -1,16 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { MODELS, basePrice, type Model, type ModelCategory } from "@/lib/models";
 import { PriceDisplay } from "@/components/price-display";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, RefreshCw, Search, Copy, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getHistory, type HistoryItem } from "@/lib/api/history";
+import { loadSession } from "@/lib/auth-store";
 
 export const Route = createFileRoute("/app/history")({
   component: HistoryPage,
 });
 
-type Item = {
+type DisplayItem = {
   id: string;
   model: Model;
   prompt: string;
@@ -18,22 +20,9 @@ type Item = {
   cost: number;
   ratio: string;
   tint: string;
+  previewUrl: string | null;
+  status: string;
 };
-
-const PROMPTS = [
-  "Flacon ambré, marbre travertin, lumière naturelle",
-  "Sneakers urbaines, plan matinal, énergie contenue",
-  "Voix off teaser série, ton grave, français",
-  "Storyboard émission cuisine à Dakar, 6 cases",
-  "Portrait UGC beauté, éclairage doux",
-  "Pub 15s café artisan, plan serré barista",
-  "Mockup story pâtisserie fine",
-  "Animation logo, transition ambre vers noir",
-  "Voix commerciale radio, portugais chaleureux",
-  "Plan drone plage brésilienne, coucher soleil",
-  "Cinemagraph mode, robe qui bouge",
-  "Illustration éditoriale, article business",
-];
 
 const TINTS = ["#3d2a1e", "#2a1e3d", "#1e3d2a", "#3d1e2a", "#2a3d1e", "#1e2a3d"];
 const CATS: { key: ModelCategory | "all"; label: string }[] = [
@@ -44,29 +33,67 @@ const CATS: { key: ModelCategory | "all"; label: string }[] = [
   { key: "text", label: "Texte" },
 ];
 
-function makeItems(): Item[] {
-  const pool = MODELS.filter((m) => m.category !== "text");
-  return Array.from({ length: 48 }).map((_, i) => {
-    const m = pool[i % pool.length];
-    return {
-      id: `g-${i}`,
-      model: m,
-      prompt: PROMPTS[i % PROMPTS.length],
-      date: `il y a ${i + 1}h`,
-      cost: basePrice(m) * (m.unit === "second" ? 5 : 1),
-      ratio: i % 5 === 0 ? "aspect-[9/16]" : i % 3 === 0 ? "aspect-[3/4]" : "aspect-square",
-      tint: TINTS[i % TINTS.length],
-    };
-  });
+function formatRelative(dateStr: string): string {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  const now = Date.now();
+  const diffMs = now - d.getTime();
+  const diffMin = Math.floor(diffMs / 60000);
+  if (diffMin < 1) return "à l'instant";
+  if (diffMin < 60) return `il y a ${diffMin}m`;
+  const diffH = Math.floor(diffMin / 60);
+  if (diffH < 24) return `il y a ${diffH}h`;
+  const diffD = Math.floor(diffH / 24);
+  if (diffD < 30) return `il y a ${diffD}j`;
+  return d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
 }
 
 function HistoryPage() {
-  const [items] = useState(makeItems);
-  const [selected, setSelected] = useState<Item | null>(null);
+  const [items, setItems] = useState<DisplayItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState<DisplayItem | null>(null);
   const [cat, setCat] = useState<ModelCategory | "all">("all");
   const [q, setQ] = useState("");
   const [modelSlug, setModelSlug] = useState<string>("all");
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    async function fetchHistory() {
+      try {
+        const session = loadSession();
+        if (!session?.user?.id) {
+          setLoading(false);
+          return;
+        }
+        const userId = Number(session.user.id);
+        if (isNaN(userId)) {
+          setLoading(false);
+          return;
+        }
+        const result = await getHistory({ data: { userId, limit: 100 } });
+        const mapped: DisplayItem[] = result.items.map((item: HistoryItem, i: number) => {
+          const model = MODELS.find((m) => m.slug === item.modelSlug) ?? MODELS[0];
+          return {
+            id: item.id,
+            model,
+            prompt: item.prompt,
+            date: formatRelative(item.date),
+            cost: item.cost || basePrice(model) * (model.unit === "second" ? 5 : 1),
+            ratio: item.modelCategory === "video" ? "aspect-[9/16]" : item.modelCategory === "audio" ? "aspect-[4/3]" : "aspect-square",
+            tint: TINTS[i % TINTS.length],
+            previewUrl: item.previewUrl,
+            status: item.status,
+          };
+        });
+        setItems(mapped);
+      } catch {
+        setItems([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchHistory();
+  }, []);
 
   const modelOptions = useMemo(() => {
     const set = new Map<string, Model>();
@@ -104,7 +131,9 @@ function HistoryPage() {
           </div>
           <h1 className="mt-2 font-display text-4xl tracking-[-0.03em]">Tout ce que tu as créé.</h1>
           <p className="mt-2 text-muted-foreground text-sm">
-            {filtered.length} génération{filtered.length > 1 ? "s" : ""} · {items.length} au total
+            {loading
+              ? "Chargement…"
+              : `${filtered.length} génération${filtered.length > 1 ? "s" : ""} · ${items.length} au total`}
           </p>
         </div>
         <div className="relative">
@@ -157,7 +186,12 @@ function HistoryPage() {
         </div>
       </div>
 
-      {filtered.length === 0 ? (
+      {loading ? (
+        <div className="mt-16 text-center text-muted-foreground">
+          <div className="font-display text-2xl mb-2">Chargement…</div>
+          <div className="text-sm">Récupération de l'historique.</div>
+        </div>
+      ) : filtered.length === 0 ? (
         <div className="mt-16 text-center text-muted-foreground">
           <div className="font-display text-2xl mb-2">Rien à afficher.</div>
           <div className="text-sm">Ajuste les filtres ou lance une nouvelle génération.</div>
@@ -174,6 +208,14 @@ function HistoryPage() {
               }
               style={{ background: `linear-gradient(135deg, ${it.tint}, oklch(0.14 0 0))` }}
             >
+              {it.previewUrl ? (
+                <img
+                  src={it.previewUrl}
+                  alt=""
+                  className="absolute inset-0 h-full w-full object-cover"
+                  loading="lazy"
+                />
+              ) : null}
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
               <div className="absolute top-2 left-2 rounded-full bg-black/60 backdrop-blur px-2 py-0.5 text-[9px] font-mono uppercase tracking-wider text-foreground/80">
                 {it.model.category}
@@ -222,9 +264,17 @@ function HistoryPage() {
                 </button>
               </div>
               <div
-                className={"m-4 rounded-xl " + selected.ratio}
+                className={"m-4 rounded-xl overflow-hidden " + selected.ratio}
                 style={{ background: `linear-gradient(135deg, ${selected.tint}, oklch(0.14 0 0))` }}
-              />
+              >
+                {selected.previewUrl && (
+                  <img
+                    src={selected.previewUrl}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
+                )}
+              </div>
               <div className="px-4 pb-6">
                 <div className="flex items-center justify-between">
                   <div className="text-xs text-muted-foreground">Prompt</div>
