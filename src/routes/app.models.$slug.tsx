@@ -24,6 +24,8 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { generate } from "@/lib/api/generate";
+import { generationStatus } from "@/lib/api/generation-status";
 
 export const Route = createFileRoute("/app/models/$slug")({
   loader: ({ params }) => {
@@ -59,13 +61,11 @@ type Result = {
   model: Model;
   prompt: string;
   cost: number;
-  tint: string;
-  ratio: string;
+  resultUrl: string | null;
+  runId: number | null;
   state: Record<string, unknown>;
   timestamp: Date;
 };
-
-const TINTS = ["#3d2a1e", "#2a1e3d", "#1e3d2a", "#3d1e2a", "#2a3d1e", "#1e2a3d"];
 
 function iconForParam(key: string, kind: ParamSpec["kind"]) {
   if (kind === "upload") return Upload;
@@ -78,20 +78,6 @@ function iconForParam(key: string, kind: ParamSpec["kind"]) {
   return SlidersHorizontal;
 }
 
-function ratioClassFrom(r?: string) {
-  switch (r) {
-    case "9:16":
-      return "aspect-[9/16]";
-    case "16:9":
-      return "aspect-video";
-    case "3:4":
-      return "aspect-[3/4]";
-    case "4:3":
-      return "aspect-[4/3]";
-    default:
-      return "aspect-square";
-  }
-}
 
 function ModelPlayground() {
   const { model } = Route.useLoaderData();
@@ -186,41 +172,75 @@ export function ModelPlaygroundContent({
     setStatus("loading");
     setError(null);
     setProgress(0);
-    const duration =
-      model.category === "video"
-        ? 4200
-        : model.category === "audio"
-          ? 2600
-          : model.category === "text"
-            ? 1800
-            : 2200;
-    const steps = 40;
-    for (let i = 1; i <= steps; i++) {
-      timers.current.push(
-        window.setTimeout(() => setProgress(Math.round((i / steps) * 100)), (duration / steps) * i),
-      );
-    }
-    timers.current.push(
-      window.setTimeout(() => {
+
+    const input: Record<string, unknown> = { ...state };
+    if (prompt.trim()) input.prompt = prompt.trim();
+
+    generate({ modelSlug: model.slug, input })
+      .then((res) => {
         const newResult: Result = {
-          id: Math.random().toString(36).substring(2, 9),
+          id: res.runId.toString(),
           model,
           prompt: prompt.trim() || "(sans prompt)",
-          cost: currentPrice,
-          tint: TINTS[Math.floor(Math.random() * TINTS.length)],
-          ratio: ratioClassFrom(state.ratio as string),
+          cost: res.estimatedCostUsd || currentPrice,
+          resultUrl: null,
+          runId: res.runId,
           state: { ...state },
           timestamp: new Date(),
         };
         setHistory((prev) => [newResult, ...prev]);
         setActiveId(newResult.id);
-        setStatus("success");
-        // Scroll gallery to top so new result is visible
-        requestAnimationFrame(() => {
-          galleryRef.current?.scrollTo({ top: 0, behavior: "smooth" });
-        });
-      }, duration + 60),
-    );
+        setProgress(10);
+
+        let pollCount = 0;
+        const maxPolls = 300;
+        const poll = () => {
+          pollCount++;
+          if (pollCount > maxPolls) {
+            setStatus("error");
+            setError("La génération a pris trop de temps. Réessaie plus tard.");
+            return;
+          }
+          generationStatus({ id: res.runId })
+            .then((statusRes) => {
+              const node = statusRes.nodes[0];
+              if (!node) return;
+              const pct = statusRes.status === "success" ? 100 : Math.min(10 + pollCount, 95);
+              setProgress(pct);
+
+              if (statusRes.status === "success" || (node.status === "success" && node.asset)) {
+                const url = node.asset?.previewUrl || node.asset?.storageUrl || null;
+                setHistory((prev) =>
+                  prev.map((r) =>
+                    r.id === newResult.id ? { ...r, resultUrl: url } : r,
+                  ),
+                );
+                setStatus("success");
+                setProgress(100);
+                requestAnimationFrame(() => {
+                  galleryRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+                });
+                return;
+              }
+
+              if (statusRes.status === "error" || node.status === "error") {
+                setStatus("error");
+                setError(node.errorMessage || "Une erreur est survenue pendant la génération.");
+                return;
+              }
+
+              timers.current.push(window.setTimeout(poll, 2000));
+            })
+            .catch(() => {
+              timers.current.push(window.setTimeout(poll, 2000));
+            });
+        };
+        timers.current.push(window.setTimeout(poll, 2000));
+      })
+      .catch((err) => {
+        setStatus("error");
+        setError(err?.message || "Impossible de lancer la génération.");
+      });
   }
 
   useEffect(() => () => clearTimers(), []);
@@ -338,8 +358,24 @@ export function ModelPlaygroundContent({
                       ? "border-amber ring-2 ring-amber/30"
                       : "border-border hover:border-amber/40",
                   )}
-                  style={{ background: `linear-gradient(135deg, ${item.tint}, oklch(0.14 0 0))` }}
+                  style={
+                    item.resultUrl
+                      ? undefined
+                      : { background: `linear-gradient(135deg, #2a1e3d, oklch(0.14 0 0))` }
+                  }
                 >
+                  {item.resultUrl && (
+                    <img
+                      src={item.resultUrl}
+                      alt={item.prompt}
+                      className="w-full h-full object-cover"
+                    />
+                  )}
+                  {!item.resultUrl && (
+                    <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
+                      <Loader2 className="size-4 animate-spin" />
+                    </div>
+                  )}
                   <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition" />
                   <div className="absolute bottom-1.5 left-1.5 right-1.5 text-[9px] font-mono text-white/90 bg-black/60 backdrop-blur px-1.5 py-0.5 rounded truncate">
                     {item.prompt}
@@ -801,6 +837,11 @@ function ActiveResultView({
   result: Result;
   onRegenerate: () => void;
 }) {
+  const hasResult = !!result.resultUrl;
+  const isImage = result.model.category === "image";
+  const isVideo = result.model.category === "video";
+  const isAudio = result.model.category === "audio";
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -812,10 +853,38 @@ function ActiveResultView({
           className={cn(
             "surface-gradient-border rounded-2xl overflow-hidden relative",
             "h-[min(58dvh,520px)] max-w-full w-auto",
-            result.ratio,
+            !hasResult && "aspect-square",
           )}
-          style={{ background: `linear-gradient(135deg, ${result.tint}, oklch(0.14 0 0))` }}
+          style={
+            hasResult
+              ? undefined
+              : { background: `linear-gradient(135deg, #2a1e3d, oklch(0.14 0 0))` }
+          }
         >
+          {hasResult && isImage && (
+            <img
+              src={result.resultUrl!}
+              alt={result.prompt}
+              className="w-full h-full object-contain"
+            />
+          )}
+          {hasResult && isVideo && (
+            <video
+              src={result.resultUrl!}
+              controls
+              className="w-full h-full object-contain"
+            />
+          )}
+          {hasResult && isAudio && (
+            <div className="flex flex-col items-center justify-center h-full gap-3 p-4">
+              <audio src={result.resultUrl!} controls className="w-full max-w-xs" />
+            </div>
+          )}
+          {!hasResult && (
+            <div className="absolute inset-0 flex items-center justify-center text-muted-foreground text-sm">
+              <Loader2 className="size-6 animate-spin" />
+            </div>
+          )}
           <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between gap-2">
             <div className="rounded-full bg-black/60 backdrop-blur px-2 py-1 text-[10px] font-mono uppercase tracking-wider truncate">
               {result.model.category}
@@ -857,9 +926,16 @@ function ActiveResultView({
           >
             <RefreshCw className="size-3.5" /> Régénérer
           </button>
-          <button className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber text-primary-foreground px-3 py-2 text-xs font-medium hover:opacity-95 transition cursor-pointer">
-            <Download className="size-3.5" /> Télécharger
-          </button>
+          {hasResult && (
+            <a
+              href={result.resultUrl!}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber text-primary-foreground px-3 py-2 text-xs font-medium hover:opacity-95 transition"
+            >
+              <Download className="size-3.5" /> Télécharger
+            </a>
+          )}
         </div>
       </div>
     </motion.div>
