@@ -5,47 +5,12 @@ import { Copy, Check, Plus, KeyRound, X, AlertTriangle, Loader2, Play, ChevronDo
 import { motion, AnimatePresence } from "framer-motion";
 import { generate } from "@/lib/api/generate";
 import { generationStatus } from "@/lib/api/generation-status";
+import { createApiKey, listApiKeys, revokeApiKey, type ApiKeyRow } from "@/lib/api/api-keys";
 import { MODELS, basePrice, unitLabel, type Model, type ParamSpec } from "@/lib/models";
 
 export const Route = createFileRoute("/app/developers")({
   component: DevelopersPage,
 });
-
-type ApiKey = {
-  id: string;
-  name: string;
-  prefix: string;
-  scope: string;
-  lastUsed: string;
-  active: boolean;
-};
-
-const KEYS: ApiKey[] = [
-  {
-    id: "1",
-    name: "Production — site principal",
-    prefix: "cx_live_9F2a",
-    scope: "generate:*",
-    lastUsed: "il y a 12 min",
-    active: true,
-  },
-  {
-    id: "2",
-    name: "Notebook expérimentations",
-    prefix: "cx_test_A73k",
-    scope: "generate:image",
-    lastUsed: "il y a 3 j",
-    active: true,
-  },
-  {
-    id: "3",
-    name: "Ancienne app (à supprimer)",
-    prefix: "cx_live_1B4z",
-    scope: "generate:*",
-    lastUsed: "il y a 2 mois",
-    active: false,
-  },
-];
 
 const USAGE = [12, 34, 22, 46, 88, 74, 92, 108, 64, 130, 156, 118, 172, 210];
 
@@ -53,6 +18,17 @@ function DevelopersPage() {
   const [tab, setTab] = useState<"curl" | "js" | "py">("curl");
   const [copied, setCopied] = useState(false);
   const [showNewKey, setShowNewKey] = useState<string | null>(null);
+  const [keyName, setKeyName] = useState("");
+  const [keys, setKeys] = useState<ApiKeyRow[]>([]);
+  const [keysLoading, setKeysLoading] = useState(true);
+  const [creatingKey, setCreatingKey] = useState(false);
+
+  useEffect(() => {
+    listApiKeys()
+      .then((data) => setKeys(data as ApiKeyRow[]))
+      .catch(() => setKeys([]))
+      .finally(() => setKeysLoading(false));
+  }, []);
 
   const snippets = {
     curl: `curl https://api.cortexia.ai/v1/generate \\
@@ -88,12 +64,32 @@ print(result.url, result.cost)`,
     setTimeout(() => setCopied(false), 1500);
   }
 
-  function createKey() {
-    // Use Web Crypto CSPRNG. Real secret minting must happen server-side; this is UI mock only.
-    const bytes = new Uint8Array(24);
-    crypto.getRandomValues(bytes);
-    const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
-    setShowNewKey("cx_live_" + hex);
+  async function handleCreateKey() {
+    if (!keyName.trim() || creatingKey) return;
+    setCreatingKey(true);
+    try {
+      const result = await createApiKey({ data: { name: keyName.trim() } });
+      setShowNewKey(result.rawKey);
+      setKeyName("");
+      // Refresh the key list
+      const updated = await listApiKeys();
+      setKeys(updated as ApiKeyRow[]);
+    } catch (err) {
+      console.error("Failed to create API key:", err);
+    } finally {
+      setCreatingKey(false);
+    }
+  }
+
+  async function handleRevokeKey(keyId: number) {
+    try {
+      await revokeApiKey({ data: { keyId } });
+      setKeys((prev) =>
+        prev.map((k) => (k.id === keyId ? { ...k, status: "revoked" } : k))
+      );
+    } catch (err) {
+      console.error("Failed to revoke API key:", err);
+    }
   }
 
   return (
@@ -137,12 +133,22 @@ print(result.url, result.cost)`,
       <div>
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-display text-2xl tracking-[-0.02em]">Clés API</h2>
-          <button
-            onClick={createKey}
-            className="inline-flex items-center gap-1.5 rounded-full bg-amber text-primary-foreground px-4 py-2 text-sm font-medium hover:opacity-95 transition"
-          >
-            <Plus className="size-4" /> Nouvelle clé
-          </button>
+          <div className="flex items-center gap-2">
+            <input
+              value={keyName}
+              onChange={(e) => setKeyName(e.target.value)}
+              placeholder="Nom de la clé"
+              className="rounded-full border border-border bg-surface-1/70 px-3 py-1.5 text-sm focus:border-amber/40 outline-none w-48"
+            />
+            <button
+              onClick={handleCreateKey}
+              disabled={creatingKey || !keyName.trim()}
+              className="inline-flex items-center gap-1.5 rounded-full bg-amber text-primary-foreground px-4 py-2 text-sm font-medium hover:opacity-95 transition disabled:opacity-50"
+            >
+              {creatingKey ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" />}
+              Nouvelle clé
+            </button>
+          </div>
         </div>
         <div className="surface-gradient-border rounded-2xl bg-surface-1/60 overflow-hidden">
           <table className="w-full text-sm">
@@ -153,34 +159,59 @@ print(result.url, result.cost)`,
                 <th className="p-4 font-normal">Scope</th>
                 <th className="p-4 font-normal">Dernière utilisation</th>
                 <th className="p-4 font-normal">Statut</th>
+                <th className="p-4 font-normal"></th>
               </tr>
             </thead>
             <tbody>
-              {KEYS.map((k) => (
-                <tr
-                  key={k.id}
-                  className="border-b border-border last:border-0 hover:bg-surface-2/40"
-                >
-                  <td className="p-4 flex items-center gap-2">
-                    <KeyRound className="size-3.5 text-muted-foreground" /> {k.name}
-                  </td>
-                  <td className="p-4 font-mono text-xs">{k.prefix}••••••••</td>
-                  <td className="p-4 font-mono text-xs text-muted-foreground">{k.scope}</td>
-                  <td className="p-4 text-muted-foreground">{k.lastUsed}</td>
-                  <td className="p-4">
-                    <span
-                      className={
-                        "rounded-full px-2 py-0.5 text-[10px] font-mono uppercase " +
-                        (k.active
-                          ? "bg-emerald/15 text-emerald"
-                          : "bg-surface-3 text-muted-foreground")
-                      }
-                    >
-                      {k.active ? "Active" : "Révoquée"}
-                    </span>
+              {keysLoading ? (
+                <tr>
+                  <td colSpan={6} className="p-4 text-center text-muted-foreground">
+                    <Loader2 className="size-4 animate-spin inline-block" />
                   </td>
                 </tr>
-              ))}
+              ) : keys.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="p-4 text-center text-muted-foreground text-xs">
+                    Aucune clé API. Crée ta première clé pour commencer.
+                  </td>
+                </tr>
+              ) : (
+                keys.map((k) => (
+                  <tr
+                    key={k.id}
+                    className="border-b border-border last:border-0 hover:bg-surface-2/40"
+                  >
+                    <td className="p-4 flex items-center gap-2">
+                      <KeyRound className="size-3.5 text-muted-foreground" /> {k.name}
+                    </td>
+                    <td className="p-4 font-mono text-xs">{k.prefix}••••••••</td>
+                    <td className="p-4 font-mono text-xs text-muted-foreground">{k.permissions}</td>
+                    <td className="p-4 text-muted-foreground">{k.lastUsed}</td>
+                    <td className="p-4">
+                      <span
+                        className={
+                          "rounded-full px-2 py-0.5 text-[10px] font-mono uppercase " +
+                          (k.status === "active"
+                            ? "bg-emerald/15 text-emerald"
+                            : "bg-surface-3 text-muted-foreground")
+                        }
+                      >
+                        {k.status === "active" ? "Active" : "Révoquée"}
+                      </span>
+                    </td>
+                    <td className="p-4">
+                      {k.status === "active" && (
+                        <button
+                          onClick={() => handleRevokeKey(k.id)}
+                          className="text-xs text-red-400 hover:text-red-300 transition"
+                        >
+                          Révoquer
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

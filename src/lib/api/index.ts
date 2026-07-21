@@ -41,6 +41,8 @@ export type {
 } from "./payments";
 export { getUserBalance } from "./balance";
 export type { BalanceInput, BalanceResponse } from "./balance";
+export { createApiKey, listApiKeys, revokeApiKey } from "./api-keys";
+export type { CreateKeyResult, ApiKeyRow } from "./api-keys";
 
 export {
   getActiveModelBySlug,
