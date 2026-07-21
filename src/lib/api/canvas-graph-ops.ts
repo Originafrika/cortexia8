@@ -38,6 +38,7 @@ type UpdateNodeOp = {
   patch: {
     modelSlug?: string;
     config?: Record<string, unknown>;
+    status?: string;
     x?: number;
     y?: number;
     width?: number;
@@ -164,6 +165,10 @@ async function dispatch(
       if (p.config !== undefined) {
         sets.push(`config = $${i++}::jsonb`);
         params.push(JSON.stringify(p.config));
+      }
+      if (p.status !== undefined) {
+        sets.push(`status = $${i++}`);
+        params.push(p.status);
       }
       if (p.x !== undefined) {
         sets.push(`canvas_x = $${i++}`);

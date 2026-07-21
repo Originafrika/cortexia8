@@ -1,7 +1,15 @@
 import type { Model, ModelCategory } from "@/lib/models";
 import type { Edge, Node } from "@xyflow/react";
 
-export type NodeStatus = "idle" | "running" | "done" | "error";
+export type NodeStatus =
+  | "unconfigured"
+  | "idle"
+  | "ready"
+  | "running"
+  | "completed"
+  | "done"
+  | "error"
+  | "failed";
 
 export type PortType = "image" | "video" | "audio" | "text";
 

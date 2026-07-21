@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { getModel, type ParamSpec, type Model } from "@/lib/models";
 import {
   ChevronRight,
+  Copy,
   Loader2,
   Play,
   RefreshCw,
@@ -121,6 +122,16 @@ export function InspectorPanel({ onClose }: { onClose: () => void }) {
             title="Supprimer le nœud"
           >
             <Trash2 className="size-3.5" />
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => useCanvasStore.getState().duplicateBranch([node.id])}
+            disabled={readOnly}
+            title="Dupliquer le nœud"
+          >
+            <Copy className="size-3.5" />
           </Button>
         </section>
 
@@ -246,7 +257,7 @@ function StatusBadge({
   progress,
   step,
 }: {
-  status: "idle" | "running" | "done" | "error";
+  status: "idle" | "running" | "done" | "error" | "unconfigured" | "ready" | "completed" | "failed";
   progress: number;
   step: string;
 }) {

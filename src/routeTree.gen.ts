@@ -17,6 +17,7 @@ import { Route as CanvasIndexRouteImport } from './routes/canvas/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as RCodeRouteImport } from './routes/r.$code'
 import { Route as AuthPathnameRouteImport } from './routes/auth.$pathname'
+import { Route as AppWorkflowsRouteImport } from './routes/app.workflows'
 import { Route as AppModelsRouteImport } from './routes/app.models'
 import { Route as AppHistoryRouteImport } from './routes/app.history'
 import { Route as AppDevelopersRouteImport } from './routes/app.developers'
@@ -64,6 +65,11 @@ const AuthPathnameRoute = AuthPathnameRouteImport.update({
   path: '/auth/$pathname',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppWorkflowsRoute = AppWorkflowsRouteImport.update({
+  id: '/workflows',
+  path: '/workflows',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppModelsRoute = AppModelsRouteImport.update({
   id: '/models',
   path: '/models',
@@ -105,6 +111,7 @@ export interface FileRoutesByFullPath {
   '/app/developers': typeof AppDevelopersRoute
   '/app/history': typeof AppHistoryRoute
   '/app/models': typeof AppModelsRouteWithChildren
+  '/app/workflows': typeof AppWorkflowsRoute
   '/auth/$pathname': typeof AuthPathnameRoute
   '/r/$code': typeof RCodeRoute
   '/app/': typeof AppIndexRoute
@@ -120,6 +127,7 @@ export interface FileRoutesByTo {
   '/app/developers': typeof AppDevelopersRoute
   '/app/history': typeof AppHistoryRoute
   '/app/models': typeof AppModelsRouteWithChildren
+  '/app/workflows': typeof AppWorkflowsRoute
   '/auth/$pathname': typeof AuthPathnameRoute
   '/r/$code': typeof RCodeRoute
   '/app': typeof AppIndexRoute
@@ -137,6 +145,7 @@ export interface FileRoutesById {
   '/app/developers': typeof AppDevelopersRoute
   '/app/history': typeof AppHistoryRoute
   '/app/models': typeof AppModelsRouteWithChildren
+  '/app/workflows': typeof AppWorkflowsRoute
   '/auth/$pathname': typeof AuthPathnameRoute
   '/r/$code': typeof RCodeRoute
   '/app/': typeof AppIndexRoute
@@ -155,6 +164,7 @@ export interface FileRouteTypes {
     | '/app/developers'
     | '/app/history'
     | '/app/models'
+    | '/app/workflows'
     | '/auth/$pathname'
     | '/r/$code'
     | '/app/'
@@ -170,6 +180,7 @@ export interface FileRouteTypes {
     | '/app/developers'
     | '/app/history'
     | '/app/models'
+    | '/app/workflows'
     | '/auth/$pathname'
     | '/r/$code'
     | '/app'
@@ -186,6 +197,7 @@ export interface FileRouteTypes {
     | '/app/developers'
     | '/app/history'
     | '/app/models'
+    | '/app/workflows'
     | '/auth/$pathname'
     | '/r/$code'
     | '/app/'
@@ -262,6 +274,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthPathnameRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/workflows': {
+      id: '/app/workflows'
+      path: '/workflows'
+      fullPath: '/app/workflows'
+      preLoaderRoute: typeof AppWorkflowsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/models': {
       id: '/app/models'
       path: '/models'
@@ -324,6 +343,7 @@ interface AppRouteChildren {
   AppDevelopersRoute: typeof AppDevelopersRoute
   AppHistoryRoute: typeof AppHistoryRoute
   AppModelsRoute: typeof AppModelsRouteWithChildren
+  AppWorkflowsRoute: typeof AppWorkflowsRoute
   AppIndexRoute: typeof AppIndexRoute
 }
 
@@ -332,6 +352,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppDevelopersRoute: AppDevelopersRoute,
   AppHistoryRoute: AppHistoryRoute,
   AppModelsRoute: AppModelsRouteWithChildren,
+  AppWorkflowsRoute: AppWorkflowsRoute,
   AppIndexRoute: AppIndexRoute,
 }
 

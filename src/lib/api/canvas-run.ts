@@ -28,6 +28,7 @@ import { HttpError, toJsonResponse } from "./auth";
 export type RunInput = {
   workflowId: number;
   userId: number;
+  rerunNodeId?: number;
 };
 
 export type RunResponse = {
@@ -73,6 +74,39 @@ export const runCanvas = createServerFn({ method: "POST" })
     }
   });
 
+function getDescendants(
+  startNodeId: number,
+  edges: { source_node_id: number; target_node_id: number }[],
+): Set<number> {
+  const descendants = new Set<number>();
+  const stack = [startNodeId];
+  while (stack.length > 0) {
+    const current = stack.pop()!;
+    for (const edge of edges) {
+      if (edge.source_node_id === current && !descendants.has(edge.target_node_id)) {
+        descendants.add(edge.target_node_id);
+        stack.push(edge.target_node_id);
+      }
+    }
+  }
+  return descendants;
+}
+
+async function getLastRunOutputs(
+  workflowNodeId: number,
+): Promise<{ output_asset_id: number | null } | null> {
+  const rows = (await sql`
+    SELECT rne.output_asset_id
+    FROM run_node_executions rne
+    JOIN runs r ON r.id = rne.run_id
+    WHERE rne.workflow_node_id = ${workflowNodeId}
+      AND rne.status = 'succeeded'
+    ORDER BY r.started_at DESC
+    LIMIT 1
+  `) as { output_asset_id: number | null }[];
+  return rows[0] ?? null;
+}
+
 async function runCanvasImpl(input: RunInput): Promise<RunResponse> {
   // 1. Load the workflow + nodes + edges.
   const wfRows = (await sql`
@@ -109,13 +143,28 @@ async function runCanvasImpl(input: RunInput): Promise<RunResponse> {
     }
   }
 
-  // 3. Topological levels (independent nodes per level run in parallel).
+  // 3. Determine which nodes to execute vs reuse
+  const rerunNodeId = input.rerunNodeId;
+  const nodesToExecute = new Set<number>();
+  if (rerunNodeId) {
+    nodesToExecute.add(rerunNodeId);
+    const descendants = getDescendants(rerunNodeId, edges);
+    for (const d of descendants) {
+      nodesToExecute.add(d);
+    }
+  } else {
+    for (const n of nodes) {
+      nodesToExecute.add(n.id);
+    }
+  }
+
+  // 4. Topological levels (independent nodes per level run in parallel).
   const levels = topoLevels(
     nodes.map((n) => n.id),
     edges.map((e) => ({ source: e.source_node_id, target: e.target_node_id })),
   );
 
-  // 4. Mint a run row up front so all node executions share the same run.
+  // 5. Mint a run row up front so all node executions share the same run.
   const runId = (
     (await sql`
       INSERT INTO runs (workflow_id, user_id, status, started_at)
@@ -128,22 +177,37 @@ async function runCanvasImpl(input: RunInput): Promise<RunResponse> {
   let estimatedTotal = 0;
   let queued = 0;
 
-  // 5. Process level by level, parallel within a level.
+  // 6. Process level by level, parallel within a level.
   for (const level of levels) {
     const levelNodes = level
       .map((id) => nodes.find((n) => n.id === id))
       .filter((n): n is WorkflowNodeRow => !!n);
 
     const results = await Promise.allSettled(
-      levelNodes.map((node) =>
-        dispatchNode({
-          runId,
-          userId: input.userId,
-          workflowId: workflow.id,
-          node,
-          model: modelCache.get(node.model_slug) ?? null,
-        }),
-      ),
+      levelNodes.map(async (node) => {
+        if (nodesToExecute.has(node.id)) {
+          // Execute this node (re-run or full run)
+          return dispatchNode({
+            runId,
+            userId: input.userId,
+            workflowId: workflow.id,
+            node,
+            model: modelCache.get(node.model_slug) ?? null,
+          });
+        } else {
+          // Reuse: copy previous result, charge $0
+          const lastOutput = await getLastRunOutputs(node.id);
+          await recordNodeExecution({
+            runId,
+            workflowNodeId: node.id,
+            status: "reused",
+            inputParams: node.config ?? {},
+            cost: 0,
+            startedAt: new Date().toISOString(),
+          });
+          return { cost: 0, reused: true, outputAssetId: lastOutput?.output_asset_id };
+        }
+      }),
     );
 
     for (let i = 0; i < results.length; i++) {
@@ -161,7 +225,7 @@ async function runCanvasImpl(input: RunInput): Promise<RunResponse> {
     }
   }
 
-  // 6. Update the run with the cost rollup. Don't change status here —
+  // 7. Update the run with the cost rollup. Don't change status here —
   //    the webhook updates it once all node executions finish.
   await sql`
     UPDATE runs SET total_cost_usd = ${estimatedTotal} WHERE id = ${runId}
@@ -251,22 +315,24 @@ async function dispatchNode(opts: {
 async function recordNodeExecution(opts: {
   runId: number;
   workflowNodeId: number;
-  status: "queued" | "running" | "succeeded" | "failed";
+  status: "queued" | "running" | "succeeded" | "failed" | "reused";
   taskId?: string;
   inputParams?: Record<string, unknown>;
   cost?: number;
   error?: string;
   startedAt?: string;
+  outputAssetId?: number | null;
 }) {
   await sql`
     INSERT INTO run_node_executions
-      (run_id, workflow_node_id, status, kie_task_id, input_params, cost_usd, error_message, started_at)
+      (run_id, workflow_node_id, status, kie_task_id, input_params, cost_usd, error_message, started_at, output_asset_id)
     VALUES
       (${opts.runId}, ${opts.workflowNodeId}, ${opts.status},
        ${opts.taskId ?? null},
        ${opts.inputParams ? JSON.stringify(opts.inputParams) : null}::jsonb,
        ${opts.cost ?? 0},
        ${opts.error ?? null},
-       ${opts.startedAt ?? null}::timestamp)
+       ${opts.startedAt ?? null}::timestamp,
+       ${opts.outputAssetId ?? null})
   `;
 }

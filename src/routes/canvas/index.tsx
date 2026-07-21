@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { ReactFlowProvider } from "@xyflow/react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ReactFlowProvider, useReactFlow } from "@xyflow/react";
+import { z } from "zod";
 import { SignedIn, RedirectToSignIn } from "@neondatabase/auth-ui";
 import { CanvasFlow } from "@/components/canvas/canvas-flow";
 import { InspectorPanel } from "@/components/canvas/inspector-panel";
@@ -8,16 +9,22 @@ import { AgentPanel } from "@/components/canvas/agent-panel";
 import { NodePicker } from "@/components/canvas/node-picker";
 import { RunControls } from "@/components/canvas/run-controls";
 import { PriceBadge } from "@/components/canvas/price-badge";
+import { EmptyStateCard } from "@/components/canvas/empty-state-card";
 import { useCanvasStore } from "@/lib/canvas-store";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ArrowLeft, Eye, Settings2, Wand2 } from "lucide-react";
+import { ArrowLeft, Copy, Eye, History, Settings2, Wand2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { MODELS } from "@/lib/models";
+import { RunHistoryPanel } from "@/components/canvas/run-history-panel";
+
+const canvasSearchSchema = z.object({
+  workflowId: z.number().optional(),
+});
 
 export const Route = createFileRoute("/canvas/")({
   head: () => ({
     meta: [{ title: "Cortexia — Canvas" }, { name: "robots", content: "noindex,nofollow" }],
   }),
+  validateSearch: canvasSearchSchema,
   component: CanvasPage,
 });
 
@@ -37,23 +44,51 @@ function CanvasPage() {
 function CanvasShell() {
   const isMobile = useIsMobile();
   const [tab, setTab] = useState<Tab>("inspector");
+  const [prefillPrompt, setPrefillPrompt] = useState<string | undefined>();
+  const [historyOpen, setHistoryOpen] = useState(false);
   const selectedId = useCanvasStore((s) => s.selectedNodeId);
   const setSelected = useCanvasStore((s) => s.setSelectedNodeId);
   const nodes = useCanvasStore((s) => s.nodes);
+  const { workflowId } = Route.useSearch();
+  const { fitView } = useReactFlow();
+  const loadedRef = useRef(false);
 
   // Auto-switch to inspector when a node is selected
   useEffect(() => {
     if (selectedId) setTab("inspector");
   }, [selectedId]);
 
-  // Seed a tiny demo graph the first time the page mounts
+  // Load workflow from DB if workflowId is in URL
   useEffect(() => {
+    if (workflowId == null || loadedRef.current) return;
+    loadedRef.current = true;
     const s = useCanvasStore.getState();
-    if (s.nodes.length === 0 && MODELS.length > 0) {
-      s.addNode("seedream-5-pro", { x: 220, y: 220 });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    s.loadWorkflow(workflowId).then(() => {
+      const after = useCanvasStore.getState();
+      if (after.nodes.length > 0) {
+        fitView({ padding: 0.2, maxZoom: 1.1 });
+      }
+    });
+  }, [workflowId, fitView]);
+
+  const handleOpenAgent = useCallback((prompt: string) => {
+    setPrefillPrompt(prompt);
+    setTab("agent");
   }, []);
+
+  const handleHighlightNodeAdd = useCallback(() => {
+    // Briefly highlight the node-add button via a data attribute
+    const btn = document.querySelector("[data-node-picker]") as HTMLElement | null;
+    if (btn) {
+      btn.setAttribute("data-highlighted", "true");
+      setTimeout(() => btn.removeAttribute("data-highlighted"), 1500);
+    }
+  }, []);
+
+  const selectedNodeIds = useCanvasStore((s) => s.selectedNodeIds);
+  const duplicateBranch = useCanvasStore((s) => s.duplicateBranch);
+
+  const showEmpty = nodes.length === 0 && workflowId == null;
 
   return (
     <div className="relative flex h-[100dvh] flex-col overflow-hidden bg-background">
@@ -73,7 +108,20 @@ function CanvasShell() {
           </div>
           <div className="ml-auto flex items-center gap-2">
             <PriceBadge className="hidden sm:inline-flex" />
-            <NodePicker />
+            <div data-node-picker>
+              <NodePicker />
+            </div>
+            {workflowId && (
+              <button
+                type="button"
+                onClick={() => setHistoryOpen(true)}
+                className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface-0/60 backdrop-blur px-2.5 h-9 text-xs text-muted-foreground hover:text-foreground hover:border-border-strong transition cursor-pointer"
+                aria-label="Historique des runs"
+              >
+                <History className="size-3.5" />
+                <span className="hidden sm:inline">Historique</span>
+              </button>
+            )}
             <RunControls />
           </div>
         </div>
@@ -92,6 +140,12 @@ function CanvasShell() {
         <div className="flex-1 min-h-0 flex">
           <div className="relative flex-1 min-w-0">
             <CanvasFlow />
+            {showEmpty && (
+              <EmptyStateCard
+                onOpenAgent={handleOpenAgent}
+                onHighlightNodeAdd={handleHighlightNodeAdd}
+              />
+            )}
           </div>
 
           {!isMobile && (
@@ -117,12 +171,25 @@ function CanvasShell() {
                 {tab === "inspector" ? (
                   <InspectorPanel onClose={() => setSelected(null)} />
                 ) : (
-                  <AgentPanel />
+                  <AgentPanel initialPrompt={prefillPrompt} workflowId={workflowId ?? null} />
                 )}
               </div>
             </aside>
           )}
         </div>
+
+        {selectedNodeIds.length > 0 && !isMobile && (
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
+            <button
+              type="button"
+              onClick={() => duplicateBranch(selectedNodeIds)}
+              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface-1/90 backdrop-blur px-4 h-9 text-sm hover:border-amber/40 transition shadow-lg cursor-pointer"
+            >
+              <Copy className="size-3.5" />
+              Dupliquer{selectedNodeIds.length > 1 ? ` (${selectedNodeIds.length})` : ""}
+            </button>
+          </div>
+        )}
 
         {isMobile && (
           <div className="absolute right-3 bottom-3 z-20">
@@ -130,6 +197,12 @@ function CanvasShell() {
           </div>
         )}
       </ReactFlowProvider>
+
+      <RunHistoryPanel
+        open={historyOpen}
+        onOpenChange={setHistoryOpen}
+        workflowId={workflowId ?? null}
+      />
     </div>
   );
 }

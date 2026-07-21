@@ -12,6 +12,7 @@ import {
   Sparkles,
   HelpCircle,
   Workflow,
+  ListTodo,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
@@ -54,6 +55,7 @@ function AppShell({
     { to: "/app", label: t("app.nav.agent"), icon: MessageSquare, exact: true },
     { to: "/app/models", label: t("app.nav.models"), icon: LayoutGrid },
     { to: "/canvas", label: t("app.nav.canvas"), icon: Workflow },
+    { to: "/app/workflows", label: t("app.nav.workflows") || "Workflows", icon: ListTodo },
     { to: "/app/history", label: t("app.nav.history"), icon: History },
     { to: "/app/developers", label: t("app.nav.dev"), icon: Code2 },
     { to: "/app/account", label: t("app.nav.account"), icon: Wallet },

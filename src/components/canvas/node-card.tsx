@@ -1,8 +1,9 @@
 import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { motion } from "framer-motion";
 import { useCanvasStore } from "@/lib/canvas-store";
 import { categoryAccent, portColor, portLabel, portsForCategory, type CanvasNode } from "@/lib/canvas-types";
 import { cn } from "@/lib/utils";
-import { Image as ImageIcon, Film, Music2, MessageSquare, Loader2, Check, AlertTriangle, Play, Sparkles } from "lucide-react";
+import { Image as ImageIcon, Film, Music2, MessageSquare, Loader2, Check, AlertTriangle, Play, Sparkles, RefreshCw } from "lucide-react";
 import { PriceDisplay } from "@/components/price-display";
 import type { ModelCategory } from "@/lib/models";
 
@@ -20,15 +21,24 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
   const readOnly = useCanvasStore((s) => s.readOnly);
   const setSelected = useCanvasStore((s) => s.setSelectedNodeId);
   const runNode = useCanvasStore((s) => s.runNode);
+  const rerunNode = useCanvasStore((s) => s.rerunNode);
   const removeNode = useCanvasStore((s) => s.removeNode);
+  const newNodeIds = useCanvasStore((s) => s.newNodeIds);
+  const cascadeDelays = useCanvasStore((s) => s.cascadeDelays);
 
   const Icon = CATEGORY_ICON[data.category];
   const running = data.status === "running";
   const done = data.status === "done";
   const err = data.status === "error";
 
+  const isNew = newNodeIds.has(id);
+  const delay = cascadeDelays.get(id) ?? 0;
+
   return (
-    <div
+    <motion.div
+      initial={isNew ? { opacity: 0, scale: 0.8 } : false}
+      animate={isNew ? { opacity: 1, scale: 1 } : undefined}
+      transition={isNew ? { duration: 0.35, delay, ease: [0.22, 1, 0.36, 1] } : undefined}
       onClick={(e) => {
         e.stopPropagation();
         setSelected(id);
@@ -118,10 +128,38 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
             </div>
           </div>
         ) : done && data.result ? (
-          <ResultPreview category={data.category} result={data.result} />
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex-1 min-w-0">
+              <ResultPreview category={data.category} result={data.result} />
+            </div>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                rerunNode(id);
+              }}
+              disabled={readOnly}
+              title="Relancer ce nœud et ses dépendances"
+              className="inline-flex items-center gap-1 rounded-full bg-emerald/90 px-2 py-1 text-[10px] font-medium text-primary-foreground hover:bg-emerald disabled:opacity-50 transition shrink-0"
+            >
+              <RefreshCw className="size-2.5" /> Relancer
+            </button>
+          </div>
         ) : err ? (
-          <div className="flex items-center gap-1.5 text-[11px] text-amber-soft">
-            <AlertTriangle className="size-3" /> Échec
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5 text-[11px] text-amber-soft">
+              <AlertTriangle className="size-3" /> Échec
+            </div>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                rerunNode(id);
+              }}
+              disabled={readOnly}
+              title="Relancer ce nœud et ses dépendances"
+              className="inline-flex items-center gap-1 rounded-full bg-emerald/90 px-2 py-1 text-[10px] font-medium text-primary-foreground hover:bg-emerald disabled:opacity-50 transition shrink-0"
+            >
+              <RefreshCw className="size-2.5" /> Relancer
+            </button>
           </div>
         ) : (
           <div className="flex items-center justify-between text-[11px] text-muted-foreground">
@@ -161,7 +199,7 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
           emphasize={done}
         />
       </div>
-    </div>
+    </motion.div>
   );
 }
 

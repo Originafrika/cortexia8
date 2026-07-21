@@ -31,6 +31,8 @@ export { generationStatus } from "./generation-status";
 export type { StatusInput, GenerationStatus };
 export { getHistory } from "./history";
 export type { HistoryInput, HistoryItem, HistoryResponse };
+export { applyAgentPlan } from "./agent-apply";
+export type { AgentApplyInput, AgentApplyResponse, AgentOp } from "./agent-apply";
 export { verifyFedaPayTransaction, createStripeCheckout, stripeWebhook } from "./payments";
 export type {
   FedaPayVerifyInput,
@@ -43,6 +45,19 @@ export { getUserBalance } from "./balance";
 export type { BalanceInput, BalanceResponse } from "./balance";
 export { createApiKey, listApiKeys, revokeApiKey } from "./api-keys";
 export type { CreateKeyResult, ApiKeyRow } from "./api-keys";
+export { createWorkflow, listWorkflows, getWorkflow, deleteWorkflow } from "./workflows";
+export type {
+  CreateWorkflowInput,
+  CreateWorkflowResponse,
+  WorkflowListItem,
+  ListWorkflowsResponse,
+  GetWorkflowInput,
+  GetWorkflowResponse,
+  WorkflowNode,
+  WorkflowEdge,
+  DeleteWorkflowInput,
+  DeleteWorkflowResponse,
+} from "./workflows";
 
 export {
   getActiveModelBySlug,
@@ -51,6 +66,22 @@ export {
   topoLevels,
   type ModelRow,
 } from "./shared";
+export {
+  createConversation,
+  saveMessage,
+  getConversation,
+  getConversationByWorkflow,
+} from "./agent-conversations";
+export type {
+  CreateConversationInput,
+  CreateConversationResponse,
+  SaveMessageInput,
+  SaveMessageResponse,
+  AgentMessageRow,
+  GetConversationInput,
+  GetConversationResponse,
+  GetByWorkflowInput,
+} from "./agent-conversations";
 
 /**
  * Best-effort: return the full URL kie.ai should call back. Returns

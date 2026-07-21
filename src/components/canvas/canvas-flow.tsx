@@ -6,15 +6,18 @@ import {
   Controls,
   MiniMap,
   type NodeMouseHandler,
+  type EdgeTypes,
 } from "@xyflow/react";
 import "@xyflow/react/dist/base.css";
 import { useCanvasStore } from "@/lib/canvas-store";
 import { NodeCard } from "@/components/canvas/node-card";
+import { AnimatedEdge } from "@/components/canvas/animated-edge";
 import { type CanvasNode } from "@/lib/canvas-types";
 import type { ModelCategory } from "@/lib/models";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const nodeTypes = { modelNode: NodeCard };
+const edgeTypes: EdgeTypes = { default: AnimatedEdge };
 
 const MINIMAP_COLOR: Record<ModelCategory, string> = {
   image: "#f59e0b",
@@ -52,6 +55,7 @@ export function CanvasFlow() {
         nodes={nodes}
         edges={edges}
         nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}

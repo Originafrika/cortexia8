@@ -1,19 +1,22 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useCanvasStore } from "@/lib/canvas-store";
 import { Sparkles, Send, Check, Loader2, Wand2, ChevronDown, ChevronUp, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { getModel } from "@/lib/models";
 import {
   runAgent,
-  shouldConfirmOperation,
   AGENT_MODELS,
-  COST_THRESHOLD,
   type AgentModel,
   type AgentResponse,
-  type GraphOperation,
 } from "@/lib/agent";
+import {
+  createConversation,
+  saveMessage,
+  getConversationByWorkflow,
+} from "@/lib/api/agent-conversations";
+import { applyAgentPlan, COST_CONFIRM_THRESHOLD, type AgentApplyResponse } from "@/lib/api/agent-apply";
+import { loadSession } from "@/lib/auth-store";
 
 const STORAGE_KEY_AGENT_MODEL = "cortexia-agent-model";
 
@@ -23,18 +26,29 @@ const STARTERS = [
   "Génère un plan éditorial, puis anime-le en 5 secondes.",
 ];
 
-export function AgentPanel({ className }: { className?: string }) {
-  const [prompt, setPrompt] = useState("");
+type ConversationMessage = {
+  role: "user" | "assistant";
+  content: string;
+  proposedPlan?: any;
+};
+
+export function AgentPanel({ className, initialPrompt, workflowId }: { className?: string; initialPrompt?: string; workflowId?: number | null }) {
+  const [prompt, setPrompt] = useState(initialPrompt ?? "");
   const [busy, setBusy] = useState(false);
   const [log, setLog] = useState<{ text: string; tone: "info" | "ok" | "muted" | "warn" }[]>([]);
   const [expanded, setExpanded] = useState(true);
   const [selectedModel, setSelectedModel] = useState<AgentModel>("claude-sonnet-4-5");
   const [pendingOperations, setPendingOperations] = useState<AgentResponse | null>(null);
+  const [pendingLaunch, setPendingLaunch] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const readOnly = useCanvasStore((s) => s.readOnly);
-  const addNode = useCanvasStore((s) => s.addNode);
   const nodes = useCanvasStore((s) => s.nodes);
   const edges = useCanvasStore((s) => s.edges);
+
+  // Conversation state
+  const conversationIdRef = useRef<number | null>(null);
+  const conversationHistoryRef = useRef<ConversationMessage[]>([]);
+  const conversationLoadedRef = useRef(false);
 
   // Load saved model from localStorage
   useEffect(() => {
@@ -49,89 +63,144 @@ export function AgentPanel({ className }: { className?: string }) {
     localStorage.setItem(STORAGE_KEY_AGENT_MODEL, selectedModel);
   }, [selectedModel]);
 
+  // Load existing conversation for this workflow on mount
+  useEffect(() => {
+    if (workflowId == null || conversationLoadedRef.current) return;
+    conversationLoadedRef.current = true;
+
+    getConversationByWorkflow({ data: { workflowId } })
+      .then((conv: any) => {
+        if (conv && conv.id) {
+          conversationIdRef.current = conv.id;
+          conversationHistoryRef.current = conv.messages.map((m: any) => ({
+            role: m.role as "user" | "assistant",
+            content: m.content,
+            proposedPlan: m.proposedPlan,
+          }));
+        }
+      })
+      .catch(() => {
+        // Silently ignore — conversation will be created on first message
+      });
+  }, [workflowId]);
+
   if (readOnly) return null;
 
   function pushLog(text: string, tone: "info" | "ok" | "muted" | "warn" = "info") {
     setLog((l) => [...l, { text, tone }]);
   }
 
-  function applyOps(ops: GraphOperation[]) {
-    const idMap = new Map<string, string>();
-
-    for (const op of ops) {
-      switch (op.type) {
-        case "ADD_NODE": {
-          const position = op.position ?? {
-            x: 120 + Math.random() * 80,
-            y: 120 + Math.random() * 80,
-          };
-          const id = addNode(op.modelSlug, position);
-          if (id) {
-            // Store mapping from temporary ID to real ID
-            idMap.set(op.modelSlug, id);
-            const model = getModel(op.modelSlug);
-            pushLog(`+ ${model?.name ?? op.modelSlug}`, "ok");
-          }
-          break;
-        }
-        case "CONNECT_NODES": {
-          // Find source and target nodes by their temporary or real IDs
-          const sourceId = idMap.get(op.source) ?? op.source;
-          const targetId = idMap.get(op.target) ?? op.target;
-
-          // Check if nodes exist
-          const sourceNode = nodes.find((n) => n.id === sourceId);
-          const targetNode = nodes.find((n) => n.id === targetId);
-
-          if (sourceNode && targetNode) {
-            useCanvasStore.getState().onConnect({
-              source: sourceId,
-              target: targetId,
-              sourceHandle: null,
-              targetHandle: null,
-            });
-            pushLog(`↔ liaison ${sourceNode.data.modelName} → ${targetNode.data.modelName}`, "ok");
-          }
-          break;
-        }
-        case "UPDATE_NODE": {
-          const realId = idMap.get(op.nodeId) ?? op.nodeId;
-          useCanvasStore.getState().updateNodeParams(realId, op.params);
-          pushLog(`✎ mise à jour des paramètres`, "muted");
-          break;
-        }
-        case "REMOVE_NODE": {
-          const realId = idMap.get(op.nodeId) ?? op.nodeId;
-          useCanvasStore.getState().removeNode(realId);
-          pushLog(`✗ nœud supprimé`, "warn");
-          break;
-        }
-      }
-    }
-  }
-
-  async function executeWithConfirmation(response: AgentResponse) {
-    if (shouldConfirmOperation(response.estimatedCost, COST_THRESHOLD)) {
-      setPendingOperations(response);
-      setShowConfirmDialog(true);
-      pushLog(
-        `⚠ Coût estimé: $${response.estimatedCost.toFixed(4)} (seuil: $${COST_THRESHOLD})`,
-        "warn"
-      );
+  async function executeWithConfirmation(response: AgentResponse, launch = false) {
+    if (workflowId == null) {
+      pushLog(`Erreur: aucun workflow associé.`, "warn");
       return;
     }
 
-    // Execute directly if under threshold
-    await executeOperations(response);
-  }
-
-  async function executeOperations(response: AgentResponse) {
-    setBusy(true);
-    pushLog(`Exécution de ${response.operations.length} opération(s)…`, "info");
+    const serverOps = response.operations.map((op) => {
+      switch (op.type) {
+        case "ADD_NODE":
+          return { op: "ADD_NODE" as const, modelSlug: op.modelSlug, position: op.position };
+        case "CONNECT_NODES":
+          return { op: "CONNECT_NODES" as const, source: op.source, target: op.target };
+        case "UPDATE_NODE":
+          return { op: "UPDATE_NODE" as const, nodeId: op.nodeId, params: op.params };
+        case "REMOVE_NODE":
+          return { op: "REMOVE_NODE" as const, nodeId: op.nodeId };
+      }
+    });
 
     try {
-      applyOps(response.operations);
-      pushLog(`Canvas mis à jour.`, "ok");
+      // Dry-run: get server-side cost estimate and confirmation flag
+      const dryResult = (await applyAgentPlan({
+        data: {
+          workflowId: Number(workflowId),
+          operations: serverOps,
+          dryRun: true,
+        },
+      })) as AgentApplyResponse;
+
+      if (dryResult.requiresConfirmation) {
+        setPendingOperations(response);
+        setPendingLaunch(launch);
+        setShowConfirmDialog(true);
+        pushLog(
+          `⚠ Coût estimé: $${dryResult.estimatedTotalCostUsd.toFixed(4)} (seuil: $${COST_CONFIRM_THRESHOLD})`,
+          "warn"
+        );
+        return;
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Erreur inconnue";
+      pushLog(`Erreur: ${message}`, "warn");
+      return;
+    }
+
+    await executeOperations(response, launch);
+  }
+
+  async function executeOperations(response: AgentResponse, launch = false) {
+    if (workflowId == null) {
+      pushLog(`Erreur: aucun workflow associé.`, "warn");
+      return;
+    }
+
+    setBusy(true);
+    pushLog(`Application de ${response.operations.length} opération(s) via DB…`, "info");
+
+    try {
+      const session = loadSession();
+      const userId = session?.user?.id ? Number(session.user.id) : null;
+      if (userId == null || isNaN(userId)) {
+        pushLog(`Erreur: session utilisateur invalide.`, "warn");
+        return;
+      }
+
+      const serverOps = response.operations.map((op) => {
+        switch (op.type) {
+          case "ADD_NODE":
+            return { op: "ADD_NODE" as const, modelSlug: op.modelSlug, position: op.position };
+          case "CONNECT_NODES":
+            return { op: "CONNECT_NODES" as const, source: op.source, target: op.target };
+          case "UPDATE_NODE":
+            return { op: "UPDATE_NODE" as const, nodeId: op.nodeId, params: op.params };
+          case "REMOVE_NODE":
+            return { op: "REMOVE_NODE" as const, nodeId: op.nodeId };
+        }
+      });
+
+      // Snapshot node/edge IDs before apply for cascade detection
+      const prevNodeIds = new Set(useCanvasStore.getState().nodes.map((n) => n.id));
+      const prevEdgeIds = new Set(useCanvasStore.getState().edges.map((e) => e.id));
+
+      const result = (await applyAgentPlan({
+        data: {
+          workflowId: Number(workflowId),
+          operations: serverOps,
+          launch,
+        },
+      })) as AgentApplyResponse;
+
+      pushLog(`${result.applied} opération(s) appliquée(s) dans la DB.`, "ok");
+
+      if (result.runId) {
+        pushLog(`Exécution lancée (run #${result.runId}).`, "ok");
+      }
+
+      // Refresh the canvas store from the DB state
+      await useCanvasStore.getState().loadWorkflow(Number(workflowId));
+      pushLog(`Canvas synchronisé.`, "ok");
+
+      // Trigger cascade animation for new nodes/edges
+      const currentNodeIds = useCanvasStore.getState().nodes.map((n) => n.id);
+      const currentEdgeIds = useCanvasStore.getState().edges.map((e) => e.id);
+      const newNodeIds = currentNodeIds.filter((id) => !prevNodeIds.has(id));
+      const newEdgeIds = currentEdgeIds.filter((id) => !prevEdgeIds.has(id));
+      if (newNodeIds.length > 0) {
+        useCanvasStore.getState().triggerCascadeAnimation(newNodeIds, newEdgeIds);
+        // Auto-clear after animation completes
+        const maxDelay = newNodeIds.length * 120 + 400;
+        setTimeout(() => useCanvasStore.getState().clearCascadeAnimation(), maxDelay);
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : "Erreur inconnue";
       pushLog(`Erreur: ${message}`, "warn");
@@ -152,6 +221,24 @@ export function AgentPanel({ className }: { className?: string }) {
     pushLog(`Analyse de la demande…`, "muted");
 
     try {
+      // Create conversation on first message if needed
+      if (conversationIdRef.current == null && workflowId != null) {
+        const conv = await createConversation({ data: { workflowId } });
+        conversationIdRef.current = conv.id;
+      }
+
+      // Save user message
+      if (conversationIdRef.current != null) {
+        await saveMessage({
+          data: {
+            conversationId: conversationIdRef.current,
+            role: "user",
+            content: text,
+          },
+        });
+        conversationHistoryRef.current.push({ role: "user", content: text });
+      }
+
       // Get current graph state for context
       const currentGraphState = {
         nodes: nodes.map((n) => ({ id: n.id, slug: n.data.modelSlug })),
@@ -163,10 +250,26 @@ export function AgentPanel({ className }: { className?: string }) {
         {
           model: selectedModel,
           maxTokens: 2048,
-          costThreshold: COST_THRESHOLD,
         },
         currentGraphState
       );
+
+      // Save assistant message
+      if (conversationIdRef.current != null) {
+        await saveMessage({
+          data: {
+            conversationId: conversationIdRef.current,
+            role: "assistant",
+            content: response.text,
+            proposedPlan: response.operations.length > 0 ? (response as any) : undefined,
+          },
+        });
+        conversationHistoryRef.current.push({
+          role: "assistant",
+          content: response.text,
+          proposedPlan: response.operations.length > 0 ? (response as any) : undefined,
+        });
+      }
 
       pushLog(`Réponse reçue (${response.language})`, "info");
       pushLog(response.text, "info");
@@ -191,14 +294,15 @@ export function AgentPanel({ className }: { className?: string }) {
     }
   }
 
-  function handleConfirm() {
+  function handleConfirm(launch = false) {
     if (pendingOperations) {
-      executeOperations(pendingOperations);
+      executeOperations(pendingOperations, launch);
     }
   }
 
   function handleCancel() {
     setPendingOperations(null);
+    setPendingLaunch(false);
     setShowConfirmDialog(false);
     pushLog(`Opération annulée.`, "muted");
   }
@@ -307,7 +411,7 @@ export function AgentPanel({ className }: { className?: string }) {
                   <div className="text-muted-foreground">
                     Coût estimé: <span className="font-medium text-amber">${pendingOperations.estimatedCost.toFixed(4)}</span>
                     <br />
-                    Seuil de confirmation: ${COST_THRESHOLD}
+                    Seuil de confirmation: ${COST_CONFIRM_THRESHOLD}
                     <br />
                     {pendingOperations.operations.length} opération(s) seront exécutées.
                   </div>
@@ -316,11 +420,19 @@ export function AgentPanel({ className }: { className?: string }) {
               <div className="flex items-center gap-2">
                 <Button
                   type="button"
-                  onClick={handleConfirm}
+                  onClick={() => handleConfirm(false)}
+                  size="sm"
+                  className="flex-1"
+                >
+                  Appliquer
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => handleConfirm(true)}
                   size="sm"
                   className="flex-1 bg-amber text-primary-foreground hover:bg-amber/90"
                 >
-                  Confirmer
+                  Lancer
                 </Button>
                 <Button
                   type="button"
