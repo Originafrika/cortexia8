@@ -100,6 +100,7 @@ export const workflowNodes = pgTable(
     modelSlug: text("model_slug")
       .notNull()
       .references(() => models.slug),
+    status: text("status").notNull().default("unconfigured"),
     config: jsonb("config").notNull().default({}),
     canvasX: text("canvas_x").notNull().default("0"),
     canvasY: text("canvas_y").notNull().default("0"),
@@ -269,5 +270,40 @@ export const paymentTransactions = pgTable(
     userIdx: index("payment_transactions_user_idx").on(table.userId),
     providerIdx: index("payment_transactions_provider_idx").on(table.provider),
     statusIdx: index("payment_transactions_status_idx").on(table.status),
+  }),
+);
+
+export const agentConversations = pgTable(
+  "agent_conversations",
+  {
+    id: serial("id").primaryKey(),
+    workflowId: serial("workflow_id")
+      .notNull()
+      .references(() => workflows.id, { onDelete: "cascade" }),
+    userId: serial("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    workflowIdx: index("agent_conversations_workflow_idx").on(table.workflowId),
+    userIdx: index("agent_conversations_user_idx").on(table.userId),
+  }),
+);
+
+export const agentMessages = pgTable(
+  "agent_messages",
+  {
+    id: serial("id").primaryKey(),
+    conversationId: serial("conversation_id")
+      .notNull()
+      .references(() => agentConversations.id, { onDelete: "cascade" }),
+    role: text("role").notNull(),
+    content: text("content").notNull(),
+    proposedPlan: jsonb("proposed_plan"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    conversationIdx: index("agent_messages_conversation_idx").on(table.conversationId),
   }),
 );
