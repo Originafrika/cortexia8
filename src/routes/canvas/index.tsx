@@ -50,7 +50,6 @@ function CanvasShell() {
   const setSelected = useCanvasStore((s) => s.setSelectedNodeId);
   const nodes = useCanvasStore((s) => s.nodes);
   const { workflowId } = Route.useSearch();
-  const { fitView } = useReactFlow();
   const loadedRef = useRef(false);
 
   // Auto-switch to inspector when a node is selected
@@ -137,65 +136,22 @@ function CanvasShell() {
       )}
 
       <ReactFlowProvider>
-        <div className="flex-1 min-h-0 flex">
-          <div className="relative flex-1 min-w-0">
-            <CanvasFlow />
-            {showEmpty && (
-              <EmptyStateCard
-                onOpenAgent={handleOpenAgent}
-                onHighlightNodeAdd={handleHighlightNodeAdd}
-              />
-            )}
-          </div>
-
-          {!isMobile && (
-            <aside className="shrink-0 w-[340px] border-l border-border bg-surface-0/60 backdrop-blur-md flex flex-col">
-              <div className="flex items-center gap-1 border-b border-border px-2 py-2">
-                <TabButton
-                  active={tab === "inspector"}
-                  onClick={() => setTab("inspector")}
-                  icon={<Settings2 className="size-3.5" />}
-                  label="Inspecteur"
-                />
-                <TabButton
-                  active={tab === "agent"}
-                  onClick={() => setTab("agent")}
-                  icon={<Wand2 className="size-3.5" />}
-                  label="Agent"
-                />
-                <div className="ml-auto">
-                  <PriceBadge className="h-7 px-2.5 text-[11px]" />
-                </div>
-              </div>
-              <div className="flex-1 min-h-0">
-                {tab === "inspector" ? (
-                  <InspectorPanel onClose={() => setSelected(null)} />
-                ) : (
-                  <AgentPanel initialPrompt={prefillPrompt} workflowId={workflowId ?? null} />
-                )}
-              </div>
-            </aside>
-          )}
-        </div>
-
-        {selectedNodeIds.length > 0 && !isMobile && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
-            <button
-              type="button"
-              onClick={() => duplicateBranch(selectedNodeIds)}
-              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface-1/90 backdrop-blur px-4 h-9 text-sm hover:border-amber/40 transition shadow-lg cursor-pointer"
-            >
-              <Copy className="size-3.5" />
-              Dupliquer{selectedNodeIds.length > 1 ? ` (${selectedNodeIds.length})` : ""}
-            </button>
-          </div>
-        )}
-
-        {isMobile && (
-          <div className="absolute right-3 bottom-3 z-20">
-            <NodePicker className="!h-10 shadow-lg" />
-          </div>
-        )}
+        <CanvasInnerWrapper
+          workflowId={workflowId}
+          loadedRef={loadedRef}
+          prefillPrompt={prefillPrompt}
+          setPrefillPrompt={setPrefillPrompt}
+          tab={tab}
+          setTab={setTab}
+          historyOpen={historyOpen}
+          setHistoryOpen={setHistoryOpen}
+          handleOpenAgent={handleOpenAgent}
+          handleHighlightNodeAdd={handleHighlightNodeAdd}
+          isMobile={isMobile}
+          showEmpty={showEmpty}
+          selectedNodeIds={selectedNodeIds}
+          duplicateBranch={duplicateBranch}
+        />
       </ReactFlowProvider>
 
       <RunHistoryPanel
@@ -204,6 +160,128 @@ function CanvasShell() {
         workflowId={workflowId ?? null}
       />
     </div>
+  );
+}
+
+function CanvasInnerWrapper({
+  workflowId,
+  loadedRef,
+  prefillPrompt,
+  setPrefillPrompt,
+  tab,
+  setTab,
+  historyOpen,
+  setHistoryOpen,
+  handleOpenAgent,
+  handleHighlightNodeAdd,
+  isMobile,
+  showEmpty,
+  selectedNodeIds,
+  duplicateBranch,
+}: {
+  workflowId: number | null | undefined;
+  loadedRef: React.MutableRefObject<boolean>;
+  prefillPrompt: string | undefined;
+  setPrefillPrompt: (v: string | undefined) => void;
+  tab: Tab;
+  setTab: (v: Tab) => void;
+  historyOpen: boolean;
+  setHistoryOpen: (v: boolean) => void;
+  handleOpenAgent: (prompt: string) => void;
+  handleHighlightNodeAdd: () => void;
+  isMobile: boolean;
+  showEmpty: boolean;
+  selectedNodeIds: string[];
+  duplicateBranch: (ids: string[]) => void;
+}) {
+  const { fitView } = useReactFlow();
+  const setSelected = useCanvasStore((s) => s.setSelectedNodeId);
+
+  // Load workflow from DB if workflowId is in URL
+  useEffect(() => {
+    if (workflowId == null || loadedRef.current) return;
+    loadedRef.current = true;
+    const s = useCanvasStore.getState();
+    s.loadWorkflow(workflowId).then(() => {
+      const after = useCanvasStore.getState();
+      if (after.nodes.length > 0) {
+        fitView({ padding: 0.2, maxZoom: 1.1 });
+      }
+    });
+  }, [workflowId, fitView]);
+
+  return (
+    <>
+      <div className="flex-1 min-h-0 flex">
+        <div className="relative flex-1 min-w-0">
+          <CanvasFlow />
+          {showEmpty && (
+            <EmptyStateCard
+              onOpenAgent={(prompt) => {
+                setPrefillPrompt(prompt);
+                setTab("agent");
+              }}
+              onHighlightNodeAdd={() => {
+                const btn = document.querySelector("[data-node-picker]") as HTMLElement | null;
+                if (btn) {
+                  btn.setAttribute("data-highlighted", "true");
+                  setTimeout(() => btn.removeAttribute("data-highlighted"), 1500);
+                }
+              }}
+            />
+          )}
+        </div>
+
+        {!isMobile && (
+          <aside className="shrink-0 w-[340px] border-l border-border bg-surface-0/60 backdrop-blur-md flex flex-col">
+            <div className="flex items-center gap-1 border-b border-border px-2 py-2">
+              <TabButton
+                active={tab === "inspector"}
+                onClick={() => setTab("inspector")}
+                icon={<Settings2 className="size-3.5" />}
+                label="Inspecteur"
+              />
+              <TabButton
+                active={tab === "agent"}
+                onClick={() => setTab("agent")}
+                icon={<Wand2 className="size-3.5" />}
+                label="Agent"
+              />
+              <div className="ml-auto">
+                <PriceBadge className="h-7 px-2.5 text-[11px]" />
+              </div>
+            </div>
+            <div className="flex-1 min-h-0">
+              {tab === "inspector" ? (
+                <InspectorPanel onClose={() => setSelected(null)} />
+              ) : (
+                <AgentPanel initialPrompt={prefillPrompt} workflowId={workflowId ?? null} />
+              )}
+            </div>
+          </aside>
+        )}
+      </div>
+
+      {selectedNodeIds.length > 0 && !isMobile && (
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
+          <button
+            type="button"
+            onClick={() => duplicateBranch(selectedNodeIds)}
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface-1/90 backdrop-blur px-4 h-9 text-sm hover:border-amber/40 transition shadow-lg cursor-pointer"
+          >
+            <Copy className="size-3.5" />
+            Dupliquer{selectedNodeIds.length > 1 ? ` (${selectedNodeIds.length})` : ""}
+          </button>
+        </div>
+      )}
+
+      {/* Mobile node-add FAB */}
+      {isMobile && (
+        <div className="absolute right-3 bottom-3 z-20">
+          <NodePicker className="!h-10 shadow-lg" />
+        </div>
+      )}
+    </>
   );
 }
 
