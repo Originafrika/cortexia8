@@ -57,19 +57,6 @@ function CanvasShell() {
     if (selectedId) setTab("inspector");
   }, [selectedId]);
 
-  // Load workflow from DB if workflowId is in URL
-  useEffect(() => {
-    if (workflowId == null || loadedRef.current) return;
-    loadedRef.current = true;
-    const s = useCanvasStore.getState();
-    s.loadWorkflow(workflowId).then(() => {
-      const after = useCanvasStore.getState();
-      if (after.nodes.length > 0) {
-        fitView({ padding: 0.2, maxZoom: 1.1 });
-      }
-    });
-  }, [workflowId, fitView]);
-
   const handleOpenAgent = useCallback((prompt: string) => {
     setPrefillPrompt(prompt);
     setTab("agent");
