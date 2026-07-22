@@ -7,26 +7,14 @@ import { useCurrency, formatMoney } from "@/lib/currency";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { verifyFedaPayTransaction, createStripeCheckout } from "@/lib/api/payments";
-import { getUserBalance } from "@/lib/api/balance";
+import { getUserBalance, getTransactionHistory } from "@/lib/api/balance";
 import { loadSession } from "@/lib/auth-store";
 
 export const Route = createFileRoute("/app/account")({
   component: AccountPage,
 });
 
-const TX = [
-  { d: "12 nov.", label: "Génération — Kling 3 Turbo 1080p (5s)", amount: -0.709, kind: "debit" },
-  { d: "12 nov.", label: "Génération — Seedream 5.0 Pro 1K", amount: -0.0441, kind: "debit" },
-  { d: "11 nov.", label: "Recharge — Mobile Money (Orange)", amount: 10, kind: "credit" },
-  {
-    d: "10 nov.",
-    label: "Génération — ElevenLabs V3 (2 400 car.)",
-    amount: -0.2117,
-    kind: "debit",
-  },
-  { d: "9 nov.", label: "Génération — GPT-5.5 (input+output)", amount: -0.0521, kind: "debit" },
-  { d: "5 nov.", label: "Recharge — Carte Visa", amount: 20, kind: "credit" },
-];
+type TxRow = { d: string; label: string; amount: number; kind: "debit" | "credit" };
 
 const METHODS = [
   { key: "mm", name: "Mobile Money", desc: "Orange · MTN · Wave · M-Pesa", icon: Smartphone },
@@ -41,6 +29,7 @@ function AccountPage() {
   const [amount, setAmount] = useState<number>(10);
   const [loading, setLoading] = useState(false);
   const [balance, setBalance] = useState<number | null>(null);
+  const [txRows, setTxRows] = useState<TxRow[]>([]);
 
   const fedapayKey = import.meta.env.VITE_FEDAPAY_PUBLIC_KEY as string | undefined;
 
@@ -57,9 +46,21 @@ function AccountPage() {
     }
   }
 
+  async function fetchTransactions() {
+    try {
+      const session = loadSession();
+      const userId = Number(session?.user?.id);
+      if (isNaN(userId)) return;
+      const result = await getTransactionHistory({ data: { userId } });
+      setTxRows(result.transactions);
+    } catch {
+      setTxRows([]);
+    }
+  }
+
   useEffect(() => {
     fetchBalance();
-    // Refetch balance after returning from Stripe checkout
+    fetchTransactions();
     if (window.location.search.includes("payment=success")) {
       fetchBalance();
     }
@@ -279,25 +280,31 @@ function AccountPage() {
               </tr>
             </thead>
             <tbody>
-              {TX.map((t, i) => (
-                <tr key={i} className="border-b border-border last:border-0 hover:bg-surface-2/40">
-                  <td className="p-4 text-muted-foreground font-mono text-xs">{t.d}</td>
-                  <td className="p-4">{t.label}</td>
-                  <td
-                    className={
-                      "p-4 text-right font-mono tabular " +
-                      (t.amount > 0 ? "text-emerald" : "text-foreground/85")
-                    }
-                  >
-                    {t.amount > 0 ? "+" : ""}
-                    <PriceDisplay
-                      usd={Math.abs(t.amount)}
-                      className={t.amount > 0 ? "text-emerald" : ""}
-                      forceDecimals={4}
-                    />
-                  </td>
-                </tr>
-              ))}
+              {txRows.map((t) => {
+                const amount = Number(t.amount);
+                const date = new Date(t.created_at);
+                const d = date.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+                const label = t.reference ?? t.type;
+                return (
+                  <tr key={t.id} className="border-b border-border last:border-0 hover:bg-surface-2/40">
+                    <td className="p-4 text-muted-foreground font-mono text-xs">{d}</td>
+                    <td className="p-4">{label}</td>
+                    <td
+                      className={
+                        "p-4 text-right font-mono tabular " +
+                        (amount > 0 ? "text-emerald" : "text-foreground/85")
+                      }
+                    >
+                      {amount > 0 ? "+" : ""}
+                      <PriceDisplay
+                        usd={Math.abs(amount)}
+                        className={amount > 0 ? "text-emerald" : ""}
+                        forceDecimals={4}
+                      />
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

@@ -237,7 +237,9 @@ export const apiKeys = pgTable(
     userId: serial("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
+    name: text("name").notNull().default("Clé"),
     keyHash: text("key_hash").notNull().unique(),
+    prefix: text("prefix").notNull().default(""),
     permissions: jsonb("permissions").notNull().default([]),
     status: text("status").notNull().default("active"),
     createdAt: timestamp("created_at").defaultNow().notNull(),

@@ -1,0 +1,2 @@
+ALTER TABLE api_keys ADD COLUMN name text NOT NULL DEFAULT 'Clé';
+ALTER TABLE api_keys ADD COLUMN prefix text NOT NULL DEFAULT '';

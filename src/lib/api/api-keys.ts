@@ -35,8 +35,8 @@ export const createApiKey = createServerFn({ method: "POST" })
     const keyHash = await sha256Hex(rawKey);
 
     const rows = (await sql`
-      INSERT INTO api_keys (user_id, key_hash, permissions, status)
-      VALUES (${ctx.userId}, ${keyHash}, '["generate:*"]'::jsonb, 'active')
+      INSERT INTO api_keys (user_id, key_hash, name, prefix, permissions, status)
+      VALUES (${ctx.userId}, ${keyHash}, ${data.name}, ${prefix}, '["generate:*"]'::jsonb, 'active')
       RETURNING id
     `) as { id: number }[];
 
@@ -68,12 +68,14 @@ export const listApiKeys = createServerFn({ method: "GET" })
     }
 
     const rows = (await sql`
-      SELECT id, key_hash, permissions, status, last_used_at, created_at
+      SELECT id, name, prefix, key_hash, permissions, status, last_used_at, created_at
       FROM api_keys
       WHERE user_id = ${ctx.userId}
       ORDER BY created_at DESC
     `) as {
       id: number;
+      name: string;
+      prefix: string;
       key_hash: string;
       permissions: string;
       status: string;
@@ -81,11 +83,10 @@ export const listApiKeys = createServerFn({ method: "GET" })
       created_at: string;
     }[];
 
-    // We can't recover the raw key; show prefix from the hash (first 11 chars of hash)
     return rows.map((r) => ({
       id: r.id,
-      name: `Clé #${r.id}`,
-      prefix: r.key_hash.slice(0, 11),
+      name: r.name,
+      prefix: r.prefix || r.key_hash.slice(0, 11),
       permissions: r.permissions,
       status: r.status,
       lastUsed: r.last_used_at

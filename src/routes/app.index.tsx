@@ -17,6 +17,8 @@ import {
 import { MODELS, basePrice, getModel, type Model } from "@/lib/models";
 import { useT } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { generate } from "@/lib/api/generate";
+import { generationStatus } from "@/lib/api/generation-status";
 
 export const Route = createFileRoute("/app/")({
   component: AgentPage,
@@ -36,10 +38,13 @@ type Turn = {
   model: Model;
   reason: string;
   alternatives: Model[];
-  status: "generating" | "done";
+  status: "generating" | "done" | "error";
   progress: number;
   step: string;
   kind: "image" | "video" | "voice" | "text";
+  resultUrl?: string | null;
+  runId?: number;
+  errorMessage?: string;
 };
 
 const STARTERS: { useCase: string; label: string; prompt: string }[] = [
@@ -142,40 +147,82 @@ function AgentPage() {
     };
   }
 
-  async function runGeneration(turnId: string, kind: Turn["kind"]) {
-    const steps =
-      kind === "video"
-        ? [
-            "Analyse du prompt…",
-            "Sélection du modèle…",
-            "Génération des frames…",
-            "Synchronisation audio…",
-            "Encodage final…",
-          ]
-        : kind === "voice"
-          ? ["Analyse du texte…", "Choix de la voix…", "Synthèse acoustique…", "Post-traitement…"]
-          : kind === "image"
-            ? [
-                "Analyse du prompt…",
-                "Sélection du modèle…",
-                "Débruitage progressif…",
-                "Finalisation…",
-              ]
-            : ["Analyse du prompt…", "Raisonnement…", "Rédaction…"];
-
-    const totalMs =
-      kind === "video" ? 3600 : kind === "voice" ? 1800 : kind === "image" ? 1600 : 1100;
-    const stepMs = totalMs / steps.length;
-
-    for (let i = 0; i < steps.length; i++) {
-      const p = Math.round(((i + 1) / steps.length) * 100);
-      const step = steps[i];
-      setTurns((ts) => ts.map((t) => (t.id === turnId ? { ...t, step, progress: p } : t)));
-      await new Promise((r) => setTimeout(r, stepMs));
-    }
+  async function runGeneration(turnId: string, promptText: string, model: Model) {
     setTurns((ts) =>
-      ts.map((t) => (t.id === turnId ? { ...t, status: "done", progress: 100, step: "" } : t)),
+      ts.map((t) => (t.id === turnId ? { ...t, step: "Soumission…", progress: 5 } : t)),
     );
+
+    try {
+      const res = await generate({ data: { modelSlug: model.slug, input: { prompt: promptText } } });
+
+      setTurns((ts) =>
+        ts.map((t) =>
+          t.id === turnId ? { ...t, runId: res.runId, step: "Génération en cours…", progress: 20 } : t,
+        ),
+      );
+
+      let pollCount = 0;
+      const maxPolls = 300;
+
+      const poll = async () => {
+        pollCount++;
+        if (pollCount > maxPolls) {
+          setTurns((ts) =>
+            ts.map((t) =>
+              t.id === turnId
+                ? { ...t, status: "error", step: "", errorMessage: "Génération trop longue." }
+                : t,
+            ),
+          );
+          return;
+        }
+
+        try {
+          const st = await generationStatus({ data: { id: res.runNodeExecutionId } });
+          const node = st.nodes[0];
+          const nodeStatus = node?.status ?? st.status;
+          const pct = nodeStatus === "success" ? 100 : Math.min(20 + pollCount, 95);
+
+          setTurns((ts) =>
+            ts.map((t) => (t.id === turnId ? { ...t, step: nodeStatus, progress: pct } : t)),
+          );
+
+          if (nodeStatus === "success" || (node?.status === "success" && node.asset)) {
+            const url = node?.asset?.previewUrl || node?.asset?.storageUrl || null;
+            setTurns((ts) =>
+              ts.map((t) =>
+                t.id === turnId ? { ...t, status: "done", progress: 100, step: "", resultUrl: url } : t,
+              ),
+            );
+            return;
+          }
+
+          if (nodeStatus === "error" || nodeStatus === "failed" || st.status === "error") {
+            setTurns((ts) =>
+              ts.map((t) =>
+                t.id === turnId
+                  ? { ...t, status: "error", step: "", errorMessage: node?.errorMessage || "Erreur de génération." }
+                  : t,
+              ),
+            );
+            return;
+          }
+
+          setTimeout(poll, 2000);
+        } catch {
+          setTimeout(poll, 2000);
+        }
+      };
+
+      setTimeout(poll, 2000);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Erreur lors de la soumission.";
+      setTurns((ts) =>
+        ts.map((t) =>
+          t.id === turnId ? { ...t, status: "error", step: "", errorMessage: message } : t,
+        ),
+      );
+    }
   }
 
   async function send(text?: string) {
@@ -197,7 +244,7 @@ function AgentPage() {
     };
     setTurns((ts) => [...ts, turn]);
     setPrompt("");
-    await runGeneration(id, kind);
+    await runGeneration(id, p, chosen);
   }
 
   function switchModel(turnId: string, m: Model) {
@@ -445,7 +492,7 @@ function ResultBlock({ turn, onRefine }: { turn: Turn; onRefine: (chip: string) 
     <div className="surface-gradient-border rounded-3xl bg-surface-1/50 overflow-hidden">
       <div className="relative aspect-[16/10] bg-gradient-to-br from-amber/20 via-surface-2 to-surface-0 overflow-hidden">
         <img
-          src={`https://picsum.photos/seed/${turn.id}/900/560`}
+          src={turn.resultUrl || `https://picsum.photos/seed/${turn.id}/900/560`}
           alt=""
           className={cn(
             "absolute inset-0 h-full w-full object-cover transition-all duration-700",
@@ -471,7 +518,12 @@ function ResultBlock({ turn, onRefine }: { turn: Turn; onRefine: (chip: string) 
             </div>
           </div>
         )}
-        {!generating && (
+        {turn.status === "error" && (
+          <div className="absolute inset-0 bg-gradient-to-t from-red-900/60 via-transparent to-transparent grid place-items-end p-5">
+            <div className="w-full text-xs text-red-200">{turn.errorMessage || "Erreur"}</div>
+          </div>
+        )}
+        {!generating && turn.status === "done" && (
           <div className="absolute top-3 left-3 rounded-full bg-black/50 backdrop-blur px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.22em] text-white/90">
             Résultat prêt · {turn.model.name}
           </div>
@@ -481,7 +533,7 @@ function ResultBlock({ turn, onRefine }: { turn: Turn; onRefine: (chip: string) 
         <div className="text-xs text-muted-foreground">
           Facturé <PriceDisplay usd={basePrice(turn.model)} className="text-xs" emphasize />
         </div>
-        {!generating && (
+        {turn.status === "done" && (
           <div className="flex flex-wrap items-center gap-2">
             <button className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs hover:border-amber/40 transition">
               <Download className="size-3.5" /> Télécharger
@@ -499,7 +551,7 @@ function ResultBlock({ turn, onRefine }: { turn: Turn; onRefine: (chip: string) 
           </div>
         )}
       </div>
-      {!generating && (
+      {turn.status === "done" && (
         <div className="border-t border-border p-4 sm:p-5">
           <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">
             Affiner

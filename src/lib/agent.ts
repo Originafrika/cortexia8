@@ -260,11 +260,6 @@ function parseAgentResponse(raw: string): AgentResponse {
       }
       case "CONNECT_NODES": {
         if (typeof op.source !== "string" || typeof op.target !== "string") continue;
-        // Validate source/target nodes exist in current graph
-        if (currentGraphState) {
-          const nodeIds = new Set(currentGraphState.nodes.map((n) => n.id));
-          if (!nodeIds.has(op.source) || !nodeIds.has(op.target)) continue;
-        }
         validatedOps.push({
           type: "CONNECT_NODES",
           source: op.source,
@@ -274,11 +269,6 @@ function parseAgentResponse(raw: string): AgentResponse {
       }
       case "UPDATE_NODE": {
         if (typeof op.nodeId !== "string" || !op.params || typeof op.params !== "object") continue;
-        // Validate node exists in current graph
-        if (currentGraphState) {
-          const nodeIds = new Set(currentGraphState.nodes.map((n) => n.id));
-          if (!nodeIds.has(op.nodeId)) continue;
-        }
         validatedOps.push({
           type: "UPDATE_NODE",
           nodeId: op.nodeId,
@@ -288,11 +278,6 @@ function parseAgentResponse(raw: string): AgentResponse {
       }
       case "REMOVE_NODE": {
         if (typeof op.nodeId !== "string") continue;
-        // Validate node exists in current graph
-        if (currentGraphState) {
-          const nodeIds = new Set(currentGraphState.nodes.map((n) => n.id));
-          if (!nodeIds.has(op.nodeId)) continue;
-        }
         validatedOps.push({
           type: "REMOVE_NODE",
           nodeId: op.nodeId,

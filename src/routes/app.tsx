@@ -1,4 +1,5 @@
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { AmbientBackground } from "@/components/ambient-background";
 import { LocalePicker } from "@/components/locale-picker";
 import { PriceDisplay } from "@/components/price-display";
@@ -16,6 +17,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
+import { getUserBalance } from "@/lib/api/balance";
+import { loadSession } from "@/lib/auth-store";
 
 export const Route = createFileRoute("/app")({
   head: () => ({
@@ -26,13 +29,26 @@ export const Route = createFileRoute("/app")({
 
 function AppLayout() {
   const path = useRouterState({ select: (s) => s.location.pathname });
-  const CREDIT_USD = 24.63;
+  const [balance, setBalance] = useState<number>(0);
   const t = useT();
   const { open, setOpen } = useOnboarding();
 
+  useEffect(() => {
+    async function fetchBalance() {
+      try {
+        const session = loadSession();
+        const userId = Number(session?.user?.id);
+        if (isNaN(userId)) return;
+        const result = await getUserBalance({ data: { userId } });
+        setBalance(result.balance);
+      } catch {}
+    }
+    fetchBalance();
+  }, []);
+
   return (
     <>
-      <AppShell path={path} CREDIT_USD={CREDIT_USD} t={t} open={open} setOpen={setOpen} />
+      <AppShell path={path} CREDIT_USD={balance} t={t} open={open} setOpen={setOpen} />
     </>
   );
 }
