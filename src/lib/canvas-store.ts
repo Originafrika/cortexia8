@@ -22,6 +22,7 @@ import {
   type CanvasNode,
   type NodeStatus,
   type NodeResult,
+  type PortType,
 } from "@/lib/canvas-types";
 import { runCanvas } from "@/lib/api/canvas-run";
 
@@ -84,6 +85,7 @@ type CanvasState = {
   newNodeIds: Set<string>;
   newEdgeIds: Set<string>;
   cascadeDelays: Map<string, number>;
+  draggingFromPort: PortType | null;
 
   // React Flow change handlers
   onNodesChange: (changes: NodeChange<CanvasNode>[]) => void;
@@ -111,6 +113,7 @@ type CanvasState = {
   runNode: (id: string) => Promise<void>;
   runAll: () => Promise<void>;
   rerunNode: (id: string) => Promise<void>;
+  runFromNode: (id: string) => Promise<void>;
 
   // Cascade animation
   triggerCascadeAnimation: (newNodeIds: string[], newEdgeIds: string[]) => void;
@@ -119,6 +122,9 @@ type CanvasState = {
   // Aggregate
   totalCost: () => number;
   setReadOnly: (v: boolean) => void;
+
+  // Drag state
+  setDraggingFromPort: (port: PortType | null) => void;
 }
 
 export const useCanvasStore = create<CanvasState>((set, get) => ({
@@ -131,6 +137,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
   newNodeIds: new Set<string>(),
   newEdgeIds: new Set<string>(),
   cascadeDelays: new Map<string, number>(),
+  draggingFromPort: null,
 
   onNodesChange: (changes) => {
     set({ nodes: applyNodeChanges(changes, get().nodes) as CanvasNode[] });
@@ -158,14 +165,17 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
   onConnect: (connection) => {
     const source = get().nodes.find((n) => n.id === connection.source);
     const target = get().nodes.find((n) => n.id === connection.target);
-    if (!isCompatibleConnection(source, target)) return;
+    if (!isCompatibleConnection(source, target)) {
+      set({ draggingFromPort: null });
+      return;
+    }
     const media = source ? portsForCategory(source.data.category).out : undefined;
     const newEdge: CanvasEdge = {
       ...connection,
       data: media ? { media } : undefined,
       animated: true,
     } as CanvasEdge;
-    set({ edges: addEdge(newEdge, get().edges) as CanvasEdge[] });
+    set({ edges: addEdge(newEdge, get().edges) as CanvasEdge[], draggingFromPort: null });
 
     const wid = get().workflowId;
     const userId = getClientUserId();
@@ -672,6 +682,97 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
     }
   },
 
+  runFromNode: async (id) => {
+    const node = get().nodes.find((n) => n.id === id);
+    if (!node) return;
+    if (get().readOnly) return;
+
+    const dbNodeId = parseDbNodeId(id);
+    if (dbNodeId == null) return;
+
+    const workflowId = get().workflowId;
+    if (!workflowId) return;
+
+    const userId = getClientUserId();
+    if (userId == null) return;
+
+    // BFS to find all downstream nodes
+    const downstreamIds = new Set<string>();
+    const queue = [id];
+    while (queue.length > 0) {
+      const current = queue.shift()!;
+      for (const edge of get().edges) {
+        if (edge.source === current && !downstreamIds.has(edge.target)) {
+          downstreamIds.add(edge.target);
+          queue.push(edge.target);
+        }
+      }
+    }
+
+    // Mark this node + all downstream as running
+    set({
+      nodes: get().nodes.map((n) => {
+        if (n.id === id || downstreamIds.has(n.id)) {
+          return { ...n, data: { ...n.data, status: "running", progress: 0, step: "Lancement…" } };
+        }
+        return n;
+      }),
+    });
+
+    persistStatusChange(id, "running");
+    for (const dId of downstreamIds) {
+      persistStatusChange(dId, "running");
+    }
+
+    try {
+      const res = await runCanvas({
+        data: {
+          workflowId: Number(workflowId),
+          userId,
+          rerunNodeId: dbNodeId,
+        },
+      });
+
+      set({
+        nodes: get().nodes.map((n) => {
+          if (n.id !== id && !downstreamIds.has(n.id)) {
+            return n;
+          }
+          return { ...n, data: { ...n.data, step: "En file d'attente…", progress: 10 } };
+        }),
+      });
+
+      const affectedNodeIds = [id, ...downstreamIds];
+      for (const nodeId of affectedNodeIds) {
+        const nodeDbId = parseDbNodeId(nodeId);
+        if (nodeDbId == null) continue;
+
+        const execRows = (await sql`
+          SELECT id FROM run_node_executions
+          WHERE run_id = ${res.runId} AND workflow_node_id = ${nodeDbId}
+          LIMIT 1
+        `) as { id: number }[];
+        if (execRows.length > 0) {
+          await pollGenerationStatus(set, get, nodeId, execRows[0].id);
+        }
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Erreur inconnue";
+      set({
+        nodes: get().nodes.map((n) => {
+          if (n.id === id || downstreamIds.has(n.id)) {
+            return { ...n, data: { ...n.data, status: "error", step: message, progress: 0 } };
+          }
+          return n;
+        }),
+      });
+      persistStatusChange(id, "failed");
+      for (const dId of downstreamIds) {
+        persistStatusChange(dId, "failed");
+      }
+    }
+  },
+
   triggerCascadeAnimation: (nodeIds, edgeIds) => {
     const { nodes } = get();
     const STAGGER_MS = 120;
@@ -691,6 +792,8 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
   totalCost: () => get().nodes.reduce((s, n) => s + (n.data.priceUSD || 0), 0),
 
   setReadOnly: (v) => set({ readOnly: v }),
+
+  setDraggingFromPort: (port) => set({ draggingFromPort: port }),
 }));
 
 function initStateForModel(m: Model): Record<string, unknown> {

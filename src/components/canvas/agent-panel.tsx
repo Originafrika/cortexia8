@@ -19,6 +19,9 @@ import { applyAgentPlan, COST_CONFIRM_THRESHOLD, type AgentApplyResponse } from 
 import { loadSession } from "@/lib/auth-store";
 
 const STORAGE_KEY_AGENT_MODEL = "cortexia-agent-model";
+const STORAGE_KEY_PERMISSION_MODE = "cortexia-agent-permission-mode";
+
+type PermissionMode = "approve_each" | "auto_run" | "auto_under_threshold";
 
 const STARTERS = [
   "Un mockup produit puis une vidéo UGC à partir de l'image.",
@@ -38,6 +41,7 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
   const [log, setLog] = useState<{ text: string; tone: "info" | "ok" | "muted" | "warn" }[]>([]);
   const [expanded, setExpanded] = useState(true);
   const [selectedModel, setSelectedModel] = useState<AgentModel>("claude-sonnet-4-5");
+  const [permissionMode, setPermissionMode] = useState<PermissionMode>("auto_under_threshold");
   const [pendingOperations, setPendingOperations] = useState<AgentResponse | null>(null);
   const [pendingLaunch, setPendingLaunch] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -62,6 +66,19 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY_AGENT_MODEL, selectedModel);
   }, [selectedModel]);
+
+  // Load saved permission mode from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY_PERMISSION_MODE);
+    if (saved && (saved === "approve_each" || saved === "auto_run" || saved === "auto_under_threshold")) {
+      setPermissionMode(saved as PermissionMode);
+    }
+  }, []);
+
+  // Save permission mode to localStorage when changed
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY_PERMISSION_MODE, permissionMode);
+  }, [permissionMode]);
 
   // Load existing conversation for this workflow on mount
   useEffect(() => {
@@ -96,6 +113,12 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
       return;
     }
 
+    // Auto-run mode: skip confirmation entirely
+    if (permissionMode === "auto_run") {
+      await executeOperations(response, launch);
+      return;
+    }
+
     const serverOps = response.operations.map((op) => {
       switch (op.type) {
         case "ADD_NODE":
@@ -119,7 +142,8 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
         },
       })) as AgentApplyResponse;
 
-      if (dryResult.requiresConfirmation) {
+      // Approve-each mode: always show confirmation
+      if (permissionMode === "approve_each" || dryResult.requiresConfirmation) {
         setPendingOperations(response);
         setPendingLaunch(launch);
         setShowConfirmDialog(true);
@@ -351,6 +375,24 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
                     {m.label}
                   </option>
                 ))}
+              </select>
+            </div>
+
+            {/* Permission Mode Selector */}
+            <div className="flex items-center gap-2">
+              <label htmlFor="permission-mode" className="text-xs text-muted-foreground whitespace-nowrap">
+                Permissions:
+              </label>
+              <select
+                id="permission-mode"
+                value={permissionMode}
+                onChange={(e) => setPermissionMode(e.target.value as PermissionMode)}
+                disabled={busy}
+                className="flex-1 text-xs bg-surface-2 border border-border rounded-md px-2 py-1.5 text-foreground disabled:opacity-50"
+              >
+                <option value="approve_each">Approuver chaque</option>
+                <option value="auto_run">Exécution auto</option>
+                <option value="auto_under_threshold">Auto sous seuil</option>
               </select>
             </div>
 

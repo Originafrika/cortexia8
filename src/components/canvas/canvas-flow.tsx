@@ -7,12 +7,14 @@ import {
   MiniMap,
   type NodeMouseHandler,
   type EdgeTypes,
+  type OnConnectStart,
+  type OnConnectEnd,
 } from "@xyflow/react";
 import "@xyflow/react/dist/base.css";
 import { useCanvasStore } from "@/lib/canvas-store";
 import { NodeCard } from "@/components/canvas/node-card";
 import { AnimatedEdge } from "@/components/canvas/animated-edge";
-import { type CanvasNode } from "@/lib/canvas-types";
+import { type CanvasNode, portsForCategory, type PortType } from "@/lib/canvas-types";
 import type { ModelCategory } from "@/lib/models";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -49,6 +51,20 @@ export function CanvasFlow() {
     useCanvasStore.getState().setSelectedNodeId(null);
   };
 
+  const handleConnectStart: OnConnectStart = (_event, params) => {
+    if (params.handleType === "source") {
+      const sourceNode = useCanvasStore.getState().nodes.find((n) => n.id === params.nodeId);
+      if (sourceNode) {
+        const portType: PortType = portsForCategory(sourceNode.data.category).out;
+        useCanvasStore.getState().setDraggingFromPort(portType);
+      }
+    }
+  };
+
+  const handleConnectEnd: OnConnectEnd = () => {
+    useCanvasStore.getState().setDraggingFromPort(null);
+  };
+
   return (
     <div className="absolute inset-0 dark">
       <ReactFlow
@@ -59,6 +75,8 @@ export function CanvasFlow() {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        onConnectStart={handleConnectStart}
+        onConnectEnd={handleConnectEnd}
         isValidConnection={isValidConnection}
         onNodeClick={handleNodeClick}
         onPaneClick={handlePaneClick}

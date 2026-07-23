@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { useCanvasStore } from "@/lib/canvas-store";
 import { categoryAccent, portColor, portLabel, portsForCategory, type CanvasNode } from "@/lib/canvas-types";
 import { cn } from "@/lib/utils";
-import { Image as ImageIcon, Film, Music2, MessageSquare, Loader2, Check, AlertTriangle, Play, Sparkles, RefreshCw } from "lucide-react";
+import { Image as ImageIcon, Film, Music2, MessageSquare, Loader2, Check, AlertTriangle, Play, Sparkles, RefreshCw, PlayCircle } from "lucide-react";
 import { PriceDisplay } from "@/components/price-display";
 import type { ModelCategory } from "@/lib/models";
 
@@ -22,6 +22,7 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
   const setSelected = useCanvasStore((s) => s.setSelectedNodeId);
   const runNode = useCanvasStore((s) => s.runNode);
   const rerunNode = useCanvasStore((s) => s.rerunNode);
+  const runFromNode = useCanvasStore((s) => s.runFromNode);
   const removeNode = useCanvasStore((s) => s.removeNode);
   const newNodeIds = useCanvasStore((s) => s.newNodeIds);
   const cascadeDelays = useCanvasStore((s) => s.cascadeDelays);
@@ -33,6 +34,11 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
 
   const isNew = newNodeIds.has(id);
   const delay = cascadeDelays.get(id) ?? 0;
+
+  const draggingFromPort = useCanvasStore((s) => s.draggingFromPort);
+  const isDragSource = draggingFromPort !== null;
+  const inputPortType = ports.in[0];
+  const isCompatible = isDragSource && draggingFromPort === inputPortType;
 
   return (
     <motion.div
@@ -49,6 +55,8 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
         selected
           ? `${accent.border} ring-2 ${accent.ring} shadow-[0_18px_60px_-18px_oklch(0.78_0.16_70_/_0.30)]`
           : `${accent.border} hover:border-border-strong`,
+        isDragSource && !isCompatible && "opacity-30 scale-[0.97]",
+        isDragSource && isCompatible && "ring-2 ring-emerald/50 shadow-[0_0_20px_4px_oklch(0.65_0.19_160_/_0.25)]",
       )}
     >
       {/* Input handle */}
@@ -59,9 +67,20 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
         isConnectable={!readOnly}
         style={{
           background: portColor(ports.in[0]),
-          width: 12,
-          height: 12,
-          border: "2px solid var(--background)",
+          width: isDragSource ? (isCompatible ? 16 : 8) : 12,
+          height: isDragSource ? (isCompatible ? 16 : 8) : 12,
+          border: isDragSource
+            ? isCompatible
+              ? `3px solid ${portColor(ports.in[0])}`
+              : "2px solid var(--background)"
+            : "2px solid var(--background)",
+          boxShadow: isDragSource && isCompatible
+            ? `0 0 12px 4px ${portColor(ports.in[0])}80, 0 0 24px 8px ${portColor(ports.in[0])}40`
+            : isDragSource
+              ? "none"
+              : undefined,
+          opacity: isDragSource && !isCompatible ? 0.25 : 1,
+          transition: "all 0.2s ease",
         }}
         title={portLabel(ports.in[0])}
       />
@@ -132,50 +151,89 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
             <div className="flex-1 min-w-0">
               <ResultPreview category={data.category} result={data.result} />
             </div>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                rerunNode(id);
-              }}
-              disabled={readOnly}
-              title="Relancer ce nœud et ses dépendances"
-              className="inline-flex items-center gap-1 rounded-full bg-emerald/90 px-2 py-1 text-[10px] font-medium text-primary-foreground hover:bg-emerald disabled:opacity-50 transition shrink-0"
-            >
-              <RefreshCw className="size-2.5" /> Relancer
-            </button>
+            <div className="flex flex-col gap-1 shrink-0">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  runFromNode(id);
+                }}
+                disabled={readOnly}
+                title="Exécuter ce nœud et tous les nœuds en aval"
+                className="inline-flex items-center gap-1 rounded-full bg-sky-600/90 px-2 py-1 text-[10px] font-medium text-primary-foreground hover:bg-sky-600 disabled:opacity-50 transition"
+              >
+                <PlayCircle className="size-2.5" /> Depuis ici
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  rerunNode(id);
+                }}
+                disabled={readOnly}
+                title="Relancer ce nœud et ses dépendances"
+                className="inline-flex items-center gap-1 rounded-full bg-emerald/90 px-2 py-1 text-[10px] font-medium text-primary-foreground hover:bg-emerald disabled:opacity-50 transition"
+              >
+                <RefreshCw className="size-2.5" /> Relancer
+              </button>
+            </div>
           </div>
         ) : err ? (
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-1.5 text-[11px] text-amber-soft">
               <AlertTriangle className="size-3" /> Échec
             </div>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                rerunNode(id);
-              }}
-              disabled={readOnly}
-              title="Relancer ce nœud et ses dépendances"
-              className="inline-flex items-center gap-1 rounded-full bg-emerald/90 px-2 py-1 text-[10px] font-medium text-primary-foreground hover:bg-emerald disabled:opacity-50 transition shrink-0"
-            >
-              <RefreshCw className="size-2.5" /> Relancer
-            </button>
+            <div className="flex gap-1 shrink-0">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  runFromNode(id);
+                }}
+                disabled={readOnly}
+                title="Exécuter ce nœud et tous les nœuds en aval"
+                className="inline-flex items-center gap-1 rounded-full bg-sky-600/90 px-2 py-1 text-[10px] font-medium text-primary-foreground hover:bg-sky-600 disabled:opacity-50 transition"
+              >
+                <PlayCircle className="size-2.5" /> Depuis ici
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  rerunNode(id);
+                }}
+                disabled={readOnly}
+                title="Relancer ce nœud et ses dépendances"
+                className="inline-flex items-center gap-1 rounded-full bg-emerald/90 px-2 py-1 text-[10px] font-medium text-primary-foreground hover:bg-emerald disabled:opacity-50 transition"
+              >
+                <RefreshCw className="size-2.5" /> Relancer
+              </button>
+            </div>
           </div>
         ) : (
           <div className="flex items-center justify-between text-[11px] text-muted-foreground">
             <span className="flex items-center gap-1.5">
               <Sparkles className="size-3" /> Prêt
             </span>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                runNode(id);
-              }}
-              disabled={readOnly}
-              className="inline-flex items-center gap-1 rounded-full bg-amber/90 px-2 py-0.5 text-[10px] font-medium text-primary-foreground hover:bg-amber disabled:opacity-50 transition"
-            >
-              <Play className="size-2.5" /> Lancer
-            </button>
+            <div className="flex gap-1">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  runFromNode(id);
+                }}
+                disabled={readOnly}
+                title="Exécuter ce nœud et tous les nœuds en aval"
+                className="inline-flex items-center gap-1 rounded-full bg-sky-600/90 px-2 py-0.5 text-[10px] font-medium text-primary-foreground hover:bg-sky-600 disabled:opacity-50 transition"
+              >
+                <PlayCircle className="size-2.5" /> Depuis ici
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  runNode(id);
+                }}
+                disabled={readOnly}
+                className="inline-flex items-center gap-1 rounded-full bg-amber/90 px-2 py-0.5 text-[10px] font-medium text-primary-foreground hover:bg-amber disabled:opacity-50 transition"
+              >
+                <Play className="size-2.5" /> Lancer
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -245,6 +303,25 @@ function ResultPreview({
             <span
               key={i}
               className="w-[2px] bg-emerald rounded-full"
+              style={{ height: `${h * 100}%` }}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
+  if (category === "music" && result.kind === "audio") {
+    return (
+      <div className="rounded-lg border border-border bg-surface-0/40 px-2.5 py-2 flex items-center gap-2">
+        <div className="grid place-items-center size-6 rounded-full bg-orange-500/20 text-orange-400">
+          <Music2 className="size-3" />
+        </div>
+        <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Musique prête</div>
+        <div className="ml-auto flex items-end gap-[2px] h-3">
+          {[0.4, 0.7, 1, 0.6, 0.9, 0.5, 0.8].map((h, i) => (
+            <span
+              key={i}
+              className="w-[2px] bg-orange-400 rounded-full"
               style={{ height: `${h * 100}%` }}
             />
           ))}

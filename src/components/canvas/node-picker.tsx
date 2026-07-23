@@ -36,10 +36,16 @@ type Props = {
   className?: string;
   /** Optional callback that returns the flow-coordinate position for a new node. */
   getPosition?: () => { x: number; y: number };
+  /** When provided, open state is controlled externally. */
+  open?: boolean;
+  /** Called when the open state changes (controlled mode). */
+  onOpenChange?: (open: boolean) => void;
 };
 
-export function NodePicker({ variant = "toolbar", className, getPosition }: Props) {
-  const [open, setOpen] = useState(false);
+export function NodePicker({ variant = "toolbar", className, getPosition, open: controlledOpen, onOpenChange }: Props) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen ?? internalOpen;
+  const setOpen = onOpenChange ?? setInternalOpen;
   const readOnly = useCanvasStore((s) => s.readOnly);
 
   if (readOnly) return null;

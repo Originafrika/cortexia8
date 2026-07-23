@@ -62,13 +62,10 @@ function CanvasShell() {
     setTab("agent");
   }, []);
 
+  const [nodePickerOpen, setNodePickerOpen] = useState(false);
+
   const handleHighlightNodeAdd = useCallback(() => {
-    // Briefly highlight the node-add button via a data attribute
-    const btn = document.querySelector("[data-node-picker]") as HTMLElement | null;
-    if (btn) {
-      btn.setAttribute("data-highlighted", "true");
-      setTimeout(() => btn.removeAttribute("data-highlighted"), 1500);
-    }
+    setNodePickerOpen(true);
   }, []);
 
   const selectedNodeIds = useCanvasStore((s) => s.selectedNodeIds);
@@ -95,7 +92,7 @@ function CanvasShell() {
           <div className="ml-auto flex items-center gap-2">
             <PriceBadge className="hidden sm:inline-flex" />
             <div data-node-picker>
-              <NodePicker />
+              <NodePicker open={nodePickerOpen} onOpenChange={setNodePickerOpen} />
             </div>
             {workflowId && (
               <button
@@ -208,13 +205,7 @@ function CanvasInnerWrapper({
                 setPrefillPrompt(prompt);
                 setTab("agent");
               }}
-              onHighlightNodeAdd={() => {
-                const btn = document.querySelector("[data-node-picker]") as HTMLElement | null;
-                if (btn) {
-                  btn.setAttribute("data-highlighted", "true");
-                  setTimeout(() => btn.removeAttribute("data-highlighted"), 1500);
-                }
-              }}
+              onHighlightNodeAdd={handleHighlightNodeAdd}
             />
           )}
         </div>

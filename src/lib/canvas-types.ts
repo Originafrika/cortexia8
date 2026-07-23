@@ -49,6 +49,8 @@ export function portsForCategory(cat: ModelCategory): { in: PortType[]; out: Por
       return { in: ["text"], out: "audio" };
     case "text":
       return { in: ["text"], out: "text" };
+    case "music":
+      return { in: ["text"], out: "audio" };
   }
 }
 
@@ -122,6 +124,15 @@ export function categoryAccent(c: ModelCategory): {
         pill: "bg-sky-500/20 text-sky-200",
         ring: "ring-sky-400/40",
         IconBg: "from-sky-500 to-sky-400",
+      };
+    case "music":
+      return {
+        bg: "bg-orange-500/10",
+        border: "border-orange-500/30",
+        text: "text-orange-300",
+        pill: "bg-orange-500/20 text-orange-200",
+        ring: "ring-orange-400/40",
+        IconBg: "from-orange-500 to-orange-400",
       };
   }
 }
