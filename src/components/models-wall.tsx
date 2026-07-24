@@ -36,7 +36,10 @@ export function ModelsWall() {
 
   const filtered = useMemo(() => {
     return allItems.filter(
-      (w) => (kind === "all" || w.kind === kind) && (useCase === "all" || w.useCase === useCase),
+      (w) =>
+        (w.kind === "image" || w.kind === "video") &&
+        (kind === "all" || w.kind === kind) &&
+        (useCase === "all" || w.useCase === useCase),
     );
   }, [allItems, kind, useCase]);
 
