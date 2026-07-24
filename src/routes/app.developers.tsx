@@ -175,12 +175,12 @@ print(url, cost)`,
       <div>
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-display text-2xl tracking-[-0.02em]">{t("dev.keys_title")}</h2>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
             <input
               value={keyName}
               onChange={(e) => setKeyName(e.target.value)}
               placeholder={t("dev.key_name_placeholder")}
-              className="rounded-full border border-border bg-surface-1/70 px-3 py-1.5 text-sm focus:border-amber/40 outline-none w-48"
+              className="rounded-full border border-border bg-surface-1/70 px-3 py-1.5 text-sm focus:border-amber/40 outline-none w-full sm:w-48"
             />
             <select
               value={keyScope}
@@ -202,8 +202,8 @@ print(url, cost)`,
             </button>
           </div>
         </div>
-        <div className="surface-gradient-border rounded-2xl bg-surface-1/60 overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="surface-gradient-border rounded-2xl bg-surface-1/60 overflow-x-auto">
+          <table className="w-full text-sm min-w-[600px]">
             <thead className="text-left text-xs font-mono uppercase tracking-wider text-muted-foreground">
               <tr className="border-b border-border">
                 <th className="p-4 font-normal">{t("dev.keys_title")}</th>

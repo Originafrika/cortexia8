@@ -263,8 +263,8 @@ function AccountPage() {
             <CurrencyPicker />
           </div>
         </div>
-        <div className="surface-gradient-border rounded-2xl bg-surface-1/60 overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="surface-gradient-border rounded-2xl bg-surface-1/60 overflow-x-auto">
+          <table className="w-full text-sm min-w-[500px]">
             <thead className="text-left text-xs font-mono uppercase tracking-wider text-muted-foreground">
               <tr className="border-b border-border">
                 <th className="p-4 font-normal">Date</th>
