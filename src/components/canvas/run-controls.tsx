@@ -1,6 +1,7 @@
 import { useCanvasStore } from "@/lib/canvas-store";
 import { Loader2, Play, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 
 type Props = {
   className?: string;
@@ -8,6 +9,7 @@ type Props = {
 };
 
 export function RunControls({ className, compact }: Props) {
+  const t = useT();
   const runAll = useCanvasStore((s) => s.runAll);
   const readOnly = useCanvasStore((s) => s.readOnly);
   const running = useCanvasStore((s) => s.nodes.some((n) => n.data.status === "running"));
@@ -28,17 +30,17 @@ export function RunControls({ className, compact }: Props) {
         "disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer",
         className,
       )}
-      aria-label="Tout lancer"
+      aria-label={t("controls.run_all")}
     >
       {running ? (
         <>
           <Loader2 className="size-3.5 animate-spin" />
-          <span>Génération…</span>
+          <span>{t("controls.running")}</span>
         </>
       ) : (
         <>
           <Play className="size-3.5 fill-current" />
-          <span>Tout lancer</span>
+          <span>{t("controls.run_all")}</span>
           <RotateCcw className="ml-1 size-3 opacity-60" />
         </>
       )}

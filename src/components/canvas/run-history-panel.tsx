@@ -20,6 +20,7 @@ import {
   ChevronRight,
   ArrowLeft,
 } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
 type Props = {
   open: boolean;
@@ -28,6 +29,7 @@ type Props = {
 };
 
 export function RunHistoryPanel({ open, onOpenChange, workflowId }: Props) {
+  const t = useT();
   const [runs, setRuns] = useState<WorkflowRun[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedRun, setSelectedRun] = useState<WorkflowRun | null>(null);
@@ -64,17 +66,17 @@ export function RunHistoryPanel({ open, onOpenChange, workflowId }: Props) {
                 type="button"
                 onClick={() => setSelectedRun(null)}
                 className="p-1 -ml-1 text-muted-foreground hover:text-foreground transition"
-                aria-label="Retour"
+                aria-label={t("run_history.back")}
               >
                 <ArrowLeft className="size-4" />
               </button>
-              <SheetTitle className="text-base">Run #{selectedRun.id}</SheetTitle>
+              <SheetTitle className="text-base">{t("run_history.run")}#{selectedRun.id}</SheetTitle>
             </div>
           ) : (
             <>
-              <SheetTitle className="text-base">Historique des runs</SheetTitle>
+              <SheetTitle className="text-base">{t("run_history.title")}</SheetTitle>
               <SheetDescription className="text-xs">
-                {runs.length} run{runs.length !== 1 ? "s" : ""} pour ce workflow
+                {runs.length} {runs.length !== 1 ? "runs" : "run"} {t("run_history.runs_for")}
               </SheetDescription>
             </>
           )}
@@ -105,6 +107,7 @@ function RunList({
   loading: boolean;
   onSelect: (run: WorkflowRun) => void;
 }) {
+  const t = useT();
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16">
@@ -117,9 +120,9 @@ function RunList({
     return (
       <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
         <Clock className="size-8 text-muted-foreground/50 mb-3" />
-        <p className="text-sm text-muted-foreground">Aucun run pour ce workflow.</p>
+        <p className="text-sm text-muted-foreground">{t("run_history.empty")}</p>
         <p className="text-xs text-muted-foreground/70 mt-1">
-          Lance une génération pour commencer l'historique.
+          {t("run_history.empty_desc")}
         </p>
       </div>
     );
@@ -164,6 +167,7 @@ function RunList({
 }
 
 function RunDetail({ run }: { run: WorkflowRun }) {
+  const t = useT();
   const succeeded = run.nodes.filter((n) => n.status === "succeeded").length;
   const failed = run.nodes.filter((n) => n.status === "failed").length;
 
@@ -173,18 +177,18 @@ function RunDetail({ run }: { run: WorkflowRun }) {
       <div className="grid grid-cols-3 gap-2">
         <StatCard
           icon={<Layers className="size-3.5" />}
-          label="Nœuds"
+          label={t("run_history.nodes")}
           value={String(run.nodeCount)}
         />
         <StatCard
           icon={<Check className="size-3.5 text-emerald" />}
-          label="Réussis"
+          label={t("run_history.succeeded")}
           value={String(succeeded)}
           accent={succeeded > 0 ? "text-emerald" : undefined}
         />
         <StatCard
           icon={<DollarSign className="size-3.5" />}
-          label="Coût"
+          label={t("run_history.cost")}
           value={`$${run.totalCostUsd.toFixed(4)}`}
         />
       </div>
@@ -192,14 +196,14 @@ function RunDetail({ run }: { run: WorkflowRun }) {
       {failed > 0 && (
         <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber/10 border border-amber/20 text-xs text-amber-soft">
           <AlertTriangle className="size-3.5 shrink-0" />
-          {failed} nœud{failed > 1 ? "s" : ""} en échec
+          {failed} {failed > 1 ? t("run_history.failed_nodes_plural") : t("run_history.failed_nodes")}
         </div>
       )}
 
       {/* Node executions */}
       <div className="space-y-1">
         <div className="px-1 text-[11px] font-mono uppercase tracking-[0.22em] text-muted-foreground">
-          Exécutions des nœuds
+          {t("run_history.executions")}
         </div>
         <div className="divide-y divide-border rounded-lg border border-border overflow-hidden">
           {run.nodes.map((node) => (
@@ -207,7 +211,7 @@ function RunDetail({ run }: { run: WorkflowRun }) {
           ))}
           {run.nodes.length === 0 && (
             <div className="px-4 py-6 text-center text-xs text-muted-foreground">
-              Aucune exécution enregistrée
+              {t("run_history.no_executions")}
             </div>
           )}
         </div>

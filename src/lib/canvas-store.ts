@@ -490,7 +490,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
     set({
       nodes: get().nodes.map((n) =>
         n.id === id
-          ? { ...n, data: { ...n.data, status: "running", progress: 0, step: "Soumission…" } }
+          ? { ...n, data: { ...n.data, status: "running", progress: 0, step: "submitting" } }
           : n,
       ),
     });
@@ -509,14 +509,14 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
       set({
         nodes: get().nodes.map((n) =>
           n.id === id
-            ? { ...n, data: { ...n.data, step: "En file d'attente…", progress: 10 } }
+            ? { ...n, data: { ...n.data, step: "queued", progress: 10 } }
             : n,
         ),
       });
 
       await pollGenerationStatus(set, get, id, runNodeExecId);
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Erreur inconnue";
+      const message = err instanceof Error ? err.message : "Unknown error";
       set({
         nodes: get().nodes.map((n) =>
           n.id === id
@@ -547,7 +547,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
                   data: {
                     ...n.data,
                     status: "error",
-                    step: "Dépendance en échec",
+                    step: "Dependency failed",
                     progress: 0,
                   },
                 }
@@ -595,7 +595,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
     set({
       nodes: get().nodes.map((n) => {
         if (n.id === id || descendantIds.has(n.id)) {
-          return { ...n, data: { ...n.data, status: "running", progress: 0, step: "Relancement…" } };
+          return { ...n, data: { ...n.data, status: "running", progress: 0, step: "rerunning" } };
         }
         return n;
       }),
@@ -624,7 +624,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
             return n;
           }
           // Mark descendants as queued
-          return { ...n, data: { ...n.data, step: "En file d'attente…", progress: 10 } };
+          return { ...n, data: { ...n.data, step: "queued", progress: 10 } };
         }),
       });
 
@@ -646,7 +646,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
         }
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Erreur inconnue";
+      const message = err instanceof Error ? err.message : "Unknown error";
       set({
         nodes: get().nodes.map((n) => {
           if (n.id === id || descendantIds.has(n.id)) {
@@ -690,7 +690,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
     set({
       nodes: get().nodes.map((n) => {
         if (n.id === id || downstreamIds.has(n.id)) {
-          return { ...n, data: { ...n.data, status: "running", progress: 0, step: "Lancement…" } };
+          return { ...n, data: { ...n.data, status: "running", progress: 0, step: "starting" } };
         }
         return n;
       }),
@@ -714,7 +714,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
           if (n.id !== id && !downstreamIds.has(n.id)) {
             return n;
           }
-          return { ...n, data: { ...n.data, step: "En file d'attente…", progress: 10 } };
+          return { ...n, data: { ...n.data, step: "queued", progress: 10 } };
         }),
       });
 
@@ -733,7 +733,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
         }
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Erreur inconnue";
+      const message = err instanceof Error ? err.message : "Unknown error";
       set({
         nodes: get().nodes.map((n) => {
           if (n.id === id || downstreamIds.has(n.id)) {
@@ -819,9 +819,9 @@ function pollGenerationStatus(
         const progress = kieStatus === "running" ? 60 : kieStatus === "queued" ? 30 : 0;
         const stepLabel =
           kieStatus === "running"
-            ? "Génération en cours…"
+            ? "generating"
             : kieStatus === "queued"
-              ? "En file d'attente…"
+              ? "queued"
               : "";
 
         if (kieStatus === "running" || kieStatus === "queued") {
@@ -878,7 +878,7 @@ function pollGenerationStatus(
                     data: {
                       ...n.data,
                       status: "error",
-                      step: nodeExec.errorMessage || "Échec de la génération",
+                      step: nodeExec.errorMessage || "Generation failed",
                       progress: 0,
                     },
                   }
@@ -891,7 +891,7 @@ function pollGenerationStatus(
       } catch (err) {
         consecutiveErrors++;
         if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
-          const message = err instanceof Error ? err.message : "Erreur de polling persistante";
+          const message = err instanceof Error ? err.message : "Persistent polling error";
           set({
             nodes: get().nodes.map((n) =>
               n.id === nodeId
@@ -921,7 +921,7 @@ function pollGenerationStatus(
               data: {
                 ...n.data,
                 status: "error",
-                step: "Délai d'attente dépassé",
+                step: "Polling timeout",
                 progress: 0,
               },
             }

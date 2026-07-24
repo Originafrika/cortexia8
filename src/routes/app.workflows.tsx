@@ -4,27 +4,29 @@ import { Plus, Workflow, Clock, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { listWorkflows, createWorkflow, type WorkflowListItem } from "@/lib/api/workflows";
 import { loadSession } from "@/lib/auth-store";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/app/workflows")({
   component: WorkflowsPage,
 });
 
-function formatRelative(dateStr: string | null): string {
-  if (!dateStr) return "Jamais exécuté";
+function formatRelative(dateStr: string | null, t: (key: string) => string): string {
+  if (!dateStr) return t("workflows.never_run");
   const d = new Date(dateStr);
   const now = Date.now();
   const diffMs = now - d.getTime();
   const diffMin = Math.floor(diffMs / 60000);
-  if (diffMin < 1) return "à l'instant";
-  if (diffMin < 60) return `il y a ${diffMin}m`;
+  if (diffMin < 1) return t("time.now");
+  if (diffMin < 60) return t("time.minutes").replace("{n}", String(diffMin));
   const diffH = Math.floor(diffMin / 60);
-  if (diffH < 24) return `il y a ${diffH}h`;
+  if (diffH < 24) return t("time.hours").replace("{n}", String(diffH));
   const diffD = Math.floor(diffH / 24);
-  if (diffD < 30) return `il y a ${diffD}j`;
+  if (diffD < 30) return t("time.days").replace("{n}", String(diffD));
   return d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
 }
 
 function WorkflowsPage() {
+  const t = useT();
   const navigate = useNavigate();
   const [workflows, setWorkflows] = useState<WorkflowListItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,13 +54,13 @@ function WorkflowsPage() {
       <div className="grid gap-4 sm:flex sm:items-end sm:justify-between">
         <div className="min-w-0">
           <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-            Workflows
+            {t("workflows.title")}
           </div>
           <h1 className="mt-2 font-display text-4xl sm:text-5xl tracking-[-0.03em]">
-            Tous vos workflows.
+            {t("workflows.subtitle")}
           </h1>
           <p className="mt-2 text-muted-foreground">
-            Créez et gérez vos pipelines d'automatisation.
+            {t("workflows.desc")}
           </p>
         </div>
         <button
@@ -74,23 +76,23 @@ function WorkflowsPage() {
           ) : (
             <Plus className="size-4" />
           )}
-          Nouveau workflow
+          {t("workflows.new")}
         </button>
       </div>
 
       {loading ? (
         <div className="mt-16 flex items-center justify-center text-muted-foreground">
           <Loader2 className="size-5 animate-spin mr-2" />
-          Chargement…
+          {t("workflows.loading")}
         </div>
       ) : workflows.length === 0 ? (
         <div className="mt-16 text-center text-muted-foreground">
           <div className="grid place-items-center size-16 mx-auto rounded-2xl border border-border bg-surface-1/60 mb-4">
             <Workflow className="size-7 text-muted-foreground/60" />
           </div>
-          <div className="font-display text-2xl mb-2">Aucun workflow.</div>
+          <div className="font-display text-2xl mb-2">{t("workflows.empty")}</div>
           <div className="text-sm">
-            Créez votre premier workflow pour commencer à automatiser.
+            {t("workflows.empty_desc")}
           </div>
         </div>
       ) : (
@@ -111,10 +113,10 @@ function WorkflowsPage() {
                   </div>
                   <div className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
                     {wf.status === "running"
-                      ? "En cours"
+                      ? t("workflows.status.active")
                       : wf.status === "error"
-                        ? "Erreur"
-                        : "Inactif"}
+                        ? t("workflows.status.error")
+                        : t("workflows.status.idle")}
                   </div>
                 </div>
                 <span
@@ -128,16 +130,16 @@ function WorkflowsPage() {
                   )}
                 >
                   {wf.status === "running"
-                    ? "Actif"
+                    ? t("workflows.status.active")
                     : wf.status === "error"
-                      ? "Erreur"
-                      : "Idle"}
+                      ? t("workflows.status.error")
+                      : t("workflows.status.idle")}
                 </span>
               </div>
               <div className="mt-4 pt-4 border-t border-border flex items-center justify-between">
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <Clock className="size-3.5" />
-                  {formatRelative(wf.lastRunAt)}
+                  {formatRelative(wf.lastRunAt, t)}
                 </div>
                 {wf.lastRunStatus && (
                   <span
@@ -151,9 +153,9 @@ function WorkflowsPage() {
                     )}
                   >
                     {wf.lastRunStatus === "success"
-                      ? "Succès"
+                      ? t("workflows.run_success")
                       : wf.lastRunStatus === "failed"
-                        ? "Échec"
+                        ? t("workflows.run_failed")
                         : wf.lastRunStatus}
                   </span>
                 )}

@@ -27,6 +27,7 @@ import { cn } from "@/lib/utils";
 import { generate } from "@/lib/api/generate";
 import { generationStatus } from "@/lib/api/generation-status";
 import { loadSession } from "@/lib/auth-store";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/app/models/$slug")({
   loader: ({ params }) => {
@@ -35,25 +36,35 @@ export const Route = createFileRoute("/app/models/$slug")({
     return { model: m };
   },
   component: ModelPlayground,
-  errorComponent: ({ error }) => (
+  errorComponent: ModelErrorComponent,
+  notFoundComponent: ModelNotFoundComponent,
+});
+
+function ModelErrorComponent({ error }: { error: Error }) {
+  const t = useT();
+  return (
     <div className="mx-auto max-w-2xl px-6 py-24 text-center">
       <AlertTriangle className="mx-auto size-8 text-amber" />
-      <h1 className="mt-4 font-display text-3xl">Une erreur est survenue.</h1>
+      <h1 className="mt-4 font-display text-3xl">{t("playground.error")}</h1>
       <p className="mt-2 text-muted-foreground text-sm">{error.message}</p>
       <Link to="/app/models" className="mt-6 inline-flex text-amber-soft hover:underline">
-        Retour au catalogue
+        {t("playground.back")}
       </Link>
     </div>
-  ),
-  notFoundComponent: () => (
+  );
+}
+
+function ModelNotFoundComponent() {
+  const t = useT();
+  return (
     <div className="mx-auto max-w-2xl px-6 py-24 text-center">
-      <h1 className="font-display text-3xl">Modèle introuvable.</h1>
+      <h1 className="font-display text-3xl">{t("playground.not_found")}</h1>
       <Link to="/app/models" className="mt-4 inline-flex text-amber-soft hover:underline">
-        Retour au catalogue
+        {t("playground.back")}
       </Link>
     </div>
-  ),
-});
+  );
+}
 
 type Status = "idle" | "loading" | "success" | "error";
 
@@ -92,6 +103,7 @@ export function ModelPlaygroundContent({
   model: Model;
   isModal?: boolean;
 }) {
+  const t = useT();
   const [prompt, setPrompt] = useState("");
   const [state, setState] = useState<Record<string, unknown>>(() => initState(model));
 
@@ -165,7 +177,7 @@ export function ModelPlaygroundContent({
     }
     if (missingFields.length > 0) {
       setStatus("error");
-      setError(`Champs requis manquants : ${missingFields.join(", ")}`);
+      setError(`${t("playground.missing_fields")} ${missingFields.join(", ")}`);
       return;
     }
 
@@ -182,7 +194,7 @@ export function ModelPlaygroundContent({
         const newResult: Result = {
           id: res.runId.toString(),
           model,
-          prompt: prompt.trim() || "(sans prompt)",
+          prompt: prompt.trim() || t("playground.no_prompt"),
           cost: res.estimatedCostUsd || currentPrice,
           resultUrl: null,
           runId: res.runId,
@@ -199,7 +211,7 @@ export function ModelPlaygroundContent({
           pollCount++;
           if (pollCount > maxPolls) {
             setStatus("error");
-            setError("La génération a pris trop de temps. Réessaie plus tard.");
+            setError(t("playground.timeout"));
             return;
           }
           generationStatus({ id: res.runId })
@@ -226,7 +238,7 @@ export function ModelPlaygroundContent({
 
               if (statusRes.status === "error" || node.status === "error") {
                 setStatus("error");
-                setError(node.errorMessage || "Une erreur est survenue pendant la génération.");
+                setError(node.errorMessage || t("playground.gen_error"));
                 return;
               }
 
@@ -240,7 +252,7 @@ export function ModelPlaygroundContent({
       })
       .catch((err) => {
         setStatus("error");
-        setError(err?.message || "Impossible de lancer la génération.");
+        setError(err?.message || t("playground.gen_impossible"));
       });
   }
 
@@ -261,7 +273,7 @@ export function ModelPlaygroundContent({
               to="/app/models"
               className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground shrink-0"
             >
-              <ArrowLeft className="size-3.5" /> Catalogue
+              <ArrowLeft className="size-3.5" /> {t("playground.catalog")}
             </Link>
             <div className="min-w-0 flex-1">
               <div className="flex items-baseline gap-2 min-w-0">
@@ -331,7 +343,7 @@ export function ModelPlaygroundContent({
           {history.length > 0 && (
             <div className="mb-3 flex items-baseline justify-between">
               <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-                Générations · {history.length}
+                {t("playground.generations")} · {history.length}
               </div>
               <button
                 onClick={() => {
@@ -340,7 +352,7 @@ export function ModelPlaygroundContent({
                 }}
                 className="text-[11px] text-muted-foreground hover:text-foreground cursor-pointer"
               >
-                Effacer
+                {t("playground.clear")}
               </button>
             </div>
           )}
@@ -463,10 +475,11 @@ function PromptBar({
   onToggleAdvanced: () => void;
   canGenerate: boolean;
 }) {
+  const t = useT();
   const promptSpec = model.params.find((p) => p.kind === "prompt");
   const placeholder =
     (promptSpec && "placeholder" in promptSpec && promptSpec.placeholder) ||
-    "Décris ce que tu veux générer…";
+    t("playground.placeholder");
 
   return (
     <div className="surface-gradient-border rounded-2xl bg-surface-1/70 p-3">
@@ -486,7 +499,7 @@ function PromptBar({
         />
       ) : (
         <div className="px-2 py-1.5 text-sm text-muted-foreground">
-          Configure les paramètres ci-dessous, puis génère.
+          {t("playground.helper")}
         </div>
       )}
 
@@ -507,13 +520,13 @@ function PromptBar({
             )}
           >
             <Settings2 className="size-3" />
-            <span className="hidden sm:inline">{showAdvanced ? "Advanced" : "Simple"}</span>
+            <span className="hidden sm:inline">{showAdvanced ? t("playground.advanced") : t("playground.simple")}</span>
           </button>
         )}
 
         <div className="ml-auto flex items-center gap-2">
           <div className="hidden sm:flex items-center gap-1 text-[11px] text-muted-foreground font-mono">
-            <span>Coût</span>
+            <span>{t("playground.cost")}</span>
             <PriceDisplay usd={currentPrice} className="text-[11px] text-foreground" />
           </div>
           <button
@@ -528,7 +541,7 @@ function PromptBar({
               </>
             ) : (
               <>
-                <span className="hidden sm:inline">Générer</span>
+                <span className="hidden sm:inline">{t("playground.generate")}</span>
                 <ArrowUp className="size-4" />
               </>
             )}
@@ -548,6 +561,7 @@ function ParamIconButton({
   state: Record<string, unknown>;
   setState: React.Dispatch<React.SetStateAction<Record<string, unknown>>>;
 }) {
+  const t = useT();
   const key = "key" in p ? p.key : p.kind;
   const Icon = iconForParam(key, p.kind);
   const label = p.label;
@@ -557,7 +571,7 @@ function ParamIconButton({
   if (p.kind === "select") preview = String(state[p.key] ?? "");
   else if (p.kind === "slider")
     preview = `${state[p.key] ?? p.default}${p.suffix ?? ""}`;
-  else if (p.kind === "toggle") preview = state[p.key] ? "On" : null;
+  else if (p.kind === "toggle") preview = state[p.key] ? t("playground.toggle_on") : null;
 
   const uploadCount = p.kind === "upload" ? ((state[p.key] as File[]) ?? []).length : 0;
 
@@ -614,6 +628,7 @@ function UploadParamEditor({
   state: Record<string, unknown>;
   setState: React.Dispatch<React.SetStateAction<Record<string, unknown>>>;
 }) {
+  const t = useT();
   const files = (state[p.key] as File[]) ?? [];
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -676,11 +691,11 @@ function UploadParamEditor({
           <div className="space-y-1">
             <Upload className="size-4 mx-auto text-amber" />
             <span>
-              {files.length} fichier{files.length > 1 ? "s" : ""} sélectionné{files.length > 1 ? "s" : ""}
+              {files.length} {t("playground.files_selected")}
             </span>
           </div>
         ) : (
-          <span>Glisse un fichier ou clique pour choisir</span>
+          <span>{t("playground.upload_text")}</span>
         )}
       </div>
       {files.length > 0 && (
@@ -711,6 +726,7 @@ function ParamEditor({
   state: Record<string, unknown>;
   setState: React.Dispatch<React.SetStateAction<Record<string, unknown>>>;
 }) {
+  const t = useT();
   if (p.kind === "upload") {
     return <UploadParamEditor p={p} state={state} setState={setState} />;
   }
@@ -769,7 +785,7 @@ function ParamEditor({
         <input
           type="number"
           value={val ?? ""}
-          placeholder="aléatoire"
+          placeholder={t("playground.seed_placeholder")}
           onChange={(e) =>
             setState((s) => ({
               ...s,
@@ -782,7 +798,7 @@ function ParamEditor({
           type="button"
           onClick={() => setState((s) => ({ ...s, [p.key]: Math.floor(Math.random() * 0xffffffff) }))}
           className="shrink-0 rounded-xl border border-border bg-surface-0/60 px-3 py-2 text-xs hover:border-amber/50 hover:bg-amber/5 transition"
-          title="Seed aléatoire"
+          title={t("playground.seed_tooltip")}
         >
           🎲
         </button>
@@ -817,6 +833,7 @@ function ParamEditor({
 }
 
 function LoadingCard({ model, progress }: { model: Model; progress: number }) {
+  const t = useT();
   return (
     <div className="surface-gradient-border rounded-2xl bg-surface-1/60 overflow-hidden">
       <div className="relative aspect-video max-h-[45dvh] grid place-items-center">
@@ -825,12 +842,12 @@ function LoadingCard({ model, progress }: { model: Model; progress: number }) {
           <Loader2 className="size-6 mx-auto text-amber animate-spin" />
           <div className="mt-3 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
             {model.category === "video"
-              ? "Rendu vidéo"
+              ? t("playground.render_video")
               : model.category === "audio"
-                ? "Synthèse vocale"
+                ? t("playground.render_audio")
                 : model.category === "text"
-                  ? "Rédaction"
-                  : "Rendu image"}
+                  ? t("playground.render_text")
+                  : t("playground.render_image")}
           </div>
           <div className="mt-1 text-sm text-foreground/80">{progress}%</div>
           <div className="mt-3 mx-auto w-40 h-1 rounded-full bg-surface-3 overflow-hidden">
@@ -852,6 +869,7 @@ function ActiveResultView({
   result: Result;
   onRegenerate: () => void;
 }) {
+  const t = useT();
   const hasResult = !!result.resultUrl;
   const isImage = result.model.category === "image";
   const isVideo = result.model.category === "video";
@@ -913,15 +931,15 @@ function ActiveResultView({
       <div className="space-y-3 min-w-0">
         <div className="surface-gradient-border rounded-2xl bg-surface-1/60 p-4">
           <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-muted-foreground">
-            Prompt
+            {t("history.prompt")}
           </div>
           <div className="mt-1.5 text-sm text-foreground/90 leading-relaxed line-clamp-4">
             {result.prompt}
           </div>
         </div>
         <div className="surface-gradient-border rounded-2xl bg-surface-1/60 p-4">
-          <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-muted-foreground mb-2">
-            Paramètres
+          <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-muted-foreground">
+            {t("playground.params")}
           </div>
           <div className="flex flex-wrap gap-1.5">
             {Object.entries(result.state).map(([k, v]) => (
@@ -939,7 +957,7 @@ function ActiveResultView({
             onClick={onRegenerate}
             className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-border bg-surface-2/40 px-3 py-2 text-xs hover:border-amber/40 transition cursor-pointer"
           >
-            <RefreshCw className="size-3.5" /> Régénérer
+            <RefreshCw className="size-3.5" /> {t("playground.regenerate")}
           </button>
           {hasResult && (
             <a
@@ -948,7 +966,7 @@ function ActiveResultView({
               rel="noopener noreferrer"
               className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber text-primary-foreground px-3 py-2 text-xs font-medium hover:opacity-95 transition"
             >
-              <Download className="size-3.5" /> Télécharger
+              <Download className="size-3.5" /> {t("playground.download")}
             </a>
           )}
         </div>
@@ -958,17 +976,18 @@ function ActiveResultView({
 }
 
 function EmptyState({ model }: { model: Model }) {
+  const t = useT();
   return (
     <div className="mt-8 grid place-items-center text-center py-16">
       <div className="grid place-items-center size-14 rounded-2xl bg-surface-2 border border-border mb-4">
         <Sparkles className="size-6 text-amber" />
       </div>
-      <div className="font-display text-2xl tracking-[-0.02em]">Prêt à générer.</div>
+      <div className="font-display text-2xl tracking-[-0.02em]">{t("playground.ready")}</div>
       <p className="mt-2 max-w-md text-sm text-muted-foreground">
         {model.blurb}
       </p>
       <div className="mt-4 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-        Écris ton prompt en bas · Ctrl/⌘ + Entrée pour lancer
+        {t("playground.ready_desc")}
       </div>
     </div>
   );
@@ -989,6 +1008,7 @@ function estimatePrice(m: Model, state: Record<string, unknown>): number {
 }
 
 function SimilarModels({ model }: { model: Model }) {
+  const t = useT();
   const similar = useMemo(
     () =>
       MODELS.filter((m) => m.category === model.category && m.slug !== model.slug).slice(0, 6),
@@ -1000,7 +1020,7 @@ function SimilarModels({ model }: { model: Model }) {
   return (
     <div className="mt-10">
       <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-4">
-        Modèles similaires
+        {t("playground.similar")}
       </div>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {similar.map((m) => (
@@ -1025,7 +1045,7 @@ function SimilarModels({ model }: { model: Model }) {
                             : "bg-surface-3 text-muted-foreground")
                       }
                     >
-                      {m.badge === "popular" ? "Populaire" : m.badge === "new" ? "Nouveau" : "Pro"}
+                      {m.badge === "popular" ? t("playground.badge.popular") : m.badge === "new" ? t("playground.badge.new") : t("playground.badge.pro")}
                     </span>
                   )}
                 </div>

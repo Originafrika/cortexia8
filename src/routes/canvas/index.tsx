@@ -15,6 +15,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { ArrowLeft, Copy, Eye, History, Settings2, Wand2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { RunHistoryPanel } from "@/components/canvas/run-history-panel";
+import { useT } from "@/lib/i18n";
 
 const canvasSearchSchema = z.object({
   workflowId: z.number().optional(),
@@ -42,6 +43,7 @@ function CanvasPage() {
 }
 
 function CanvasShell() {
+  const t = useT();
   const isMobile = useIsMobile();
   const [tab, setTab] = useState<Tab>("inspector");
   const [prefillPrompt, setPrefillPrompt] = useState<string | undefined>();
@@ -81,12 +83,12 @@ function CanvasShell() {
             to="/app"
             className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition shrink-0"
           >
-            <ArrowLeft className="size-3.5" /> <span className="hidden sm:inline">Retour</span>
+            <ArrowLeft className="size-3.5" /> <span className="hidden sm:inline">{t("canvas.back")}</span>
           </Link>
           <div className="hidden md:flex flex-col min-w-0">
             <div className="font-display text-base tracking-[-0.02em] truncate">Canvas</div>
             <div className="font-mono text-[9px] uppercase tracking-[0.22em] text-muted-foreground">
-              Compose ton pipeline · {nodes.length} nœud{nodes.length > 1 ? "s" : ""}
+              {t("canvas.subtitle")} · {nodes.length} nœud{nodes.length > 1 ? "s" : ""}
             </div>
           </div>
           <div className="ml-auto flex items-center gap-2">
@@ -99,10 +101,10 @@ function CanvasShell() {
                 type="button"
                 onClick={() => setHistoryOpen(true)}
                 className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface-0/60 backdrop-blur px-2.5 h-9 text-xs text-muted-foreground hover:text-foreground hover:border-border-strong transition cursor-pointer"
-                aria-label="Historique des runs"
+                aria-label={t("run_history.title")}
               >
                 <History className="size-3.5" />
-                <span className="hidden sm:inline">Historique</span>
+                <span className="hidden sm:inline">{t("canvas.history")}</span>
               </button>
             )}
             <RunControls />
@@ -114,7 +116,7 @@ function CanvasShell() {
         <div className="shrink-0 z-20 border-b border-border bg-amber/10 px-4 py-2 flex items-center gap-2 text-[11px]">
           <Eye className="size-3.5 text-amber shrink-0" />
           <span className="text-foreground/80">
-            Mode lecture seule. Ouvre l'app sur desktop pour éditer le canvas.
+            {t("canvas.mobile_banner")}
           </span>
         </div>
       )}
@@ -178,6 +180,7 @@ function CanvasInnerWrapper({
   selectedNodeIds: string[];
   duplicateBranch: (ids: string[]) => void;
 }) {
+  const t = useT();
   const { fitView } = useReactFlow();
   const setSelected = useCanvasStore((s) => s.setSelectedNodeId);
 
@@ -217,13 +220,13 @@ function CanvasInnerWrapper({
                 active={tab === "inspector"}
                 onClick={() => setTab("inspector")}
                 icon={<Settings2 className="size-3.5" />}
-                label="Inspecteur"
+                label={t("canvas.tab.inspector")}
               />
               <TabButton
                 active={tab === "agent"}
                 onClick={() => setTab("agent")}
                 icon={<Wand2 className="size-3.5" />}
-                label="Agent"
+                label={t("canvas.tab.agent")}
               />
               <div className="ml-auto">
                 <PriceBadge className="h-7 px-2.5 text-[11px]" />
@@ -248,7 +251,7 @@ function CanvasInnerWrapper({
             className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface-1/90 backdrop-blur px-4 h-9 text-sm hover:border-amber/40 transition shadow-lg cursor-pointer"
           >
             <Copy className="size-3.5" />
-            Dupliquer{selectedNodeIds.length > 1 ? ` (${selectedNodeIds.length})` : ""}
+            {t("canvas.duplicate")}{selectedNodeIds.length > 1 ? ` (${selectedNodeIds.length})` : ""}
           </button>
         </div>
       )}

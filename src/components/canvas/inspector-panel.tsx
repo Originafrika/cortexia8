@@ -33,8 +33,10 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 
 export function InspectorPanel({ onClose }: { onClose: () => void }) {
+  const t = useT();
   const selectedId = useCanvasStore((s) => s.selectedNodeId);
   const node = useCanvasStore((s) => s.nodes.find((n) => n.id === selectedId) ?? null);
   const readOnly = useCanvasStore((s) => s.readOnly);
@@ -42,14 +44,14 @@ export function InspectorPanel({ onClose }: { onClose: () => void }) {
   if (!node) {
     return (
       <div className="flex h-full flex-col gap-4 p-4 text-sm text-muted-foreground">
-        <PanelHeader onClose={onClose} title="Inspecteur" subtitle="Aucune sélection" />
+        <PanelHeader onClose={onClose} title={t("inspector.title")} subtitle={t("inspector.empty")} />
         <div className="mt-8 grid place-items-center text-center">
           <div className="grid place-items-center size-12 rounded-2xl border border-dashed border-border text-muted-foreground">
             <Settings2 className="size-4" />
           </div>
-          <div className="mt-3 text-sm">Sélectionne un nœud</div>
+          <div className="mt-3 text-sm">{t("inspector.select_node")}</div>
           <div className="mt-1 text-xs text-muted-foreground max-w-[220px]">
-            Clique sur un nœud du canvas pour voir ses paramètres, son coût et son résultat.
+            {t("inspector.empty_desc")}
           </div>
         </div>
       </div>
@@ -72,9 +74,9 @@ export function InspectorPanel({ onClose }: { onClose: () => void }) {
       <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-4 space-y-4">
         {/* Status + price + actions */}
         <section className="grid grid-cols-2 gap-2">
-          <Stat label="Coût" value={<PriceDisplay usd={node.data.priceUSD} className="text-base" emphasize />} />
+          <Stat label={t("inspector.cost")} value={<PriceDisplay usd={node.data.priceUSD} className="text-base" emphasize />} />
           <Stat
-            label="Statut"
+            label={t("inspector.status")}
             value={<StatusBadge status={node.data.status} progress={node.data.progress} step={node.data.step} />}
           />
         </section>
@@ -95,10 +97,10 @@ export function InspectorPanel({ onClose }: { onClose: () => void }) {
               <Play className="size-3.5" />
             )}
             {node.data.status === "running"
-              ? "En cours…"
+              ? t("inspector.running_step")
               : node.data.status === "done"
-                ? "Re-lancer"
-                : "Lancer"}
+                ? t("inspector.rerun")
+                : t("inspector.run")}
           </Button>
           <Button
             type="button"
@@ -139,10 +141,10 @@ export function InspectorPanel({ onClose }: { onClose: () => void }) {
 
         {/* Ports */}
         <section>
-          <SectionTitle>Ports</SectionTitle>
+          <SectionTitle>{t("inspector.ports")}</SectionTitle>
           <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
-            <PortPill label="Entrée" types={ports.in} />
-            <PortPill label="Sortie" types={[ports.out]} />
+            <PortPill label={t("inspector.input")} types={ports.in} />
+            <PortPill label={t("inspector.output")} types={[ports.out]} />
           </div>
         </section>
 
@@ -150,10 +152,10 @@ export function InspectorPanel({ onClose }: { onClose: () => void }) {
 
         {/* Parameters */}
         <section>
-          <SectionTitle>Paramètres</SectionTitle>
+          <SectionTitle>{t("inspector.params")}</SectionTitle>
           <div className="mt-2 space-y-3">
             {m.params.length === 0 && (
-              <div className="text-xs text-muted-foreground">Aucun paramètre.</div>
+              <div className="text-xs text-muted-foreground">{t("inspector.no_params")}</div>
             )}
             {m.params.map((p, i) => (
               <ParamField
@@ -173,15 +175,15 @@ export function InspectorPanel({ onClose }: { onClose: () => void }) {
 
         {/* Result preview */}
         <section>
-          <SectionTitle>Résultat</SectionTitle>
+          <SectionTitle>{t("inspector.result")}</SectionTitle>
           <div className="mt-2">
             {node.data.status !== "done" || !node.data.result ? (
               <div className="rounded-xl border border-dashed border-border bg-surface-0/40 px-3 py-6 text-center text-xs text-muted-foreground">
                 {node.data.status === "running"
-                  ? "Génération en cours…"
+                  ? t("inspector.running")
                   : node.data.status === "error"
-                    ? "Échec de la génération."
-                    : "Lance le nœud pour voir le résultat."}
+                    ? t("inspector.failed")
+                    : t("inspector.run_node")}
               </div>
             ) : (
               <ResultPreview
@@ -208,6 +210,7 @@ function PanelHeader({
   subtitle?: string;
   accent?: ReturnType<typeof categoryAccent>;
 }) {
+  const t = useT();
   return (
     <div className={cn("flex items-center gap-3 px-4 py-3 border-b border-border", accent?.bg)}>
       <div className="grid place-items-center size-9 rounded-xl border border-border bg-surface-0/60 shrink-0">
@@ -225,7 +228,7 @@ function PanelHeader({
         type="button"
         onClick={onClose}
         className="grid place-items-center size-7 rounded-md text-muted-foreground hover:bg-surface-2 hover:text-foreground transition cursor-pointer"
-        aria-label="Fermer l'inspecteur"
+        aria-label={t("inspector.close")}
       >
         <X className="size-3.5" />
       </button>
@@ -261,11 +264,12 @@ function StatusBadge({
   progress: number;
   step: string;
 }) {
+  const t = useT();
   if (status === "running") {
     return (
       <div className="space-y-1">
         <span className="inline-flex items-center gap-1.5 text-amber-soft text-xs">
-          <Loader2 className="size-3 animate-spin" /> {step || "En cours…"}
+          <Loader2 className="size-3 animate-spin" /> {step || t("inspector.running_step")}
         </span>
         <div className="h-1 w-full overflow-hidden rounded-full bg-surface-3">
           <div
@@ -279,18 +283,18 @@ function StatusBadge({
   if (status === "done") {
     return (
       <span className="inline-flex items-center gap-1.5 text-emerald text-xs">
-        <Check className="size-3" /> Prêt
+        <Check className="size-3" /> {t("node.status.ready")}
       </span>
     );
   }
   if (status === "error") {
     return (
       <span className="inline-flex items-center gap-1.5 text-destructive text-xs">
-        <AlertTriangle className="size-3" /> Échec
+        <AlertTriangle className="size-3" /> {t("node.status.error")}
       </span>
     );
   }
-  return <span className="text-xs text-muted-foreground">En attente</span>;
+  return <span className="text-xs text-muted-foreground">{t("node.status.idle")}</span>;
 }
 
 function PortPill({ label, types }: { label: string; types: string[] }) {
@@ -318,6 +322,7 @@ function ParamField({
   onChange: (key: string, v: unknown) => void;
   disabled?: boolean;
 }) {
+  const t = useT();
   if (p.kind === "prompt") {
     const v = (value["prompt"] as string | undefined) ?? "";
     return (
@@ -344,7 +349,7 @@ function ParamField({
             !disabled && "hover:border-amber/40 cursor-pointer",
           )}
         >
-          {p.multiple ? "Glisse des fichiers ou clique" : "Glisse un fichier ou clique"}
+          {p.multiple ? t("inspector.drag_multi") : t("inspector.drag_single")}
           <input type="file" className="hidden" accept={p.accepts} multiple={p.multiple} disabled={disabled} />
         </label>
       </div>
@@ -409,7 +414,7 @@ function ParamField({
         <Input
           value={v}
           onChange={(e) => onChange("seed", e.target.value)}
-          placeholder="aléatoire"
+          placeholder={t("inspector.seed_placeholder")}
           disabled={disabled}
           className="font-mono"
         />
@@ -428,6 +433,7 @@ function ResultPreview({
   result: NonNullable<ReturnType<typeof useCanvasStore.getState>["nodes"][number]["data"]["result"]>;
   priceUSD: number;
 }) {
+  const t = useT();
   return (
     <div className="rounded-xl border border-border bg-surface-0/40 overflow-hidden">
       {category === "image" && result.kind === "image" && (
@@ -447,7 +453,7 @@ function ResultPreview({
             <Play className="size-3.5 fill-current" />
           </div>
           <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-            Voix prête
+            {t("inspector.voix_ready")}
           </div>
         </div>
       )}
@@ -458,7 +464,7 @@ function ResultPreview({
       )}
       <div className="flex items-center justify-between px-3 py-2 border-t border-border">
         <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-muted-foreground">
-          Facturé
+          {t("inspector.billed")}
         </span>
         <div className="flex items-center gap-2">
           <PriceDisplay usd={priceUSD} className="text-xs" emphasize />
@@ -466,7 +472,7 @@ function ResultPreview({
             type="button"
             className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-[10px] hover:border-amber/40 transition"
           >
-            <Download className="size-2.5" /> Télécharger
+            <Download className="size-2.5" /> {t("inspector.download")}
           </button>
         </div>
       </div>

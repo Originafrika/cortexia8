@@ -7,6 +7,7 @@ import { X, RefreshCw, Search, Copy, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getHistory, type HistoryItem } from "@/lib/api/history";
 import { loadSession } from "@/lib/auth-store";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/app/history")({
   component: HistoryPage,
@@ -25,30 +26,31 @@ type DisplayItem = {
 };
 
 const TINTS = ["#3d2a1e", "#2a1e3d", "#1e3d2a", "#3d1e2a", "#2a3d1e", "#1e2a3d"];
-const CATS: { key: ModelCategory | "all"; label: string }[] = [
-  { key: "all", label: "Tout" },
-  { key: "image", label: "Image" },
-  { key: "video", label: "Vidéo" },
-  { key: "audio", label: "Voix" },
-  { key: "text", label: "Texte" },
-];
 
-function formatRelative(dateStr: string): string {
+function formatRelative(dateStr: string, t: (key: string) => string): string {
   if (!dateStr) return "";
   const d = new Date(dateStr);
   const now = Date.now();
   const diffMs = now - d.getTime();
   const diffMin = Math.floor(diffMs / 60000);
-  if (diffMin < 1) return "à l'instant";
-  if (diffMin < 60) return `il y a ${diffMin}m`;
+  if (diffMin < 1) return t("time.now");
+  if (diffMin < 60) return t("time.minutes").replace("{n}", String(diffMin));
   const diffH = Math.floor(diffMin / 60);
-  if (diffH < 24) return `il y a ${diffH}h`;
+  if (diffH < 24) return t("time.hours").replace("{n}", String(diffH));
   const diffD = Math.floor(diffH / 24);
-  if (diffD < 30) return `il y a ${diffD}j`;
+  if (diffD < 30) return t("time.days").replace("{n}", String(diffD));
   return d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
 }
 
 function HistoryPage() {
+  const t = useT();
+  const CATS: { key: ModelCategory | "all"; label: string }[] = [
+    { key: "all", label: t("cat.all") },
+    { key: "image", label: t("cat.image") },
+    { key: "video", label: t("cat.video") },
+    { key: "audio", label: t("cat.audio") },
+    { key: "text", label: t("cat.text") },
+  ];
   const [items, setItems] = useState<DisplayItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<DisplayItem | null>(null);
@@ -67,7 +69,7 @@ function HistoryPage() {
             id: item.id,
             model,
             prompt: item.prompt,
-            date: formatRelative(item.date),
+            date: formatRelative(item.date, t),
             cost: item.cost || basePrice(model) * (model.unit === "second" ? 5 : 1),
             ratio: item.modelCategory === "video" ? "aspect-[9/16]" : item.modelCategory === "audio" ? "aspect-[4/3]" : "aspect-square",
             tint: TINTS[i % TINTS.length],
@@ -117,13 +119,13 @@ function HistoryPage() {
       <div className="mb-8 grid gap-4 sm:flex sm:items-end sm:justify-between">
         <div className="min-w-0">
           <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-            Historique
+            {t("history.title")}
           </div>
-          <h1 className="mt-2 font-display text-4xl tracking-[-0.03em]">Tout ce que tu as créé.</h1>
+          <h1 className="mt-2 font-display text-4xl tracking-[-0.03em]">{t("history.subtitle")}</h1>
           <p className="mt-2 text-muted-foreground text-sm">
             {loading
-              ? "Chargement…"
-              : `${filtered.length} génération${filtered.length > 1 ? "s" : ""} · ${items.length} au total`}
+              ? t("history.loading")
+              : `${filtered.length === 1 ? t("history.count_one") : t("history.count_many").replace("{n}", String(filtered.length))} · ${items.length} ${t("history.count_total")}`}
           </p>
         </div>
         <div className="relative">
@@ -131,7 +133,7 @@ function HistoryPage() {
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Rechercher un prompt, un modèle…"
+            placeholder={t("history.search")}
             className="w-full sm:w-72 rounded-full border border-border bg-surface-1/70 pl-9 pr-4 py-2 text-sm focus:border-amber/40 outline-none"
           />
         </div>
@@ -157,14 +159,14 @@ function HistoryPage() {
         ))}
         <div className="ml-auto flex items-center gap-2">
           <label className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-            Modèle
+            {t("history.model")}
           </label>
           <select
             value={modelSlug}
             onChange={(e) => setModelSlug(e.target.value)}
             className="rounded-full border border-border bg-surface-1/70 px-3 py-1.5 text-xs focus:border-amber/40 outline-none max-w-[200px]"
           >
-            <option value="all">Tous</option>
+            <option value="all">{t("history.all")}</option>
             {modelOptions
               .filter((m) => cat === "all" || m.category === cat)
               .map((m) => (
@@ -178,13 +180,13 @@ function HistoryPage() {
 
       {loading ? (
         <div className="mt-16 text-center text-muted-foreground">
-          <div className="font-display text-2xl mb-2">Chargement…</div>
-          <div className="text-sm">Récupération de l'historique.</div>
+          <div className="font-display text-2xl mb-2">{t("history.loading")}</div>
+          <div className="text-sm">{t("history.loading_sub")}</div>
         </div>
       ) : filtered.length === 0 ? (
         <div className="mt-16 text-center text-muted-foreground">
-          <div className="font-display text-2xl mb-2">Rien à afficher.</div>
-          <div className="text-sm">Ajuste les filtres ou lance une nouvelle génération.</div>
+          <div className="font-display text-2xl mb-2">{t("history.empty")}</div>
+          <div className="text-sm">{t("history.empty_desc")}</div>
         </div>
       ) : (
         <div className="columns-2 md:columns-3 lg:columns-4 gap-3 [column-fill:_balance]">
@@ -244,7 +246,7 @@ function HistoryPage() {
             >
               <div className="sticky top-0 flex items-center justify-between p-4 border-b border-border bg-surface-1/95 backdrop-blur">
                 <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-                  Détail
+                  {t("history.detail")}
                 </div>
                 <button
                   onClick={() => setSelected(null)}
@@ -267,18 +269,18 @@ function HistoryPage() {
               </div>
               <div className="px-4 pb-6">
                 <div className="flex items-center justify-between">
-                  <div className="text-xs text-muted-foreground">Prompt</div>
+                  <div className="text-xs text-muted-foreground">{t("history.prompt")}</div>
                   <button
                     onClick={() => copyPrompt(selected.prompt)}
                     className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground"
                   >
                     {copied ? (
                       <>
-                        <Check className="size-3 text-emerald" /> Copié
+                        <Check className="size-3 text-emerald" /> {t("history.copied")}
                       </>
                     ) : (
                       <>
-                        <Copy className="size-3" /> Copier
+                        <Copy className="size-3" /> {t("history.copy")}
                       </>
                     )}
                   </button>
@@ -286,29 +288,29 @@ function HistoryPage() {
                 <div className="mt-1 text-foreground/90 leading-relaxed">{selected.prompt}</div>
                 <div className="mt-6 grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <div className="text-xs text-muted-foreground">Modèle</div>
+                    <div className="text-xs text-muted-foreground">{t("history.model")}</div>
                     <div className="mt-1">{selected.model.name}</div>
                     <div className="text-[11px] text-muted-foreground font-mono">
                       {selected.model.provider}
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs text-muted-foreground">Coût</div>
+                    <div className="text-xs text-muted-foreground">{t("history.cost")}</div>
                     <div className="mt-1">
                       <PriceDisplay usd={selected.cost} emphasize />
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs text-muted-foreground">Date</div>
+                    <div className="text-xs text-muted-foreground">{t("history.date")}</div>
                     <div className="mt-1">{selected.date}</div>
                   </div>
                   <div>
-                    <div className="text-xs text-muted-foreground">Catégorie</div>
+                    <div className="text-xs text-muted-foreground">{t("history.category")}</div>
                     <div className="mt-1 capitalize">{selected.model.category}</div>
                   </div>
                 </div>
                 <button className="mt-6 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber px-4 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-95 transition">
-                  <RefreshCw className="size-4" /> Régénérer avec ces paramètres
+                  <RefreshCw className="size-4" /> {t("history.regenerate")}
                 </button>
               </div>
             </motion.aside>

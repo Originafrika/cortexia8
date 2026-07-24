@@ -3,14 +3,15 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Wand2, Plus, Sparkles, ArrowRight } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
 const SUGGESTIONS = [
-  { label: "Pub", text: "Créer une publicité visuelle percutante avec image et voix off" },
-  { label: "UGC", text: "Générer un contenu UGC authentique pour les réseaux sociaux" },
-  { label: "Émission", text: "Concevoir un plan éditorial complet pour une émission" },
-  { label: "Film", text: "Créer un storyboard visuel pour un court-métrage" },
-  { label: "Teaser", text: "Produire un teaser vidéo court avec transitions et musique" },
-  { label: "Podcast", text: "Assembler un podcast avec intro musicale et narration" },
+  { key: "pub", text: "Créer une publicité visuelle percutante avec image et voix off" },
+  { key: "ugc", text: "Générer un contenu UGC authentique pour les réseaux sociaux" },
+  { key: "show", text: "Concevoir un plan éditorial complet pour une émission" },
+  { key: "film", text: "Créer un storyboard visuel pour un court-métrage" },
+  { key: "teaser", text: "Produire un teaser vidéo court avec transitions et musique" },
+  { key: "podcast", text: "Assembler un podcast avec intro musicale et narration" },
 ];
 
 type Props = {
@@ -19,6 +20,7 @@ type Props = {
 };
 
 export function EmptyStateCard({ onOpenAgent, onHighlightNodeAdd }: Props) {
+  const t = useT();
   const [input, setInput] = useState("");
 
   function handleAgent() {
@@ -39,10 +41,10 @@ export function EmptyStateCard({ onOpenAgent, onHighlightNodeAdd }: Props) {
             <Sparkles className="size-5" />
           </div>
           <h2 className="font-display text-xl tracking-[-0.02em] text-foreground">
-            Qu'est-ce que tu veux créer ?
+            {t("canvas.empty.title")}
           </h2>
           <p className="text-sm text-muted-foreground mt-1.5">
-            Décris ton idée ou choisis un use case pour commencer.
+            {t("canvas.empty.desc")}
           </p>
         </div>
 
@@ -56,7 +58,7 @@ export function EmptyStateCard({ onOpenAgent, onHighlightNodeAdd }: Props) {
                 handleAgent();
               }
             }}
-            placeholder="Décris ton pipeline…"
+            placeholder={t("canvas.empty.placeholder")}
             className="h-11 text-sm bg-surface-2/70 border-border/60"
           />
         </div>
@@ -64,7 +66,7 @@ export function EmptyStateCard({ onOpenAgent, onHighlightNodeAdd }: Props) {
         <div className="flex flex-wrap gap-1.5 mb-6">
           {SUGGESTIONS.map((s) => (
             <button
-              key={s.label}
+              key={s.key}
               type="button"
               onClick={() => setInput(s.text)}
               className={cn(
@@ -74,7 +76,7 @@ export function EmptyStateCard({ onOpenAgent, onHighlightNodeAdd }: Props) {
                 input === s.text && "border-amber/50 text-foreground bg-surface-2",
               )}
             >
-              {s.label}
+              {t(`canvas.empty.suggestion.${s.key}`)}
             </button>
           ))}
         </div>
@@ -87,7 +89,7 @@ export function EmptyStateCard({ onOpenAgent, onHighlightNodeAdd }: Props) {
             className="flex-1 h-10 bg-gradient-to-r from-amber to-amber-soft text-primary-foreground hover:opacity-90"
           >
             <Wand2 className="size-4" />
-            Laisser l'agent construire
+            {t("canvas.empty.agent")}
             <ArrowRight className="size-3.5 ml-auto" />
           </Button>
           <Button
@@ -97,7 +99,7 @@ export function EmptyStateCard({ onOpenAgent, onHighlightNodeAdd }: Props) {
             className="h-10"
           >
             <Plus className="size-4" />
-            Construire moi-même
+            {t("canvas.empty.manual")}
           </Button>
         </div>
       </div>

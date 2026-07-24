@@ -17,6 +17,7 @@ import {
 } from "@/lib/api/agent-conversations";
 import { applyAgentPlan, COST_CONFIRM_THRESHOLD, type AgentApplyResponse } from "@/lib/api/agent-apply";
 import { loadSession } from "@/lib/auth-store";
+import { useT } from "@/lib/i18n";
 
 const STORAGE_KEY_AGENT_MODEL = "cortexia-agent-model";
 const STORAGE_KEY_PERMISSION_MODE = "cortexia-agent-permission-mode";
@@ -36,6 +37,7 @@ type ConversationMessage = {
 };
 
 export function AgentPanel({ className, initialPrompt, workflowId }: { className?: string; initialPrompt?: string; workflowId?: number | null }) {
+  const t = useT();
   const [prompt, setPrompt] = useState(initialPrompt ?? "");
   const [busy, setBusy] = useState(false);
   const [log, setLog] = useState<{ text: string; tone: "info" | "ok" | "muted" | "warn" }[]>([]);
@@ -343,9 +345,9 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
             <Wand2 className="size-3.5" />
           </div>
           <div className="min-w-0">
-            <div className="text-sm font-medium">Agent builder</div>
+            <div className="text-sm font-medium">{t("agent.title")}</div>
             <div className="font-mono text-[9px] uppercase tracking-[0.22em] text-muted-foreground">
-              Décris · je construis
+              {t("agent.subtitle")}
             </div>
           </div>
         </div>
@@ -365,7 +367,7 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
             {/* Model Selector */}
             <div className="flex items-center gap-2">
               <label htmlFor="agent-model" className="text-xs text-muted-foreground whitespace-nowrap">
-                Modèle:
+                {t("agent.model")}
               </label>
               <select
                 id="agent-model"
@@ -385,7 +387,7 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
             {/* Permission Mode Selector */}
             <div className="flex items-center gap-2">
               <label htmlFor="permission-mode" className="text-xs text-muted-foreground whitespace-nowrap">
-                Permissions:
+                {t("agent.permissions")}
               </label>
               <select
                 id="permission-mode"
@@ -394,9 +396,9 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
                 disabled={busy}
                 className="flex-1 text-xs bg-surface-2 border border-border rounded-md px-2 py-1.5 text-foreground disabled:opacity-50"
               >
-                <option value="approve_each">Approuver chaque</option>
-                <option value="auto_run">Exécution auto</option>
-                <option value="auto_under_threshold">Auto sous seuil</option>
+                <option value="approve_each">{t("agent.approve_each")}</option>
+                <option value="auto_run">{t("agent.auto_run")}</option>
+                <option value="auto_under_threshold">{t("agent.auto_under_threshold")}</option>
               </select>
             </div>
 
@@ -404,7 +406,7 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               rows={3}
-              placeholder="Décris le pipeline que tu veux…"
+              placeholder={t("agent.placeholder")}
               disabled={busy}
               className="text-sm"
             />
@@ -418,11 +420,11 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
               >
                 {busy ? (
                   <>
-                    <Loader2 className="size-3.5 animate-spin" /> Construction…
+                    <Loader2 className="size-3.5 animate-spin" /> {t("agent.building")}
                   </>
                 ) : (
                   <>
-                    <Send className="size-3.5" /> Construire
+                    <Send className="size-3.5" /> {t("agent.build")}
                   </>
                 )}
               </Button>
@@ -430,7 +432,7 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
             {log.length === 0 && (
               <div className="pt-2 space-y-1.5">
                 <div className="font-mono text-[9px] uppercase tracking-[0.22em] text-muted-foreground">
-                  Exemples
+                  {t("agent.examples")}
                 </div>
                 {STARTERS.map((s) => (
                   <button
@@ -453,11 +455,11 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
               <div className="flex items-start gap-2 mb-3">
                 <AlertTriangle className="size-4 text-amber mt-0.5 shrink-0" />
                 <div className="text-xs text-foreground">
-                  <div className="font-medium mb-1">Confirmation requise</div>
+                  <div className="font-medium mb-1">{t("agent.confirm.title")}</div>
                   <div className="text-muted-foreground">
-                    Coût estimé: <span className="font-medium text-amber">${pendingOperations.estimatedCost.toFixed(4)}</span>
+                    {t("agent.confirm.cost")} <span className="font-medium text-amber">${pendingOperations.estimatedCost.toFixed(4)}</span>
                     <br />
-                    Seuil de confirmation: ${COST_CONFIRM_THRESHOLD}
+                    {t("agent.confirm.threshold")} ${COST_CONFIRM_THRESHOLD}
                     <br />
                     {pendingOperations.operations.length} opération(s) seront exécutées.
                   </div>
@@ -470,7 +472,7 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
                   size="sm"
                   className="flex-1"
                 >
-                  Appliquer
+                  {t("agent.confirm.apply")}
                 </Button>
                 <Button
                   type="button"
@@ -478,7 +480,7 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
                   size="sm"
                   className="flex-1 bg-amber text-primary-foreground hover:bg-amber/90"
                 >
-                  Lancer
+                  {t("agent.confirm.launch")}
                 </Button>
                 <Button
                   type="button"
@@ -487,7 +489,7 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
                   variant="outline"
                   className="flex-1"
                 >
-                  Annuler
+                  {t("agent.confirm.cancel")}
                 </Button>
               </div>
             </div>
@@ -496,7 +498,7 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
           {log.length > 0 && (
             <div className="flex-1 min-h-0 overflow-y-auto border-t border-border px-4 py-3 space-y-1.5">
               <div className="font-mono text-[9px] uppercase tracking-[0.22em] text-muted-foreground sticky top-0 bg-surface-1/95 backdrop-blur py-1 -mt-1">
-                Journal
+                {t("agent.journal")}
               </div>
               {log.map((l, i) => (
                 <div
@@ -526,8 +528,10 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
 
           <div className="px-4 py-2 border-t border-border text-[10px] text-muted-foreground">
             {nodes.length === 0
-              ? "Canvas vide. Décris ton pipeline pour le peupler."
-              : `${nodes.length} nœud${nodes.length > 1 ? "s" : ""} sur le canvas.`}
+              ? t("agent.empty_canvas")
+              : nodes.length === 1
+                ? t("agent.node_count").replace("{count}", String(nodes.length))
+                : t("agent.node_count_plural").replace("{count}", String(nodes.length))}
           </div>
         </div>
       )}

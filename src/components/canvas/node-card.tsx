@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { Image as ImageIcon, Film, Music2, MessageSquare, Loader2, Check, AlertTriangle, Play, Sparkles, RefreshCw, PlayCircle } from "lucide-react";
 import { PriceDisplay } from "@/components/price-display";
 import type { ModelCategory } from "@/lib/models";
+import { useT } from "@/lib/i18n";
 
 const CATEGORY_ICON: Record<ModelCategory, typeof ImageIcon> = {
   image: ImageIcon,
@@ -16,6 +17,7 @@ const CATEGORY_ICON: Record<ModelCategory, typeof ImageIcon> = {
 };
 
 export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
+  const t = useT();
   const accent = categoryAccent(data.category);
   const ports = portsForCategory(data.category);
   const readOnly = useCanvasStore((s) => s.readOnly);
@@ -161,7 +163,7 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
                 title="Exécuter ce nœud et tous les nœuds en aval"
                 className="inline-flex items-center gap-1 rounded-full bg-sky-600/90 px-2 py-1 text-[10px] font-medium text-primary-foreground hover:bg-sky-600 disabled:opacity-50 transition"
               >
-                <PlayCircle className="size-2.5" /> Depuis ici
+                <PlayCircle className="size-2.5" /> {t("node.action.from_here")}
               </button>
               <button
                 onClick={(e) => {
@@ -172,14 +174,14 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
                 title="Relancer ce nœud et ses dépendances"
                 className="inline-flex items-center gap-1 rounded-full bg-emerald/90 px-2 py-1 text-[10px] font-medium text-primary-foreground hover:bg-emerald disabled:opacity-50 transition"
               >
-                <RefreshCw className="size-2.5" /> Relancer
+                <RefreshCw className="size-2.5" /> {t("node.action.rerun")}
               </button>
             </div>
           </div>
         ) : err ? (
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-1.5 text-[11px] text-amber-soft">
-              <AlertTriangle className="size-3" /> Échec
+              <AlertTriangle className="size-3" /> {t("node.status.error")}
             </div>
             <div className="flex gap-1 shrink-0">
               <button
@@ -191,7 +193,7 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
                 title="Exécuter ce nœud et tous les nœuds en aval"
                 className="inline-flex items-center gap-1 rounded-full bg-sky-600/90 px-2 py-1 text-[10px] font-medium text-primary-foreground hover:bg-sky-600 disabled:opacity-50 transition"
               >
-                <PlayCircle className="size-2.5" /> Depuis ici
+                <PlayCircle className="size-2.5" /> {t("node.action.from_here")}
               </button>
               <button
                 onClick={(e) => {
@@ -202,14 +204,14 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
                 title="Relancer ce nœud et ses dépendances"
                 className="inline-flex items-center gap-1 rounded-full bg-emerald/90 px-2 py-1 text-[10px] font-medium text-primary-foreground hover:bg-emerald disabled:opacity-50 transition"
               >
-                <RefreshCw className="size-2.5" /> Relancer
+                <RefreshCw className="size-2.5" /> {t("node.action.rerun")}
               </button>
             </div>
           </div>
         ) : (
           <div className="flex items-center justify-between text-[11px] text-muted-foreground">
             <span className="flex items-center gap-1.5">
-              <Sparkles className="size-3" /> Prêt
+              <Sparkles className="size-3" /> {t("node.status.ready")}
             </span>
             <div className="flex gap-1">
               <button
@@ -221,7 +223,7 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
                 title="Exécuter ce nœud et tous les nœuds en aval"
                 className="inline-flex items-center gap-1 rounded-full bg-sky-600/90 px-2 py-0.5 text-[10px] font-medium text-primary-foreground hover:bg-sky-600 disabled:opacity-50 transition"
               >
-                <PlayCircle className="size-2.5" /> Depuis ici
+                <PlayCircle className="size-2.5" /> {t("node.action.from_here")}
               </button>
               <button
                 onClick={(e) => {
@@ -231,7 +233,7 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
                 disabled={readOnly}
                 className="inline-flex items-center gap-1 rounded-full bg-amber/90 px-2 py-0.5 text-[10px] font-medium text-primary-foreground hover:bg-amber disabled:opacity-50 transition"
               >
-                <Play className="size-2.5" /> Lancer
+                <Play className="size-2.5" /> {t("node.action.run")}
               </button>
             </div>
           </div>
@@ -243,12 +245,12 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
         <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-muted-foreground">
           {data.status === "done" ? (
             <span className="inline-flex items-center gap-1 text-emerald">
-              <Check className="size-2.5" /> Prêt
+              <Check className="size-2.5" /> {t("node.status.ready")}
             </span>
           ) : data.status === "running" ? (
-            <span className="text-amber-soft">En cours</span>
+            <span className="text-amber-soft">{t("node.status.running")}</span>
           ) : (
-            "En attente"
+            t("node.status.idle")
           )}
         </span>
         <PriceDisplay
@@ -268,6 +270,7 @@ function ResultPreview({
   category: ModelCategory;
   result: NonNullable<CanvasNode["data"]["result"]>;
 }) {
+  const t = useT();
   if (category === "image" && result.kind === "image") {
     return (
       <div className="rounded-lg overflow-hidden border border-border bg-surface-0/40 aspect-video">
@@ -297,7 +300,7 @@ function ResultPreview({
         <div className="grid place-items-center size-6 rounded-full bg-emerald/20 text-emerald">
           <Music2 className="size-3" />
         </div>
-        <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Voix prête</div>
+        <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">{t("node.audio.ready")}</div>
         <div className="ml-auto flex items-end gap-[2px] h-3">
           {[0.4, 0.7, 1, 0.6, 0.9, 0.5, 0.8].map((h, i) => (
             <span
@@ -316,7 +319,7 @@ function ResultPreview({
         <div className="grid place-items-center size-6 rounded-full bg-orange-500/20 text-orange-400">
           <Music2 className="size-3" />
         </div>
-        <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Musique prête</div>
+        <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">{t("node.music.ready")}</div>
         <div className="ml-auto flex items-end gap-[2px] h-3">
           {[0.4, 0.7, 1, 0.6, 0.9, 0.5, 0.8].map((h, i) => (
             <span

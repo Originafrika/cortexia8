@@ -13,6 +13,7 @@ import { useCanvasStore } from "@/lib/canvas-store";
 import { Image as ImageIcon, Film, Music2, MessageSquare, Plus, Search } from "lucide-react";
 import { PriceDisplay } from "@/components/price-display";
 import { cn } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 
 const CATEGORY_ICON: Record<ModelCategory, typeof ImageIcon> = {
   image: ImageIcon,
@@ -43,6 +44,7 @@ type Props = {
 };
 
 export function NodePicker({ variant = "toolbar", className, getPosition, open: controlledOpen, onOpenChange }: Props) {
+  const t = useT();
   const [internalOpen, setInternalOpen] = useState(false);
   const open = controlledOpen ?? internalOpen;
   const setOpen = onOpenChange ?? setInternalOpen;
@@ -64,7 +66,7 @@ export function NodePicker({ variant = "toolbar", className, getPosition, open: 
         )}
       >
         <span className="inline-flex items-center gap-2">
-          <Plus className="size-3.5" /> Ajouter un nœud
+          <Plus className="size-3.5" /> {t("node.picker.add_node")}
         </span>
       </button>
     );
@@ -80,13 +82,13 @@ export function NodePicker({ variant = "toolbar", className, getPosition, open: 
             className,
           )}
         >
-          <Plus className="size-4" /> Ajouter un modèle
+          <Plus className="size-4" /> {t("node.picker.add_model")}
         </button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl p-0 gap-0 overflow-hidden bg-surface-1/95 backdrop-blur border-border">
         <DialogHeader className="px-4 pt-4 pb-2">
           <DialogTitle className="text-sm font-mono uppercase tracking-[0.22em] text-muted-foreground">
-            Catalogue · ajoute un modèle au canvas
+            {t("node.picker.catalog")}
           </DialogTitle>
         </DialogHeader>
         <PickerBody onPick={() => setOpen(false)} getPosition={getPosition} />
@@ -102,6 +104,7 @@ function PickerBody({
   onPick: () => void;
   getPosition?: () => { x: number; y: number };
 }) {
+  const t = useT();
   const [q, setQ] = useState("");
   const addNode = useCanvasStore((s) => s.addNode);
 
@@ -137,7 +140,7 @@ function PickerBody({
             !m.name.toLowerCase().includes(q.toLowerCase()) &&
             !m.provider.toLowerCase().includes(q.toLowerCase()) &&
             !m.blurb.toLowerCase().includes(q.toLowerCase()),
-        ) && <CommandEmpty>Aucun modèle ne correspond.</CommandEmpty>}
+        ) && <CommandEmpty>{t("node.picker.empty")}</CommandEmpty>}
         {(Object.keys(grouped) as ModelCategory[]).map((cat) => {
           const list = grouped[cat];
           if (list.length === 0) return null;
@@ -148,7 +151,7 @@ function PickerBody({
               key={cat}
               heading={
                 <span className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.22em]">
-                  <Icon className="size-3" /> {CATEGORY_LABEL[cat]}
+                  <Icon className="size-3" /> {t(`node.category.${cat}`)}
                 </span>
               }
             >
