@@ -63,6 +63,7 @@ export type CanvasOp = CreateNodeOp | UpdateNodeOp | DeleteNodeOp | CreateEdgeOp
 
 type GraphOpsInput = {
   ops: CanvasOp[];
+  sessionToken?: string;
 };
 
 type SerializableResult = {
@@ -87,11 +88,11 @@ export const graphOps = createServerFn({ method: "POST" })
     if (!Array.isArray(data.ops)) {
       throw new HttpError(400, "ops must be an array");
     }
-    return data;
+    return { ops: data.ops, sessionToken: data.sessionToken };
   })
   .handler(async ({ data }) => {
     try {
-      const ctx = await getRequestContext();
+      const ctx = await getRequestContext(data.sessionToken);
       const userId = await requireUserId(ctx);
       return await applyOps(data, userId);
     } catch (err) {

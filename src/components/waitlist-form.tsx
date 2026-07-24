@@ -157,7 +157,7 @@ function ConfirmationCard({
   const t = useT();
   const displayRank = useCountUp(rank, 800);
   const [copied, setCopied] = useState(false);
-  const origin = typeof window !== "undefined" ? window.location.origin : "https://cortexia.ai";
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://cortexia.originafrika.online";
   const link = `${origin}/r/${referralCode}`;
 
   const recapKey = `waitlist.confirm.recap.${profession.toLowerCase()}`;

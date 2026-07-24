@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Plus, Workflow, Clock, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { listWorkflows, createWorkflow, type WorkflowListItem } from "@/lib/api/workflows";
+import { loadSession } from "@/lib/auth-store";
 
 export const Route = createFileRoute("/app/workflows")({
   component: WorkflowsPage,
@@ -30,7 +31,7 @@ function WorkflowsPage() {
   const [creating, setCreating] = useState(false);
 
   useEffect(() => {
-    listWorkflows({ data: undefined })
+    listWorkflows({ data: { sessionToken: loadSession()?.token } })
       .then(setWorkflows)
       .catch(() => setWorkflows([]))
       .finally(() => setLoading(false));
@@ -39,7 +40,7 @@ function WorkflowsPage() {
   async function handleCreate() {
     setCreating(true);
     try {
-      const { id } = await createWorkflow({ data: {} });
+      const { id } = await createWorkflow({ data: { sessionToken: loadSession()?.token } });
       navigate({ to: "/canvas/$id", params: { id: String(id) } });
     } catch {
       setCreating(false);

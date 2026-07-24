@@ -17,6 +17,7 @@ import { getRequestContext, HttpError, requireUserId, toJsonResponse, validateOr
 
 export type CreateWorkflowInput = {
   name?: string;
+  sessionToken?: string;
 };
 
 export type CreateWorkflowResponse = {
@@ -25,11 +26,11 @@ export type CreateWorkflowResponse = {
 
 export const createWorkflow = createServerFn({ method: "POST" })
   .validator((data: CreateWorkflowInput): CreateWorkflowInput => {
-    return data ?? {};
+    return { name: data?.name, sessionToken: data?.sessionToken };
   })
   .handler(async ({ data, headers }) => {
     try {
-      const ctx = await getRequestContext();
+      const ctx = await getRequestContext(data.sessionToken);
       const userId = await requireUserId(ctx);
       // CSRF: validate origin for state-changing endpoint.
       // NOTE: TanStack Start server functions do not expose raw request headers.
@@ -67,10 +68,10 @@ export type WorkflowListItem = {
 export type ListWorkflowsResponse = WorkflowListItem[];
 
 export const listWorkflows = createServerFn({ method: "GET" })
-  .validator((_data: void) => _data)
-  .handler(async () => {
+  .validator((_data: { sessionToken?: string } | void) => _data ?? {})
+  .handler(async ({ data }) => {
     try {
-      const ctx = await getRequestContext();
+      const ctx = await getRequestContext((data as { sessionToken?: string })?.sessionToken);
       const userId = await requireUserId(ctx);
 
       const rows = (await sql`
@@ -145,17 +146,18 @@ export type GetWorkflowResponse = {
 
 export type GetWorkflowInput = {
   workflowId: number;
+  sessionToken?: string;
 };
 
 export const getWorkflow = createServerFn({ method: "GET" })
   .validator((data: GetWorkflowInput): GetWorkflowInput => {
     if (!data || typeof data !== "object") throw new HttpError(400, "Invalid input");
     if (!Number.isInteger(data.workflowId)) throw new HttpError(400, "workflowId is required");
-    return data;
+    return { workflowId: data.workflowId, sessionToken: data.sessionToken };
   })
   .handler(async ({ data }) => {
     try {
-      const ctx = await getRequestContext();
+      const ctx = await getRequestContext(data.sessionToken);
       const userId = await requireUserId(ctx);
 
       // Fetch workflow
@@ -235,6 +237,7 @@ export const getWorkflow = createServerFn({ method: "GET" })
 
 export type DeleteWorkflowInput = {
   workflowId: number;
+  sessionToken?: string;
 };
 
 export type DeleteWorkflowResponse = {
@@ -245,11 +248,11 @@ export const deleteWorkflow = createServerFn({ method: "POST" })
   .validator((data: DeleteWorkflowInput): DeleteWorkflowInput => {
     if (!data || typeof data !== "object") throw new HttpError(400, "Invalid input");
     if (!Number.isInteger(data.workflowId)) throw new HttpError(400, "workflowId is required");
-    return data;
+    return { workflowId: data.workflowId, sessionToken: data.sessionToken };
   })
   .handler(async ({ data }) => {
     try {
-      const ctx = await getRequestContext();
+      const ctx = await getRequestContext(data.sessionToken);
       const userId = await requireUserId(ctx);
 
       // Verify ownership

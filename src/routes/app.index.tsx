@@ -19,6 +19,7 @@ import { useT } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { generate } from "@/lib/api/generate";
 import { generationStatus } from "@/lib/api/generation-status";
+import { loadSession } from "@/lib/auth-store";
 
 export const Route = createFileRoute("/app/")({
   component: AgentPage,
@@ -153,7 +154,7 @@ function AgentPage() {
     );
 
     try {
-      const res = await generate({ data: { modelSlug: model.slug, input: { prompt: promptText } } });
+      const res = await generate({ data: { modelSlug: model.slug, input: { prompt: promptText }, sessionToken: loadSession()?.token } });
 
       setTurns((ts) =>
         ts.map((t) =>

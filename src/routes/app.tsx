@@ -50,7 +50,7 @@ function AppLayout() {
   useEffect(() => {
     async function fetchBalance() {
       try {
-        const result = await getUserBalance({ data: {} });
+        const result = await getUserBalance({ data: { sessionToken: loadSession()?.token } });
         setBalance(result.balance);
       } catch {}
     }

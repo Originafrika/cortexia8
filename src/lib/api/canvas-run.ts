@@ -28,6 +28,7 @@ import { getRequestContext, HttpError, requireUserId, toJsonResponse } from "./a
 export type RunInput = {
   workflowId: number;
   rerunNodeId?: number;
+  sessionToken?: string;
 };
 
 export type RunResponse = {
@@ -59,11 +60,11 @@ export const runCanvas = createServerFn({ method: "POST" })
     if (!Number.isInteger(data.workflowId)) {
       throw new HttpError(400, "workflowId is required");
     }
-    return data;
+    return { workflowId: data.workflowId, rerunNodeId: data.rerunNodeId, sessionToken: data.sessionToken };
   })
   .handler(async ({ data }) => {
     try {
-      const ctx = await getRequestContext();
+      const ctx = await getRequestContext(data.sessionToken);
       const userId = await requireUserId(ctx);
       return await runCanvasImpl(data, userId);
     } catch (err) {

@@ -38,6 +38,7 @@ export type AgentApplyInput = {
   operations: AgentOp[];
   launch?: boolean;
   dryRun?: boolean;
+  sessionToken?: string;
 };
 
 export type AgentApplyResponse = {
@@ -59,7 +60,7 @@ export const applyAgentPlan = createServerFn({ method: "POST" })
     if (!Array.isArray(data.operations) || data.operations.length === 0) {
       throw new HttpError(400, "operations must be a non-empty array");
     }
-    return data;
+    return { ...data, sessionToken: data.sessionToken };
   })
   .handler(async ({ data }) => {
     try {
@@ -89,7 +90,7 @@ function estimateOperationsCost(operations: AgentOp[]): number {
 // ── Implementation ────────────────────────────────────────────────────────
 
 async function applyPlanImpl(input: AgentApplyInput): Promise<AgentApplyResponse> {
-  const ctx = await getRequestContext();
+  const ctx = await getRequestContext(input.sessionToken);
   const userId = await requireUserId(ctx);
 
   // 1. Verify workflow ownership

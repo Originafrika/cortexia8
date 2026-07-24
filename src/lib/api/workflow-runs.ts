@@ -35,6 +35,7 @@ export type WorkflowRun = {
 export type WorkflowRunsInput = {
   workflowId: number;
   limit?: number;
+  sessionToken?: string;
 };
 
 export type WorkflowRunsResponse = {
@@ -45,11 +46,11 @@ export const getWorkflowRuns = createServerFn({ method: "GET" })
   .validator((data: WorkflowRunsInput): WorkflowRunsInput => {
     if (!data || typeof data !== "object") throw new HttpError(400, "Invalid body");
     if (!Number.isInteger(data.workflowId)) throw new HttpError(400, "workflowId is required");
-    return data;
+    return { workflowId: data.workflowId, limit: data.limit, sessionToken: data.sessionToken };
   })
   .handler(async ({ data }) => {
     try {
-      const ctx = await getRequestContext();
+      const ctx = await getRequestContext(data.sessionToken);
       const userId = await requireUserId(ctx);
       const limit = Math.min(data.limit ?? 50, 100);
 

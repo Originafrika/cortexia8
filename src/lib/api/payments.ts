@@ -30,6 +30,7 @@ import { getRequestContext, HttpError, requireUserId, toJsonResponse } from "./a
 export type FedaPayVerifyInput = {
   transactionId: string;
   amount: number;
+  sessionToken?: string;
 };
 
 export type PaymentResponse = {
@@ -52,7 +53,7 @@ export const verifyFedaPayTransaction = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     try {
-      const ctx = await getRequestContext();
+      const ctx = await getRequestContext(data.sessionToken);
       const userId = await requireUserId(ctx);
       // CSRF: This is a state-changing POST. TanStack Start server functions do not
       // expose raw request headers. Primary CSRF defense: SameSite=Strict session cookies.
@@ -133,6 +134,7 @@ export type StripeCheckoutInput = {
   currency?: string;
   successUrl?: string;
   cancelUrl?: string;
+  sessionToken?: string;
 };
 
 export type StripeCheckoutResponse = {
@@ -152,7 +154,7 @@ export const createStripeCheckout = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     try {
-      const ctx = await getRequestContext();
+      const ctx = await getRequestContext(data.sessionToken);
       const userId = await requireUserId(ctx);
       // CSRF: This is a state-changing POST. TanStack Start server functions do not
       // expose raw request headers. Primary CSRF defense: SameSite=Strict session cookies.

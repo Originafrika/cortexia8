@@ -27,9 +27,9 @@ function parseCookies(header: string): Record<string, string> {
   return out;
 }
 
-export async function getRequestContext(_headers?: Headers): Promise<RequestContext> {
+export async function getRequestContext(sessionToken?: string): Promise<RequestContext> {
   // ── 1. Bearer API key (cx_…) ───────────────────────────────────────────
-  const headers = _headers ?? getEventHeaders();
+  const headers = getEventHeaders();
   if (headers) {
     const auth = headers.get("authorization") ?? headers.get("Authorization");
     if (auth?.toLowerCase().startsWith("bearer ")) {
@@ -51,7 +51,13 @@ export async function getRequestContext(_headers?: Headers): Promise<RequestCont
     }
   }
 
-  // ── 2. Cookie-based session (Better Auth / Neon Auth) ──────────────────
+  // ── 2. Explicit session token from client ──────────────────────────────
+  if (sessionToken) {
+    const session = await resolveSessionFromToken(sessionToken);
+    if (session) return session;
+  }
+
+  // ── 3. Cookie-based session (Better Auth / Neon Auth) ──────────────────
   const cookieToken = getSessionTokenFromCookie();
   if (cookieToken) {
     const session = await resolveSessionFromToken(cookieToken);

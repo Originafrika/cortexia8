@@ -50,6 +50,7 @@ export type GenerateInput = {
   workflowId?: number;
   /** When true, don't actually submit the task — useful for dry-runs. */
   dryRun?: boolean;
+  sessionToken?: string;
 };
 
 export type GenerateResponse = {
@@ -73,11 +74,11 @@ export const generate = createServerFn({ method: "POST" })
     if (!data.input || typeof data.input !== "object") {
       throw new HttpError(400, "input is required");
     }
-    return data;
+    return { ...data, sessionToken: data.sessionToken };
   })
   .handler(async ({ data }) => {
     try {
-      const ctx = await getRequestContext();
+      const ctx = await getRequestContext(data.sessionToken);
       const userId = await requireUserId(ctx);
       // CSRF: validate origin for state-changing endpoint.
       // NOTE: In TanStack Start server functions, request headers are not directly

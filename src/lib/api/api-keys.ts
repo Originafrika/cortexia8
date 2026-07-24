@@ -12,14 +12,14 @@ export type CreateKeyResult = {
 };
 
 export const createApiKey = createServerFn({ method: "POST" })
-  .validator((data: { name: string }) => {
+  .validator((data: { name: string; sessionToken?: string }) => {
     if (!data?.name || typeof data.name !== "string" || data.name.trim().length === 0) {
       throw new HttpError(400, "name is required");
     }
-    return { name: data.name.trim() };
+    return { name: data.name.trim(), sessionToken: data.sessionToken };
   })
   .handler(async ({ data }) => {
-    const ctx = await getRequestContext();
+    const ctx = await getRequestContext(data.sessionToken);
     if (ctx.userId == null) {
       throw new HttpError(401, "Authentication required");
     }
@@ -65,8 +65,9 @@ export type ApiKeyRow = {
 };
 
 export const listApiKeys = createServerFn({ method: "GET" })
-  .handler(async () => {
-    const ctx = await getRequestContext();
+  .validator((data: { sessionToken?: string }) => data ?? {})
+  .handler(async ({ data }) => {
+    const ctx = await getRequestContext(data.sessionToken);
     if (ctx.userId == null) {
       throw new HttpError(401, "Authentication required");
     }
@@ -103,12 +104,12 @@ export const listApiKeys = createServerFn({ method: "GET" })
 // ── Revoke API Key ────────────────────────────────────────────────────────
 
 export const revokeApiKey = createServerFn({ method: "POST" })
-  .validator((data: { keyId: number }) => {
+  .validator((data: { keyId: number; sessionToken?: string }) => {
     if (!data?.keyId) throw new HttpError(400, "keyId is required");
-    return { keyId: data.keyId };
+    return { keyId: data.keyId, sessionToken: data.sessionToken };
   })
   .handler(async ({ data }) => {
-    const ctx = await getRequestContext();
+    const ctx = await getRequestContext(data.sessionToken);
     if (ctx.userId == null) {
       throw new HttpError(401, "Authentication required");
     }

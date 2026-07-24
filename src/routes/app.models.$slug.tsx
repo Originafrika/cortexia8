@@ -26,6 +26,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import { generate } from "@/lib/api/generate";
 import { generationStatus } from "@/lib/api/generation-status";
+import { loadSession } from "@/lib/auth-store";
 
 export const Route = createFileRoute("/app/models/$slug")({
   loader: ({ params }) => {
@@ -176,7 +177,7 @@ export function ModelPlaygroundContent({
     const input: Record<string, unknown> = { ...state };
     if (prompt.trim()) input.prompt = prompt.trim();
 
-    generate({ modelSlug: model.slug, input })
+    generate({ modelSlug: model.slug, input, sessionToken: loadSession()?.token })
       .then((res) => {
         const newResult: Result = {
           id: res.runId.toString(),

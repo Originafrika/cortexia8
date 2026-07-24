@@ -17,6 +17,7 @@ import { getRequestContext, HttpError, requireUserId, toJsonResponse } from "./a
 
 export type CreateConversationInput = {
   workflowId: number;
+  sessionToken?: string;
 };
 
 export type CreateConversationResponse = {
@@ -27,11 +28,11 @@ export const createConversation = createServerFn({ method: "POST" })
   .validator((data: CreateConversationInput): CreateConversationInput => {
     if (!data || typeof data !== "object") throw new HttpError(400, "Invalid input");
     if (!Number.isInteger(data.workflowId)) throw new HttpError(400, "workflowId is required");
-    return data;
+    return { workflowId: data.workflowId, sessionToken: data.sessionToken };
   })
   .handler(async ({ data }) => {
     try {
-      const ctx = await getRequestContext();
+      const ctx = await getRequestContext(data.sessionToken);
       const userId = await requireUserId(ctx);
 
       const rows = (await sql`
@@ -56,6 +57,7 @@ export type SaveMessageInput = {
   role: "user" | "assistant";
   content: string;
   proposedPlan?: any;
+  sessionToken?: string;
 };
 
 export type SaveMessageResponse = {
@@ -72,7 +74,7 @@ export const saveMessage = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     try {
-      const ctx = await getRequestContext();
+      const ctx = await getRequestContext(data.sessionToken);
       await requireUserId(ctx);
 
       const rows = (await sql`
@@ -94,6 +96,7 @@ export const saveMessage = createServerFn({ method: "POST" })
 
 export type GetConversationInput = {
   conversationId: number;
+  sessionToken?: string;
 };
 
 export type AgentMessageRow = {
@@ -114,11 +117,11 @@ export const getConversation = createServerFn({ method: "GET" })
   .validator((data: GetConversationInput): GetConversationInput => {
     if (!data || typeof data !== "object") throw new HttpError(400, "Invalid input");
     if (!Number.isInteger(data.conversationId)) throw new HttpError(400, "conversationId is required");
-    return data;
+    return { conversationId: data.conversationId, sessionToken: data.sessionToken };
   })
   .handler(async ({ data }) => {
     try {
-      const ctx = await getRequestContext();
+      const ctx = await getRequestContext(data.sessionToken);
       await requireUserId(ctx);
 
       // Fetch conversation
@@ -165,17 +168,18 @@ export const getConversation = createServerFn({ method: "GET" })
 
 export type GetByWorkflowInput = {
   workflowId: number;
+  sessionToken?: string;
 };
 
 export const getConversationByWorkflow = createServerFn({ method: "GET" })
   .validator((data: GetByWorkflowInput): GetByWorkflowInput => {
     if (!data || typeof data !== "object") throw new HttpError(400, "Invalid input");
     if (!Number.isInteger(data.workflowId)) throw new HttpError(400, "workflowId is required");
-    return data;
+    return { workflowId: data.workflowId, sessionToken: data.sessionToken };
   })
   .handler(async ({ data }) => {
     try {
-      const ctx = await getRequestContext();
+      const ctx = await getRequestContext(data.sessionToken);
       await requireUserId(ctx);
 
       // Find latest conversation for this workflow

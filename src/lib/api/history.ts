@@ -13,6 +13,7 @@ import { HttpError, getRequestContext, requireUserId, toJsonResponse } from "./a
 
 export type HistoryInput = {
   limit?: number;
+  sessionToken?: string;
 };
 
 export type HistoryItem = {
@@ -34,11 +35,11 @@ export type HistoryResponse = {
 export const getHistory = createServerFn({ method: "GET" })
   .validator((data: HistoryInput): HistoryInput => {
     if (data && typeof data !== "object") throw new HttpError(400, "Invalid body");
-    return data ?? {};
+    return { limit: data?.limit, sessionToken: data?.sessionToken };
   })
   .handler(async ({ data }) => {
     try {
-      const ctx = await getRequestContext();
+      const ctx = await getRequestContext(data.sessionToken);
       const userId = await requireUserId(ctx);
       return await loadHistory(userId, data);
     } catch (err) {

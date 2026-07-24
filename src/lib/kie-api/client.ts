@@ -262,7 +262,7 @@ export function buildCallbackUrl(): string {
   if (!base) {
     throw new Error(
       "APP_URL is not set. Required to build the kie.ai callback URL. " +
-        "Set it to your public origin (e.g. https://app.cortexia.ai).",
+        "Set it to your public origin (e.g. https://cortexia.originafrika.online).",
     );
   }
   return `${base.replace(/\/+$/, "")}/api/webhooks/kie`;

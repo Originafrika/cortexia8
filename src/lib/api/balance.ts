@@ -3,7 +3,7 @@ import { sql } from "@/lib/db";
 import { getBalance } from "@/lib/credits";
 import { getRequestContext, HttpError, requireUserId, toJsonResponse } from "./auth";
 
-export type BalanceInput = Record<string, never>;
+export type BalanceInput = { sessionToken?: string };
 
 export type BalanceResponse = {
   balance: number;
@@ -12,11 +12,11 @@ export type BalanceResponse = {
 export const getUserBalance = createServerFn({ method: "GET" })
   .validator((data: BalanceInput): BalanceInput => {
     if (data && typeof data !== "object") throw new HttpError(400, "Invalid body");
-    return {};
+    return { sessionToken: data?.sessionToken };
   })
   .handler(async ({ data }) => {
     try {
-      const ctx = await getRequestContext();
+      const ctx = await getRequestContext(data.sessionToken);
       const userId = await requireUserId(ctx);
       const balance = await getBalance(userId);
       return { balance } as BalanceResponse;
@@ -37,11 +37,11 @@ export type TxRow = {
 export const getTransactionHistory = createServerFn({ method: "GET" })
   .validator((data: BalanceInput): BalanceInput => {
     if (data && typeof data !== "object") throw new HttpError(400, "Invalid body");
-    return {};
+    return { sessionToken: data?.sessionToken };
   })
   .handler(async ({ data }) => {
     try {
-      const ctx = await getRequestContext();
+      const ctx = await getRequestContext(data.sessionToken);
       const userId = await requireUserId(ctx);
       const rows = (await sql`
         SELECT id, amount, type, reference, created_at
