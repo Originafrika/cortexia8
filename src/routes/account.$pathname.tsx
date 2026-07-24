@@ -1,7 +1,14 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { AccountView } from "@neondatabase/auth-ui";
+import { loadSession } from "@/lib/auth-store";
 
 export const Route = createFileRoute("/account/$pathname")({
+  beforeLoad: ({ location }) => {
+    const session = loadSession();
+    if (!session) {
+      throw redirect({ to: "/auth/sign-in", search: { redirect: location.href } });
+    }
+  },
   component: Account,
 });
 

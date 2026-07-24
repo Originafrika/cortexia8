@@ -36,7 +36,7 @@ function mapRowToWallItem(row: AssetRow): WallItem {
   };
 
   if (kind === "video" || kind === "voice" || kind === "music") {
-    item.video = url;
+    item.video = row.storage_url;
   }
 
   if (kind === "voice" || kind === "music") {
@@ -58,7 +58,7 @@ function resolveKind(type: string): WallKind {
     case "audio":
       return "music";
     default:
-      return "image";
+      return type as WallKind;
   }
 }
 

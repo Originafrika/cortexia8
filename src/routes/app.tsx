@@ -1,4 +1,4 @@
-import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, redirect, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { SignedIn, RedirectToSignIn } from "@neondatabase/auth-ui";
 import { AmbientBackground } from "@/components/ambient-background";
@@ -22,6 +22,12 @@ import { getUserBalance } from "@/lib/api/balance";
 import { loadSession } from "@/lib/auth-store";
 
 export const Route = createFileRoute("/app")({
+  beforeLoad: ({ location }) => {
+    const session = loadSession();
+    if (!session) {
+      throw redirect({ to: "/auth/sign-in", search: { redirect: location.href } });
+    }
+  },
   head: () => ({
     meta: [{ title: "Cortexia — App" }, { name: "robots", content: "noindex,nofollow" }],
   }),
