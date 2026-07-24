@@ -178,22 +178,22 @@ function WallCard({ item, index, onOpen }: { item: WallItem; index: number; onOp
 
       {/* audio waveform card */}
       {(item.kind === "music" || item.kind === "voice") && item.audio && (
-        <div className="absolute inset-x-3 bottom-3 rounded-xl bg-black/50 backdrop-blur px-3 py-2.5 border border-white/10">
-          <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-white/70">
+        <div className="absolute inset-x-3 bottom-3 rounded-xl bg-foreground/50 backdrop-blur px-3 py-2.5 border border-border">
+          <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-background/70">
             <Waveform playing={hover} />
             <span className="ml-auto tabular">{item.audio.duration}</span>
           </div>
-          <div className="mt-1 text-xs text-white truncate">{item.audio.title}</div>
+          <div className="mt-1 text-xs text-background truncate">{item.audio.title}</div>
         </div>
       )}
 
       {/* gradient + kind badge */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/20 pointer-events-none" />
-      <div className="absolute top-3 left-3 flex items-center gap-1.5 rounded-full bg-black/50 backdrop-blur px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.2em] text-white/90 border border-white/10">
+      <div className="absolute top-3 left-3 flex items-center gap-1.5 rounded-full bg-foreground/50 backdrop-blur px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.2em] text-background/90 border border-border">
         <KindIcon className="size-3" />{item.kind}
       </div>
       <div className="absolute bottom-3 left-3 right-3 pointer-events-none">
-        <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/70">{item.model}</div>
+        <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-background/70">{item.model}</div>
       </div>
     </motion.button>
   );
@@ -217,7 +217,7 @@ function WallModal({ item, onClose }: { item: WallItem | null; onClose: () => vo
       {item && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 grid place-items-center bg-black/80 backdrop-blur-sm p-4" onClick={onClose}>
           <motion.div initial={{ opacity: 0, y: 12, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 8, scale: 0.98 }} transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }} onClick={(e) => e.stopPropagation()} className="relative w-full max-w-4xl max-h-[90vh] overflow-auto rounded-3xl border border-border bg-surface-1 shadow-2xl">
-            <button onClick={onClose} className="absolute top-3 right-3 z-10 grid place-items-center size-9 rounded-full bg-black/60 backdrop-blur text-white hover:bg-black/80 transition" aria-label="Fermer">
+            <button onClick={onClose} className="absolute top-3 right-3 z-10 grid place-items-center size-9 rounded-full bg-foreground/60 backdrop-blur text-background hover:bg-foreground/80 transition" aria-label="Fermer">
               <X className="size-4" />
             </button>
             <div className="relative bg-black">
@@ -268,9 +268,9 @@ export function WallPreview() {
               ) : (
                 <img src={item.image} alt="" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-              <div className="absolute top-1.5 left-1.5 grid place-items-center size-5 rounded-full bg-black/60 backdrop-blur border border-white/10">
-                <KindIcon className="size-2.5 text-white" />
+              <div className="absolute inset-0 bg-gradient-to-t from-foreground/50 to-transparent" />
+              <div className="absolute top-1.5 left-1.5 grid place-items-center size-5 rounded-full bg-foreground/60 backdrop-blur border border-border">
+                <KindIcon className="size-2.5 text-background" />
               </div>
             </motion.div>
           );

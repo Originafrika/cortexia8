@@ -13,10 +13,10 @@ export function AmbientBackground({ className }: { className?: string }) {
         className="absolute inset-0 opacity-[0.55] mesh-anim"
         style={{
           background: `
-            radial-gradient(60% 45% at 20% 20%, oklch(0.78 0.16 70 / 0.28), transparent 60%),
-            radial-gradient(50% 40% at 80% 10%, oklch(0.55 0.12 30 / 0.22), transparent 60%),
-            radial-gradient(70% 55% at 70% 90%, oklch(0.35 0.08 50 / 0.35), transparent 70%),
-            radial-gradient(40% 30% at 10% 90%, oklch(0.72 0.14 155 / 0.10), transparent 60%)
+            radial-gradient(60% 45% at 20% 20%, color-mix(in oklab, var(--amber) 28%, transparent), transparent 60%),
+            radial-gradient(50% 40% at 80% 10%, color-mix(in oklab, var(--amber-soft) 22%, transparent), transparent 60%),
+            radial-gradient(70% 55% at 70% 90%, color-mix(in oklab, var(--surface-3) 35%, transparent), transparent 70%),
+            radial-gradient(40% 30% at 10% 90%, color-mix(in oklab, var(--emerald) 10%, transparent), transparent 60%)
           `,
         }}
       />

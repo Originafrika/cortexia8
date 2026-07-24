@@ -134,7 +134,7 @@ function AccountPage() {
 
       <div className="grid gap-6 lg:grid-cols-[1fr,1.2fr]">
         {/* Credit card */}
-        <div className="relative aspect-[1.586/1] rounded-3xl overflow-hidden p-6 flex flex-col justify-between surface-gradient-border bg-[linear-gradient(135deg,oklch(0.22_0.05_60),oklch(0.14_0.02_50))]">
+        <div className="relative aspect-[1.586/1] rounded-3xl overflow-hidden p-6 flex flex-col justify-between surface-gradient-border bg-[linear-gradient(135deg,var(--surface-2),var(--background))]">
           <div className="absolute -top-20 -right-20 size-64 rounded-full bg-amber/20 blur-3xl" />
           <div className="relative z-10 flex items-start justify-between">
             <div>

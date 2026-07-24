@@ -524,7 +524,7 @@ function ResultBlock({ turn, onRefine }: { turn: Turn; onRefine: (chip: string) 
           </div>
         )}
         {!generating && turn.status === "done" && (
-          <div className="absolute top-3 left-3 rounded-full bg-black/50 backdrop-blur px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.22em] text-white/90">
+          <div className="absolute top-3 left-3 rounded-full bg-foreground/50 backdrop-blur px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.22em] text-background/90">
             Résultat prêt · {turn.model.name}
           </div>
         )}

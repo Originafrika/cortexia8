@@ -27,7 +27,7 @@ export const waitlist = pgTable(
   {
     id: serial("id").primaryKey(),
     email: text("email").notNull(),
-    profession: text("profession").notNull(),
+    profession: text("profession").nullable(),
     referral_code: text("referral_code").notNull(),
     referred_by: text("referred_by"),
     created_at: timestamp("created_at").defaultNow().notNull(),

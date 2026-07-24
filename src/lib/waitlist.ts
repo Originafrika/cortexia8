@@ -10,11 +10,11 @@ function generateReferralCode(email: string): string {
 }
 
 export const waitlistSignup = createServerFn({ method: "POST" })
-  .validator((d: { email: string; profession: string; referred_by?: string }) => {
+  .validator((d: { email: string; profession?: string | null; referred_by?: string }) => {
     if (!d.email || !d.email.includes("@")) throw new Error("Email invalide");
     const valid = ["Pub", "UGC", "Émission", "Film", "Autre"];
-    if (!valid.includes(d.profession)) throw new Error("Profession invalide");
-    return d;
+    if (d.profession && !valid.includes(d.profession)) throw new Error("Profession invalide");
+    return { ...d, profession: d.profession ?? null };
   })
   .handler(async ({ data }) => {
     const code = generateReferralCode(data.email);

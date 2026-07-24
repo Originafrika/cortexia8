@@ -12,7 +12,7 @@ import { useT } from "@/lib/i18n";
 import { getWaitlistCount } from "@/lib/waitlist";
 import { useQuery } from "@tanstack/react-query";
 import { LAUNCH_DATE } from "@/lib/launch";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, ArrowRight, Bot, Sliders } from "lucide-react";
 
@@ -46,6 +46,7 @@ function WaitlistLanding() {
       <SocialProofSection />
       <AccessSection />
       <FaqSection />
+      <RepeatedWaitlistCTA />
       <FooterSection />
     </div>
   );
@@ -497,5 +498,33 @@ function FooterSection() {
         </div>
       </div>
     </footer>
+  );
+}
+
+function RepeatedWaitlistCTA() {
+  const t = useT();
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+  return (
+    <section className="py-16 sm:py-24 border-t border-border bg-surface-0/40">
+      <div className="mx-auto max-w-3xl px-5 sm:px-8 text-center">
+        <div className="font-mono text-xs uppercase tracking-[0.22em] text-muted-foreground">
+          {t("waitlist.title")}
+        </div>
+        <h2 className="mt-4 font-display text-3xl sm:text-4xl tracking-[-0.03em]">
+          {t("waitlist.subtitle")}
+        </h2>
+        <p className="mt-4 text-foreground/75 max-w-xl mx-auto leading-relaxed">
+          {t("access.body")}
+        </p>
+        <button
+          onClick={scrollToTop}
+          className="mt-8 inline-flex items-center justify-center gap-2 rounded-xl bg-amber px-8 py-3.5 text-sm font-medium text-primary-foreground hover:opacity-95 transition"
+        >
+          {t("waitlist.cta")} <ArrowRight className="size-4" />
+        </button>
+      </div>
+    </section>
   );
 }

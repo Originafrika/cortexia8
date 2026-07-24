@@ -34,11 +34,11 @@ export function WaitlistForm() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!email || !profession) return;
+    if (!email) return;
     setStatus("loading");
     setErrorMsg("");
     try {
-      const result = await waitlistSignup({ data: { email, profession, referred_by: referredBy } });
+      const result = await waitlistSignup({ data: { email, profession: profession ?? "Autre", referred_by: referredBy } });
       setReferralCode(result.referral_code);
       setRank(result.id);
       setStatus("done");
@@ -61,7 +61,7 @@ export function WaitlistForm() {
             onSubmit={submit}
             className="surface-gradient-border rounded-2xl bg-surface-1/70 backdrop-blur-xl p-5 sm:p-6"
           >
-            <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+            <div className="font-mono text-xs uppercase tracking-[0.22em] text-muted-foreground">
               {t("waitlist.title")}
             </div>
             <p className="mt-2 text-sm text-muted-foreground">
@@ -103,7 +103,7 @@ export function WaitlistForm() {
               />
               <button
                 type="submit"
-                disabled={status === "loading" || !email || !profession}
+                disabled={status === "loading" || !email}
                 className="group inline-flex items-center justify-center gap-2 rounded-xl bg-amber px-5 py-3 text-sm font-medium text-primary-foreground disabled:opacity-40 hover:opacity-95 transition"
               >
                 {status === "loading" ? (
@@ -118,7 +118,10 @@ export function WaitlistForm() {
             </div>
 
 
-            <p className="mt-5 text-[11px] text-muted-foreground/80">{t("waitlist.no_spam")}</p>
+            <p className="mt-5 text-xs text-muted-foreground">{t("waitlist.no_spam")}</p>
+            {status !== "loading" && !email && (
+              <p className="mt-2 text-xs text-muted-foreground/70 italic">{t("waitlist.helper_email")}</p>
+            )}
           </motion.form>
         ) : status === "error" ? (
           <motion.div
@@ -130,19 +133,19 @@ export function WaitlistForm() {
             <div className="flex items-start gap-3">
               <AlertTriangle className="size-5 text-amber shrink-0 mt-0.5" />
               <div>
-                <div className="font-display text-lg">Une erreur est survenue</div>
+                <div className="font-display text-lg">{t("waitlist.error_title")}</div>
                 <p className="mt-1 text-sm text-muted-foreground">{errorMsg}</p>
                 <button
                   onClick={() => setStatus("idle")}
                   className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-amber px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-95 transition"
                 >
-                  Réessayer
+                  {t("waitlist.error_retry")}
                 </button>
               </div>
             </div>
           </motion.div>
         ) : (
-          <ConfirmationCard key="done" rank={rank} email={email} profession={profession!} referralCode={referralCode} />
+          <ConfirmationCard key="done" rank={rank} email={email} profession={profession ?? "Autre"} referralCode={referralCode} />
         )}
       </AnimatePresence>
     </div>

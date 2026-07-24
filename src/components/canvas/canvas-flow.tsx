@@ -86,7 +86,7 @@ export function CanvasFlow() {
         deleteKeyCode={isMobile ? null : ["Backspace", "Delete"]}
         defaultEdgeOptions={{
           animated: true,
-          style: { stroke: "oklch(0.78 0.16 70 / 0.55)", strokeWidth: 1.5 },
+          style: { stroke: "var(--ring)", strokeWidth: 1.5 },
         }}
         proOptions={{ hideAttribution: true }}
         fitView={nodes.length > 0}
@@ -99,7 +99,7 @@ export function CanvasFlow() {
           variant={BackgroundVariant.Dots}
           gap={24}
           size={1.2}
-          color="oklch(1 0 0 / 0.08)"
+          color="var(--border)"
         />
         <Controls
           position="bottom-left"
@@ -110,15 +110,15 @@ export function CanvasFlow() {
           position="bottom-right"
           pannable
           zoomable
-          maskColor="oklch(0.14 0.005 60 / 0.85)"
+          maskColor="color-mix(in oklab, var(--background) 85%, transparent)"
           nodeColor={(n) => {
             const cat = (n.data as CanvasNode["data"])?.category as ModelCategory | undefined;
             return cat ? MINIMAP_COLOR[cat] : "#888";
           }}
           nodeStrokeColor={() => "transparent"}
           style={{
-            background: "oklch(0.17 0.008 65 / 0.85)",
-            border: "1px solid oklch(1 0 0 / 0.08)",
+            background: "color-mix(in oklab, var(--surface-1) 85%, transparent)",
+            border: "1px solid var(--border)",
             borderRadius: 12,
             overflow: "hidden",
           }}

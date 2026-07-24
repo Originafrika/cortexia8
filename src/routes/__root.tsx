@@ -8,8 +8,10 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import { initTheme } from "../components/ui/theme-toggle";
 import { NeonAuthUIProvider } from "@neondatabase/auth-ui";
 import { authClient } from "../auth";
+import { Analytics } from "@vercel/analytics/react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -135,6 +137,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  useEffect(() => { initTheme(); }, []);
+
   return (
     <html lang="fr">
       <head>
@@ -143,6 +147,7 @@ function RootShell({ children }: { children: ReactNode }) {
       <body>
         {children}
         <Scripts />
+        <Analytics />
         <script src="https://cdn.fedapay.com/checkout.js?v=1.1.7" />
       </body>
     </html>

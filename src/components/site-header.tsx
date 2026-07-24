@@ -3,6 +3,7 @@ import { LocalePicker } from "./locale-picker";
 import { CountdownCompact } from "./editorial-countdown";
 import { LAUNCH_DATE, isWaitlist } from "@/lib/launch";
 import { useT } from "@/lib/i18n";
+import { ThemeToggle } from "./ui/theme-toggle";
 
 export function SiteHeader({ variant = "landing" }: { variant?: "landing" | "preview" }) {
   const t = useT();
@@ -34,6 +35,7 @@ export function SiteHeader({ variant = "landing" }: { variant?: "landing" | "pre
           )}
         </div>
         <div className="flex items-center gap-3">
+          <ThemeToggle />
           {variant === "preview" && (
             <Link
               to="/app"

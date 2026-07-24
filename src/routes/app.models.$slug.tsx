@@ -361,7 +361,7 @@ export function ModelPlaygroundContent({
                   style={
                     item.resultUrl
                       ? undefined
-                      : { background: `linear-gradient(135deg, #2a1e3d, oklch(0.14 0 0))` }
+                      : { background: `linear-gradient(135deg, var(--surface-2), var(--background))` }
                   }
                 >
                   {item.resultUrl && (
@@ -376,11 +376,11 @@ export function ModelPlaygroundContent({
                       <Loader2 className="size-4 animate-spin" />
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition" />
-                  <div className="absolute bottom-1.5 left-1.5 right-1.5 text-[9px] font-mono text-white/90 bg-black/60 backdrop-blur px-1.5 py-0.5 rounded truncate">
+                  <div className="absolute inset-0 bg-foreground/30 opacity-0 group-hover:opacity-100 transition" />
+                  <div                   className="absolute bottom-1.5 left-1.5 right-1.5 text-[9px] font-mono text-background/90 bg-foreground/60 backdrop-blur px-1.5 py-0.5 rounded truncate">
                     {item.prompt}
                   </div>
-                  <div className="absolute top-1.5 right-1.5 rounded-full bg-black/60 backdrop-blur px-1.5 py-0.5 text-[9px] font-mono text-white/80">
+                  <div className="absolute top-1.5 right-1.5 rounded-full bg-foreground/60 backdrop-blur px-1.5 py-0.5 text-[9px] font-mono text-background/80">
                     <PriceDisplay usd={item.cost} className="text-[9px]" />
                   </div>
                 </button>
@@ -819,7 +819,7 @@ function LoadingCard({ model, progress }: { model: Model; progress: number }) {
   return (
     <div className="surface-gradient-border rounded-2xl bg-surface-1/60 overflow-hidden">
       <div className="relative aspect-video max-h-[45dvh] grid place-items-center">
-        <div className="absolute inset-0 bg-[linear-gradient(115deg,transparent_20%,oklch(0.78_0.16_70_/_0.18)_50%,transparent_80%)] bg-[length:200%_100%] animate-[shimmer_1.6s_linear_infinite]" />
+        <div className="absolute inset-0 bg-[linear-gradient(115deg,transparent_20%,color-mix(in_oklab,var(--amber)_18%,transparent)_50%,transparent_80%)] bg-[length:200%_100%] animate-[shimmer_1.6s_linear_infinite]" />
         <div className="relative text-center">
           <Loader2 className="size-6 mx-auto text-amber animate-spin" />
           <div className="mt-3 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
@@ -872,7 +872,7 @@ function ActiveResultView({
           style={
             hasResult
               ? undefined
-              : { background: `linear-gradient(135deg, #2a1e3d, oklch(0.14 0 0))` }
+              : { background: `linear-gradient(135deg, var(--surface-2), var(--background))` }
           }
         >
           {hasResult && isImage && (
@@ -900,10 +900,10 @@ function ActiveResultView({
             </div>
           )}
           <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between gap-2">
-            <div className="rounded-full bg-black/60 backdrop-blur px-2 py-1 text-[10px] font-mono uppercase tracking-wider truncate">
+            <div className="rounded-full bg-foreground/60 backdrop-blur px-2 py-1 text-[10px] font-mono uppercase tracking-wider text-background/90 truncate">
               {result.model.category}
             </div>
-            <div className="rounded-full bg-black/60 backdrop-blur px-2 py-1 shrink-0">
+            <div className="rounded-full bg-foreground/60 backdrop-blur px-2 py-1 shrink-0 text-background/90">
               <PriceDisplay usd={result.cost} className="text-[10px]" />
             </div>
           </div>
@@ -1007,7 +1007,7 @@ function SimilarModels({ model }: { model: Model }) {
             key={m.slug}
             to="/app/models/$slug"
             params={{ slug: m.slug }}
-            className="group surface-gradient-border rounded-2xl bg-surface-1/60 backdrop-blur p-4 hover:bg-surface-1/80 transition-all hover:-translate-y-0.5 hover:shadow-[0_20px_60px_-20px_oklch(0.78_0.16_70_/_0.25)]"
+            className="group surface-gradient-border rounded-2xl bg-surface-1/60 backdrop-blur p-4 hover:bg-surface-1/80 transition-all hover:-translate-y-0.5 hover:shadow-[0_20px_60px_-20px_color-mix(in_oklab,var(--amber)_25%,transparent)]"
           >
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
