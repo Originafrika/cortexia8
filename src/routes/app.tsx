@@ -6,7 +6,6 @@ import { LocalePicker } from "@/components/locale-picker";
 import { PriceDisplay } from "@/components/price-display";
 import { OnboardingOverlay, useOnboarding } from "@/components/onboarding-overlay";
 import {
-  MessageSquare,
   LayoutGrid,
   History,
   Code2,
@@ -83,9 +82,8 @@ function AppShell({
   setOpen: (v: boolean) => void;
 }) {
   const NAV = [
-    { to: "/app", label: t("app.nav.agent"), icon: MessageSquare, exact: true },
-    { to: "/app/models", label: t("app.nav.models"), icon: LayoutGrid },
     { to: "/canvas", label: t("app.nav.canvas"), icon: Workflow },
+    { to: "/app/models", label: t("app.nav.models"), icon: LayoutGrid },
     { to: "/app/workflows", label: t("app.nav.workflows") || "Workflows", icon: ListTodo },
     { to: "/app/history", label: t("app.nav.history"), icon: History },
     { to: "/app/developers", label: t("app.nav.dev"), icon: Code2 },

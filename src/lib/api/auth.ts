@@ -1,11 +1,11 @@
 /**
  * Auth helper for API routes and TanStack Start server functions.
  *
- * Reads the Better Auth / Neon Auth session cookie via h3's getEvent()
- * to resolve the authenticated user on the server side.
+ * Reads the Better Auth / Neon Auth session cookie via TanStack Start's
+ * server utilities to resolve the authenticated user on the server side.
  */
 
-import { getEvent } from "h3";
+import { getRequestHeaders, getCookie } from "@tanstack/react-start/server";
 import { sql } from "@/lib/db";
 
 const SESSION_COOKIE = "better-auth.session_token";
@@ -63,13 +63,7 @@ export async function getRequestContext(_headers?: Headers): Promise<RequestCont
 
 function getEventHeaders(): Headers | null {
   try {
-    const event = getEvent();
-    const raw = event.node.req.headers;
-    const h = new Headers();
-    for (const [k, v] of Object.entries(raw)) {
-      if (v != null) h.set(k, Array.isArray(v) ? v.join(", ") : v);
-    }
-    return h;
+    return getRequestHeaders();
   } catch {
     return null;
   }
@@ -77,11 +71,7 @@ function getEventHeaders(): Headers | null {
 
 function getSessionTokenFromCookie(): string | null {
   try {
-    const event = getEvent();
-    const raw = event.node.req.headers.cookie;
-    if (!raw) return null;
-    const cookies = parseCookies(raw);
-    return cookies[SESSION_COOKIE] ?? null;
+    return getCookie(SESSION_COOKIE) ?? null;
   } catch {
     return null;
   }
