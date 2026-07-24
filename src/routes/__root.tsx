@@ -11,7 +11,6 @@ import { useEffect, type ReactNode } from "react";
 import { initTheme } from "../components/ui/theme-toggle";
 import { NeonAuthUIProvider } from "@neondatabase/auth-ui";
 import { authClient } from "../auth";
-import { Analytics } from "@vercel/analytics/react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -147,7 +146,6 @@ function RootShell({ children }: { children: ReactNode }) {
       <body>
         {children}
         <Scripts />
-        <Analytics />
         <script src="https://cdn.fedapay.com/checkout.js?v=1.1.7" />
       </body>
     </html>
