@@ -29,7 +29,7 @@ export const createWorkflow = createServerFn({ method: "POST" })
   })
   .handler(async ({ data, headers }) => {
     try {
-      const ctx = await getRequestContext(new Headers());
+      const ctx = await getRequestContext();
       const userId = await requireUserId(ctx);
       // CSRF: validate origin for state-changing endpoint.
       // NOTE: TanStack Start server functions do not expose raw request headers.
@@ -70,7 +70,7 @@ export const listWorkflows = createServerFn({ method: "GET" })
   .validator((_data: void) => _data)
   .handler(async () => {
     try {
-      const ctx = await getRequestContext(new Headers());
+      const ctx = await getRequestContext();
       const userId = await requireUserId(ctx);
 
       const rows = (await sql`
@@ -155,7 +155,7 @@ export const getWorkflow = createServerFn({ method: "GET" })
   })
   .handler(async ({ data }) => {
     try {
-      const ctx = await getRequestContext(new Headers());
+      const ctx = await getRequestContext();
       const userId = await requireUserId(ctx);
 
       // Fetch workflow
@@ -249,7 +249,7 @@ export const deleteWorkflow = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     try {
-      const ctx = await getRequestContext(new Headers());
+      const ctx = await getRequestContext();
       const userId = await requireUserId(ctx);
 
       // Verify ownership

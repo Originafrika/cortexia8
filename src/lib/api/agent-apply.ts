@@ -89,7 +89,7 @@ function estimateOperationsCost(operations: AgentOp[]): number {
 // ── Implementation ────────────────────────────────────────────────────────
 
 async function applyPlanImpl(input: AgentApplyInput): Promise<AgentApplyResponse> {
-  const ctx = await getRequestContext(new Headers());
+  const ctx = await getRequestContext();
   const userId = await requireUserId(ctx);
 
   // 1. Verify workflow ownership

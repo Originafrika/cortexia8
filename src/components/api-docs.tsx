@@ -5,8 +5,8 @@ const endpoints = [
   {
     method: "POST",
     path: "/v1/generate",
-    title: "Générer du contenu",
-    description: "Lance une génération d'image, vidéo ou audio selon le modèle choisi.",
+    title: "Generate content",
+    description: "Starts an image, video, or audio generation based on the chosen model.",
     headers: [
       { name: "Authorization", value: "Bearer cx_..." },
       { name: "Content-Type", value: "application/json" },
@@ -19,55 +19,136 @@ const endpoints = [
 }`,
     responseExample: `{
   "id": "gen_3x8kL2",
+  "object": "generation",
   "status": "completed",
+  "model": "seedream-5-pro",
   "url": "https://cdn.cortexia.ai/gen_3x8kL2.webp",
-  "cost": 0.04,
-  "model": "seedream-5-pro"
+  "cost": {
+    "amount": 0.04,
+    "currency": "USD"
+  },
+  "created_at": "2026-07-24T10:30:00Z"
 }`,
     errors: [
-      { code: 400, message: "Paramètres invalides ou manquants" },
-      { code: 401, message: "Clé API invalide ou absente" },
-      { code: 402, message: "Crédits insuffisants" },
-      { code: 429, message: "Limite de débit atteinte" },
+      { code: 400, message: "Invalid or missing parameters" },
+      { code: 401, message: "Invalid or missing API key" },
+      { code: 402, message: "Insufficient credits" },
+      { code: 429, message: "Rate limit exceeded" },
     ],
   },
   {
     method: "GET",
     path: "/v1/generations/:id",
-    title: "Vérifier le statut",
-    description: "Récupère le statut et le résultat d'une génération en cours ou terminée.",
+    title: "Check status",
+    description: "Retrieves the status and result of a generation in progress or completed.",
     headers: [{ name: "Authorization", value: "Bearer cx_..." }],
     requestBody: null,
     responseExample: `{
   "id": "gen_3x8kL2",
+  "object": "generation",
   "status": "completed",
+  "model": "seedream-5-pro",
   "url": "https://cdn.cortexia.ai/gen_3x8kL2.webp",
-  "cost": 0.04,
+  "cost": {
+    "amount": 0.04,
+    "currency": "USD"
+  },
   "created_at": "2026-07-24T10:30:00Z"
 }`,
     errors: [
-      { code: 404, message: "Génération introuvable" },
-      { code: 401, message: "Clé API invalide" },
+      { code: 404, message: "Generation not found" },
+      { code: 401, message: "Invalid API key" },
     ],
   },
   {
     method: "GET",
     path: "/v1/credits",
-    title: "Crédits restants",
-    description: "Retourne le solde de crédits disponible sur ton compte.",
+    title: "Credit balance",
+    description: "Returns the available credit balance on your account.",
     headers: [{ name: "Authorization", value: "Bearer cx_..." }],
     requestBody: null,
     responseExample: `{
-  "credits": 12.40,
-  "currency": "USD"
+  "credits": {
+    "amount": 12.40,
+    "currency": "USD"
+  }
 }`,
-    errors: [{ code: 401, message: "Clé API invalide" }],
+    errors: [{ code: 401, message: "Invalid API key" }],
+  },
+  {
+    method: "POST",
+    path: "/v1/workflows",
+    title: "Create workflow",
+    description: "Creates a new workflow definition composed of multiple generation steps.",
+    headers: [
+      { name: "Authorization", value: "Bearer cx_..." },
+      { name: "Content-Type", value: "application/json" },
+    ],
+    requestBody: `{
+  "name": "Brand Pack Generator",
+  "steps": [
+    {
+      "model": "seedream-5-pro",
+      "prompt": "Product shot of {{product_name}}",
+      "resolution": "1K"
+    }
+  ]
+}`,
+    responseExample: `{
+  "id": "wf_brand_pack",
+  "object": "workflow",
+  "name": "Brand Pack Generator",
+  "steps": 1,
+  "created_at": "2026-07-24T10:30:00Z"
+}`,
+    errors: [
+      { code: 400, message: "Invalid workflow definition" },
+      { code: 401, message: "Invalid API key" },
+    ],
+  },
+  {
+    method: "GET",
+    path: "/v1/workflows",
+    title: "List workflows",
+    description: "Returns all workflow definitions on your account.",
+    headers: [{ name: "Authorization", value: "Bearer cx_..." }],
+    requestBody: null,
+    responseExample: `{
+  "data": [
+    {
+      "id": "wf_brand_pack",
+      "object": "workflow",
+      "name": "Brand Pack Generator",
+      "steps": 1,
+      "created_at": "2026-07-24T10:30:00Z"
+    }
+  ],
+  "has_more": false
+}`,
+    errors: [{ code: 401, message: "Invalid API key" }],
+  },
+  {
+    method: "DELETE",
+    path: "/v1/workflows/:id",
+    title: "Delete workflow",
+    description: "Permanently deletes a workflow and its run history.",
+    headers: [{ name: "Authorization", value: "Bearer cx_..." }],
+    requestBody: null,
+    responseExample: `{
+  "id": "wf_brand_pack",
+  "object": "workflow",
+  "deleted": true
+}`,
+    errors: [
+      { code: 404, message: "Workflow not found" },
+      { code: 401, message: "Invalid API key" },
+    ],
   },
   {
     method: "POST",
     path: "/v1/workflows/run",
-    title: "Exécuter un workflow",
-    description: "Lance un workflow personnalisé composé de plusieurs étapes de génération.",
+    title: "Run workflow",
+    description: "Executes a custom workflow composed of multiple generation steps.",
     headers: [
       { name: "Authorization", value: "Bearer cx_..." },
       { name: "Content-Type", value: "application/json" },
@@ -81,14 +162,80 @@ const endpoints = [
 }`,
     responseExample: `{
   "id": "run_9mK4",
+  "object": "workflow_run",
+  "workflow_id": "wf_brand_pack",
   "status": "running",
-  "estimated_seconds": 12
+  "estimated_seconds": 12,
+  "created_at": "2026-07-24T10:30:00Z"
 }`,
     errors: [
-      { code: 400, message: "Workflow introuvable ou paramètres invalides" },
-      { code: 401, message: "Clé API invalide" },
-      { code: 402, message: "Crédits insuffisants pour ce workflow" },
+      { code: 400, message: "Workflow not found or invalid parameters" },
+      { code: 401, message: "Invalid API key" },
+      { code: 402, message: "Insufficient credits for this workflow" },
     ],
+  },
+  {
+    method: "GET",
+    path: "/v1/history",
+    title: "Generation history",
+    description: "Returns a paginated list of all generations on your account.",
+    headers: [{ name: "Authorization", value: "Bearer cx_..." }],
+    requestBody: null,
+    responseExample: `{
+  "data": [
+    {
+      "id": "gen_3x8kL2",
+      "object": "generation",
+      "status": "completed",
+      "model": "seedream-5-pro",
+      "prompt": "Un flacon ambré sur marbre travertin",
+      "url": "https://cdn.cortexia.ai/gen_3x8kL2.webp",
+      "cost": {
+        "amount": 0.04,
+        "currency": "USD"
+      },
+      "created_at": "2026-07-24T10:30:00Z"
+    }
+  ],
+  "has_more": false,
+  "total": 1
+}`,
+    errors: [{ code: 401, message: "Invalid API key" }],
+  },
+  {
+    method: "GET",
+    path: "/v1/credits/transactions",
+    title: "Credit transactions",
+    description: "Returns a paginated list of all credit transactions (charges, top-ups, refunds).",
+    headers: [{ name: "Authorization", value: "Bearer cx_..." }],
+    requestBody: null,
+    responseExample: `{
+  "data": [
+    {
+      "id": "txn_8pLm3",
+      "object": "credit_transaction",
+      "type": "charge",
+      "amount": -0.04,
+      "currency": "USD",
+      "description": "Generation gen_3x8kL2",
+      "balance_after": 12.36,
+      "created_at": "2026-07-24T10:30:05Z"
+    },
+    {
+      "id": "txn_7kNv9",
+      "object": "credit_transaction",
+      "type": "topup",
+      "amount": 20.00,
+      "currency": "USD",
+      "description": "Card payment ending 4242",
+      "balance_after": 12.40,
+      "created_at": "2026-07-24T09:00:00Z"
+    }
+  ],
+  "has_more": false,
+  "total": 2
+}`,
+    errors: [{ code: 401, message: "Invalid API key" }],
   },
 ] as const;
 
@@ -119,11 +266,11 @@ function CodeBlock({ children }: { children: string }) {
       >
         {copied ? (
           <>
-            <Check className="size-3 text-emerald" /> Copié
+            <Check className="size-3 text-emerald" /> Copied
           </>
         ) : (
           <>
-            <Copy className="size-3" /> Copier
+            <Copy className="size-3" /> Copy
           </>
         )}
       </button>
@@ -158,7 +305,7 @@ function EndpointCard({ ep }: { ep: (typeof endpoints)[number] }) {
 
           <div>
             <h4 className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">
-              Headers requis
+              Required Headers
             </h4>
             <CodeBlock>
               {ep.headers.map((h) => `${h.name}: ${h.value}`).join("\n")}
@@ -168,7 +315,7 @@ function EndpointCard({ ep }: { ep: (typeof endpoints)[number] }) {
           {ep.requestBody && (
             <div>
               <h4 className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">
-                Corps de la requête
+                Request Body
               </h4>
               <CodeBlock>{ep.requestBody}</CodeBlock>
             </div>
@@ -176,14 +323,14 @@ function EndpointCard({ ep }: { ep: (typeof endpoints)[number] }) {
 
           <div>
             <h4 className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">
-              Réponse
+              Response
             </h4>
             <CodeBlock>{ep.responseExample}</CodeBlock>
           </div>
 
           <div>
             <h4 className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">
-              Codes d'erreur
+              Error Codes
             </h4>
             <div className="space-y-1">
               {ep.errors.map((e) => (
@@ -207,29 +354,29 @@ export function ApiDocs() {
     <div className="space-y-8">
       {/* Authentication */}
       <div className="surface-gradient-border rounded-2xl bg-surface-1/60 p-6 space-y-4">
-        <h3 className="font-display text-2xl tracking-[-0.02em]">Authentification</h3>
+        <h3 className="font-display text-2xl tracking-[-0.02em]">Authentication</h3>
         <p className="text-sm text-muted-foreground max-w-2xl">
-          Toutes les requêtes API doivent inclure une clé API dans le header{" "}
-          <code className="rounded-md bg-surface-2 px-1.5 py-0.5 font-mono text-xs">Authorization</code>.
-          Utilise le format{" "}
+          All API requests must include an API key in the{" "}
+          <code className="rounded-md bg-surface-2 px-1.5 py-0.5 font-mono text-xs">Authorization</code>{" "}
+          header. Use the format{" "}
           <code className="rounded-md bg-surface-2 px-1.5 py-0.5 font-mono text-xs">
             Bearer cx_...
           </code>
-          . Tu peux créer et gérer tes clés dans la section ci-dessus.
+          . You can create and manage your keys in the section above.
         </p>
         <CodeBlock>{`Authorization: Bearer cx_tes_cle_api_ici`}</CodeBlock>
         <div className="rounded-xl border border-amber/30 bg-amber/5 p-3 flex items-start gap-2 text-xs text-amber-soft">
           <span className="shrink-0 mt-0.5">⚠</span>
           <span>
-            Ne jamais exposer ta clé API côté client. Utilise des variables d'environnement et
-            appelle l'API depuis un serveur sécurisé.
+            Never expose your API key on the client side. Use environment variables and
+            call the API from a secure server.
           </span>
         </div>
       </div>
 
       {/* Endpoints */}
       <div className="space-y-4">
-        <h3 className="font-display text-2xl tracking-[-0.02em]">Référence des endpoints</h3>
+        <h3 className="font-display text-2xl tracking-[-0.02em]">Endpoint Reference</h3>
         <div className="space-y-3">
           {endpoints.map((ep) => (
             <EndpointCard key={ep.method + ep.path} ep={ep} />
@@ -239,31 +386,31 @@ export function ApiDocs() {
 
       {/* Rate limits */}
       <div className="surface-gradient-border rounded-2xl bg-surface-1/60 p-6 space-y-4">
-        <h3 className="font-display text-2xl tracking-[-0.02em]">Limites de débit</h3>
+        <h3 className="font-display text-2xl tracking-[-0.02em]">Rate Limits</h3>
         <div className="space-y-3 text-sm text-muted-foreground">
           <div className="flex items-center gap-3">
             <code className="rounded-md bg-surface-2 px-1.5 py-0.5 font-mono text-xs font-bold">
               60
             </code>
-            <span>requêtes par minute par clé API</span>
+            <span>requests per minute per API key</span>
           </div>
           <div className="flex items-center gap-3">
             <code className="rounded-md bg-surface-2 px-1.5 py-0.5 font-mono text-xs font-bold">
               10
             </code>
-            <span>générations simultanées par compte</span>
+            <span>concurrent generations per account</span>
           </div>
           <div className="flex items-center gap-3">
             <code className="rounded-md bg-surface-2 px-1.5 py-0.5 font-mono text-xs font-bold">
               100 MB
             </code>
-            <span>taille maximale pour les fichiers de référence</span>
+            <span>maximum file size for reference files</span>
           </div>
         </div>
         <p className="text-xs text-muted-foreground">
-          Les headers <code className="font-mono">X-RateLimit-Remaining</code> et{" "}
-          <code className="font-mono">X-RateLimit-Reset</code> sont inclus dans chaque réponse.
-          En cas de dépassement, l'API renvoie un{" "}
+          The <code className="font-mono">X-RateLimit-Remaining</code> and{" "}
+          <code className="font-mono">X-RateLimit-Reset</code> headers are included in every response.
+          When exceeded, the API returns a{" "}
           <code className="font-mono text-red">429 Too Many Requests</code>.
         </p>
       </div>

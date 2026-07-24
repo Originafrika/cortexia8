@@ -49,7 +49,7 @@ export const getWorkflowRuns = createServerFn({ method: "GET" })
   })
   .handler(async ({ data }) => {
     try {
-      const ctx = await getRequestContext(new Headers());
+      const ctx = await getRequestContext();
       const userId = await requireUserId(ctx);
       const limit = Math.min(data.limit ?? 50, 100);
 

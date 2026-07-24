@@ -6,7 +6,7 @@ export const checkUserRole = createServerFn({ method: "GET" })
   .validator((_data: void) => _data)
   .handler(async ({ data }) => {
     try {
-      const ctx = await getRequestContext(new Headers());
+      const ctx = await getRequestContext();
       const userId = await requireUserId(ctx);
       const role = await getUserRole(String(userId));
       return { role };

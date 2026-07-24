@@ -52,7 +52,7 @@ export const verifyFedaPayTransaction = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     try {
-      const ctx = await getRequestContext(new Headers());
+      const ctx = await getRequestContext();
       const userId = await requireUserId(ctx);
       // CSRF: This is a state-changing POST. TanStack Start server functions do not
       // expose raw request headers. Primary CSRF defense: SameSite=Strict session cookies.
@@ -152,7 +152,7 @@ export const createStripeCheckout = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     try {
-      const ctx = await getRequestContext(new Headers());
+      const ctx = await getRequestContext();
       const userId = await requireUserId(ctx);
       // CSRF: This is a state-changing POST. TanStack Start server functions do not
       // expose raw request headers. Primary CSRF defense: SameSite=Strict session cookies.

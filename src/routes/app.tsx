@@ -15,11 +15,19 @@ import {
   HelpCircle,
   Workflow,
   ListTodo,
+  Menu,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
 import { getUserBalance } from "@/lib/api/balance";
 import { loadSession } from "@/lib/auth-store";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 export const Route = createFileRoute("/app")({
   beforeLoad: ({ location }) => {
@@ -84,6 +92,8 @@ function AppShell({
     { to: "/app/account", label: t("app.nav.account"), icon: Wallet },
   ];
 
+  const [mobileOpen, setMobileOpen] = useState(false);
+
   return (
     <div className="relative min-h-screen">
       <AmbientBackground />
@@ -137,9 +147,72 @@ function AppShell({
         <div className="flex-1 min-w-0 flex flex-col">
           <header className="sticky top-0 z-20 backdrop-blur-md bg-background/60 border-b border-border">
             <div className="flex items-center justify-between gap-3 px-5 sm:px-8 h-14">
-              <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-                <Sparkles className="size-3 text-amber" />
-                {t("app.header.internal")}
+              <div className="flex items-center gap-3">
+                <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+                  <SheetTrigger asChild>
+                    <button
+                      className="md:hidden inline-flex items-center justify-center size-9 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface-1/60 transition-colors"
+                      aria-label="Open navigation"
+                    >
+                      <Menu className="size-5" />
+                    </button>
+                  </SheetTrigger>
+                  <SheetContent side="left" className="w-64 p-0 bg-surface-0/95 backdrop-blur-xl">
+                    <SheetHeader className="p-4 border-b border-border">
+                      <SheetTitle className="flex items-center gap-2">
+                        <div className="grid place-items-center size-7 rounded-lg bg-gradient-to-br from-amber to-amber-soft text-primary-foreground">
+                          <span className="font-display text-sm">C</span>
+                        </div>
+                        <span className="font-display tracking-[-0.02em] text-lg">Cortexia</span>
+                      </SheetTitle>
+                    </SheetHeader>
+                    <nav className="p-3 space-y-0.5">
+                      {NAV.map((item) => {
+                        const active = item.exact ? path === item.to : path.startsWith(item.to);
+                        const Icon = item.icon;
+                        return (
+                          <Link
+                            key={item.to}
+                            to={item.to as never}
+                            onClick={() => setMobileOpen(false)}
+                            className={cn(
+                              "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors",
+                              active
+                                ? "bg-surface-2/70 text-foreground"
+                                : "text-muted-foreground hover:bg-surface-1/60 hover:text-foreground",
+                            )}
+                          >
+                            <Icon className="size-4" />
+                            {item.label}
+                          </Link>
+                        );
+                      })}
+                    </nav>
+                    <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-border">
+                      <div className="rounded-xl border border-border bg-surface-1/60 p-3">
+                        <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                          {t("app.header.balance")}
+                        </div>
+                        <PriceDisplay
+                          usd={CREDIT_USD}
+                          className="mt-1 font-display text-2xl tracking-[-0.02em]"
+                          emphasize
+                        />
+                        <Link
+                          to="/app/account"
+                          onClick={() => setMobileOpen(false)}
+                          className="mt-2 inline-flex items-center gap-1 text-xs text-amber-soft hover:underline"
+                        >
+                          Recharger →
+                        </Link>
+                      </div>
+                    </div>
+                  </SheetContent>
+                </Sheet>
+                <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                  <Sparkles className="size-3 text-amber" />
+                  {t("app.header.internal")}
+                </div>
               </div>
               <div className="flex items-center gap-3">
                 <button

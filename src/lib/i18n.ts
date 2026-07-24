@@ -209,6 +209,28 @@ const fr: Dict = {
 
   "waitlist.helper_email": "Tu seras le premier informé à l'ouverture.",
   "waitlist.error_signup": "Erreur d'inscription",
+
+  // Developer page
+  "dev.title": "Développeur",
+  "dev.subtitle": "Une seule facturation à l'usage pour tous les modèles. Pas de plan mensuel obligatoire, pas de minimum.",
+  "dev.quick_start": "Démarrer en 30 secondes",
+  "dev.api_ref": "Référence API",
+  "dev.keys_title": "Clés API",
+  "dev.keys_empty": "Aucune clé API. Crée ta première clé pour commencer.",
+  "dev.key_new": "Nouvelle clé",
+  "dev.key_name_placeholder": "Nom de la clé",
+  "dev.key_revoke": "Révoquer",
+  "dev.key_revoked": "Révoquée",
+  "dev.key_active": "Active",
+  "dev.key_created": "Clé créée",
+  "dev.key_copy_now": "Copie-la maintenant.",
+  "dev.key_secret_warning": "C'est la seule fois où tu verras ce secret en clair. Après cette fenêtre, il ne pourra plus être récupéré — seulement révoqué.",
+  "dev.stat_calls": "Appels ce mois",
+  "dev.stat_cost": "Coût ce mois",
+  "dev.stat_success": "Taux de réussite",
+  "dev.key_create_error": "Échec de la création de la clé API.",
+  "dev.key_revoke_error": "Échec de la révocation de la clé API.",
+  "dev.keys_load_error": "Échec du chargement des clés API.",
 };
 
 const en: Dict = {
@@ -393,6 +415,28 @@ const en: Dict = {
 
   "waitlist.helper_email": "You'll be the first to know at launch.",
   "waitlist.error_signup": "Signup error",
+
+  // Developer page
+  "dev.title": "Developer",
+  "dev.subtitle": "One pay-as-you-go pricing for all models. No mandatory monthly plan, no minimum.",
+  "dev.quick_start": "Get started in 30 seconds",
+  "dev.api_ref": "API Reference",
+  "dev.keys_title": "API Keys",
+  "dev.keys_empty": "No API keys yet. Create your first key to get started.",
+  "dev.key_new": "New key",
+  "dev.key_name_placeholder": "Key name",
+  "dev.key_revoke": "Revoke",
+  "dev.key_revoked": "Revoked",
+  "dev.key_active": "Active",
+  "dev.key_created": "Key created",
+  "dev.key_copy_now": "Copy it now.",
+  "dev.key_secret_warning": "This is the only time you'll see this secret in plain text. After closing this, it can never be recovered — only revoked.",
+  "dev.stat_calls": "Calls this month",
+  "dev.stat_cost": "Cost this month",
+  "dev.stat_success": "Success rate",
+  "dev.key_create_error": "Failed to create API key.",
+  "dev.key_revoke_error": "Failed to revoke API key.",
+  "dev.keys_load_error": "Failed to load API keys.",
 };
 
 // Portuguese, Spanish, Indonesian , cover the core landing strings.
@@ -567,6 +611,28 @@ const pt: Dict = {
 
   "waitlist.helper_email": "Serás o primeiro a saber na abertura.",
   "waitlist.error_signup": "Erro no cadastro",
+
+  // Developer page
+  "dev.title": "Desenvolvedor",
+  "dev.subtitle": "Uma única cobrança por uso para todos os modelos. Sem plano mensal obrigatório, sem mínimo.",
+  "dev.quick_start": "Comece em 30 segundos",
+  "dev.api_ref": "Referência da API",
+  "dev.keys_title": "Chaves API",
+  "dev.keys_empty": "Nenhuma chave API. Crie sua primeira chave para começar.",
+  "dev.key_new": "Nova chave",
+  "dev.key_name_placeholder": "Nome da chave",
+  "dev.key_revoke": "Revogar",
+  "dev.key_revoked": "Revogada",
+  "dev.key_active": "Ativa",
+  "dev.key_created": "Chave criada",
+  "dev.key_copy_now": "Copie agora.",
+  "dev.key_secret_warning": "Esta é a única vez que você verá este segredo em texto claro. Depois de fechar, nunca poderá ser recuperado — apenas revogado.",
+  "dev.stat_calls": "Chamadas este mês",
+  "dev.stat_cost": "Custo este mês",
+  "dev.stat_success": "Taxa de sucesso",
+  "dev.key_create_error": "Falha ao criar chave API.",
+  "dev.key_revoke_error": "Falha ao revogar chave API.",
+  "dev.keys_load_error": "Falha ao carregar chaves API.",
 };
 
 const es: Dict = {
@@ -739,6 +805,28 @@ const es: Dict = {
 
   "waitlist.helper_email": "Serás el primero en saber en el lanzamiento.",
   "waitlist.error_signup": "Error de registro",
+
+  // Developer page
+  "dev.title": "Desarrollador",
+  "dev.subtitle": "Una única facturación por uso para todos los modelos. Sin plan mensual obligatorio, sin mínimo.",
+  "dev.quick_start": "Empieza en 30 segundos",
+  "dev.api_ref": "Referencia de la API",
+  "dev.keys_title": "Claves API",
+  "dev.keys_empty": "No hay claves API. Crea tu primera clave para empezar.",
+  "dev.key_new": "Nueva clave",
+  "dev.key_name_placeholder": "Nombre de la clave",
+  "dev.key_revoke": "Revocar",
+  "dev.key_revoked": "Revocada",
+  "dev.key_active": "Activa",
+  "dev.key_created": "Clave creada",
+  "dev.key_copy_now": "Cópiala ahora.",
+  "dev.key_secret_warning": "Esta es la única vez que verás este secreto en texto plano. Después de cerrar, nunca podrá recuperarse — solo revocarse.",
+  "dev.stat_calls": "Llamadas este mes",
+  "dev.stat_cost": "Costo este mes",
+  "dev.stat_success": "Tasa de éxito",
+  "dev.key_create_error": "Error al crear clave API.",
+  "dev.key_revoke_error": "Error al revocar clave API.",
+  "dev.keys_load_error": "Error al cargar claves API.",
 };
 
 const id: Dict = {
@@ -911,6 +999,28 @@ const id: Dict = {
 
   "waitlist.helper_email": "Kamu akan menjadi yang pertama tahu saat peluncuran.",
   "waitlist.error_signup": "Kesalahan pendaftaran",
+
+  // Developer page
+  "dev.title": "Pengembang",
+  "dev.subtitle": "Satu tarif per penggunaan untuk semua model. Tanpa paket bulanan wajib, tanpa minimum.",
+  "dev.quick_start": "Mulai dalam 30 detik",
+  "dev.api_ref": "Referensi API",
+  "dev.keys_title": "Kunci API",
+  "dev.keys_empty": "Belum ada kunci API. Buat kuncimu yang pertama untuk memulai.",
+  "dev.key_new": "Kunci baru",
+  "dev.key_name_placeholder": "Nama kunci",
+  "dev.key_revoke": "Cabut",
+  "dev.key_revoked": "Dicabut",
+  "dev.key_active": "Aktif",
+  "dev.key_created": "Kunci dibuat",
+  "dev.key_copy_now": "Salin sekarang.",
+  "dev.key_secret_warning": "Ini satu-satunya kali kamu akan melihat rahasia ini dalam teks biasa. Setelah menutup, tidak akan bisa dipulihkan — hanya bisa dicabut.",
+  "dev.stat_calls": "Panggilan bulan ini",
+  "dev.stat_cost": "Biaya bulan ini",
+  "dev.stat_success": "Tingkat keberhasilan",
+  "dev.key_create_error": "Gagal membuat kunci API.",
+  "dev.key_revoke_error": "Gagal mencabut kunci API.",
+  "dev.keys_load_error": "Gagal memuat kunci API.",
 };
 
 const DICTS: Record<Lang, Dict> = { fr, en, pt, id, es };

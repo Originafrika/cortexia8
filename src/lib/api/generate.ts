@@ -77,7 +77,7 @@ export const generate = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     try {
-      const ctx = await getRequestContext(new Headers());
+      const ctx = await getRequestContext();
       const userId = await requireUserId(ctx);
       // CSRF: validate origin for state-changing endpoint.
       // NOTE: In TanStack Start server functions, request headers are not directly

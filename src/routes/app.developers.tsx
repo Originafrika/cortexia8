@@ -4,6 +4,8 @@ import { Copy, Check, Plus, KeyRound, X, AlertTriangle, Loader2 } from "lucide-r
 import { ApiDocs } from "@/components/api-docs";
 import { motion, AnimatePresence } from "framer-motion";
 import { createApiKey, listApiKeys, revokeApiKey, type ApiKeyRow } from "@/lib/api/api-keys";
+import { useT } from "@/lib/i18n";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/app/developers")({
   component: DevelopersPage,
@@ -11,6 +13,7 @@ export const Route = createFileRoute("/app/developers")({
 
 
 function DevelopersPage() {
+  const t = useT();
   const [tab, setTab] = useState<"curl" | "js" | "py">("curl");
   const [copied, setCopied] = useState(false);
   const [showNewKey, setShowNewKey] = useState<string | null>(null);
@@ -23,7 +26,10 @@ function DevelopersPage() {
   useEffect(() => {
     listApiKeys()
       .then((data) => setKeys(data as ApiKeyRow[]))
-      .catch(() => setKeys([]))
+      .catch(() => {
+        setKeys([]);
+        toast.error(t("dev.keys_load_error"));
+      })
       .finally(() => setKeysLoading(false));
   }, []);
 
@@ -77,11 +83,10 @@ print(url, cost)`,
       const result = await createApiKey({ data: { name: keyName.trim(), scope: keyScope } });
       setShowNewKey(result.rawKey);
       setKeyName("");
-      // Refresh the key list
       const updated = await listApiKeys();
       setKeys(updated as ApiKeyRow[]);
     } catch (err) {
-      console.error("Failed to create API key:", err);
+      toast.error(t("dev.key_create_error"));
     } finally {
       setCreatingKey(false);
     }
@@ -94,7 +99,7 @@ print(url, cost)`,
         prev.map((k) => (k.id === keyId ? { ...k, status: "revoked" } : k))
       );
     } catch (err) {
-      console.error("Failed to revoke API key:", err);
+      toast.error(t("dev.key_revoke_error"));
     }
   }
 
@@ -102,31 +107,78 @@ print(url, cost)`,
     <div className="mx-auto max-w-6xl px-5 sm:px-8 py-10 space-y-10">
       <div>
         <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-          Développeur
+          {t("dev.title")}
         </div>
         <h1 className="mt-2 font-display text-4xl tracking-[-0.03em]">API Cortexia.</h1>
         <p className="mt-2 text-muted-foreground max-w-2xl">
-          Une seule facturation à l'usage pour tous les modèles. Pas de plan mensuel obligatoire,
-          pas de minimum.
+          {t("dev.subtitle")}
         </p>
       </div>
 
       {/* Usage */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard label="Appels ce mois" value="—" />
-        <StatCard label="Coût ce mois" value="—" />
-        <StatCard label="Taux de réussite" value="—" />
+        <StatCard label={t("dev.stat_calls")} value="—" />
+        <StatCard label={t("dev.stat_cost")} value="—" />
+        <StatCard label={t("dev.stat_success")} value="—" />
+      </div>
+
+      {/* Quick Start */}
+      <div>
+        <h2 className="font-display text-2xl tracking-[-0.02em] mb-4">{t("dev.quick_start")}</h2>
+        <div className="surface-gradient-border rounded-2xl bg-surface-1/60 overflow-hidden">
+          <div className="flex items-center justify-between border-b border-border px-4 py-2">
+            <div className="flex gap-1">
+              {(["curl", "js", "py"] as const).map((t2) => (
+                <button
+                  key={t2}
+                  onClick={() => setTab(t2)}
+                  className={
+                    "rounded-full px-3 py-1 text-xs font-mono transition " +
+                    (tab === t2
+                      ? "bg-surface-3 text-foreground"
+                      : "text-muted-foreground hover:text-foreground")
+                  }
+                >
+                  {t2 === "curl" ? "cURL" : t2 === "js" ? "JavaScript" : "Python"}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={copy}
+              className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+            >
+              {copied ? (
+                <>
+                  <Check className="size-3.5 text-emerald" /> {t("waitlist.copied")}
+                </>
+              ) : (
+                <>
+                  <Copy className="size-3.5" /> {t("waitlist.copy")}
+                </>
+              )}
+            </button>
+          </div>
+          <pre className="overflow-x-auto p-5 font-mono text-xs leading-relaxed text-foreground/90 whitespace-pre">
+            {snippets[tab]}
+          </pre>
+        </div>
+      </div>
+
+      {/* API Documentation (includes Rate Limits) */}
+      <div>
+        <h2 className="font-display text-2xl tracking-[-0.02em] mb-4">{t("dev.api_ref")}</h2>
+        <ApiDocs />
       </div>
 
       {/* Keys */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-display text-2xl tracking-[-0.02em]">Clés API</h2>
+          <h2 className="font-display text-2xl tracking-[-0.02em]">{t("dev.keys_title")}</h2>
           <div className="flex items-center gap-2">
             <input
               value={keyName}
               onChange={(e) => setKeyName(e.target.value)}
-              placeholder="Nom de la clé"
+              placeholder={t("dev.key_name_placeholder")}
               className="rounded-full border border-border bg-surface-1/70 px-3 py-1.5 text-sm focus:border-amber/40 outline-none w-48"
             />
             <select
@@ -145,7 +197,7 @@ print(url, cost)`,
               className="inline-flex items-center gap-1.5 rounded-full bg-amber text-primary-foreground px-4 py-2 text-sm font-medium hover:opacity-95 transition disabled:opacity-50"
             >
               {creatingKey ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" />}
-              Nouvelle clé
+              {t("dev.key_new")}
             </button>
           </div>
         </div>
@@ -153,11 +205,11 @@ print(url, cost)`,
           <table className="w-full text-sm">
             <thead className="text-left text-xs font-mono uppercase tracking-wider text-muted-foreground">
               <tr className="border-b border-border">
-                <th className="p-4 font-normal">Nom</th>
-                <th className="p-4 font-normal">Clé</th>
+                <th className="p-4 font-normal">{t("dev.keys_title")}</th>
+                <th className="p-4 font-normal">Key</th>
                 <th className="p-4 font-normal">Scope</th>
-                <th className="p-4 font-normal">Dernière utilisation</th>
-                <th className="p-4 font-normal">Statut</th>
+                <th className="p-4 font-normal">Last used</th>
+                <th className="p-4 font-normal">Status</th>
                 <th className="p-4 font-normal"></th>
               </tr>
             </thead>
@@ -171,7 +223,7 @@ print(url, cost)`,
               ) : keys.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="p-4 text-center text-muted-foreground text-xs">
-                    Aucune clé API. Crée ta première clé pour commencer.
+                    {t("dev.keys_empty")}
                   </td>
                 </tr>
               ) : (
@@ -195,7 +247,7 @@ print(url, cost)`,
                             : "bg-surface-3 text-muted-foreground")
                         }
                       >
-                        {k.status === "active" ? "Active" : "Révoquée"}
+                        {k.status === "active" ? t("dev.key_active") : t("dev.key_revoked")}
                       </span>
                     </td>
                     <td className="p-4">
@@ -204,7 +256,7 @@ print(url, cost)`,
                           onClick={() => handleRevokeKey(k.id)}
                           className="text-xs text-red-400 hover:text-red-300 transition"
                         >
-                          Révoquer
+                          {t("dev.key_revoke")}
                         </button>
                       )}
                     </td>
@@ -214,54 +266,6 @@ print(url, cost)`,
             </tbody>
           </table>
         </div>
-      </div>
-
-      {/* Docs */}
-      <div>
-        <h2 className="font-display text-2xl tracking-[-0.02em] mb-4">Démarrer en 30 secondes</h2>
-        <div className="surface-gradient-border rounded-2xl bg-surface-1/60 overflow-hidden">
-          <div className="flex items-center justify-between border-b border-border px-4 py-2">
-            <div className="flex gap-1">
-              {(["curl", "js", "py"] as const).map((t) => (
-                <button
-                  key={t}
-                  onClick={() => setTab(t)}
-                  className={
-                    "rounded-full px-3 py-1 text-xs font-mono transition " +
-                    (tab === t
-                      ? "bg-surface-3 text-foreground"
-                      : "text-muted-foreground hover:text-foreground")
-                  }
-                >
-                  {t === "curl" ? "cURL" : t === "js" ? "JavaScript" : "Python"}
-                </button>
-              ))}
-            </div>
-            <button
-              onClick={copy}
-              className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
-            >
-              {copied ? (
-                <>
-                  <Check className="size-3.5 text-emerald" /> Copié
-                </>
-              ) : (
-                <>
-                  <Copy className="size-3.5" /> Copier
-                </>
-              )}
-            </button>
-          </div>
-          <pre className="overflow-x-auto p-5 font-mono text-xs leading-relaxed text-foreground/90 whitespace-pre">
-            {snippets[tab]}
-          </pre>
-        </div>
-      </div>
-
-      {/* API Documentation */}
-      <div>
-        <h2 className="font-display text-2xl tracking-[-0.02em] mb-4">Référence API</h2>
-        <ApiDocs />
       </div>
 
       <AnimatePresence>
@@ -283,10 +287,10 @@ print(url, cost)`,
               <div className="flex items-start justify-between">
                 <div>
                   <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-soft">
-                    Clé créée
+                    {t("dev.key_created")}
                   </div>
                   <h3 className="mt-2 font-display text-2xl tracking-[-0.02em]">
-                    Copie-la maintenant.
+                    {t("dev.key_copy_now")}
                   </h3>
                 </div>
                 <button
@@ -299,8 +303,7 @@ print(url, cost)`,
               <div className="mt-4 rounded-xl border border-amber/30 bg-amber/5 p-3 flex items-start gap-2 text-xs text-amber-soft">
                 <AlertTriangle className="size-4 shrink-0 mt-0.5" />
                 <span>
-                  C'est la seule fois où tu verras ce secret en clair. Après cette fenêtre, il ne
-                  pourra plus être récupéré — seulement révoqué.
+                  {t("dev.key_secret_warning")}
                 </span>
               </div>
               <div className="mt-4 flex items-center gap-2">
@@ -311,7 +314,7 @@ print(url, cost)`,
                   onClick={() => navigator.clipboard.writeText(showNewKey)}
                   className="rounded-lg border border-border px-3 py-2 text-xs hover:border-amber/40"
                 >
-                  Copier
+                  {t("waitlist.copy")}
                 </button>
               </div>
             </motion.div>

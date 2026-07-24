@@ -63,7 +63,7 @@ export const runCanvas = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     try {
-      const ctx = await getRequestContext(new Headers());
+      const ctx = await getRequestContext();
       const userId = await requireUserId(ctx);
       return await runCanvasImpl(data, userId);
     } catch (err) {

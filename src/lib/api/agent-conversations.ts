@@ -31,7 +31,7 @@ export const createConversation = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     try {
-      const ctx = await getRequestContext(new Headers());
+      const ctx = await getRequestContext();
       const userId = await requireUserId(ctx);
 
       const rows = (await sql`
@@ -72,7 +72,7 @@ export const saveMessage = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     try {
-      const ctx = await getRequestContext(new Headers());
+      const ctx = await getRequestContext();
       await requireUserId(ctx);
 
       const rows = (await sql`
@@ -118,7 +118,7 @@ export const getConversation = createServerFn({ method: "GET" })
   })
   .handler(async ({ data }) => {
     try {
-      const ctx = await getRequestContext(new Headers());
+      const ctx = await getRequestContext();
       await requireUserId(ctx);
 
       // Fetch conversation
@@ -175,7 +175,7 @@ export const getConversationByWorkflow = createServerFn({ method: "GET" })
   })
   .handler(async ({ data }) => {
     try {
-      const ctx = await getRequestContext(new Headers());
+      const ctx = await getRequestContext();
       await requireUserId(ctx);
 
       // Find latest conversation for this workflow

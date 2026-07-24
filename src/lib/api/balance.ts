@@ -16,7 +16,7 @@ export const getUserBalance = createServerFn({ method: "GET" })
   })
   .handler(async ({ data }) => {
     try {
-      const ctx = await getRequestContext(new Headers());
+      const ctx = await getRequestContext();
       const userId = await requireUserId(ctx);
       const balance = await getBalance(userId);
       return { balance } as BalanceResponse;
@@ -41,7 +41,7 @@ export const getTransactionHistory = createServerFn({ method: "GET" })
   })
   .handler(async ({ data }) => {
     try {
-      const ctx = await getRequestContext(new Headers());
+      const ctx = await getRequestContext();
       const userId = await requireUserId(ctx);
       const rows = (await sql`
         SELECT id, amount, type, reference, created_at

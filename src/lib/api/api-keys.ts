@@ -19,7 +19,7 @@ export const createApiKey = createServerFn({ method: "POST" })
     return { name: data.name.trim() };
   })
   .handler(async ({ data }) => {
-    const ctx = await getRequestContext(new Headers());
+    const ctx = await getRequestContext();
     if (ctx.userId == null) {
       throw new HttpError(401, "Authentication required");
     }
@@ -66,7 +66,7 @@ export type ApiKeyRow = {
 
 export const listApiKeys = createServerFn({ method: "GET" })
   .handler(async () => {
-    const ctx = await getRequestContext(new Headers());
+    const ctx = await getRequestContext();
     if (ctx.userId == null) {
       throw new HttpError(401, "Authentication required");
     }
@@ -108,7 +108,7 @@ export const revokeApiKey = createServerFn({ method: "POST" })
     return { keyId: data.keyId };
   })
   .handler(async ({ data }) => {
-    const ctx = await getRequestContext(new Headers());
+    const ctx = await getRequestContext();
     if (ctx.userId == null) {
       throw new HttpError(401, "Authentication required");
     }
