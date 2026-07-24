@@ -9,10 +9,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { sql } from "@/lib/db";
 import { getModel, type Model } from "@/lib/models";
-import { HttpError, toJsonResponse } from "./auth";
+import { HttpError, getRequestContext, requireUserId, toJsonResponse } from "./auth";
 
 export type HistoryInput = {
-  userId: number;
   limit?: number;
 };
 
@@ -34,20 +33,21 @@ export type HistoryResponse = {
 
 export const getHistory = createServerFn({ method: "GET" })
   .validator((data: HistoryInput): HistoryInput => {
-    if (!data || typeof data !== "object") throw new HttpError(400, "Invalid body");
-    if (data.userId == null) throw new HttpError(400, "userId is required");
-    return data;
+    if (data && typeof data !== "object") throw new HttpError(400, "Invalid body");
+    return data ?? {};
   })
   .handler(async ({ data }) => {
     try {
-      return await loadHistory(data);
+      const ctx = await getRequestContext(new Headers());
+      const userId = await requireUserId(ctx);
+      return await loadHistory(userId, data);
     } catch (err) {
       if (err instanceof HttpError) throw err;
       throw toJsonResponse(err);
     }
   });
 
-async function loadHistory(input: HistoryInput): Promise<HistoryResponse> {
+async function loadHistory(userId: number, input: HistoryInput): Promise<HistoryResponse> {
   const limit = Math.min(input.limit ?? 100, 200);
 
   const rows = (await sql`
@@ -63,7 +63,7 @@ async function loadHistory(input: HistoryInput): Promise<HistoryResponse> {
     JOIN runs r ON r.id = rne.run_id
     JOIN workflow_nodes wn ON wn.id = rne.workflow_node_id
     LEFT JOIN assets a ON a.id = rne.output_asset_id
-    WHERE r.user_id = ${input.userId}
+    WHERE r.user_id = ${userId}
     ORDER BY rne.started_at DESC NULLS LAST, rne.id DESC
     LIMIT ${limit}
   `) as {

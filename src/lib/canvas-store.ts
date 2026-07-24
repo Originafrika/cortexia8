@@ -63,11 +63,8 @@ let _saveTimer: ReturnType<typeof setTimeout> | null = null;
 function persistStatusChange(nodeId: string, status: string) {
   const dbId = parseDbNodeId(nodeId);
   if (dbId == null) return;
-  const userId = getClientUserId();
-  if (userId == null) return;
   graphOps({
     data: {
-      userId,
       ops: [{ op: "updateNode", nodeId: dbId, patch: { status } }],
     },
   }).catch((err) => {
@@ -178,14 +175,12 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
     set({ edges: addEdge(newEdge, get().edges) as CanvasEdge[], draggingFromPort: null });
 
     const wid = get().workflowId;
-    const userId = getClientUserId();
-    if (wid && userId != null && connection.source && connection.target) {
+    if (wid && connection.source && connection.target) {
       const srcDbId = parseDbNodeId(connection.source);
       const tgtDbId = parseDbNodeId(connection.target);
       if (srcDbId != null && tgtDbId != null) {
         graphOps({
           data: {
-            userId,
             ops: [{
               op: "createEdge",
               workflowId: Number(wid),
@@ -238,11 +233,9 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
     set({ nodes: [...get().nodes, node], selectedNodeId: id });
 
     const wid = get().workflowId;
-    const userId = getClientUserId();
-    if (wid && userId != null) {
+    if (wid) {
       graphOps({
         data: {
-          userId,
           ops: [{
             op: "createNode",
             workflowId: Number(wid),
@@ -296,20 +289,17 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
 
     const dbId = parseDbNodeId(id);
     if (dbId != null) {
-      const userId = getClientUserId();
-      if (userId != null) {
-        const ops: Array<{ op: "updateNode"; nodeId: number; patch: Record<string, unknown> }> = [
-          { op: "updateNode", nodeId: dbId, patch: { config: params } },
-        ];
-        if (newStatus) {
-          ops.push({ op: "updateNode", nodeId: dbId, patch: { status: newStatus } });
-        }
-        graphOps({
-          data: { userId, ops },
-        }).catch((err) => {
-          console.error("[canvas-store] updateNodeParams graphOps failed", err);
-        });
+      const ops: Array<{ op: "updateNode"; nodeId: number; patch: Record<string, unknown> }> = [
+        { op: "updateNode", nodeId: dbId, patch: { config: params } },
+      ];
+      if (newStatus) {
+        ops.push({ op: "updateNode", nodeId: dbId, patch: { status: newStatus } });
       }
+      graphOps({
+        data: { ops },
+      }).catch((err) => {
+        console.error("[canvas-store] updateNodeParams graphOps failed", err);
+      });
     }
   },
 
@@ -323,20 +313,17 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
 
     const dbId = parseDbNodeId(id);
     if (dbId != null) {
-      const userId = getClientUserId();
-      if (userId != null) {
-        const ops: Array<{ op: "deleteEdge"; edgeId: number } | { op: "deleteNode"; nodeId: number }> = [];
-        for (const e of removedEdges) {
-          const edgeDbId = e.id.startsWith("e_db_") ? Number(e.id.slice(5)) : NaN;
-          if (!isNaN(edgeDbId)) ops.push({ op: "deleteEdge", edgeId: edgeDbId });
-        }
-        ops.push({ op: "deleteNode", nodeId: dbId });
-        graphOps({
-          data: { userId, ops },
-        }).catch((err) => {
-          console.error("[canvas-store] removeNode graphOps failed", err);
-        });
+      const ops: Array<{ op: "deleteEdge"; edgeId: number } | { op: "deleteNode"; nodeId: number }> = [];
+      for (const e of removedEdges) {
+        const edgeDbId = e.id.startsWith("e_db_") ? Number(e.id.slice(5)) : NaN;
+        if (!isNaN(edgeDbId)) ops.push({ op: "deleteEdge", edgeId: edgeDbId });
       }
+      ops.push({ op: "deleteNode", nodeId: dbId });
+      graphOps({
+        data: { ops },
+      }).catch((err) => {
+        console.error("[canvas-store] removeNode graphOps failed", err);
+      });
     }
   },
 
@@ -392,8 +379,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
 
     // Persist via graphOps
     const wid = get().workflowId;
-    const userId = getClientUserId();
-    if (wid && userId != null) {
+    if (wid) {
       const ops: Array<Parameters<typeof graphOps>[0]["data"]["ops"][number]> = [];
       for (const nn of newNodes) {
         ops.push({
@@ -406,7 +392,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
         });
       }
       if (ops.length > 0) {
-        graphOps({ data: { userId, ops } }).catch((err) => {
+        graphOps({ data: { ops } }).catch((err) => {
           console.error("[canvas-store] duplicateBranch createNode graphOps failed", err);
         });
       }
@@ -466,8 +452,6 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
   saveWorkflow: () => {
     const wid = get().workflowId;
     if (!wid) return;
-    const userId = getClientUserId();
-    if (userId == null) return;
 
     if (_saveTimer) clearTimeout(_saveTimer);
     _saveTimer = setTimeout(async () => {
@@ -491,7 +475,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
 
       if (ops.length === 0) return;
       try {
-        await graphOps({ data: { userId, ops } });
+        await graphOps({ data: { ops } });
       } catch (err) {
         console.error("[canvas-store] saveWorkflow failed", err);
       }
@@ -594,9 +578,6 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
     const workflowId = get().workflowId;
     if (!workflowId) return;
 
-    const userId = getClientUserId();
-    if (userId == null) return;
-
     // Find all descendants of this node
     const descendantIds = new Set<string>();
     const stack = [id];
@@ -630,7 +611,6 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
       const res = await runCanvas({
         data: {
           workflowId: Number(workflowId),
-          userId,
           rerunNodeId: dbNodeId,
         },
       });
@@ -693,9 +673,6 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
     const workflowId = get().workflowId;
     if (!workflowId) return;
 
-    const userId = getClientUserId();
-    if (userId == null) return;
-
     // BFS to find all downstream nodes
     const downstreamIds = new Set<string>();
     const queue = [id];
@@ -728,7 +705,6 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
       const res = await runCanvas({
         data: {
           workflowId: Number(workflowId),
-          userId,
           rerunNodeId: dbNodeId,
         },
       });

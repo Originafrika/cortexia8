@@ -223,12 +223,30 @@ function ConfirmationCard({
           {t("waitlist.referral_copy")}
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
-          {["X", "WhatsApp", "Telegram", "LinkedIn"].map((n) => (
+          {[
+            {
+              network: "X",
+              onClick: () => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(t("waitlist.done"))}&url=${encodeURIComponent(link)}`, "_blank"),
+            },
+            {
+              network: "WhatsApp",
+              onClick: () => window.open(`https://wa.me/?text=${encodeURIComponent(t("waitlist.done") + " " + link)}`, "_blank"),
+            },
+            {
+              network: "Telegram",
+              onClick: () => window.open(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(t("waitlist.done"))}`, "_blank"),
+            },
+            {
+              network: "LinkedIn",
+              onClick: () => window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(link)}`, "_blank"),
+            },
+          ].map(({ network, onClick }) => (
             <button
-              key={n}
+              key={network}
+              onClick={onClick}
               className="rounded-full border border-border bg-surface-2/50 px-3 py-1.5 text-xs text-foreground/85 hover:border-border-strong hover:text-foreground transition"
             >
-              {t("waitlist.confirm.share").replace("{network}", n)}
+              {t("waitlist.confirm.share").replace("{network}", network)}
             </button>
           ))}
         </div>

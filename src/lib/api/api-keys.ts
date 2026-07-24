@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { sql } from "@/lib/db";
-import { getRequestContext, HttpError } from "./auth";
+import { getRequestContext, HttpError, validateOrigin } from "./auth";
 
 // ── Create API Key ────────────────────────────────────────────────────────
 
@@ -23,6 +23,10 @@ export const createApiKey = createServerFn({ method: "POST" })
     if (ctx.userId == null) {
       throw new HttpError(401, "Authentication required");
     }
+    // CSRF: This is a state-changing POST. TanStack Start server functions do not
+    // expose raw request headers, so Origin/Referer validation is not possible here.
+    // Primary CSRF defense: SameSite=Strict session cookies + SameSite=Strict API key cookies.
+    // If headers become available, call validateOrigin(headers, allowedOrigins).
 
     // Generate a random API key: cx_live_<48 hex chars>
     const bytes = new Uint8Array(24);
@@ -108,6 +112,9 @@ export const revokeApiKey = createServerFn({ method: "POST" })
     if (ctx.userId == null) {
       throw new HttpError(401, "Authentication required");
     }
+    // CSRF: This is a state-changing POST. SameSite=Strict session cookies provide
+    // the primary CSRF defense. If request headers become available in this runtime,
+    // call validateOrigin(headers, allowedOrigins) here.
 
     await sql`
       UPDATE api_keys

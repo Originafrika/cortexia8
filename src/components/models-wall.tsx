@@ -254,7 +254,20 @@ function WallModal({ item, onClose }: { item: WallItem | null; onClose: () => vo
 }
 
 export function WallPreview() {
-  const items = WALL_ITEMS.slice(0, 6);
+  const all = WALL_ITEMS;
+  const byKind: Record<string, WallItem[]> = { image: [], video: [], music: [], voice: [] };
+  all.forEach((item) => { byKind[item.kind]?.push(item); });
+  const interleaved: WallItem[] = [];
+  let idx = 0;
+  while (interleaved.length < 6 && idx < 30) {
+    const kind = (["image", "video", "voice", "music"] as const)[idx % 4];
+    const pool = byKind[kind];
+    if (pool.length > 0) {
+      interleaved.push(pool[idx % pool.length]);
+    }
+    idx++;
+  }
+  const items = interleaved;
   return (
     <div className="relative">
       <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3">
@@ -263,7 +276,9 @@ export function WallPreview() {
           const isVideo = item.kind === "video";
           return (
             <motion.div key={item.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.05 * i }} className={cn("relative overflow-hidden rounded-xl border border-border aspect-[3/4]", i === 1 && "sm:row-span-2 sm:aspect-auto", i === 4 && "sm:row-span-2 sm:aspect-auto")}>
-              {isVideo ? (
+              {isVideo && item.video ? (
+                <video src={item.video} muted loop playsInline autoPlay preload="metadata" className="absolute inset-0 h-full w-full object-cover" />
+              ) : isVideo ? (
                 <div className="absolute inset-0 bg-gradient-to-br from-surface-2 to-surface-3" />
               ) : (
                 <img src={item.image} alt="" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />

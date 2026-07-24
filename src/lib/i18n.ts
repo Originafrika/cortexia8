@@ -207,6 +207,7 @@ const fr: Dict = {
   "waitlist.confirm.recap.film": "Parfait pour la production audiovisuelle — Kling 4K et modèles cinéma prêts dès l'ouverture.",
   "waitlist.confirm.recap.autre": "On te met de côté un accès dès l'ouverture, avec un mot d'accueil personnel.",
 
+  "waitlist.helper_email": "Tu seras le premier informé à l'ouverture.",
   "waitlist.error_signup": "Erreur d'inscription",
 };
 
@@ -390,6 +391,7 @@ const en: Dict = {
   "waitlist.confirm.recap.film": "Perfect for audiovisual production — Kling 4K and cinema models ready from launch.",
   "waitlist.confirm.recap.autre": "We're saving you a spot from launch, with a personal welcome message.",
 
+  "waitlist.helper_email": "You'll be the first to know at launch.",
   "waitlist.error_signup": "Signup error",
 };
 
@@ -563,6 +565,7 @@ const pt: Dict = {
   "waitlist.confirm.recap.film": "Perfeito para produção audiovisual — Kling 4K e modelos de cinema prontos desde o lançamento.",
   "waitlist.confirm.recap.autre": "Estamos guardando seu acesso desde o lançamento, com uma mensagem de boas-vindas pessoal.",
 
+  "waitlist.helper_email": "Serás o primeiro a saber na abertura.",
   "waitlist.error_signup": "Erro no cadastro",
 };
 
@@ -734,6 +737,7 @@ const es: Dict = {
   "waitlist.confirm.recap.film": "Perfecto para producción audiovisual — Kling 4K y modelos de cine listos desde el lanzamiento.",
   "waitlist.confirm.recap.autre": "Te estamos guardando un acceso desde el lanzamiento, con un mensaje de bienvenida personal.",
 
+  "waitlist.helper_email": "Serás el primero en saber en el lanzamiento.",
   "waitlist.error_signup": "Error de registro",
 };
 
@@ -905,6 +909,7 @@ const id: Dict = {
   "waitlist.confirm.recap.film": "Cocok untuk produksi audiovisual — Kling 4K dan model sinema siap sejak peluncuran.",
   "waitlist.confirm.recap.autre": "Kami simpan akses untukmu sejak peluncuran, dengan pesan sambutan pribadi.",
 
+  "waitlist.helper_email": "Kamu akan menjadi yang pertama tahu saat peluncuran.",
   "waitlist.error_signup": "Kesalahan pendaftaran",
 };
 

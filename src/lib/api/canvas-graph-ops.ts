@@ -19,7 +19,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { withTransaction } from "@/lib/db";
 import type { PoolClient } from "@/lib/db";
-import { HttpError, toJsonResponse } from "./auth";
+import { getRequestContext, HttpError, requireUserId, toJsonResponse } from "./auth";
 
 type CreateNodeOp = {
   op: "createNode";
@@ -62,7 +62,6 @@ type DeleteEdgeOp = { op: "deleteEdge"; edgeId: number };
 export type CanvasOp = CreateNodeOp | UpdateNodeOp | DeleteNodeOp | CreateEdgeOp | DeleteEdgeOp;
 
 type GraphOpsInput = {
-  userId: number;
   ops: CanvasOp[];
 };
 
@@ -85,9 +84,6 @@ export type GraphOpsResponse = {
 export const graphOps = createServerFn({ method: "POST" })
   .validator((data: GraphOpsInput): GraphOpsInput => {
     if (!data || typeof data !== "object") throw new HttpError(400, "Invalid body");
-    if (!Number.isInteger(data.userId)) {
-      throw new HttpError(400, "userId is required");
-    }
     if (!Array.isArray(data.ops)) {
       throw new HttpError(400, "ops must be an array");
     }
@@ -95,7 +91,9 @@ export const graphOps = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     try {
-      return await applyOps(data);
+      const ctx = await getRequestContext(new Headers());
+      const userId = await requireUserId(ctx);
+      return await applyOps(data, userId);
     } catch (err) {
       if (err instanceof HttpError) throw err;
       throw toJsonResponse(err);
@@ -106,13 +104,13 @@ export const graphOps = createServerFn({ method: "POST" })
 // `query` method is used; the type is re-exported from @/lib/db.
 type _PoolClientRef = PoolClient;
 
-async function applyOps(input: GraphOpsInput): Promise<GraphOpsResponse> {
+async function applyOps(input: GraphOpsInput, userId: number): Promise<GraphOpsResponse> {
   const results: OpResult[] = [];
   await withTransaction(async (client: PoolClient) => {
     for (let i = 0; i < input.ops.length; i++) {
       const op = input.ops[i];
       try {
-        const result = await dispatch(client, input.userId, op);
+        const result = await dispatch(client, userId, op);
         results.push({ opIndex: i, status: "ok", result });
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);

@@ -1,11 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { sql } from "@/lib/db";
 import { getBalance } from "@/lib/credits";
-import { HttpError, toJsonResponse } from "./auth";
+import { getRequestContext, HttpError, requireUserId, toJsonResponse } from "./auth";
 
-export type BalanceInput = {
-  userId: number;
-};
+export type BalanceInput = Record<string, never>;
 
 export type BalanceResponse = {
   balance: number;
@@ -13,13 +11,14 @@ export type BalanceResponse = {
 
 export const getUserBalance = createServerFn({ method: "GET" })
   .validator((data: BalanceInput): BalanceInput => {
-    if (!data || typeof data !== "object") throw new HttpError(400, "Invalid body");
-    if (data.userId == null) throw new HttpError(400, "userId is required");
-    return data;
+    if (data && typeof data !== "object") throw new HttpError(400, "Invalid body");
+    return {};
   })
   .handler(async ({ data }) => {
     try {
-      const balance = await getBalance(data.userId);
+      const ctx = await getRequestContext(new Headers());
+      const userId = await requireUserId(ctx);
+      const balance = await getBalance(userId);
       return { balance } as BalanceResponse;
     } catch (err) {
       if (err instanceof HttpError) throw err;
@@ -37,16 +36,17 @@ export type TxRow = {
 
 export const getTransactionHistory = createServerFn({ method: "GET" })
   .validator((data: BalanceInput): BalanceInput => {
-    if (!data || typeof data !== "object") throw new HttpError(400, "Invalid body");
-    if (data.userId == null) throw new HttpError(400, "userId is required");
-    return data;
+    if (data && typeof data !== "object") throw new HttpError(400, "Invalid body");
+    return {};
   })
   .handler(async ({ data }) => {
     try {
+      const ctx = await getRequestContext(new Headers());
+      const userId = await requireUserId(ctx);
       const rows = (await sql`
         SELECT id, amount, type, reference, created_at
         FROM credits_ledger
-        WHERE user_id = ${data.userId}
+        WHERE user_id = ${userId}
         ORDER BY created_at DESC
         LIMIT 50
       `) as TxRow[];

@@ -35,11 +35,7 @@ function AccountPage() {
 
   async function fetchBalance() {
     try {
-      const session = loadSession();
-      if (!session?.user?.id) return;
-      const userId = Number(session.user.id);
-      if (isNaN(userId)) return;
-      const result = await getUserBalance({ data: { userId } });
+      const result = await getUserBalance({ data: {} });
       setBalance(result.balance);
     } catch {
       // silently ignore — balance stays null
@@ -48,10 +44,7 @@ function AccountPage() {
 
   async function fetchTransactions() {
     try {
-      const session = loadSession();
-      const userId = Number(session?.user?.id);
-      if (isNaN(userId)) return;
-      const result = await getTransactionHistory({ data: { userId } });
+      const result = await getTransactionHistory({ data: {} });
       setTxRows(result.transactions);
     } catch {
       setTxRows([]);

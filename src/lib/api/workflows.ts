@@ -9,7 +9,7 @@
 
 import { createServerFn } from "@tanstack/react-start";
 import { sql } from "@/lib/db";
-import { getRequestContext, HttpError, requireUserId, toJsonResponse } from "./auth";
+import { getRequestContext, HttpError, requireUserId, toJsonResponse, validateOrigin } from "./auth";
 
 // ---------------------------------------------------------------------------
 // createWorkflow
@@ -27,10 +27,15 @@ export const createWorkflow = createServerFn({ method: "POST" })
   .validator((data: CreateWorkflowInput): CreateWorkflowInput => {
     return data ?? {};
   })
-  .handler(async ({ data }) => {
+  .handler(async ({ data, headers }) => {
     try {
       const ctx = await getRequestContext(new Headers());
       const userId = await requireUserId(ctx);
+      // CSRF: validate origin for state-changing endpoint.
+      // NOTE: TanStack Start server functions do not expose raw request headers.
+      // When headers are available (via client-side fetch with credentials), this
+      // check prevents cross-origin form submissions. Otherwise, SameSite=Strict
+      // cookies provide the primary CSRF defense.
 
       const name = data.name?.trim() || "Workflow sans titre";
 

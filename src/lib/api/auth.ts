@@ -49,6 +49,17 @@ export async function requireUserId(ctx: RequestContext): Promise<number> {
   return ctx.userId;
 }
 
+/**
+ * Validate the Origin/Referer header against a list of allowed origins
+ * to prevent CSRF attacks on state-changing POST endpoints.
+ */
+export function validateOrigin(headers: Headers, allowedOrigins: string[]): void {
+  const origin = headers.get("origin") ?? headers.get("referer");
+  if (!origin || !allowedOrigins.some((o) => origin.startsWith(o))) {
+    throw new HttpError(403, "Invalid origin");
+  }
+}
+
 export class HttpError extends Error {
   constructor(
     public status: number,

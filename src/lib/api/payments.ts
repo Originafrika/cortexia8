@@ -30,7 +30,6 @@ import { getRequestContext, HttpError, requireUserId, toJsonResponse } from "./a
 export type FedaPayVerifyInput = {
   transactionId: string;
   amount: number;
-  userId?: number;
 };
 
 export type PaymentResponse = {
@@ -54,10 +53,9 @@ export const verifyFedaPayTransaction = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     try {
       const ctx = await getRequestContext(new Headers());
-      const userId = data.userId ?? ctx.userId;
-      if (userId == null) {
-        throw new HttpError(401, "Authentication required");
-      }
+      const userId = await requireUserId(ctx);
+      // CSRF: This is a state-changing POST. TanStack Start server functions do not
+      // expose raw request headers. Primary CSRF defense: SameSite=Strict session cookies.
 
       // Verify with FedaPay API
       const apiKey = process.env.FEDAPAY_SECRET_KEY;
@@ -133,7 +131,6 @@ export const verifyFedaPayTransaction = createServerFn({ method: "POST" })
 export type StripeCheckoutInput = {
   amount: number;
   currency?: string;
-  userId?: number;
   successUrl?: string;
   cancelUrl?: string;
 };
@@ -156,10 +153,9 @@ export const createStripeCheckout = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     try {
       const ctx = await getRequestContext(new Headers());
-      const userId = data.userId ?? ctx.userId;
-      if (userId == null) {
-        throw new HttpError(401, "Authentication required");
-      }
+      const userId = await requireUserId(ctx);
+      // CSRF: This is a state-changing POST. TanStack Start server functions do not
+      // expose raw request headers. Primary CSRF defense: SameSite=Strict session cookies.
 
       const secretKey = process.env.STRIPE_SECRET_KEY;
       if (!secretKey) {
@@ -216,6 +212,12 @@ export const createStripeCheckout = createServerFn({ method: "POST" })
 
 // ---------------------------------------------------------------------------
 // Stripe Webhook
+// ---------------------------------------------------------------------------
+// NOTE: The Stripe webhook has been migrated from createServerFn to a raw
+// Nitro event handler at server/api/webhooks/stripe.ts. That handler can
+// read the raw request body needed for stripe webhook signature verification.
+// The handler below is retained for backward compatibility but should not
+// be used in production — it cannot verify the Stripe signature.
 // ---------------------------------------------------------------------------
 
 export type StripeWebhookResponse = {

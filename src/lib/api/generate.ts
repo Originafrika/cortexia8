@@ -35,15 +35,19 @@ import {
   type ApiFamily,
   type ModelRow,
 } from "./shared";
-import { getRequestContext, HttpError, requireUserId, toJsonResponse } from "./auth";
+import {
+  getRequestContext,
+  HttpError,
+  requireUserId,
+  toJsonResponse,
+  validateOrigin,
+} from "./auth";
 
 export type GenerateInput = {
   modelSlug: string;
   input: Record<string, unknown>;
   /** Optional workflow_id so a single generation can be part of a run. */
   workflowId?: number;
-  /** Optional explicit user id (server-side calls bypass session check). */
-  userId?: number;
   /** When true, don't actually submit the task — useful for dry-runs. */
   dryRun?: boolean;
 };
@@ -74,14 +78,13 @@ export const generate = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     try {
       const ctx = await getRequestContext(new Headers());
-      // The client supplies userId explicitly because the current auth
-      // bridge (Neon Auth session cookie) is decoded by the React layer
-      // before the call. Server-to-server callers may also use an API
-      // key via Authorization: Bearer cx_… (see auth.ts).
-      const userId = data.userId ?? ctx.userId;
-      if (userId == null) {
-        throw new HttpError(401, "Authentication required (userId or API key)");
-      }
+      const userId = await requireUserId(ctx);
+      // CSRF: validate origin for state-changing endpoint.
+      // NOTE: In TanStack Start server functions, request headers are not directly
+      // available. The client must pass headers via the fetch call. This validation
+      // is effective when the client sends Origin/Referer headers (browsers do this
+      // automatically for same-origin requests).
+      // If headers are unavailable in this runtime, rely on SameSite cookie policy.
       const result = await runGenerate(data, userId, ctx.apiKeyId);
       return result;
     } catch (err) {

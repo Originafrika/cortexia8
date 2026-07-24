@@ -23,11 +23,10 @@ import {
   topoLevels,
   type ModelRow,
 } from "./shared";
-import { HttpError, toJsonResponse } from "./auth";
+import { getRequestContext, HttpError, requireUserId, toJsonResponse } from "./auth";
 
 export type RunInput = {
   workflowId: number;
-  userId: number;
   rerunNodeId?: number;
 };
 
@@ -60,14 +59,13 @@ export const runCanvas = createServerFn({ method: "POST" })
     if (!Number.isInteger(data.workflowId)) {
       throw new HttpError(400, "workflowId is required");
     }
-    if (!Number.isInteger(data.userId)) {
-      throw new HttpError(400, "userId is required");
-    }
     return data;
   })
   .handler(async ({ data }) => {
     try {
-      return await runCanvasImpl(data);
+      const ctx = await getRequestContext(new Headers());
+      const userId = await requireUserId(ctx);
+      return await runCanvasImpl(data, userId);
     } catch (err) {
       if (err instanceof HttpError) throw err;
       throw toJsonResponse(err);
@@ -107,7 +105,7 @@ async function getLastRunOutputs(
   return rows[0] ?? null;
 }
 
-async function runCanvasImpl(input: RunInput): Promise<RunResponse> {
+async function runCanvasImpl(input: RunInput, userId: number): Promise<RunResponse> {
   // 1. Load the workflow + nodes + edges.
   const wfRows = (await sql`
     SELECT id, user_id, name FROM workflows WHERE id = ${input.workflowId} LIMIT 1
@@ -115,7 +113,7 @@ async function runCanvasImpl(input: RunInput): Promise<RunResponse> {
   if (wfRows.length === 0) {
     throw new HttpError(404, `Workflow ${input.workflowId} not found`);
   }
-  if (wfRows[0].user_id != null && wfRows[0].user_id !== input.userId) {
+  if (wfRows[0].user_id != null && wfRows[0].user_id !== userId) {
     throw new HttpError(403, "Workflow belongs to a different user");
   }
   const workflow = wfRows[0];
@@ -168,7 +166,7 @@ async function runCanvasImpl(input: RunInput): Promise<RunResponse> {
   const runId = (
     (await sql`
       INSERT INTO runs (workflow_id, user_id, status, started_at)
-      VALUES (${workflow.id}, ${input.userId}, 'running', NOW())
+      VALUES (${workflow.id}, ${userId}, 'running', NOW())
       RETURNING id
     `) as { id: number }[]
   )[0].id;
@@ -189,7 +187,7 @@ async function runCanvasImpl(input: RunInput): Promise<RunResponse> {
           // Execute this node (re-run or full run)
           return dispatchNode({
             runId,
-            userId: input.userId,
+            userId,
             workflowId: workflow.id,
             node,
             model: modelCache.get(node.model_slug) ?? null,

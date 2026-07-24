@@ -1,5 +1,6 @@
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { SignedIn, RedirectToSignIn } from "@neondatabase/auth-ui";
 import { AmbientBackground } from "@/components/ambient-background";
 import { LocalePicker } from "@/components/locale-picker";
 import { PriceDisplay } from "@/components/price-display";
@@ -36,10 +37,7 @@ function AppLayout() {
   useEffect(() => {
     async function fetchBalance() {
       try {
-        const session = loadSession();
-        const userId = Number(session?.user?.id);
-        if (isNaN(userId)) return;
-        const result = await getUserBalance({ data: { userId } });
+        const result = await getUserBalance({ data: {} });
         setBalance(result.balance);
       } catch {}
     }
@@ -48,7 +46,10 @@ function AppLayout() {
 
   return (
     <>
-      <AppShell path={path} CREDIT_USD={balance} t={t} open={open} setOpen={setOpen} />
+      <SignedIn>
+        <AppShell path={path} CREDIT_USD={balance} t={t} open={open} setOpen={setOpen} />
+      </SignedIn>
+      <RedirectToSignIn />
     </>
   );
 }

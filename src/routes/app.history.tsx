@@ -60,17 +60,7 @@ function HistoryPage() {
   useEffect(() => {
     async function fetchHistory() {
       try {
-        const session = loadSession();
-        if (!session?.user?.id) {
-          setLoading(false);
-          return;
-        }
-        const userId = Number(session.user.id);
-        if (isNaN(userId)) {
-          setLoading(false);
-          return;
-        }
-        const result = await getHistory({ data: { userId, limit: 100 } });
+        const result = await getHistory({ data: { limit: 100 } });
         const mapped: DisplayItem[] = result.items.map((item: HistoryItem, i: number) => {
           const model = MODELS.find((m) => m.slug === item.modelSlug) ?? MODELS[0];
           return {

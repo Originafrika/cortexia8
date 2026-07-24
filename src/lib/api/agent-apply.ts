@@ -127,7 +127,7 @@ async function applyPlanImpl(input: AgentApplyInput): Promise<AgentApplyResponse
   let runId: number | undefined;
   if (input.launch) {
     const run = await runCanvas({
-      data: { workflowId: input.workflowId, userId },
+      data: { workflowId: input.workflowId },
     });
     runId = run.runId;
   }
