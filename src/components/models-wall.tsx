@@ -42,14 +42,19 @@ export function ModelsWall() {
 
   const BATCH = 12;
   const visible = useMemo(() => {
-    const total = page * BATCH;
-    const out: WallItem[] = [];
-    for (let i = 0; i < total; i++) {
-      const source = filtered[i % filtered.length];
-      if (!source) break;
-      out.push({ ...source, id: `${source.id}-${i}` });
+    // Interleave by kind so first page shows a mix of images + videos
+    const byKind: Record<string, WallItem[]> = {};
+    filtered.forEach((item) => (byKind[item.kind] ??= []).push(item));
+    const kinds = Object.keys(byKind);
+    const interleaved: WallItem[] = [];
+    let idx = 0;
+    const pools = kinds.map((k) => [...byKind[k]]);
+    while (interleaved.length < filtered.length && idx < filtered.length * kinds.length) {
+      const pool = pools[idx % pools.length];
+      if (pool.length > 0) interleaved.push(pool.shift()!);
+      idx++;
     }
-    return out;
+    return interleaved.slice(0, page * BATCH);
   }, [filtered, page]);
 
   return (
