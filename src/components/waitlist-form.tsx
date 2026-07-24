@@ -1,21 +1,12 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight, Check, Copy, Users, AlertTriangle } from "lucide-react";
+import { ArrowRight, Check, Copy, AlertTriangle } from "lucide-react";
 import { useCountUp } from "@/lib/use-count-up";
 import { useT } from "@/lib/i18n";
 import { waitlistSignup } from "@/lib/waitlist";
 
 const PROFESSIONS = ["Pub", "UGC", "Émission", "Film", "Autre"] as const;
 type Profession = (typeof PROFESSIONS)[number];
-
-const RECAP: Record<Profession, string> = {
-  Pub: "Parfait pour les créatifs pub — Kling, Seedance et GPT Image seront dans ta boîte à outils dès l'ouverture.",
-  UGC: "Parfait pour les créateurs UGC — on te prévient dès que Cortexia ouvre, avec un accès prioritaire au playground vidéo.",
-  Émission:
-    "Parfait pour les équipes d'émission — voix, montage IA et musiques seront disponibles dès le lancement.",
-  Film: "Parfait pour la production audiovisuelle — Kling 4K et modèles cinéma prêts dès l'ouverture.",
-  Autre: "On te met de côté un accès dès l'ouverture, avec un mot d'accueil personnel.",
-};
 
 export function WaitlistForm() {
   const t = useT();
@@ -43,7 +34,7 @@ export function WaitlistForm() {
       setRank(result.id);
       setStatus("done");
     } catch (err) {
-      setErrorMsg(err instanceof Error ? err.message : "Erreur d'inscription");
+      setErrorMsg(err instanceof Error ? err.message : t("waitlist.error_signup"));
       setStatus("error");
     }
   }
@@ -166,10 +157,12 @@ function ConfirmationCard({
   const t = useT();
   const displayRank = useCountUp(rank, 800);
   const [copied, setCopied] = useState(false);
-  const invitedCount = 0;
   const origin = typeof window !== "undefined" ? window.location.origin : "https://cortexia.ai";
   const link = `${origin}/r/${referralCode}`;
-  const referredPct = 12;
+
+  const recapKey = `waitlist.confirm.recap.${profession.toLowerCase()}`;
+  const recapText = t(recapKey);
+  const locale = typeof navigator !== "undefined" ? navigator.language : "en";
 
   return (
     <motion.div
@@ -184,37 +177,23 @@ function ConfirmationCard({
       <div className="mt-3 flex items-baseline gap-2">
         <span className="text-sm text-muted-foreground">{t("waitlist.your_seat")}</span>
         <span className="font-display text-5xl sm:text-6xl tracking-[-0.03em] tabular text-foreground">
-          #{Math.round(displayRank).toLocaleString("fr-FR")}
+          #{Math.round(displayRank).toLocaleString(locale)}
         </span>
-      </div>
-      <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-surface-3">
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: `${referredPct}%` }}
-          transition={{ duration: 1.2, ease: "easeOut" }}
-          className="h-full bg-gradient-to-r from-amber to-amber-soft"
-        />
-      </div>
-      <div className="mt-2 font-mono text-[11px] text-muted-foreground">
-        {referredPct}% de la file franchie. Parraine pour avancer plus vite.
       </div>
 
       <div className="mt-5 rounded-xl border border-amber/30 bg-amber/10 p-4">
         <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-soft">
-          Profil enregistré : {profession}
+          {t("waitlist.confirm.recap_label").replace("{profession}", profession)}
         </div>
-        <p className="mt-1.5 text-sm text-foreground/90 leading-relaxed">{RECAP[profession]}</p>
+        {recapText !== recapKey && (
+          <p className="mt-1.5 text-sm text-foreground/90 leading-relaxed">{recapText}</p>
+        )}
       </div>
 
       <div className="mt-5 rounded-xl border border-border bg-surface-0/60 p-4">
         <div className="flex items-center justify-between">
           <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
             {t("waitlist.referral")}
-          </div>
-          <div className="flex items-center gap-1.5 font-mono text-[10px] text-muted-foreground tabular">
-            <Users className="size-3" />
-            <span className="text-foreground/90">{invitedCount}</span>{" "}
-            {t("waitlist.friends_invited")}
           </div>
         </div>
         <div className="mt-2 flex items-center gap-2">
@@ -249,7 +228,7 @@ function ConfirmationCard({
               key={n}
               className="rounded-full border border-border bg-surface-2/50 px-3 py-1.5 text-xs text-foreground/85 hover:border-border-strong hover:text-foreground transition"
             >
-              Partager sur {n}
+              {t("waitlist.confirm.share").replace("{network}", n)}
             </button>
           ))}
         </div>
