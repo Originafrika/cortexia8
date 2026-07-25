@@ -43,7 +43,7 @@ function WorkflowsPage() {
     setCreating(true);
     try {
       const { id } = await createWorkflow({ data: { sessionToken: loadSession()?.token } });
-      navigate({ to: "/canvas/$id", params: { id: String(id) } });
+      navigate({ to: "/canvas", search: { workflowId: id } });
     } catch {
       setCreating(false);
     }
@@ -100,8 +100,8 @@ function WorkflowsPage() {
           {workflows.map((wf) => (
             <Link
               key={wf.id}
-              to="/canvas/$id"
-              params={{ id: String(wf.id) }}
+              to="/canvas"
+              search={{ workflowId: wf.id }}
               className="group surface-gradient-border rounded-2xl bg-surface-1/60 backdrop-blur p-5 hover:bg-surface-1/80 transition-all hover:-translate-y-0.5 hover:shadow-[0_20px_60px_-20px_oklch(0.78_0.16_70_/_0.25)]"
             >
               <div className="flex items-start justify-between gap-3">

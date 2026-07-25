@@ -2,8 +2,10 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Wand2, Plus, Sparkles, ArrowRight } from "lucide-react";
+import { Wand2, Plus, Sparkles, ArrowRight, LayoutGrid, Image as ImageIcon, Film, Music2 } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { CANVAS_TEMPLATES, type CanvasTemplate } from "@/lib/canvas-templates";
+import { useCanvasStore } from "@/lib/canvas-store";
 
 const SUGGESTIONS = [
   { key: "pub", text: "Créer une publicité visuelle percutante avec image et voix off" },
@@ -14,6 +16,20 @@ const SUGGESTIONS = [
   { key: "podcast", text: "Assembler un podcast avec intro musicale et narration" },
 ];
 
+const CATEGORY_ICON: Record<CanvasTemplate["category"], typeof ImageIcon> = {
+  Pub: ImageIcon,
+  UGC: Film,
+  Film: Film,
+  Musique: Music2,
+};
+
+const CATEGORY_COLORS: Record<CanvasTemplate["category"], string> = {
+  Pub: "bg-amber/15 text-amber-soft border-amber/25",
+  UGC: "bg-violet-500/15 text-violet-300 border-violet-500/25",
+  Film: "bg-sky-500/15 text-sky-300 border-sky-500/25",
+  Musique: "bg-orange-500/15 text-orange-300 border-orange-500/25",
+};
+
 type Props = {
   onOpenAgent: (prompt: string) => void;
   onHighlightNodeAdd: () => void;
@@ -22,6 +38,23 @@ type Props = {
 export function EmptyStateCard({ onOpenAgent, onHighlightNodeAdd }: Props) {
   const t = useT();
   const [input, setInput] = useState("");
+  const addNode = useCanvasStore((s) => s.addNode);
+  const onConnect = useCanvasStore((s) => s.onConnect);
+
+  function handleLoadTemplate(template: CanvasTemplate) {
+    const nodeIds: string[] = [];
+    for (const n of template.nodes) {
+      const id = addNode(n.modelSlug, { x: n.x, y: n.y });
+      if (id) nodeIds.push(id);
+    }
+    for (const e of template.edges) {
+      const sourceId = nodeIds[e.source];
+      const targetId = nodeIds[e.target];
+      if (sourceId && targetId) {
+        onConnect({ source: sourceId, target: targetId, sourceHandle: "out", targetHandle: "in" });
+      }
+    }
+  }
 
   function handleAgent() {
     const text = input.trim();
@@ -79,6 +112,40 @@ export function EmptyStateCard({ onOpenAgent, onHighlightNodeAdd }: Props) {
               {t(`canvas.empty.suggestion.${s.key}`)}
             </button>
           ))}
+        </div>
+
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <LayoutGrid className="size-3.5 text-muted-foreground" />
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Templates</span>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {CANVAS_TEMPLATES.map((tpl) => {
+              const Icon = CATEGORY_ICON[tpl.category];
+              return (
+                <button
+                  key={tpl.id}
+                  type="button"
+                  onClick={() => handleLoadTemplate(tpl)}
+                  className={cn(
+                    "group text-left rounded-xl p-3 transition cursor-pointer",
+                    "border border-border/50 bg-surface-2/40",
+                    "hover:border-amber/40 hover:bg-surface-2/70",
+                  )}
+                >
+                  <div className="flex items-start gap-2.5">
+                    <div className={cn("size-7 rounded-lg flex items-center justify-center shrink-0 border", CATEGORY_COLORS[tpl.category])}>
+                      <Icon className="size-3.5" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-xs font-medium text-foreground truncate">{tpl.name}</div>
+                      <div className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2">{tpl.description}</div>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         <div className="flex items-center gap-3">

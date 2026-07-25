@@ -12,10 +12,12 @@ import { PriceBadge } from "@/components/canvas/price-badge";
 import { EmptyStateCard } from "@/components/canvas/empty-state-card";
 import { useCanvasStore } from "@/lib/canvas-store";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ArrowLeft, Copy, Eye, History, Settings2, Wand2 } from "lucide-react";
+import { ArrowLeft, Bot, Copy, Eye, History, Settings2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { RunHistoryPanel } from "@/components/canvas/run-history-panel";
 import { useT } from "@/lib/i18n";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
+import type { Layout } from "react-resizable-panels";
 
 const canvasSearchSchema = z.object({
   workflowId: z.number().optional(),
@@ -28,8 +30,6 @@ export const Route = createFileRoute("/canvas/")({
   validateSearch: canvasSearchSchema,
   component: CanvasPage,
 });
-
-type Tab = "inspector" | "agent";
 
 function CanvasPage() {
   return (
@@ -45,23 +45,16 @@ function CanvasPage() {
 function CanvasShell() {
   const t = useT();
   const isMobile = useIsMobile();
-  const [tab, setTab] = useState<Tab>("inspector");
+  const [agentOpen, setAgentOpen] = useState(false);
   const [prefillPrompt, setPrefillPrompt] = useState<string | undefined>();
   const [historyOpen, setHistoryOpen] = useState(false);
-  const selectedId = useCanvasStore((s) => s.selectedNodeId);
-  const setSelected = useCanvasStore((s) => s.setSelectedNodeId);
   const nodes = useCanvasStore((s) => s.nodes);
   const { workflowId } = Route.useSearch();
   const loadedRef = useRef(false);
 
-  // Auto-switch to inspector when a node is selected
-  useEffect(() => {
-    if (selectedId) setTab("inspector");
-  }, [selectedId]);
-
   const handleOpenAgent = useCallback((prompt: string) => {
     setPrefillPrompt(prompt);
-    setTab("agent");
+    setAgentOpen(true);
   }, []);
 
   const [nodePickerOpen, setNodePickerOpen] = useState(false);
@@ -127,8 +120,8 @@ function CanvasShell() {
           loadedRef={loadedRef}
           prefillPrompt={prefillPrompt}
           setPrefillPrompt={setPrefillPrompt}
-          tab={tab}
-          setTab={setTab}
+          agentOpen={agentOpen}
+          setAgentOpen={setAgentOpen}
           historyOpen={historyOpen}
           setHistoryOpen={setHistoryOpen}
           handleOpenAgent={handleOpenAgent}
@@ -149,13 +142,15 @@ function CanvasShell() {
   );
 }
 
+const PANEL_SIZES_KEY = "cortexia-canvas-panel-sizes";
+
 function CanvasInnerWrapper({
   workflowId,
   loadedRef,
   prefillPrompt,
   setPrefillPrompt,
-  tab,
-  setTab,
+  agentOpen,
+  setAgentOpen,
   historyOpen,
   setHistoryOpen,
   handleOpenAgent,
@@ -169,8 +164,8 @@ function CanvasInnerWrapper({
   loadedRef: React.MutableRefObject<boolean>;
   prefillPrompt: string | undefined;
   setPrefillPrompt: (v: string | undefined) => void;
-  tab: Tab;
-  setTab: (v: Tab) => void;
+  agentOpen: boolean;
+  setAgentOpen: (v: boolean) => void;
   historyOpen: boolean;
   setHistoryOpen: (v: boolean) => void;
   handleOpenAgent: (prompt: string) => void;
@@ -183,6 +178,21 @@ function CanvasInnerWrapper({
   const t = useT();
   const { fitView } = useReactFlow();
   const setSelected = useCanvasStore((s) => s.setSelectedNodeId);
+  const [savedLayout, setSavedLayout] = useState<Layout | undefined>(() => {
+    try {
+      const raw = localStorage.getItem(PANEL_SIZES_KEY);
+      if (!raw) return undefined;
+      const parsed = JSON.parse(raw);
+      if (typeof parsed === "object" && parsed !== null && "canvas" in parsed && "inspector" in parsed) {
+        return parsed as Layout;
+      }
+    } catch { /* ignore */ }
+    return undefined;
+  });
+
+  const handleLayoutChanged = useCallback((layout: Layout) => {
+    try { localStorage.setItem(PANEL_SIZES_KEY, JSON.stringify(layout)); } catch { /* ignore */ }
+  }, []);
 
   // Load workflow from DB if workflowId is in URL
   useEffect(() => {
@@ -199,49 +209,58 @@ function CanvasInnerWrapper({
 
   return (
     <>
-      <div className="flex-1 min-h-0 flex">
-        <div className="relative flex-1 min-w-0">
-          <CanvasFlow />
-          {showEmpty && (
-            <EmptyStateCard
-              onOpenAgent={(prompt) => {
-                setPrefillPrompt(prompt);
-                setTab("agent");
-              }}
-              onHighlightNodeAdd={handleHighlightNodeAdd}
-            />
-          )}
-        </div>
-
+      <ResizablePanelGroup
+        orientation="horizontal"
+        className="flex-1 min-h-0"
+        onLayoutChanged={handleLayoutChanged}
+      >
+        <ResizablePanel
+          id="canvas"
+          defaultSize={savedLayout?.canvas ?? "75"}
+          minSize="40"
+          className="rounded-2xl"
+        >
+          <div className="relative h-full rounded-2xl">
+            <CanvasFlow />
+            {showEmpty && (
+              <EmptyStateCard
+                onOpenAgent={(prompt) => {
+                  setPrefillPrompt(prompt);
+                  setAgentOpen(true);
+                }}
+                onHighlightNodeAdd={handleHighlightNodeAdd}
+              />
+            )}
+          </div>
+        </ResizablePanel>
         {!isMobile && (
-          <aside className="shrink-0 w-[340px] border-l border-border bg-surface-0/60 backdrop-blur-md flex flex-col">
-            <div className="flex items-center gap-1 border-b border-border px-2 py-2">
-              <TabButton
-                active={tab === "inspector"}
-                onClick={() => setTab("inspector")}
-                icon={<Settings2 className="size-3.5" />}
-                label={t("canvas.tab.inspector")}
-              />
-              <TabButton
-                active={tab === "agent"}
-                onClick={() => setTab("agent")}
-                icon={<Wand2 className="size-3.5" />}
-                label={t("canvas.tab.agent")}
-              />
-              <div className="ml-auto">
-                <PriceBadge className="h-7 px-2.5 text-[11px]" />
-              </div>
-            </div>
-            <div className="flex-1 min-h-0">
-              {tab === "inspector" ? (
-                <InspectorPanel onClose={() => setSelected(null)} />
-              ) : (
-                <AgentPanel initialPrompt={prefillPrompt} workflowId={workflowId ?? null} />
-              )}
-            </div>
-          </aside>
+          <>
+            <ResizableHandle withHandle />
+            <ResizablePanel
+              id="inspector"
+              defaultSize={savedLayout?.inspector ?? "25"}
+              minSize="15"
+              maxSize="50"
+              className="rounded-2xl"
+            >
+              <aside className="h-full rounded-2xl bg-surface-0/60 backdrop-blur-md flex flex-col">
+                <div className="flex items-center gap-2 border-b border-border px-4 py-3">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Settings2 className="size-3.5" />
+                    <span className="text-sm font-medium">{t("canvas.tab.inspector")}</span>
+                  </div>
+                  <div className="ml-auto">
+                    <PriceBadge className="h-7 px-2.5 text-[11px]" />
+                  </div>
+                </div>
+                <div className="flex-1 min-h-0">
+                  <InspectorPanel onClose={() => setSelected(null)} />
+                </div>
+              </aside>
+            </ResizablePanel>
+          </>
         )}
-      </div>
+      </ResizablePanelGroup>
 
       {selectedNodeIds.length > 0 && !isMobile && (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
@@ -262,34 +281,51 @@ function CanvasInnerWrapper({
           <NodePicker className="!h-10 shadow-lg" />
         </div>
       )}
-    </>
-  );
-}
 
-function TabButton({
-  active,
-  onClick,
-  icon,
-  label,
-}: {
-  active: boolean;
-  onClick: () => void;
-  icon: React.ReactNode;
-  label: string;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-md px-2.5 h-8 text-xs transition cursor-pointer",
-        active
-          ? "bg-surface-2 text-foreground"
-          : "text-muted-foreground hover:bg-surface-1/60 hover:text-foreground",
+      {/* Floating Agent toggle button */}
+      {!isMobile && (
+        <button
+          type="button"
+          onClick={() => setAgentOpen((v) => !v)}
+          className={cn(
+            "absolute bottom-4 right-4 z-20 inline-flex items-center justify-center size-11 rounded-full border shadow-lg transition cursor-pointer",
+            agentOpen
+              ? "bg-amber text-primary-foreground border-amber/40"
+              : "bg-surface-1/90 backdrop-blur border-border hover:border-amber/40 text-muted-foreground hover:text-foreground"
+          )}
+          aria-label={t("canvas.tab.agent")}
+        >
+          <Bot className="size-5" />
+        </button>
       )}
-    >
-      {icon}
-      {label}
-    </button>
+
+      {/* Agent slide-in panel */}
+      {agentOpen && (
+        <div
+          className="absolute inset-y-0 right-0 z-30 flex"
+          style={{ top: 0 }}
+        >
+          <div
+            className="absolute inset-0 bg-black/20 backdrop-blur-sm"
+            onClick={() => setAgentOpen(false)}
+          />
+          <div className="relative ml-auto w-[380px] h-full bg-surface-0 border-l border-border shadow-2xl flex flex-col rounded-l-2xl overflow-hidden animate-in slide-in-from-right duration-200">
+            <div className="flex items-center justify-end px-3 py-2 border-b border-border">
+              <button
+                type="button"
+                onClick={() => setAgentOpen(false)}
+                className="inline-flex items-center justify-center size-7 rounded-md text-muted-foreground hover:bg-surface-2 hover:text-foreground transition cursor-pointer"
+                aria-label={t("canvas.tab.agent")}
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+            <div className="flex-1 min-h-0">
+              <AgentPanel initialPrompt={prefillPrompt} workflowId={workflowId ?? null} />
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
