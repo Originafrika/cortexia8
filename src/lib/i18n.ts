@@ -449,6 +449,32 @@ const fr: Dict = {
   "time.minutes": "il y a {n}m",
   "time.hours": "il y a {n}h",
   "time.days": "il y a {n}j",
+
+  // Access denied
+  "access_denied.title": "Accès refusé",
+  "access_denied.body":
+    "Cette application est en accès restreint. Pour obtenir un accès, contacte l'administrateur.",
+  "access_denied.signout": "Se déconnecter",
+
+  // App preview
+  "preview.hero.title1": "Un accès. Tous les modèles.",
+  "preview.hero.title2": "Facturé à la seconde.",
+  "preview.hero.body":
+    "Cortexia route ton prompt vers le meilleur modèle disponible — ou tu choisis toi-même. Payé à l'usage. Zéro abonnement. Payable partout.",
+  "preview.cta.start": "Commencer à créer",
+  "preview.cta.catalog": "Voir le catalogue",
+  "preview.models_title": "Modèles disponibles",
+  "preview.sim_title": "Simule ton usage.",
+  "preview.sim_body":
+    "Aucune surprise en fin de mois — la facture est le simulateur.",
+  "preview.footer_copy": "© 2026 Cortexia — construit pour les créateurs, partout.",
+  "preview.footer_open": "Ouvrir l'app",
+
+  // Recharge link
+  "app.recharge": "Recharger →",
+
+  // Onboarding welcome label
+  "app.onb.welcome_label": "Cadeau de bienvenue",
 };
 
 const en: Dict = {
@@ -873,6 +899,32 @@ const en: Dict = {
   "time.minutes": "{n}m ago",
   "time.hours": "{n}h ago",
   "time.days": "{n}d ago",
+
+  // Access denied
+  "access_denied.title": "Access denied",
+  "access_denied.body":
+    "This application is restricted. To get access, contact your administrator.",
+  "access_denied.signout": "Sign out",
+
+  // App preview
+  "preview.hero.title1": "One access. Every model.",
+  "preview.hero.title2": "Billed by the second.",
+  "preview.hero.body":
+    "Cortexia routes your prompt to the best available model — or you pick yourself. Pay-as-you-go. Zero subscription. Payable anywhere.",
+  "preview.cta.start": "Start creating",
+  "preview.cta.catalog": "Browse catalog",
+  "preview.models_title": "Available models",
+  "preview.sim_title": "Simulate your usage.",
+  "preview.sim_body":
+    "No end-of-month surprises — the bill is the simulator.",
+  "preview.footer_copy": "© 2026 Cortexia — built for creators, everywhere.",
+  "preview.footer_open": "Open app",
+
+  // Recharge link
+  "app.recharge": "Top up →",
+
+  // Onboarding welcome label
+  "app.onb.welcome_label": "Welcome gift",
 };
 
 // Portuguese, Spanish, Indonesian , cover the core landing strings.
@@ -1287,6 +1339,32 @@ const pt: Dict = {
   "time.minutes": "há {n}m",
   "time.hours": "há {n}h",
   "time.days": "há {n}d",
+
+  // Access denied
+  "access_denied.title": "Acesso negado",
+  "access_denied.body":
+    "Este aplicativo é de acesso restrito. Para obter acesso, entre em contato com o administrador.",
+  "access_denied.signout": "Sair",
+
+  // App preview
+  "preview.hero.title1": "Um acesso. Todos os modelos.",
+  "preview.hero.title2": "Cobrado por segundo.",
+  "preview.hero.body":
+    "Cortexia roteia seu prompt para o melhor modelo disponível — ou você escolhe. Cobrado por uso. Sem assinatura. Pago em todo lugar.",
+  "preview.cta.start": "Começar a criar",
+  "preview.cta.catalog": "Ver catálogo",
+  "preview.models_title": "Modelos disponíveis",
+  "preview.sim_title": "Simule seu uso.",
+  "preview.sim_body":
+    "Nenhuma surpresa no fim do mês — a fatura é o simulador.",
+  "preview.footer_copy": "© 2026 Cortexia — construído para os criadores, em todo lugar.",
+  "preview.footer_open": "Abrir o app",
+
+  // Recharge link
+  "app.recharge": "Recarregar →",
+
+  // Onboarding welcome label
+  "app.onb.welcome_label": "Presente de boas-vindas",
 };
 
 const es: Dict = {
@@ -1699,6 +1777,32 @@ const es: Dict = {
   "time.minutes": "hace {n}m",
   "time.hours": "hace {n}h",
   "time.days": "hace {n}d",
+
+  // Access denied
+  "access_denied.title": "Acceso denegado",
+  "access_denied.body":
+    "Esta aplicación tiene acceso restringido. Para obtener acceso, contacta al administrador.",
+  "access_denied.signout": "Cerrar sesión",
+
+  // App preview
+  "preview.hero.title1": "Un acceso. Todos los modelos.",
+  "preview.hero.title2": "Facturado por segundo.",
+  "preview.hero.body":
+    "Cortexia enruta tu prompt al mejor modelo disponible — o elegís vos. Pagás por uso. Sin suscripción. Pagable en todos lados.",
+  "preview.cta.start": "Empezar a crear",
+  "preview.cta.catalog": "Ver catálogo",
+  "preview.models_title": "Modelos disponibles",
+  "preview.sim_title": "Simulá tu uso.",
+  "preview.sim_body":
+    "Sin sorpresas de fin de mes — la factura es el simulador.",
+  "preview.footer_copy": "© 2026 Cortexia — construido para los creadores, en todos lados.",
+  "preview.footer_open": "Abrir la app",
+
+  // Recharge link
+  "app.recharge": "Recargar →",
+
+  // Onboarding welcome label
+  "app.onb.welcome_label": "Regalo de bienvenida",
 };
 
 const id: Dict = {
@@ -2111,6 +2215,32 @@ const id: Dict = {
   "time.minutes": "{n}m lalu",
   "time.hours": "{n}j lalu",
   "time.days": "{n}h lalu",
+
+  // Access denied
+  "access_denied.title": "Akses ditolak",
+  "access_denied.body":
+    "Aplikasi ini memiliki akses terbatas. Untuk mendapatkan akses, hubungi administrator.",
+  "access_denied.signout": "Keluar",
+
+  // App preview
+  "preview.hero.title1": "Satu akses. Semua model.",
+  "preview.hero.title2": "Dibayar per detik.",
+  "preview.hero.body":
+    "Cortexia merutekan promptmu ke model terbaik yang tersedia — atau kamu pilih sendiri. Dibayar per penggunaan. Tanpa langganan. Bisa dibayar di mana saja.",
+  "preview.cta.start": "Mulai berkreasi",
+  "preview.cta.catalog": "Lihat katalog",
+  "preview.models_title": "Model tersedia",
+  "preview.sim_title": "Simulasikan penggunaanmu.",
+  "preview.sim_body":
+    "Tanpa kejutan di akhir bulan — tagihan adalah simulasi.",
+  "preview.footer_copy": "© 2026 Cortexia — dibuat untuk kreator, di mana saja.",
+  "preview.footer_open": "Buka app",
+
+  // Recharge link
+  "app.recharge": "Isi ulang →",
+
+  // Onboarding welcome label
+  "app.onb.welcome_label": "Hadiah selamat datang",
 };
 
 const DICTS: Record<Lang, Dict> = { fr, en, pt, id, es };

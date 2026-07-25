@@ -137,7 +137,7 @@ function AppShell({
               to="/app/account"
               className="mt-2 inline-flex items-center gap-1 text-xs text-amber-soft hover:underline"
             >
-              Recharger →
+              {t("app.recharge")}
             </Link>
           </div>
         </aside>
@@ -201,7 +201,7 @@ function AppShell({
                           onClick={() => setMobileOpen(false)}
                           className="mt-2 inline-flex items-center gap-1 text-xs text-amber-soft hover:underline"
                         >
-                          Recharger →
+                          {t("app.recharge")}
                         </Link>
                       </div>
                     </div>

@@ -493,7 +493,7 @@ function ResultBlock({ turn, onRefine }: { turn: Turn; onRefine: (chip: string) 
     <div className="surface-gradient-border rounded-3xl bg-surface-1/50 overflow-hidden">
       <div className="relative aspect-[16/10] bg-gradient-to-br from-amber/20 via-surface-2 to-surface-0 overflow-hidden">
         <img
-          src={turn.resultUrl || `https://picsum.photos/seed/${turn.id}/900/560`}
+          src={turn.resultUrl || undefined}
           alt=""
           className={cn(
             "absolute inset-0 h-full w-full object-cover transition-all duration-700",

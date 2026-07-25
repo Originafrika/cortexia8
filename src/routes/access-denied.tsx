@@ -1,17 +1,18 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { authClient } from "@/auth";
 import { clearSession } from "@/lib/auth-store";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/access-denied")({
   component: () => {
     const navigate = useNavigate();
+    const t = useT();
     return (
       <div className="min-h-screen grid place-items-center">
         <div className="text-center max-w-md">
-          <h1 className="text-3xl font-semibold">Accès refusé</h1>
+          <h1 className="text-3xl font-semibold">{t("access_denied.title")}</h1>
           <p className="text-muted-foreground mt-3">
-            Cette application est en accès restreint.
-            Pour obtenir un accès, contacte l'administrateur.
+            {t("access_denied.body")}
           </p>
           <button
             onClick={async () => {
@@ -21,7 +22,7 @@ export const Route = createFileRoute("/access-denied")({
             }}
             className="mt-6 underline text-sm"
           >
-            Se déconnecter
+            {t("access_denied.signout")}
           </button>
         </div>
       </div>
