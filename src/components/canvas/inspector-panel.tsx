@@ -110,7 +110,7 @@ export function InspectorPanel({ onClose }: { onClose: () => void }) {
               useCanvasStore.getState().updateNodeParams(node.id, initStateForModel(m));
             }}
             disabled={readOnly}
-            title="Réinitialiser les paramètres"
+            title={t("node.reset_params")}
           >
             <RotateCcw className="size-3.5" />
           </Button>
@@ -121,7 +121,7 @@ export function InspectorPanel({ onClose }: { onClose: () => void }) {
             onClick={() => useCanvasStore.getState().removeNode(node.id)}
             disabled={readOnly}
             className="text-muted-foreground hover:text-foreground"
-            title="Supprimer le nœud"
+            title={t("node.delete")}
           >
             <Trash2 className="size-3.5" />
           </Button>
@@ -131,7 +131,7 @@ export function InspectorPanel({ onClose }: { onClose: () => void }) {
             variant="outline"
             onClick={() => useCanvasStore.getState().duplicateBranch([node.id])}
             disabled={readOnly}
-            title="Dupliquer le nœud"
+            title={t("node.duplicate")}
           >
             <Copy className="size-3.5" />
           </Button>

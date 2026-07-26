@@ -123,8 +123,8 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
             e.stopPropagation();
             removeNode(id);
           }}
-          className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground transition p-1"
-          aria-label="Supprimer le nœud"
+          className="sm:opacity-0 sm:group-hover:opacity-100 text-muted-foreground hover:text-foreground transition p-1 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          aria-label={t("node.delete")}
         >
           ×
         </button>
@@ -160,7 +160,7 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
                   runFromNode(id);
                 }}
                 disabled={readOnly}
-                title="Exécuter ce nœud et tous les nœuds en aval"
+                title={t("node.run_from_here")}
                 className="inline-flex items-center gap-1 rounded-full bg-sky-600/90 px-2 py-1 text-[10px] font-medium text-primary-foreground hover:bg-sky-600 disabled:opacity-50 transition"
               >
                 <PlayCircle className="size-2.5" /> {t("node.action.from_here")}
@@ -171,7 +171,7 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
                   rerunNode(id);
                 }}
                 disabled={readOnly}
-                title="Relancer ce nœud et ses dépendances"
+                title={t("node.rerun")}
                 className="inline-flex items-center gap-1 rounded-full bg-emerald/90 px-2 py-1 text-[10px] font-medium text-primary-foreground hover:bg-emerald disabled:opacity-50 transition"
               >
                 <RefreshCw className="size-2.5" /> {t("node.action.rerun")}

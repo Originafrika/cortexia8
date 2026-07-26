@@ -7,6 +7,7 @@ import { createApiKey, listApiKeys, revokeApiKey, type ApiKeyRow } from "@/lib/a
 import { useT } from "@/lib/i18n";
 import { loadSession } from "@/lib/auth-store";
 import { toast } from "sonner";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/app/developers")({
   component: DevelopersPage,
@@ -182,16 +183,17 @@ print(url, cost)`,
               placeholder={t("dev.key_name_placeholder")}
               className="rounded-full border border-border bg-surface-1/70 px-3 py-1.5 text-sm focus:border-amber/40 outline-none w-full sm:w-48"
             />
-            <select
-              value={keyScope}
-              onChange={(e) => setKeyScope(e.target.value)}
-              className="rounded-full border border-border bg-surface-1/70 px-3 py-1.5 text-sm focus:border-amber/40 outline-none"
-            >
-              <option value="generate:*">generate:* (all)</option>
-              <option value="generate:image">generate:image</option>
-              <option value="generate:video">generate:video</option>
-              <option value="generate:audio">generate:audio</option>
-            </select>
+            <Select value={keyScope} onValueChange={setKeyScope}>
+              <SelectTrigger className="rounded-full w-[180px] h-9 text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="generate:*" className="text-sm">generate:* (all)</SelectItem>
+                <SelectItem value="generate:image" className="text-sm">generate:image</SelectItem>
+                <SelectItem value="generate:video" className="text-sm">generate:video</SelectItem>
+                <SelectItem value="generate:audio" className="text-sm">generate:audio</SelectItem>
+              </SelectContent>
+            </Select>
             <button
               onClick={handleCreateKey}
               disabled={creatingKey || !keyName.trim()}

@@ -141,12 +141,6 @@
   .font-mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
   .tabular { font-variant-numeric: tabular-nums; }
 
-  :focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--ring);
-    border-radius: 6px;
-  }
-
   ::selection {
     background: color-mix(in oklab, var(--amber) 40%, transparent);
     color: var(--foreground);

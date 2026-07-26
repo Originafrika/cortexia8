@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { getHistory, type HistoryItem } from "@/lib/api/history";
 import { loadSession } from "@/lib/auth-store";
 import { useT } from "@/lib/i18n";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/app/history")({
   component: HistoryPage,
@@ -161,20 +162,21 @@ function HistoryPage() {
           <label className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
             {t("history.model")}
           </label>
-          <select
-            value={modelSlug}
-            onChange={(e) => setModelSlug(e.target.value)}
-            className="rounded-full border border-border bg-surface-1/70 px-3 py-1.5 text-xs focus:border-amber/40 outline-none max-w-[200px]"
-          >
-            <option value="all">{t("history.all")}</option>
-            {modelOptions
-              .filter((m) => cat === "all" || m.category === cat)
-              .map((m) => (
-                <option key={m.slug} value={m.slug}>
-                  {m.name}
-                </option>
-              ))}
-          </select>
+          <Select value={modelSlug} onValueChange={setModelSlug}>
+            <SelectTrigger className="w-[180px] h-8 rounded-full text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all" className="text-xs">{t("history.all")}</SelectItem>
+              {modelOptions
+                .filter((m) => cat === "all" || m.category === cat)
+                .map((m) => (
+                  <SelectItem key={m.slug} value={m.slug} className="text-xs">
+                    {m.name}
+                  </SelectItem>
+                ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 

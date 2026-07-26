@@ -302,7 +302,7 @@ function CanvasInnerWrapper({
       {/* Agent slide-in panel */}
       {agentOpen && (
         <div
-          className="absolute inset-y-0 right-0 z-30 flex"
+          className="absolute inset-y-0 right-0 z-40 flex"
           style={{ top: 0 }}
         >
           <div

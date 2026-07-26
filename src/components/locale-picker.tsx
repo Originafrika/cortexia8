@@ -22,11 +22,11 @@ export function LocalePicker({ className }: { className?: string }) {
 
   useEffect(() => {
     if (!open) return;
-    function onClick(e: MouseEvent) {
+    function onClick(e: PointerEvent) {
       if (!ref.current?.contains(e.target as Node)) setOpen(false);
     }
-    window.addEventListener("mousedown", onClick);
-    return () => window.removeEventListener("mousedown", onClick);
+    window.addEventListener("pointerdown", onClick);
+    return () => window.removeEventListener("pointerdown", onClick);
   }, [open]);
 
   const current = CURRENCIES[code];
@@ -52,7 +52,7 @@ export function LocalePicker({ className }: { className?: string }) {
         <ChevronDown className="size-3 opacity-60" />
       </button>
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-[22rem] max-w-[calc(100vw-2rem)] rounded-2xl border border-border bg-popover shadow-2xl shadow-black/60 p-2 z-50 animate-in fade-in-0 zoom-in-95">
+        <div className="absolute right-0 top-full mt-2 w-[22rem] max-w-[calc(100vw-2rem)] rounded-2xl border border-border bg-popover shadow-md p-2 z-50 animate-in fade-in-0 zoom-in-95">
           <div className="grid grid-cols-2 gap-2">
             <div>
               <div className="px-2 py-1.5 font-mono text-[9px] uppercase tracking-[0.22em] text-muted-foreground">
@@ -64,7 +64,7 @@ export function LocalePicker({ className }: { className?: string }) {
                     key={cur.code}
                     onClick={() => onCurrency(cur.code)}
                     className={cn(
-                      "w-full flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs hover:bg-surface-2/70 transition-colors",
+                      "w-full flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs hover:bg-surface-2/70 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring transition-colors",
                       cur.code === code && "bg-surface-2/50",
                     )}
                   >
@@ -86,7 +86,7 @@ export function LocalePicker({ className }: { className?: string }) {
                     key={l}
                     onClick={() => setLang(l)}
                     className={cn(
-                      "w-full flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs hover:bg-surface-2/70 transition-colors",
+                      "w-full flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs hover:bg-surface-2/70 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring transition-colors",
                       l === lang && "bg-surface-2/50",
                     )}
                   >

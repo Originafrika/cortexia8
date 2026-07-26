@@ -4,6 +4,16 @@ import { Sparkles, Send, Check, Loader2, Wand2, ChevronDown, ChevronUp, AlertTri
 import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 import {
   runAgent,
   AGENT_MODELS,
@@ -355,7 +365,7 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
           type="button"
           onClick={() => setExpanded((v) => !v)}
           className="grid place-items-center size-7 rounded-md text-muted-foreground hover:bg-surface-2 hover:text-foreground transition"
-          aria-label={expanded ? "Réduire" : "Déployer"}
+          aria-label={expanded ? t("agent.collapse") : t("agent.expand")}
         >
           {expanded ? <ChevronDown className="size-3.5" /> : <ChevronUp className="size-3.5" />}
         </button>
@@ -369,19 +379,18 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
               <label htmlFor="agent-model" className="text-xs text-muted-foreground whitespace-nowrap">
                 {t("agent.model")}
               </label>
-              <select
-                id="agent-model"
-                value={selectedModel}
-                onChange={(e) => setSelectedModel(e.target.value as AgentModel)}
-                disabled={busy}
-                className="flex-1 text-xs bg-surface-2 border border-border rounded-md px-2 py-1.5 text-foreground disabled:opacity-50"
-              >
-                {AGENT_MODELS.map((m) => (
-                  <option key={m.value} value={m.value}>
-                    {m.label}
-                  </option>
-                ))}
-              </select>
+              <Select value={selectedModel} onValueChange={(v) => setSelectedModel(v as AgentModel)} disabled={busy}>
+                <SelectTrigger id="agent-model" className="flex-1 h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {AGENT_MODELS.map((m) => (
+                    <SelectItem key={m.value} value={m.value} className="text-xs">
+                      {m.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Permission Mode Selector */}
@@ -389,17 +398,16 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
               <label htmlFor="permission-mode" className="text-xs text-muted-foreground whitespace-nowrap">
                 {t("agent.permissions")}
               </label>
-              <select
-                id="permission-mode"
-                value={permissionMode}
-                onChange={(e) => setPermissionMode(e.target.value as PermissionMode)}
-                disabled={busy}
-                className="flex-1 text-xs bg-surface-2 border border-border rounded-md px-2 py-1.5 text-foreground disabled:opacity-50"
-              >
-                <option value="approve_each">{t("agent.approve_each")}</option>
-                <option value="auto_run">{t("agent.auto_run")}</option>
-                <option value="auto_under_threshold">{t("agent.auto_under_threshold")}</option>
-              </select>
+              <Select value={permissionMode} onValueChange={(v) => setPermissionMode(v as PermissionMode)} disabled={busy}>
+                <SelectTrigger id="permission-mode" className="flex-1 h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="approve_each" className="text-xs">{t("agent.approve_each")}</SelectItem>
+                  <SelectItem value="auto_run" className="text-xs">{t("agent.auto_run")}</SelectItem>
+                  <SelectItem value="auto_under_threshold" className="text-xs">{t("agent.auto_under_threshold")}</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <Textarea
@@ -450,22 +458,25 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
           </div>
 
           {/* Confirmation Dialog */}
-          {showConfirmDialog && pendingOperations && (
-            <div className="px-4 py-3 border-t border-amber/30 bg-amber/5">
-              <div className="flex items-start gap-2 mb-3">
-                <AlertTriangle className="size-4 text-amber mt-0.5 shrink-0" />
-                <div className="text-xs text-foreground">
-                  <div className="font-medium mb-1">{t("agent.confirm.title")}</div>
-                  <div className="text-muted-foreground">
-                    {t("agent.confirm.cost")} <span className="font-medium text-amber">${pendingOperations.estimatedCost.toFixed(4)}</span>
-                    <br />
-                    {t("agent.confirm.threshold")} ${COST_CONFIRM_THRESHOLD}
-                    <br />
-                    {pendingOperations.operations.length} opération(s) seront exécutées.
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
+          <AlertDialog open={showConfirmDialog && !!pendingOperations} onOpenChange={(open) => { if (!open) handleCancel(); }}>
+            <AlertDialogContent className="sm:max-w-md">
+              <AlertDialogHeader>
+                <AlertDialogTitle className="flex items-center gap-2">
+                  <AlertTriangle className="size-4 text-amber" />
+                  {t("agent.confirm.title")}
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  {t("agent.confirm.cost")} <span className="font-medium text-amber">${pendingOperations?.estimatedCost?.toFixed(4) ?? "0"}</span>
+                  <br />
+                  {t("agent.confirm.threshold")} ${COST_CONFIRM_THRESHOLD}
+                  <br />
+                  {pendingOperations?.operations?.length ?? 0} opération(s) seront exécutées.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter className="flex-row gap-2 sm:gap-2">
+                <AlertDialogCancel onClick={handleCancel} className="mt-0">
+                  {t("agent.confirm.cancel")}
+                </AlertDialogCancel>
                 <Button
                   type="button"
                   onClick={() => handleConfirm(false)}
@@ -482,18 +493,9 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
                 >
                   {t("agent.confirm.launch")}
                 </Button>
-                <Button
-                  type="button"
-                  onClick={handleCancel}
-                  size="sm"
-                  variant="outline"
-                  className="flex-1"
-                >
-                  {t("agent.confirm.cancel")}
-                </Button>
-              </div>
-            </div>
-          )}
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
 
           {log.length > 0 && (
             <div className="flex-1 min-h-0 overflow-y-auto border-t border-border px-4 py-3 space-y-1.5">
