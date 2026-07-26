@@ -109,7 +109,8 @@ async function resolveSessionFromToken(
 
     if (users.length === 0) return null;
     return { userId: users[0].id, apiKeyId: null };
-  } catch {
+  } catch (err) {
+    console.error("[auth] resolveSessionFromToken failed:", err);
     return null;
   }
 }

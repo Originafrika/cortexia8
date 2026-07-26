@@ -115,15 +115,37 @@ function Auth() {
       const { data, error } = await authClient.emailOtp.verifyEmail({ email, otp: code });
       if (error) throw error;
 
-      const anyData = data as { session?: unknown; token?: string } | null;
+      const anyData = data as { session?: { user?: { id: string; name: string; email: string; role?: string; emailVerified?: boolean } }; token?: string } | null;
       if (anyData?.session || anyData?.token) {
+        const u = anyData.session?.user;
+        saveSession({
+          token: anyData.token,
+          user: {
+            id: u?.id ?? "",
+            name: u?.name ?? "",
+            email: u?.email ?? email,
+            role: u?.role ?? "user",
+            emailVerified: true,
+          },
+        });
         navigate({ to: "/app-preview" });
         return;
       }
       // Auto-sign-in disabled — try to sign the user in with their password.
       if (password) {
-        const { error: signErr } = await authClient.signIn.email({ email, password });
-        if (!signErr) {
+        const signResult = await authClient.signIn.email({ email, password });
+        if (!signResult.error && signResult.data?.user) {
+          const role = signResult.data.user.role ?? "user";
+          saveSession({
+            token: signResult.data.token,
+            user: {
+              id: signResult.data.user.id,
+              name: signResult.data.user.name,
+              email: signResult.data.user.email,
+              role,
+              emailVerified: true,
+            },
+          });
           navigate({ to: "/app-preview" });
           return;
         }
