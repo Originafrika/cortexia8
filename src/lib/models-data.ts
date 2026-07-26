@@ -153,9 +153,27 @@ export const schemaLLM: InputSchemaField[] = [
   { key: "top_p", type: "number", label: "Top P", min: 0, max: 1, step: 0.05, default: 1 },
 ];
 
-export const schemaClaude: InputSchemaField[] = [
+export const schemaClaude8k: InputSchemaField[] = [
   { key: "messages", type: "longtext", required: true, label: "Messages (JSON array)" },
-  { key: "max_tokens", type: "number", min: 1, max: 4096, step: 1, default: 4096 },
+  { key: "max_tokens", type: "number", min: 1, max: 8192, step: 1, default: 4096 },
+  { key: "thinkingFlag", type: "boolean", default: false },
+];
+
+export const schemaClaude16k: InputSchemaField[] = [
+  { key: "messages", type: "longtext", required: true, label: "Messages (JSON array)" },
+  { key: "max_tokens", type: "number", min: 1, max: 16384, step: 1, default: 4096 },
+  { key: "thinkingFlag", type: "boolean", default: false },
+];
+
+export const schemaClaude32k: InputSchemaField[] = [
+  { key: "messages", type: "longtext", required: true, label: "Messages (JSON array)" },
+  { key: "max_tokens", type: "number", min: 1, max: 32768, step: 1, default: 4096 },
+  { key: "thinkingFlag", type: "boolean", default: false },
+];
+
+export const schemaClaudeDefault: InputSchemaField[] = [
+  { key: "messages", type: "longtext", required: true, label: "Messages (JSON array)" },
+  { key: "max_tokens", type: "number", min: 1, max: 8192, step: 1, default: 4096 },
   { key: "thinkingFlag", type: "boolean", default: false },
 ];
 
@@ -2190,7 +2208,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Raisonnement profond, analyses stratégiques, code exigeant.",
     unit: "1m-tokens-io",
     io: { inputUSD: 1.425, outputUSD: 7.15 },
-    inputSchema: schemaClaude,
+    inputSchema: schemaClaude32k,
   },
   {
     slug: "claude-opus-48",
@@ -2207,7 +2225,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Claude Opus 4.8 — successeur haut de gamme Anthropic.",
     unit: "1m-tokens-io",
     io: { inputUSD: 1.5, outputUSD: 7.5 },
-    inputSchema: schemaClaude,
+    inputSchema: schemaClaude32k,
   },
   {
     slug: "claude-fable-5",
@@ -2223,7 +2241,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Claude Fable 5 — variante créative pour narration.",
     unit: "1m-tokens-io",
     io: { inputUSD: 0.6, outputUSD: 3.0 },
-    inputSchema: schemaClaude,
+    inputSchema: schemaClaude8k,
   },
   {
     slug: "claude-sonnet-5",
@@ -2239,7 +2257,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Claude Sonnet 5 — prochaine génération milieu de gamme.",
     unit: "1m-tokens-io",
     io: { inputUSD: 1.0, outputUSD: 5.0 },
-    inputSchema: schemaClaude,
+    inputSchema: schemaClaude16k,
   },
   {
     slug: "claude-haiku-45",
@@ -2255,7 +2273,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Claude Haiku 4.5 — entrée de gamme rapide et économique.",
     unit: "1m-tokens-io",
     io: { inputUSD: 0.2, outputUSD: 1.0 },
-    inputSchema: schemaClaude,
+    inputSchema: schemaClaude8k,
   },
   {
     slug: "claude-opus-45",
@@ -2271,7 +2289,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Claude Opus 4.5 — génération précédente haut de gamme.",
     unit: "1m-tokens-io",
     io: { inputUSD: 1.2, outputUSD: 6.0 },
-    inputSchema: schemaClaude,
+    inputSchema: schemaClaude32k,
   },
   {
     slug: "claude-opus-46",
@@ -2287,7 +2305,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Claude Opus 4.6 — génération intermédiaire haut de gamme.",
     unit: "1m-tokens-io",
     io: { inputUSD: 1.3, outputUSD: 6.5 },
-    inputSchema: schemaClaude,
+    inputSchema: schemaClaude32k,
   },
   {
     slug: "claude-sonnet-45",
@@ -2303,7 +2321,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Claude Sonnet 4.5 — génération précédente milieu de gamme.",
     unit: "1m-tokens-io",
     io: { inputUSD: 0.8, outputUSD: 4.0 },
-    inputSchema: schemaClaude,
+    inputSchema: schemaClaude8k,
   },
   {
     slug: "claude-sonnet-46",
@@ -2320,7 +2338,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Le meilleur compromis raisonnement/vitesse d'Anthropic.",
     unit: "1m-tokens-io",
     io: { inputUSD: 0.85, outputUSD: 4.275 },
-    inputSchema: schemaClaude,
+    inputSchema: schemaClaude8k,
   },
   {
     slug: "gpt-codex",
