@@ -93,15 +93,22 @@ async function resolveSessionFromToken(
 ): Promise<RequestContext | null> {
   try {
     const rows = (await sql`
-      SELECT u.email
+      SELECT u.email, u.name
       FROM session s
       JOIN "user" u ON u.id = s.user_id
       WHERE s.token = ${token}
         AND s.expires_at > NOW()
       LIMIT 1
-    `) as { email: string }[];
+    `) as { email: string; name: string }[];
 
     if (rows.length === 0) return null;
+
+    // Upsert into local users table so app operations can reference the integer userId.
+    await sql`
+      INSERT INTO users (email, display_name)
+      VALUES (${rows[0].email}, ${rows[0].name ?? ""})
+      ON CONFLICT (email) DO NOTHING
+    `.catch(() => undefined);
 
     const users = (await sql`
       SELECT id FROM users WHERE email = ${rows[0].email} LIMIT 1

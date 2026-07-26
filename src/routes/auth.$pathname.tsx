@@ -48,6 +48,18 @@ function Auth() {
       if (data?.user && !data.user.emailVerified) {
         setInfo("Un code de vérification vient de t'être envoyé par email.");
         setStep("verify");
+      } else if (data?.user) {
+        saveSession({
+          token: (data as any).token ?? (data as any).session?.token ?? "",
+          user: {
+            id: data.user.id,
+            name: data.user.name,
+            email: data.user.email,
+            role: (data.user as any).role ?? "user",
+            emailVerified: true,
+          },
+        });
+        navigate({ to: "/app-preview" });
       } else {
         navigate({ to: "/app-preview" });
       }
@@ -115,23 +127,8 @@ function Auth() {
       const { data, error } = await authClient.emailOtp.verifyEmail({ email, otp: code });
       if (error) throw error;
 
-      const anyData = data as { session?: { user?: { id: string; name: string; email: string; role?: string; emailVerified?: boolean } }; token?: string } | null;
-      if (anyData?.session || anyData?.token) {
-        const u = anyData.session?.user;
-        saveSession({
-          token: anyData.token,
-          user: {
-            id: u?.id ?? "",
-            name: u?.name ?? "",
-            email: u?.email ?? email,
-            role: u?.role ?? "user",
-            emailVerified: true,
-          },
-        });
-        navigate({ to: "/app-preview" });
-        return;
-      }
-      // Auto-sign-in disabled — try to sign the user in with their password.
+      // Always re-sign in after OTP verification to get a proper session token.
+      // The verifyEmail response may not include a usable token.
       if (password) {
         const signResult = await authClient.signIn.email({ email, password });
         if (!signResult.error && signResult.data?.user) {
@@ -146,9 +143,31 @@ function Auth() {
               emailVerified: true,
             },
           });
-          navigate({ to: "/app-preview" });
+          if (role === "admin") {
+            navigate({ to: "/app-preview" });
+          } else {
+            navigate({ to: "/access-denied" });
+          }
           return;
         }
+      }
+      // Fallback: if no password was stored, try to extract token from verify response.
+      const anyData = data as { session?: { user?: { id: string; name: string; email: string; role?: string } }; token?: string } | null;
+      const token = anyData?.token ?? anyData?.session?.user?.id ? (anyData as any)?.session?.token : undefined;
+      if (token) {
+        const u = anyData?.session?.user;
+        saveSession({
+          token,
+          user: {
+            id: u?.id ?? "",
+            name: u?.name ?? "",
+            email: u?.email ?? email,
+            role: u?.role ?? "user",
+            emailVerified: true,
+          },
+        });
+        navigate({ to: "/app-preview" });
+        return;
       }
       setInfo("Email vérifié. Tu peux maintenant te connecter.");
       setMode("sign-in");
