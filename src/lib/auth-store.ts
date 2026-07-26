@@ -12,6 +12,7 @@ export interface StoredSession {
 }
 
 export function saveSession(data: { token: string; user: StoredSession["user"] }) {
+  if (typeof window === "undefined") return; // SSR guard
   try {
     console.log("[auth-store] saveSession token:", data.token ? data.token.slice(0, 12) + "..." : "EMPTY/UNDEFINED");
     console.log("[auth-store] saveSession user:", data.user);
@@ -23,6 +24,7 @@ export function saveSession(data: { token: string; user: StoredSession["user"] }
 }
 
 export function loadSession(): StoredSession | null {
+  if (typeof window === "undefined") return null; // SSR guard
   try {
     const raw = localStorage.getItem(SESSION_KEY);
     console.log("[auth-store] loadSession raw:", raw ? raw.slice(0, 100) + "..." : "NULL");
@@ -37,6 +39,7 @@ export function loadSession(): StoredSession | null {
 }
 
 export function clearSession() {
+  if (typeof window === "undefined") return; // SSR guard
   try {
     localStorage.removeItem(SESSION_KEY);
   } catch {}

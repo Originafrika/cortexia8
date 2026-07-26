@@ -139,7 +139,11 @@ async function resolveSessionFromToken(
     console.log("[auth] resolved userId:", users[0].id);
     return { userId: users[0].id, apiKeyId: null };
   } catch (err) {
-    console.error("[auth] resolveSessionFromToken FAILED:", err);
+    console.error("[AUTH_DEBUG] resolveSessionFromToken FAILED:", JSON.stringify({
+      error: err instanceof Error ? err.message : String(err),
+      stack: err instanceof Error ? err.stack?.slice(0, 500) : undefined,
+      tokenPrefix: token.slice(0, 8) + "...",
+    }));
     return null;
   }
 }
