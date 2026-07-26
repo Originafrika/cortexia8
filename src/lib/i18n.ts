@@ -443,6 +443,7 @@ const fr: Dict = {
   "workflows.never_run": "Jamais exécuté",
   "workflows.run_success": "Succès",
   "workflows.run_failed": "Échec",
+  "workflows.create_error": "Échec de la création du workflow.",
 
   // Relative time
   "time.now": "à l'instant",
@@ -893,6 +894,7 @@ const en: Dict = {
   "workflows.never_run": "Never run",
   "workflows.run_success": "Success",
   "workflows.run_failed": "Failed",
+  "workflows.create_error": "Failed to create workflow.",
 
   // Relative time
   "time.now": "just now",
@@ -1333,6 +1335,7 @@ const pt: Dict = {
   "workflows.never_run": "Nunca executado",
   "workflows.run_success": "Sucesso",
   "workflows.run_failed": "Falha",
+  "workflows.create_error": "Falha ao criar workflow.",
 
   // Relative time
   "time.now": "agora",
@@ -1771,6 +1774,7 @@ const es: Dict = {
   "workflows.never_run": "Nunca ejecutado",
   "workflows.run_success": "Éxito",
   "workflows.run_failed": "Fallido",
+  "workflows.create_error": "Error al crear workflow.",
 
   // Relative time
   "time.now": "ahora",
@@ -2209,6 +2213,7 @@ const id: Dict = {
   "workflows.never_run": "Belum pernah dijalankan",
   "workflows.run_success": "Berhasil",
   "workflows.run_failed": "Gagal",
+  "workflows.create_error": "Gagal membuat workflow.",
 
   // Relative time
   "time.now": "baru saja",

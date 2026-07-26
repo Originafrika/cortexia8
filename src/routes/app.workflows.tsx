@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Plus, Workflow, Clock, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { listWorkflows, createWorkflow, type WorkflowListItem } from "@/lib/api/workflows";
 import { loadSession } from "@/lib/auth-store";
@@ -44,8 +45,9 @@ function WorkflowsPage() {
     try {
       const { id } = await createWorkflow({ data: { sessionToken: loadSession()?.token } });
       navigate({ to: "/canvas", search: { workflowId: id } });
-    } catch {
+    } catch (err) {
       setCreating(false);
+      toast.error(t("workflows.create_error"));
     }
   }
 
