@@ -404,7 +404,8 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
 
   loadWorkflow: async (id) => {
     try {
-      const res = await getWorkflow({ data: { workflowId: id } });
+      const session = loadSession();
+      const res = await getWorkflow({ data: { workflowId: id, sessionToken: session?.token } });
       const dbNodeIds = new Map<number, string>();
 
       const nodes: CanvasNode[] = res.nodes.map((n) => {
