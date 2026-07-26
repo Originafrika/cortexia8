@@ -7,17 +7,19 @@ import {
   Film,
   Mic,
   MessageSquare,
+  Music2,
   AlertTriangle,
   Sparkles,
   ChevronDown,
   ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CATALOGUE } from "@/lib/models-data";
 
 type SimModel = {
   key: string;
   name: string;
-  category: "image" | "video" | "voice" | "text";
+  category: "image" | "video" | "voice" | "text" | "music";
   icon: React.ElementType;
   unit: string;
   unitPriceUSD: number;
@@ -27,8 +29,7 @@ type SimModel = {
   defaultValue: number;
 };
 
-const ALL_MODELS: SimModel[] = [
-  // Image
+const IMAGE_MODELS: SimModel[] = [
   { key: "seedream-5-pro", name: "Seedream 5.0 Pro", category: "image", icon: ImageIcon, unit: "images", unitPriceUSD: 0.08505, suffix: "images / mois", max: 500, step: 5, defaultValue: 40 },
   { key: "seedream-5-lite", name: "Seedream 5.0 Lite", category: "image", icon: ImageIcon, unit: "images", unitPriceUSD: 0.0441, suffix: "images / mois", max: 500, step: 5, defaultValue: 0 },
   { key: "nano-banana-2", name: "Nano Banana 2", category: "image", icon: ImageIcon, unit: "images", unitPriceUSD: 0.0504, suffix: "images / mois", max: 500, step: 5, defaultValue: 0 },
@@ -37,7 +38,9 @@ const ALL_MODELS: SimModel[] = [
   { key: "qwen-image-20", name: "Qwen Image 2.0", category: "image", icon: ImageIcon, unit: "images", unitPriceUSD: 0.0252, suffix: "images / mois", max: 500, step: 5, defaultValue: 0 },
   { key: "wan-27-image", name: "Wan 2.7 Image", category: "image", icon: ImageIcon, unit: "images", unitPriceUSD: 0.0378, suffix: "images / mois", max: 500, step: 5, defaultValue: 0 },
   { key: "wan-27-image-pro", name: "Wan 2.7 Image Pro", category: "image", icon: ImageIcon, unit: "images", unitPriceUSD: 0.1008, suffix: "images / mois", max: 500, step: 5, defaultValue: 0 },
-  // Video
+];
+
+const VIDEO_MODELS: SimModel[] = [
   { key: "seedance-2", name: "Seedance 2.0", category: "video", icon: Film, unit: "secondes", unitPriceUSD: 0.07182, suffix: "secondes / mois", max: 300, step: 5, defaultValue: 0 },
   { key: "seedance-2-fast", name: "Seedance 2.0 Fast", category: "video", icon: Film, unit: "secondes", unitPriceUSD: 0.0504, suffix: "secondes / mois", max: 300, step: 5, defaultValue: 0 },
   { key: "seedance-2-mini", name: "Seedance 2.0 Mini", category: "video", icon: Film, unit: "secondes", unitPriceUSD: 0.02394, suffix: "secondes / mois", max: 300, step: 5, defaultValue: 0 },
@@ -52,13 +55,48 @@ const ALL_MODELS: SimModel[] = [
   { key: "gemini-omni-video", name: "Gemini Omni Video", category: "video", icon: Film, unit: "secondes", unitPriceUSD: 0.8316, suffix: "secondes / mois", max: 300, step: 5, defaultValue: 0 },
   { key: "omnihuman-15", name: "OmniHuman 1.5", category: "video", icon: Film, unit: "secondes", unitPriceUSD: 0.1071, suffix: "secondes / mois", max: 300, step: 5, defaultValue: 0 },
   { key: "volcengine-lip-sync", name: "Volcengine Lip Sync", category: "video", icon: Film, unit: "secondes", unitPriceUSD: 0.0315, suffix: "secondes / mois", max: 300, step: 5, defaultValue: 0 },
-  // Voice
+];
+
+const VOICE_MODELS: SimModel[] = [
   { key: "eleven-v3", name: "ElevenLabs Text-to-Dialogue V3", category: "voice", icon: Mic, unit: "1k caractères", unitPriceUSD: 0.0882, suffix: "×1k car. / mois", max: 200, step: 2, defaultValue: 6 },
-  // Text
-  { key: "claude-opus-47", name: "Claude Opus 4.7", category: "text", icon: MessageSquare, unit: "M tokens", unitPriceUSD: 9.009, suffix: "M tokens / mois", max: 20, step: 0.5, defaultValue: 0 },
-  { key: "claude-sonnet-46", name: "Claude Sonnet 4.6", category: "text", icon: MessageSquare, unit: "M tokens", unitPriceUSD: 5.3865, suffix: "M tokens / mois", max: 20, step: 0.5, defaultValue: 0.8 },
-  { key: "gpt-55", name: "GPT-5.5", category: "text", icon: MessageSquare, unit: "M tokens", unitPriceUSD: 10.584, suffix: "M tokens / mois", max: 20, step: 0.5, defaultValue: 0 },
-  { key: "gemini-31-pro", name: "Gemini 3.1 Pro", category: "text", icon: MessageSquare, unit: "M tokens", unitPriceUSD: 0.63, suffix: "M tokens / mois", max: 20, step: 0.5, defaultValue: 0 },
+];
+
+const CATALOGUE_TEXT_MODELS: SimModel[] = CATALOGUE
+  .filter((e) => e.category === "text" && e.active)
+  .map((e) => ({
+    key: e.slug,
+    name: e.name,
+    category: "text" as const,
+    icon: MessageSquare,
+    unit: "M tokens",
+    unitPriceUSD: e.cortexiaPriceUsd,
+    suffix: "M tokens / mois",
+    max: 50,
+    step: 0.5,
+    defaultValue: 0,
+  }));
+
+const CATALOGUE_MUSIC_MODELS: SimModel[] = CATALOGUE
+  .filter((e) => e.category === "music" && e.active)
+  .map((e) => ({
+    key: e.slug,
+    name: e.name,
+    category: "music" as const,
+    icon: Music2,
+    unit: "pistes",
+    unitPriceUSD: e.cortexiaPriceUsd,
+    suffix: "pistes / mois",
+    max: 100,
+    step: 1,
+    defaultValue: 0,
+  }));
+
+const ALL_MODELS: SimModel[] = [
+  ...IMAGE_MODELS,
+  ...VIDEO_MODELS,
+  ...VOICE_MODELS,
+  ...CATALOGUE_TEXT_MODELS,
+  ...CATALOGUE_MUSIC_MODELS,
 ];
 
 const CATEGORY_META: Record<string, { label: string; icon: React.ElementType; refSub: { name: string; usd: number } }> = {
@@ -66,6 +104,7 @@ const CATEGORY_META: Record<string, { label: string; icon: React.ElementType; re
   video: { label: "Vidéo", icon: Film, refSub: { name: "Higgsfield Pro", usd: 39 } },
   voice: { label: "Voix", icon: Mic, refSub: { name: "ElevenLabs Starter", usd: 22 } },
   text: { label: "Texte", icon: MessageSquare, refSub: { name: "Claude Pro", usd: 20 } },
+  music: { label: "Musique", icon: Music2, refSub: { name: "Suno Pro", usd: 25 } },
 };
 
 const DEFAULT_VALUES: Record<string, number> = Object.fromEntries(

@@ -12,8 +12,7 @@ import {
   Wallet,
   Sparkles,
   HelpCircle,
-  Workflow,
-  ListTodo,
+    Workflow,
   Menu,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -82,9 +81,8 @@ function AppShell({
   setOpen: (v: boolean) => void;
 }) {
   const NAV = [
-    { to: "/canvas", label: t("app.nav.canvas"), icon: Workflow },
+    { to: "/app/workflows", label: t("app.nav.workflows") || "Workflows", icon: Workflow },
     { to: "/app/models", label: t("app.nav.models"), icon: LayoutGrid },
-    { to: "/app/workflows", label: t("app.nav.workflows") || "Workflows", icon: ListTodo },
     { to: "/app/history", label: t("app.nav.history"), icon: History },
     { to: "/app/developers", label: t("app.nav.dev"), icon: Code2 },
     { to: "/app/account", label: t("app.nav.account"), icon: Wallet },

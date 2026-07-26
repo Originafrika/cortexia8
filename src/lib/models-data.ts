@@ -153,6 +153,27 @@ export const schemaLLM: InputSchemaField[] = [
   { key: "top_p", type: "number", label: "Top P", min: 0, max: 1, step: 0.05, default: 1 },
 ];
 
+export const schemaClaude: InputSchemaField[] = [
+  { key: "messages", type: "longtext", required: true, label: "Messages (JSON array)" },
+  { key: "max_tokens", type: "number", min: 1, max: 4096, step: 1, default: 4096 },
+  { key: "thinkingFlag", type: "boolean", default: false },
+];
+
+export const schemaGPT: InputSchemaField[] = [
+  { key: "messages", type: "longtext", required: true, label: "Messages (JSON array)" },
+  { key: "reasoning_effort", type: "enum", options: ["low", "high"], default: "high" },
+];
+
+export const schemaGemini: InputSchemaField[] = [
+  { key: "messages", type: "longtext", required: true, label: "Messages (JSON array)" },
+  { key: "reasoning_effort", type: "enum", options: ["low", "high"], default: "high" },
+];
+
+export const schemaGrok: InputSchemaField[] = [
+  { key: "messages", type: "longtext", required: true, label: "Messages (JSON array)" },
+  { key: "reasoning_effort", type: "enum", options: ["low", "high"], default: "high" },
+];
+
 export const schemaMusicGenerate: InputSchemaField[] = [
   { key: "prompt", type: "longtext", required: true, label: "Prompt" },
   { key: "instrumental", type: "boolean", label: "Instrumental only", default: false },
@@ -2068,7 +2089,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "GPT-5.2 — entrée de gamme OpenAI nouvelle génération.",
     unit: "1m-tokens-io",
     io: { inputUSD: 1.0, outputUSD: 4.0 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaGPT,
   },
   {
     slug: "gpt-54",
@@ -2084,7 +2105,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "GPT-5.4 — milieu de gamme OpenAI.",
     unit: "1m-tokens-io",
     io: { inputUSD: 2.0, outputUSD: 8.0 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaGPT,
   },
   {
     slug: "gpt-55",
@@ -2101,7 +2122,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Le nouveau flagship OpenAI, raisonnement lourd.",
     unit: "1m-tokens-io",
     io: { inputUSD: 1.4, outputUSD: 8.4 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaGPT,
   },
   {
     slug: "gpt-56-luna",
@@ -2117,7 +2138,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "GPT-5.6 Luna — variante optimisée pour le conversationnel.",
     unit: "1m-tokens-io",
     io: { inputUSD: 2.5, outputUSD: 10.0 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaGPT,
   },
   {
     slug: "gpt-56-terra",
@@ -2133,7 +2154,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "GPT-5.6 Terra — variante polyvalente et équilibrée.",
     unit: "1m-tokens-io",
     io: { inputUSD: 2.5, outputUSD: 10.0 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaGPT,
   },
   {
     slug: "gpt-56-sol",
@@ -2149,7 +2170,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "GPT-5.6 Sol — variante orientée raisonnement long.",
     unit: "1m-tokens-io",
     io: { inputUSD: 2.5, outputUSD: 10.0 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaGPT,
   },
   // ════════════════════════════════════════════════════════════════════
   // LLM — Anthropic Claude
@@ -2169,7 +2190,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Raisonnement profond, analyses stratégiques, code exigeant.",
     unit: "1m-tokens-io",
     io: { inputUSD: 1.425, outputUSD: 7.15 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaClaude,
   },
   {
     slug: "claude-opus-48",
@@ -2186,7 +2207,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Claude Opus 4.8 — successeur haut de gamme Anthropic.",
     unit: "1m-tokens-io",
     io: { inputUSD: 1.5, outputUSD: 7.5 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaClaude,
   },
   {
     slug: "claude-fable-5",
@@ -2202,7 +2223,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Claude Fable 5 — variante créative pour narration.",
     unit: "1m-tokens-io",
     io: { inputUSD: 0.6, outputUSD: 3.0 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaClaude,
   },
   {
     slug: "claude-sonnet-5",
@@ -2218,7 +2239,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Claude Sonnet 5 — prochaine génération milieu de gamme.",
     unit: "1m-tokens-io",
     io: { inputUSD: 1.0, outputUSD: 5.0 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaClaude,
   },
   {
     slug: "claude-haiku-45",
@@ -2234,7 +2255,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Claude Haiku 4.5 — entrée de gamme rapide et économique.",
     unit: "1m-tokens-io",
     io: { inputUSD: 0.2, outputUSD: 1.0 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaClaude,
   },
   {
     slug: "claude-opus-45",
@@ -2250,7 +2271,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Claude Opus 4.5 — génération précédente haut de gamme.",
     unit: "1m-tokens-io",
     io: { inputUSD: 1.2, outputUSD: 6.0 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaClaude,
   },
   {
     slug: "claude-opus-46",
@@ -2266,7 +2287,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Claude Opus 4.6 — génération intermédiaire haut de gamme.",
     unit: "1m-tokens-io",
     io: { inputUSD: 1.3, outputUSD: 6.5 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaClaude,
   },
   {
     slug: "claude-sonnet-45",
@@ -2282,7 +2303,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Claude Sonnet 4.5 — génération précédente milieu de gamme.",
     unit: "1m-tokens-io",
     io: { inputUSD: 0.8, outputUSD: 4.0 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaClaude,
   },
   {
     slug: "claude-sonnet-46",
@@ -2299,7 +2320,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Le meilleur compromis raisonnement/vitesse d'Anthropic.",
     unit: "1m-tokens-io",
     io: { inputUSD: 0.85, outputUSD: 4.275 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaClaude,
   },
   {
     slug: "gpt-codex",
@@ -2315,7 +2336,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "GPT Codex — modèle code-spécialisé d'OpenAI.",
     unit: "1m-tokens-io",
     io: { inputUSD: 1.5, outputUSD: 6.0 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaGPT,
   },
   // ════════════════════════════════════════════════════════════════════
   // LLM — Google Gemini
@@ -2334,7 +2355,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Gemini 2.5 Pro — Google multimodal haut de gamme.",
     unit: "1m-tokens-io",
     io: { inputUSD: 0.5, outputUSD: 2.0 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaGemini,
   },
   {
     slug: "gemini-3-pro",
@@ -2350,7 +2371,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Gemini 3 Pro — génération 3 Google.",
     unit: "1m-tokens-io",
     io: { inputUSD: 0.8, outputUSD: 3.2 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaGemini,
   },
   {
     slug: "gemini-31-pro",
@@ -2366,7 +2387,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Contexte long, multimodal natif, très performant.",
     unit: "1m-tokens-io",
     io: { inputUSD: 0.5, outputUSD: 0.5 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaGemini,
   },
   {
     slug: "gemini-25-flash",
@@ -2382,7 +2403,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Gemini 2.5 Flash — rapide et économique.",
     unit: "1m-tokens-io",
     io: { inputUSD: 0.08, outputUSD: 0.32 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaGemini,
   },
   {
     slug: "gemini-3-flash",
@@ -2398,7 +2419,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Gemini 3 Flash — nouvelle génération rapide.",
     unit: "1m-tokens-io",
     io: { inputUSD: 0.1, outputUSD: 0.4 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaGemini,
   },
   {
     slug: "gemini-35-flash",
@@ -2414,7 +2435,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Gemini 3.5 Flash — version intermédiaire rapide.",
     unit: "1m-tokens-io",
     io: { inputUSD: 0.12, outputUSD: 0.48 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaGPT,
   },
   {
     slug: "gemini-35-flash-openai",
@@ -2430,7 +2451,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Gemini 3.5 Flash — endpoint compatible OpenAI.",
     unit: "1m-tokens-io",
     io: { inputUSD: 0.12, outputUSD: 0.48 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaGPT,
   },
   {
     slug: "gemini-3-flash-v1beta",
@@ -2446,7 +2467,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Gemini 3 Flash v1beta — préversion API.",
     unit: "1m-tokens-io",
     io: { inputUSD: 0.1, outputUSD: 0.4 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaGPT,
   },
   // ════════════════════════════════════════════════════════════════════
   // LLM — xAI Grok
@@ -2465,7 +2486,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Grok 4.3 — modèle texte xAI.",
     unit: "1m-tokens-io",
     io: { inputUSD: 1.0, outputUSD: 3.0 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaGPT,
   },
   {
     slug: "grok-45",
@@ -2481,7 +2502,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Grok 4.5 — modèle xAI haut de gamme.",
     unit: "1m-tokens-io",
     io: { inputUSD: 1.5, outputUSD: 5.0 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaGPT,
   },
   // ════════════════════════════════════════════════════════════════════
   // MUSIC — Suno
@@ -3411,7 +3432,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "GPT-5.4 Luna — variante conversationnelle (Response API).",
     unit: "1m-tokens-io",
     io: { inputUSD: 2.5, outputUSD: 10.0 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaGPT,
   },
   {
     slug: "gpt-54-terra",
@@ -3427,7 +3448,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "GPT-5.4 Terra — variante polyvalente (Response API).",
     unit: "1m-tokens-io",
     io: { inputUSD: 2.5, outputUSD: 10.0 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaGPT,
   },
   {
     slug: "gpt-54-sol",
@@ -3443,7 +3464,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "GPT-5.4 Sol — variante raisonnement (Response API).",
     unit: "1m-tokens-io",
     io: { inputUSD: 2.5, outputUSD: 10.0 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaGPT,
   },
   {
     slug: "gpt-55-luna",
@@ -3459,7 +3480,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "GPT-5.5 Luna — variante conversationnelle (Response API).",
     unit: "1m-tokens-io",
     io: { inputUSD: 2.5, outputUSD: 10.0 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaGPT,
   },
   {
     slug: "gpt-55-terra",
@@ -3475,7 +3496,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "GPT-5.5 Terra — variante polyvalente (Response API).",
     unit: "1m-tokens-io",
     io: { inputUSD: 2.5, outputUSD: 10.0 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaGPT,
   },
   {
     slug: "gpt-55-sol",
@@ -3491,7 +3512,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "GPT-5.5 Sol — variante raisonnement (Response API).",
     unit: "1m-tokens-io",
     io: { inputUSD: 2.5, outputUSD: 10.0 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaGPT,
   },
   {
     slug: "gpt-56-luna-resp",
@@ -3507,7 +3528,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "GPT-5.6 Luna — variante conversationnelle (Response API).",
     unit: "1m-tokens-io",
     io: { inputUSD: 2.5, outputUSD: 10.0 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaGPT,
   },
   {
     slug: "gpt-56-terra-resp",
@@ -3523,7 +3544,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "GPT-5.6 Terra — variante polyvalente (Response API).",
     unit: "1m-tokens-io",
     io: { inputUSD: 2.5, outputUSD: 10.0 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaGPT,
   },
   {
     slug: "gpt-56-sol-resp",
@@ -3539,7 +3560,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "GPT-5.6 Sol — variante raisonnement (Response API).",
     unit: "1m-tokens-io",
     io: { inputUSD: 2.5, outputUSD: 10.0 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaGPT,
   },
   // ════════════════════════════════════════════════════════════════════
   // LLM — Gemini OpenAI-compatible
@@ -3558,7 +3579,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Gemini 2.5 Pro — endpoint compatible OpenAI.",
     unit: "1m-tokens-io",
     io: { inputUSD: 0.5, outputUSD: 2.0 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaGPT,
   },
   {
     slug: "gemini-3-pro-openai",
@@ -3574,7 +3595,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Gemini 3 Pro — endpoint compatible OpenAI.",
     unit: "1m-tokens-io",
     io: { inputUSD: 0.8, outputUSD: 3.2 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaGPT,
   },
   {
     slug: "gemini-31-pro-openai",
@@ -3590,7 +3611,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Gemini 3.1 Pro — endpoint compatible OpenAI.",
     unit: "1m-tokens-io",
     io: { inputUSD: 0.5, outputUSD: 2.0 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaGPT,
   },
   {
     slug: "gemini-25-flash-openai",
@@ -3606,7 +3627,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Gemini 2.5 Flash — endpoint compatible OpenAI.",
     unit: "1m-tokens-io",
     io: { inputUSD: 0.08, outputUSD: 0.32 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaGPT,
   },
   {
     slug: "gemini-3-flash-openai",
@@ -3622,7 +3643,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Gemini 3 Flash — endpoint compatible OpenAI.",
     unit: "1m-tokens-io",
     io: { inputUSD: 0.1, outputUSD: 0.4 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaGPT,
   },
   {
     slug: "gemini-3-flash-v1beta-openai",
@@ -3638,7 +3659,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Gemini 3 Flash v1beta — endpoint compatible OpenAI.",
     unit: "1m-tokens-io",
     io: { inputUSD: 0.1, outputUSD: 0.4 },
-    inputSchema: schemaLLM,
+    inputSchema: schemaGPT,
   },
   // ════════════════════════════════════════════════════════════════════
   // MUSIC — Additional
