@@ -30,8 +30,11 @@ export const createWorkflow = createServerFn({ method: "POST" })
   })
   .handler(async ({ data, headers }) => {
     try {
-      const ctx = await getRequestContext(data.sessionToken);
+      console.log("[workflows:create] called with sessionToken:", (data as any).sessionToken ? (data as any).sessionToken.slice(0, 12) + "..." : "UNDEFINED");
+      const ctx = await getRequestContext((data as any).sessionToken);
+      console.log("[workflows:create] auth context:", ctx);
       const userId = await requireUserId(ctx);
+      console.log("[workflows:create] userId:", userId);
       // CSRF: validate origin for state-changing endpoint.
       // NOTE: TanStack Start server functions do not expose raw request headers.
       // When headers are available (via client-side fetch with credentials), this

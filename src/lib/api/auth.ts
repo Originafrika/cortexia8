@@ -28,6 +28,7 @@ function parseCookies(header: string): Record<string, string> {
 }
 
 export async function getRequestContext(sessionToken?: string): Promise<RequestContext> {
+  console.log("[auth] getRequestContext called, sessionToken:", sessionToken ? sessionToken.slice(0, 12) + "..." : "UNDEFINED/EMPTY");
   // ── 1. Bearer API key (cx_…) ───────────────────────────────────────────
   const headers = getEventHeaders();
   if (headers) {
@@ -45,6 +46,7 @@ export async function getRequestContext(sessionToken?: string): Promise<RequestC
           await sql`
             UPDATE api_keys SET last_used_at = NOW() WHERE id = ${rows[0].id}
           `.catch(() => undefined);
+          console.log("[auth] resolved via API key, userId:", rows[0].user_id);
           return { userId: rows[0].user_id, apiKeyId: rows[0].id };
         }
       }
@@ -53,17 +55,32 @@ export async function getRequestContext(sessionToken?: string): Promise<RequestC
 
   // ── 2. Explicit session token from client ──────────────────────────────
   if (sessionToken) {
+    console.log("[auth] trying explicit sessionToken...");
     const session = await resolveSessionFromToken(sessionToken);
-    if (session) return session;
+    if (session) {
+      console.log("[auth] resolved via explicit token, userId:", session.userId);
+      return session;
+    }
+    console.log("[auth] explicit token NOT found in DB");
+  } else {
+    console.log("[auth] no explicit sessionToken provided, skipping step 2");
   }
 
   // ── 3. Cookie-based session (Better Auth / Neon Auth) ──────────────────
   const cookieToken = getSessionTokenFromCookie();
   if (cookieToken) {
+    console.log("[auth] trying cookie token:", cookieToken.slice(0, 12) + "...");
     const session = await resolveSessionFromToken(cookieToken);
-    if (session) return session;
+    if (session) {
+      console.log("[auth] resolved via cookie, userId:", session.userId);
+      return session;
+    }
+    console.log("[auth] cookie token NOT found in DB");
+  } else {
+    console.log("[auth] no cookie token found");
   }
 
+  console.log("[auth] ALL AUTH METHODS FAILED — returning userId: null");
   return { userId: null, apiKeyId: null };
 }
 
@@ -92,6 +109,7 @@ async function resolveSessionFromToken(
   token: string,
 ): Promise<RequestContext | null> {
   try {
+    console.log("[auth] resolveSessionFromToken, token:", token.slice(0, 12) + "...");
     const rows = (await sql`
       SELECT u.email, u.name
       FROM session s
@@ -101,31 +119,38 @@ async function resolveSessionFromToken(
       LIMIT 1
     `) as { email: string; name: string }[];
 
+    console.log("[auth] Neon Auth lookup rows:", rows.length, rows.length > 0 ? rows[0] : "(none)");
     if (rows.length === 0) return null;
 
     // Upsert into local users table so app operations can reference the integer userId.
+    console.log("[auth] upserting user into local users table:", rows[0].email);
     await sql`
       INSERT INTO users (email, display_name)
       VALUES (${rows[0].email}, ${rows[0].name ?? ""})
       ON CONFLICT (email) DO NOTHING
-    `.catch(() => undefined);
+    `.catch((e) => console.error("[auth] upsert users FAILED:", e));
 
     const users = (await sql`
       SELECT id FROM users WHERE email = ${rows[0].email} LIMIT 1
     `) as { id: number }[];
 
+    console.log("[auth] local users lookup:", users.length > 0 ? users[0] : "(none)");
     if (users.length === 0) return null;
+    console.log("[auth] resolved userId:", users[0].id);
     return { userId: users[0].id, apiKeyId: null };
   } catch (err) {
-    console.error("[auth] resolveSessionFromToken failed:", err);
+    console.error("[auth] resolveSessionFromToken FAILED:", err);
     return null;
   }
 }
 
 export async function requireUserId(ctx: RequestContext): Promise<number> {
+  console.log("[auth] requireUserId called, ctx:", ctx);
   if (ctx.userId == null) {
+    console.error("[auth] requireUserId FAILED: userId is null");
     throw new HttpError(401, "Authentication required");
   }
+  console.log("[auth] requireUserId OK, returning:", ctx.userId);
   return ctx.userId;
 }
 

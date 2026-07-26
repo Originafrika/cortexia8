@@ -38,17 +38,21 @@ function Auth() {
     reset();
     setLoading(true);
     try {
+      console.log("[auth] handleSignUp called for:", email);
       const { data, error } = await authClient.signUp.email({
         email,
         password,
         name: name || email.split("@")[0] || "User",
       });
+      console.log("[auth] signUp response:", { hasData: !!data, hasError: !!error, dataKeys: data ? Object.keys(data) : [] });
       if (error) throw error;
 
       if (data?.user && !data.user.emailVerified) {
+        console.log("[auth] email not verified, going to verify step");
         setInfo("Un code de vérification vient de t'être envoyé par email.");
         setStep("verify");
       } else if (data?.user) {
+        console.log("[auth] email already verified, saving session");
         saveSession({
           token: (data as any).token ?? (data as any).session?.token ?? "",
           user: {
@@ -61,9 +65,11 @@ function Auth() {
         });
         navigate({ to: "/app-preview" });
       } else {
+        console.log("[auth] no user in response, navigating to /app-preview");
         navigate({ to: "/app-preview" });
       }
     } catch (err) {
+      console.error("[auth] handleSignUp error:", err);
       setError(err instanceof Error ? err.message : "Une erreur est survenue.");
     } finally {
       setLoading(false);
@@ -75,10 +81,13 @@ function Auth() {
     reset();
     setLoading(true);
     try {
+      console.log("[auth] handleSignIn called for:", email);
       const result = await authClient.signIn.email({ email, password });
+      console.log("[auth] signIn response:", { hasData: !!result.data, hasError: !!result.error, token: result.data?.token ? result.data.token.slice(0, 12) + "..." : "NONE" });
       if (result.error) throw result.error;
       if (result.data?.user) {
         const role = result.data.user.role ?? "user";
+        console.log("[auth] handleSignIn saving session, token:", result.data.token.slice(0, 12) + "...", "role:", role);
         saveSession({
           token: result.data.token,
           user: {
@@ -95,10 +104,12 @@ function Auth() {
           navigate({ to: "/access-denied" });
         }
       } else {
+        console.log("[auth] handleSignIn no user in response, navigating to /app-preview");
         navigate({ to: "/app-preview" });
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Identifiants invalides.";
+      console.error("[auth] handleSignIn error:", msg);
       // If Neon returned "email not verified", switch to the verify step and send a code.
       if (/verif/i.test(msg)) {
         try {
@@ -124,15 +135,20 @@ function Auth() {
     reset();
     setLoading(true);
     try {
+      console.log("[auth] handleVerify called for:", email, "code:", code);
       const { data, error } = await authClient.emailOtp.verifyEmail({ email, otp: code });
+      console.log("[auth] verifyEmail response:", { hasData: !!data, hasError: !!error, dataKeys: data ? Object.keys(data) : [] });
       if (error) throw error;
 
       // Always re-sign in after OTP verification to get a proper session token.
       // The verifyEmail response may not include a usable token.
       if (password) {
+        console.log("[auth] handleVerify re-signing in with password...");
         const signResult = await authClient.signIn.email({ email, password });
+        console.log("[auth] handleVerify re-sign response:", { hasError: !!signResult.error, hasUser: !!signResult.data?.user, token: signResult.data?.token ? signResult.data.token.slice(0, 12) + "..." : "NONE" });
         if (!signResult.error && signResult.data?.user) {
           const role = signResult.data.user.role ?? "user";
+          console.log("[auth] handleVerify saving session, token:", signResult.data.token.slice(0, 12) + "...");
           saveSession({
             token: signResult.data.token,
             user: {
@@ -150,6 +166,9 @@ function Auth() {
           }
           return;
         }
+        console.log("[auth] handleVerify re-sign FAILED:", signResult.error);
+      } else {
+        console.log("[auth] handleVerify no password available for re-sign-in");
       }
       // Fallback: if no password was stored, try to extract token from verify response.
       const anyData = data as { session?: { user?: { id: string; name: string; email: string; role?: string } }; token?: string } | null;
