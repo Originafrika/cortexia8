@@ -8,7 +8,7 @@
 import { getRequestHeaders, getCookie } from "@tanstack/react-start/server";
 import { sql } from "@/lib/db";
 
-const SESSION_COOKIE = "better-auth.session_token";
+const SESSION_COOKIE = "__Secure-neon-auth.session_token";
 
 export type RequestContext = {
   userId: number | null;
@@ -112,10 +112,10 @@ async function resolveSessionFromToken(
     console.log("[auth] resolveSessionFromToken, token:", token.slice(0, 12) + "...");
     const rows = (await sql`
       SELECT u.email, u.name
-      FROM session s
-      JOIN "user" u ON u.id = s.user_id
+      FROM neon_auth.session s
+      JOIN neon_auth."user" u ON u.id = s."userId"
       WHERE s.token = ${token}
-        AND s.expires_at > NOW()
+        AND s."expiresAt" > NOW()
       LIMIT 1
     `) as { email: string; name: string }[];
 
