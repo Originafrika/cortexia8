@@ -121,7 +121,7 @@
   --ring: oklch(0.70 0.16 70 / 0.55);
 }
 
-/* Canvas always uses dark theme variables — overrides .light on <html> */
+/* Dark theme variables — used when .dark class is on <html> */
 .dark {
   --background: oklch(0.14 0.005 60);
   --foreground: oklch(0.96 0.01 80);
@@ -152,7 +152,7 @@
   --ring: oklch(0.78 0.16 70 / 0.55);
 }
 
-/* Force dark theme inside canvas — overrides .light on <html> */
+/* Canvas forces dark theme — overrides .light on <html> for ReactFlow nodes */
 .react-flow,
 .react-flow__node {
   --background: oklch(0.14 0.005 60);

@@ -20,20 +20,20 @@ function NotFoundComponent() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
-          Erreur 404
+          Error 404
         </div>
         <h1 className="mt-4 font-display text-6xl tracking-[-0.03em] text-foreground">
-          Cette page n'existe pas.
+          This page doesn't exist.
         </h1>
         <p className="mt-3 text-sm text-muted-foreground">
-          Le lien est peut-être ancien, ou la page a été déplacée. Retour à la maison.
+          The link may be old, or the page has been moved. Back to home.
         </p>
         <div className="mt-8">
           <Link
             to="/"
             className="inline-flex items-center justify-center rounded-full bg-amber px-5 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-90 transition"
           >
-            Retour à l'accueil
+            Back to home
           </Link>
         </div>
       </div>
@@ -52,12 +52,12 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
-          Erreur inattendue
+          Unexpected Error
         </div>
         <h1 className="mt-4 font-display text-4xl tracking-[-0.03em] text-foreground">
-          La page n'a pas chargé.
+          The page failed to load.
         </h1>
-        <p className="mt-3 text-sm text-muted-foreground">Réessaie, ou reviens à l'accueil.</p>
+        <p className="mt-3 text-sm text-muted-foreground">Try again, or go back to the homepage.</p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => {
@@ -66,13 +66,13 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
             }}
             className="inline-flex items-center justify-center rounded-full bg-amber px-5 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-90 transition"
           >
-            Réessayer
+            Retry
           </button>
           <a
             href="/"
             className="inline-flex items-center justify-center rounded-full border border-border px-5 py-2.5 text-sm font-medium hover:border-border-strong transition"
           >
-            Accueil
+            Home
           </a>
         </div>
       </div>

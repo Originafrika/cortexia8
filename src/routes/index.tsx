@@ -483,10 +483,10 @@ function FooterSection() {
           <span className="text-muted-foreground text-xs">{t("footer.copy")}</span>
         </div>
         <div className="flex items-center gap-4 text-xs text-muted-foreground">
-          <a href="#" className="hover:text-foreground transition">
+          <a href="/privacy" className="hover:text-foreground transition">
             {t("footer.policy")}
           </a>
-          <a href="#" className="hover:text-foreground transition">
+          <a href="mailto:contact@cortexia.originafrika.online" className="hover:text-foreground transition">
             {t("footer.contact")}
           </a>
           <a
