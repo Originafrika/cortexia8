@@ -98,7 +98,7 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
     if (workflowId == null || conversationLoadedRef.current) return;
     conversationLoadedRef.current = true;
 
-    getConversationByWorkflow({ data: { workflowId }, sessionToken: loadSession()?.token })
+    getConversationByWorkflow({ data: { workflowId, sessionToken: loadSession()?.token } })
       .then((conv: any) => {
         if (conv && conv.id) {
           conversationIdRef.current = conv.id;
@@ -151,8 +151,8 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
           workflowId: Number(workflowId),
           operations: serverOps,
           dryRun: true,
+          sessionToken: loadSession()?.token,
         },
-        sessionToken: loadSession()?.token,
       })) as AgentApplyResponse;
 
       // Approve-each mode: always show confirmation
@@ -207,8 +207,8 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
           workflowId: Number(workflowId),
           operations: serverOps,
           launch,
+          sessionToken: loadSession()?.token,
         },
-        sessionToken: loadSession()?.token,
       })) as AgentApplyResponse;
 
       pushLog(`${result.applied} opération(s) appliquée(s) dans la DB.`, "ok");
@@ -254,7 +254,7 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
     try {
       // Create conversation on first message if needed
       if (conversationIdRef.current == null && workflowId != null) {
-        const conv = await createConversation({ data: { workflowId }, sessionToken: loadSession()?.token });
+        const conv = await createConversation({ data: { workflowId, sessionToken: loadSession()?.token } });
         conversationIdRef.current = conv.id;
       }
 
@@ -265,8 +265,8 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
             conversationId: conversationIdRef.current,
             role: "user",
             content: text,
+            sessionToken: loadSession()?.token,
           },
-          sessionToken: loadSession()?.token,
         });
         conversationHistoryRef.current.push({ role: "user", content: text });
       }
@@ -285,8 +285,8 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
             maxTokens: 2048,
           },
           graphState: currentGraphState,
+          sessionToken: loadSession()?.token,
         },
-        sessionToken: loadSession()?.token,
       });
 
       // Save assistant message
@@ -297,8 +297,8 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
             role: "assistant",
             content: response.text,
             proposedPlan: response.operations.length > 0 ? (response as any) : undefined,
+            sessionToken: loadSession()?.token,
           },
-          sessionToken: loadSession()?.token,
         });
         conversationHistoryRef.current.push({
           role: "assistant",

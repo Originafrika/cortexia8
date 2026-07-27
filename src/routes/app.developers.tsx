@@ -32,7 +32,7 @@ function DevelopersPage() {
   const [creatingKey, setCreatingKey] = useState(false);
 
   useEffect(() => {
-    listApiKeys({ data: {}, sessionToken: loadSession()?.token })
+    listApiKeys({ data: { sessionToken: loadSession()?.token } })
       .then((data) => setKeys(data as ApiKeyRow[]))
       .catch(() => {
         setKeys([]);
@@ -88,10 +88,10 @@ print(url, cost)`,
     if (!keyName.trim() || creatingKey) return;
     setCreatingKey(true);
     try {
-      const result = await createApiKey({ data: { name: keyName.trim() }, sessionToken: loadSession()?.token });
+      const result = await createApiKey({ data: { name: keyName.trim(), sessionToken: loadSession()?.token } });
       setShowNewKey(result.rawKey);
       setKeyName("");
-      const updated = await listApiKeys({ data: {}, sessionToken: loadSession()?.token });
+      const updated = await listApiKeys({ data: { sessionToken: loadSession()?.token } });
       setKeys(updated as ApiKeyRow[]);
     } catch (err) {
       toast.error(t("dev.key_create_error"));
@@ -102,7 +102,7 @@ print(url, cost)`,
 
   async function handleRevokeKey(keyId: number) {
     try {
-      await revokeApiKey({ data: { keyId }, sessionToken: loadSession()?.token });
+      await revokeApiKey({ data: { keyId, sessionToken: loadSession()?.token } });
       setKeys((prev) =>
         prev.map((k) => (k.id === keyId ? { ...k, status: "revoked" } : k))
       );

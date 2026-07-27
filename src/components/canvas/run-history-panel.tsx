@@ -38,7 +38,7 @@ export function RunHistoryPanel({ open, onOpenChange, workflowId }: Props) {
     if (workflowId == null || !open) return;
     setLoading(true);
     try {
-      const res = await getWorkflowRuns({ data: { workflowId: Number(workflowId) }, sessionToken: loadSession()?.token });
+      const res = await getWorkflowRuns({ data: { workflowId: Number(workflowId), sessionToken: loadSession()?.token } });
       setRuns(res.runs);
     } catch (err) {
       console.error("[run-history] fetch failed", err);

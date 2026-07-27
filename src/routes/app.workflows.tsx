@@ -40,7 +40,7 @@ function WorkflowsPage() {
   const [creating, setCreating] = useState(false);
 
   useEffect(() => {
-    listWorkflows({ data: {}, sessionToken: loadSession()?.token })
+    listWorkflows({ data: { sessionToken: loadSession()?.token } })
       .then((wf) => {
         setWorkflows(wf);
       })
@@ -53,7 +53,7 @@ function WorkflowsPage() {
   async function handleCreate() {
     setCreating(true);
     try {
-      const result = await createWorkflow({ data: {}, sessionToken: loadSession()?.token });
+      const result = await createWorkflow({ data: { sessionToken: loadSession()?.token } });
       navigate({ to: "/canvas", search: { workflowId: result.id } });
     } catch (err) {
       setCreating(false);
