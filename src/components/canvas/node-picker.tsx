@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { MODELS, type Model, type ModelCategory } from "@/lib/models";
-import { categoryAccent, categoryPillColor } from "@/lib/canvas-types";
+import { categoryAccent, categoryPillColor, portsForCategory, portLabel } from "@/lib/canvas-types";
 import { useCanvasStore } from "@/lib/canvas-store";
 import { Image as ImageIcon, Film, Music2, MessageSquare, Plus, Search } from "lucide-react";
 import { PriceDisplay } from "@/components/price-display";
@@ -199,6 +199,7 @@ function PickerBody({
             >
               {list.map((m) => {
                 const price = m.priceUSD ?? m.tiers?.[0]?.priceUSD ?? m.io?.outputUSD ?? 0;
+                const ports = portsForCategory(m.category);
                 return (
                   <CommandItem
                     key={m.slug}
@@ -216,6 +217,9 @@ function PickerBody({
                       <div className="text-sm font-medium truncate">{m.name}</div>
                       <div className="font-mono text-[9px] uppercase tracking-[0.22em] text-muted-foreground truncate">
                         {m.provider} · {m.category}
+                      </div>
+                      <div className="font-mono text-[8px] text-muted-foreground/60 mt-0.5">
+                        {portLabel(ports.in[0])} → {portLabel(ports.out)}
                       </div>
                     </div>
                     <PriceDisplay usd={price} className="text-xs" />

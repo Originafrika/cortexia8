@@ -91,7 +91,7 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
           setSelected(id);
         }}
         className={cn(
-          "group w-[260px] rounded-xl border bg-surface-1 overflow-hidden",
+          "group w-[260px] rounded-xl border bg-surface-1",
           "transition-all duration-200",
           selected
             ? "border-border-strong ring-1 ring-border-strong shadow-lg"
@@ -104,62 +104,54 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
             "ring-1 ring-emerald/50 shadow-[0_0_12px_2px_rgba(16,185,129,0.15)]",
         )}
       >
-        {/* Hidden handles — invisible but functional for connections */}
+        {/* Input handle — visible icon, draggable for connections */}
         <Handle
           type="target"
           position={Position.Left}
           id="in"
           isConnectable={!readOnly}
-          className="!bg-transparent !border-0 !w-6 !h-6 !-left-3"
+          className={cn(
+            "!size-[22px] !rounded-full !bg-surface-2 !border !border-border",
+            "!-left-4 !top-1/2 !-translate-y-1/2",
+            "!cursor-grab !flex !items-center !justify-center",
+            "hover:!border-border-strong hover:!bg-surface-3",
+            "transition-all duration-200",
+            isDragSource &&
+              isCompatible &&
+              "!border-emerald !bg-emerald/10 !scale-110",
+            isDragSource &&
+              !isCompatible &&
+              "!opacity-30",
+          )}
           title={portLabel(ports.in[0])}
-        />
+        >
+          <InputIcon className={cn("size-3 pointer-events-none", inputColorClass)} />
+        </Handle>
+
+        {/* Output handle — visible icon, draggable for connections */}
         <Handle
           type="source"
           position={Position.Right}
           id="out"
           isConnectable={!readOnly}
-          className="!bg-transparent !border-0 !w-6 !h-6 !-right-3"
-          title={portLabel(ports.out)}
-        />
-
-        {/* Left edge icon — Input */}
-        <div
           className={cn(
-            "absolute -left-4 top-1/2 -translate-y-1/2 z-10",
-            "size-[22px] rounded-full bg-surface-2 border border-border",
-            "flex items-center justify-center",
-            "transition-all duration-200",
-            isDragSource &&
-              isCompatible &&
-              "border-emerald bg-emerald/10 scale-110",
-            isDragSource &&
-              !isCompatible &&
-              "opacity-30",
-          )}
-          title={portLabel(ports.in[0])}
-        >
-          <InputIcon className={cn("size-3", inputColorClass)} />
-        </div>
-
-        {/* Right edge icon — Output */}
-        <div
-          className={cn(
-            "absolute -right-4 top-1/2 -translate-y-1/2 z-10",
-            "size-[22px] rounded-full bg-surface-2 border border-border",
-            "flex items-center justify-center",
+            "!size-[22px] !rounded-full !bg-surface-2 !border !border-border",
+            "!-right-4 !top-1/2 !-translate-y-1/2",
+            "!cursor-grab !flex !items-center !justify-center",
+            "hover:!border-border-strong hover:!bg-surface-3",
             "transition-all duration-200",
             isDragSource &&
               !isCompatible &&
-              "opacity-30",
+              "!opacity-30",
           )}
           title={portLabel(ports.out)}
         >
-          <OutputIcon className={cn("size-3", outputColorClass)} />
-        </div>
+          <OutputIcon className={cn("size-3 pointer-events-none", outputColorClass)} />
+        </Handle>
 
         {/* Header — clickable to expand */}
         <div
-          className="flex items-center gap-2.5 px-3 py-2.5 cursor-pointer hover:bg-surface-2/50 transition-colors"
+          className="flex items-center gap-2.5 px-3 py-2.5 cursor-pointer hover:bg-surface-2/50 transition-colors overflow-hidden"
           onClick={handleExpandToggle}
         >
           <div className="min-w-0 flex-1">
