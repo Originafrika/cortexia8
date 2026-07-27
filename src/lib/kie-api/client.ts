@@ -232,6 +232,10 @@ export async function chatGoogleNative(opts: {
   tools?: unknown[];
   generationConfig?: Record<string, unknown>;
 }): Promise<{ taskId: string; response?: unknown }> {
+  // SECURITY NOTE: The Google API key is sent as a URL query parameter to kie.ai.
+  // This is the standard Google API authentication method. kie.ai proxies this request
+  // to Google's API. Ensure kie.ai properly strips API keys from access logs.
+  // If kie.ai supports header-based auth for Google models, migrate to that method.
   const endpoint = `/streamGenerateContent?alt=sse&key=${encodeURIComponent(process.env.GOOGLE_API_KEY ?? "")}`;
   const body: Record<string, unknown> = {
     contents: opts.contents,

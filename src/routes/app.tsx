@@ -49,7 +49,7 @@ function AppLayout() {
   useEffect(() => {
     async function fetchBalance() {
       try {
-        const result = await getUserBalance({ data: { sessionToken: loadSession()?.token } });
+        const result = await getUserBalance({ data: {} });
         setBalance(result?.balance ?? 0);
       } catch {
         // Balance fetch failed — show $0, user can refresh

@@ -122,13 +122,13 @@ export const getConversation = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     try {
       const ctx = await getRequestContext(data.sessionToken);
-      await requireUserId(ctx);
+      const userId = await requireUserId(ctx);
 
-      // Fetch conversation
+      // Fetch conversation — verify ownership
       const cRows = (await sql`
         SELECT id, workflow_id
         FROM agent_conversations
-        WHERE id = ${data.conversationId}
+        WHERE id = ${data.conversationId} AND user_id = ${userId}
         LIMIT 1
       `) as { id: number; workflow_id: number }[];
 

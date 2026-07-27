@@ -1,7 +1,6 @@
 const SESSION_KEY = "cortexia_session";
 
 export interface StoredSession {
-  token: string;
   user: {
     id: string;
     name: string;
@@ -11,7 +10,7 @@ export interface StoredSession {
   };
 }
 
-export function saveSession(data: { token: string; user: StoredSession["user"] }) {
+export function saveSession(data: { user: StoredSession["user"] }) {
   if (typeof window === "undefined") return; // SSR guard
   try {
     localStorage.setItem(SESSION_KEY, JSON.stringify(data));

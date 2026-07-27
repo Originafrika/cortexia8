@@ -50,7 +50,6 @@ function Auth() {
         setStep("verify");
       } else if (data?.user) {
         saveSession({
-          token: (data as any).token ?? (data as any).session?.token ?? "",
           user: {
             id: data.user.id,
             name: data.user.name,
@@ -80,7 +79,6 @@ function Auth() {
       if (result.data?.user) {
         const role = result.data.user.role ?? "user";
         saveSession({
-          token: result.data.token,
           user: {
             id: result.data.user.id,
             name: result.data.user.name,
@@ -134,7 +132,6 @@ function Auth() {
         if (!signResult.error && signResult.data?.user) {
           const role = signResult.data.user.role ?? "user";
           saveSession({
-            token: signResult.data.token,
             user: {
               id: signResult.data.user.id,
               name: signResult.data.user.name,
@@ -152,18 +149,16 @@ function Auth() {
         }
       } else {
       }
-      // Fallback: if no password was stored, try to extract token from verify response.
-      const anyData = data as { session?: { user?: { id: string; name: string; email: string; role?: string } }; token?: string } | null;
-      const token = anyData?.token ?? anyData?.session?.user?.id ? (anyData as any)?.session?.token : undefined;
-      if (token) {
-        const u = anyData?.session?.user;
+      // Fallback: if no password was stored, try to extract user info from verify response.
+      const anyData = data as { session?: { user?: { id: string; name: string; email: string; role?: string } } } | null;
+      if (anyData?.session?.user) {
+        const u = anyData.session.user;
         saveSession({
-          token,
           user: {
-            id: u?.id ?? "",
-            name: u?.name ?? "",
-            email: u?.email ?? email,
-            role: u?.role ?? "user",
+            id: u.id ?? "",
+            name: u.name ?? "",
+            email: u.email ?? email,
+            role: u.role ?? "user",
             emailVerified: true,
           },
         });

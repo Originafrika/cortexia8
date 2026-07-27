@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getWorkflowRuns, type WorkflowRun, type WorkflowRunNodeExec } from "@/lib/api/workflow-runs";
-import { loadSession } from "@/lib/auth-store";
 import { cn } from "@/lib/utils";
 import {
   Check,
@@ -38,7 +37,7 @@ export function RunHistoryPanel({ open, onOpenChange, workflowId }: Props) {
     if (workflowId == null || !open) return;
     setLoading(true);
     try {
-      const res = await getWorkflowRuns({ data: { workflowId: Number(workflowId), sessionToken: loadSession()?.token } });
+      const res = await getWorkflowRuns({ data: { workflowId: Number(workflowId) } });
       setRuns(res.runs);
     } catch (err) {
       console.error("[run-history] fetch failed", err);

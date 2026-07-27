@@ -22,6 +22,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { sql } from "@/lib/db";
 import { recordTransaction } from "@/lib/credits";
 import { getRequestContext, HttpError, requireUserId, toJsonResponse } from "./auth";
+import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 
 // ---------------------------------------------------------------------------
 // FedaPay verification
@@ -55,8 +56,12 @@ export const verifyFedaPayTransaction = createServerFn({ method: "POST" })
     try {
       const ctx = await getRequestContext(data.sessionToken);
       const userId = await requireUserId(ctx);
-      // CSRF: This is a state-changing POST. TanStack Start server functions do not
-      // expose raw request headers. Primary CSRF defense: SameSite=Strict session cookies.
+
+      // Rate limit: 10 requests per minute per user
+      const rateLimitKey = `payment:${userId}`;
+      if (!checkRateLimit(rateLimitKey, RATE_LIMITS.payment)) {
+        throw new HttpError(429, "Rate limit exceeded. Please try again later.");
+      }
 
       // Verify with FedaPay API
       const apiKey = process.env.FEDAPAY_SECRET_KEY;

@@ -13,7 +13,6 @@ import { generate } from "@/lib/api/generate";
 import { generationStatus } from "@/lib/api/generation-status";
 import { getWorkflow } from "@/lib/api/workflows";
 import { graphOps } from "@/lib/api/canvas-graph-ops";
-import { loadSession } from "@/lib/auth-store";
 import {
   estimateNodePrice,
   portsForCategory,
@@ -36,13 +35,6 @@ function isCompatibleConnection(source: CanvasNode | undefined, target: CanvasNo
   const s = portsForCategory(source.data.category).out;
   const t = portsForCategory(target.data.category).in;
   return t.includes(s);
-}
-
-function getClientUserId(): number | null {
-  const session = loadSession();
-  if (!session?.user?.id) return null;
-  const id = Number(session.user.id);
-  return isNaN(id) ? null : id;
 }
 
 /** Map a numeric DB node id to a string id used by React Flow. */

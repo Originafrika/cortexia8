@@ -42,6 +42,7 @@ import {
   toJsonResponse,
   validateOrigin,
 } from "./auth";
+import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 
 export type GenerateInput = {
   modelSlug: string;
@@ -80,12 +81,13 @@ export const generate = createServerFn({ method: "POST" })
     try {
       const ctx = await getRequestContext(data.sessionToken);
       const userId = await requireUserId(ctx);
-      // CSRF: validate origin for state-changing endpoint.
-      // NOTE: In TanStack Start server functions, request headers are not directly
-      // available. The client must pass headers via the fetch call. This validation
-      // is effective when the client sends Origin/Referer headers (browsers do this
-      // automatically for same-origin requests).
-      // If headers are unavailable in this runtime, rely on SameSite cookie policy.
+
+      // Rate limit: 30 requests per minute per user
+      const rateLimitKey = `generate:${userId}`;
+      if (!checkRateLimit(rateLimitKey, RATE_LIMITS.generation)) {
+        throw new HttpError(429, "Rate limit exceeded. Please try again later.");
+      }
+
       const result = await runGenerate(data, userId, ctx.apiKeyId);
       return result;
     } catch (err) {
