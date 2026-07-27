@@ -82,7 +82,7 @@ export const verifyFedaPayTransaction = createServerFn({ method: "POST" })
 
       if (!response.ok) {
         const errText = await response.text();
-        throw new HttpError(400, `FedaPay verification failed: ${response.status}`);
+        throw new HttpError(400, "FedaPay verification failed");
       }
 
       const tx = (await response.json()) as {
@@ -199,7 +199,7 @@ export const createStripeCheckout = createServerFn({ method: "POST" })
 
       if (!response.ok) {
         const errBody = await response.text();
-        throw new HttpError(502, `Stripe checkout creation failed: ${response.status}`);
+        throw new HttpError(502, "Stripe checkout creation failed");
       }
 
       const session = (await response.json()) as { id: string; url: string };

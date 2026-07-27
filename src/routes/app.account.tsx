@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { PriceDisplay } from "@/components/price-display";
 import { CurrencyPicker } from "@/components/currency-picker";
 import { CreditCard, Smartphone, Bitcoin, Wallet, Check, Loader2 } from "lucide-react";
-import { useCurrency, formatMoney } from "@/lib/currency";
+import { useCurrency, formatMoney, CURRENCIES } from "@/lib/currency";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { verifyFedaPayTransaction, createStripeCheckout } from "@/lib/api/payments";
@@ -94,7 +94,7 @@ function AccountPage() {
   async function handleFedaPayComplete(transactionId: string) {
     try {
       const result = await verifyFedaPayTransaction({
-        data: { transactionId, amount: amount * 600 }, // Convert USD to XOF
+        data: { transactionId, amount: amount * CURRENCIES.XOF.rate }, // Convert USD to XOF
       });
       if (result.ok) {
         if (result.balance != null) {
@@ -344,7 +344,7 @@ function FedaPayWidget({
   const options = {
     public_key,
     transaction: {
-      amount: amount * 600, // Convert USD to XOF (CFA Franc) — 1 USD ≈ 600 XOF
+      amount: amount * CURRENCIES.XOF.rate, // Convert USD to XOF (CFA Franc)
       description: t("account.fedapay_description"),
     },
     currency: {

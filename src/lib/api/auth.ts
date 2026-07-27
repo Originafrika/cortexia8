@@ -161,8 +161,8 @@ export function toJsonResponse(err: unknown): Response {
       { status: err.status },
     );
   }
-  const message = err instanceof Error ? err.message : "Internal error";
-  return Response.json({ error: message }, { status: 500 });
+  // Sanitize 500 errors — never leak internal details to clients
+  return Response.json({ error: "Internal server error" }, { status: 500 });
 }
 
 async function sha256Hex(s: string): Promise<string> {
