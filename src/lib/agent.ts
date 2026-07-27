@@ -16,7 +16,17 @@ import { kieApiBase } from "./kie-api/client";
 
 // ── Types ─────────────────────────────────────────────────────────────────
 
-export type AgentModel = "claude-sonnet-4-5" | "gpt-5-2";
+export type AgentModel =
+  | "claude-sonnet-4-5"
+  | "gpt-5-2"
+  | "gpt-5"
+  | "gpt-4.1"
+  | "gpt-4.1-mini"
+  | "claude-opus-4"
+  | "claude-haiku-3-5"
+  | "gemini-2-5-pro"
+  | "gemini-2-5-flash"
+  | "grok-3";
 
 export type GraphOperation =
   | { type: "ADD_NODE"; modelSlug: string; position?: { x: number; y: number } }
@@ -185,15 +195,89 @@ async function callGPT(
   return data.choices?.[0]?.message?.content ?? "";
 }
 
+async function callGemini(
+  messages: Array<{ role: string; content: string }>,
+  config: AgentConfig
+): Promise<string> {
+  const model = config.model === "gemini-2-5-flash" ? "gemini-2.5-flash" : "gemini-2.5-pro";
+  const endpoint = `${kieApiBase()}/google/v1beta/models/${model}:generateContent`;
+  const body = {
+    contents: messages.map((m) => ({
+      role: m.role === "assistant" ? "model" : "user",
+      parts: [{ text: m.content }],
+    })),
+    generationConfig: {
+      maxOutputTokens: config.maxTokens ?? DEFAULT_MAX_TOKENS,
+    },
+  };
+
+  const res = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.KIE_API_KEY}`,
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const error = await res.text();
+    throw new Error(`Gemini API error: ${res.status} - ${error}`);
+  }
+
+  const data = await res.json();
+  return data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+}
+
+async function callGrok(
+  messages: Array<{ role: string; content: string }>,
+  config: AgentConfig
+): Promise<string> {
+  const endpoint = `${kieApiBase()}/xai/v1/chat/completions`;
+  const body = {
+    model: "grok-3",
+    messages,
+    max_tokens: config.maxTokens ?? DEFAULT_MAX_TOKENS,
+    stream: false,
+  };
+
+  const res = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.KIE_API_KEY}`,
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const error = await res.text();
+    throw new Error(`Grok API error: ${res.status} - ${error}`);
+  }
+
+  const data = await res.json();
+  return data.choices?.[0]?.message?.content ?? "";
+}
+
 async function callLLM(
   messages: Array<{ role: string; content: string }>,
   config: AgentConfig
 ): Promise<string> {
   switch (config.model) {
     case "claude-sonnet-4-5":
+    case "claude-opus-4":
+    case "claude-haiku-3-5":
       return callClaude(messages, config);
     case "gpt-5-2":
+    case "gpt-5":
+    case "gpt-4.1":
+    case "gpt-4.1-mini":
       return callGPT(messages, config);
+    case "gemini-2-5-pro":
+    case "gemini-2-5-flash":
+      return callGemini(messages, config);
+    case "grok-3":
+      return callGrok(messages, config);
     default:
       throw new Error(`Unsupported model: ${config.model}`);
   }
@@ -367,8 +451,16 @@ export function shouldConfirmOperation(
 // ── Export Constants ──────────────────────────────────────────────────────
 
 export const AGENT_MODELS: Array<{ value: AgentModel; label: string }> = [
-  { value: "claude-sonnet-4-5", label: "Claude Sonnet 4.5" },
   { value: "gpt-5-2", label: "GPT 5.2" },
+  { value: "gpt-5", label: "GPT 5" },
+  { value: "gpt-4.1", label: "GPT 4.1" },
+  { value: "gpt-4.1-mini", label: "GPT 4.1 Mini" },
+  { value: "claude-sonnet-4-5", label: "Claude Sonnet 4.5" },
+  { value: "claude-opus-4", label: "Claude Opus 4" },
+  { value: "claude-haiku-3-5", label: "Claude Haiku 3.5" },
+  { value: "gemini-2-5-pro", label: "Gemini 2.5 Pro" },
+  { value: "gemini-2-5-flash", label: "Gemini 2.5 Flash" },
+  { value: "grok-3", label: "Grok 3" },
 ];
 
 export const COST_THRESHOLD = DEFAULT_COST_THRESHOLD;

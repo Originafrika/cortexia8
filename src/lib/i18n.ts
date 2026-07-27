@@ -260,6 +260,8 @@ const fr: Dict = {
   "node.duplicate": "Dupliquer le noeud",
   "node.run_from_here": "Executer ce noeud et tous les noeuds en aval",
   "node.rerun": "Relancer ce noeud et ses dependances",
+  "node.more": "Plus de parametres",
+  "node.close": "Fermer",
 
   // Inspector keys
   "inspector.title": "Inspecteur",
@@ -293,12 +295,13 @@ const fr: Dict = {
   "controls.running": "Génération...",
 
   // Node picker
-  "node.picker.add_node": "Ajouter un nœud",
-  "node.picker.add_model": "Ajouter un modèle",
-  "node.picker.catalog": "Catalogue · ajoute un modèle au canvas",
-  "node.picker.empty": "Aucun modèle ne correspond.",
+  "node.picker.add_node": "Ajouter un noeud",
+  "node.picker.add_model": "Ajouter un modele",
+  "node.picker.catalog": "Catalogue . ajoute un modele au canvas",
+  "node.picker.empty": "Aucun modele ne correspond.",
+  "node.picker.all": "Tout",
   "node.category.image": "Image",
-  "node.category.video": "Vidéo",
+  "node.category.video": "Video",
   "node.category.audio": "Voix",
   "node.category.text": "Texte",
   "node.category.music": "Musique",
@@ -718,6 +721,8 @@ const en: Dict = {
   "node.duplicate": "Duplicate node",
   "node.run_from_here": "Run this node and all downstream nodes",
   "node.rerun": "Rerun this node and its dependencies",
+  "node.more": "More parameters",
+  "node.close": "Close",
 
   // Inspector keys
   "inspector.title": "Inspector",
@@ -753,8 +758,9 @@ const en: Dict = {
   // Node picker
   "node.picker.add_node": "Add a node",
   "node.picker.add_model": "Add a model",
-  "node.picker.catalog": "Catalogue · add a model to the canvas",
+  "node.picker.catalog": "Catalogue . add a model to the canvas",
   "node.picker.empty": "No matching model.",
+  "node.picker.all": "All",
   "node.category.image": "Image",
   "node.category.video": "Video",
   "node.category.audio": "Voice",
@@ -1166,6 +1172,8 @@ const pt: Dict = {
   "node.duplicate": "Duplicar no",
   "node.run_from_here": "Executar este no e todos os nos downstream",
   "node.rerun": "Reexecutar este no e suas dependencias",
+  "node.more": "Mais parametros",
+  "node.close": "Fechar",
 
   // Inspector keys
   "inspector.title": "Inspetor",
@@ -1199,10 +1207,11 @@ const pt: Dict = {
   "controls.running": "Gerando...",
 
   // Node picker
-  "node.picker.add_node": "Adicionar um nó",
+  "node.picker.add_node": "Adicionar um no",
   "node.picker.add_model": "Adicionar um modelo",
-  "node.picker.catalog": "Catálogo · adicione um modelo ao canvas",
+  "node.picker.catalog": "Catalogo . adicione um modelo ao canvas",
   "node.picker.empty": "Nenhum modelo correspondente.",
+  "node.picker.all": "Todos",
   "node.category.image": "Imagem",
   "node.category.video": "Vídeo",
   "node.category.audio": "Voz",
@@ -1612,6 +1621,8 @@ const es: Dict = {
   "node.duplicate": "Duplicar nodo",
   "node.run_from_here": "Ejecutar este nodo y todos los nodos aguas abajo",
   "node.rerun": "Re-ejecutar este nodo y sus dependencias",
+  "node.more": "Mas parametros",
+  "node.close": "Cerrar",
 
   // Inspector keys
   "inspector.title": "Inspector",
@@ -1648,7 +1659,8 @@ const es: Dict = {
   "node.picker.add_node": "Agregar un nodo",
   "node.picker.add_model": "Agregar un modelo",
   "node.picker.catalog": "Catálogo · agrega un modelo al canvas",
-  "node.picker.empty": "Ningún modelo coincide.",
+  "node.picker.empty": "Ningun modelo coincide.",
+  "node.picker.all": "Todos",
   "node.category.image": "Imagen",
   "node.category.video": "Video",
   "node.category.audio": "Voz",
@@ -2058,6 +2070,8 @@ const id: Dict = {
   "node.duplicate": "Duplikat node",
   "node.run_from_here": "Jalankan node ini dan semua node downstream",
   "node.rerun": "Jalankan ulang node ini dan dependensinya",
+  "node.more": "Lebih banyak parameter",
+  "node.close": "Tutup",
 
   // Inspector keys
   "inspector.title": "Inspektur",
@@ -2100,6 +2114,7 @@ const id: Dict = {
   "node.category.audio": "Suara",
   "node.category.text": "Teks",
   "node.category.music": "Musik",
+  "node.picker.all": "Semua",
 
   // Node result labels
   "node.audio.ready": "Suara siap",

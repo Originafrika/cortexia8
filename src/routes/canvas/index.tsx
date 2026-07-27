@@ -4,7 +4,6 @@ import { ReactFlowProvider, useReactFlow } from "@xyflow/react";
 import { z } from "zod";
 import { SignedIn, RedirectToSignIn } from "@neondatabase/auth-ui";
 import { CanvasFlow } from "@/components/canvas/canvas-flow";
-import { InspectorPanel } from "@/components/canvas/inspector-panel";
 import { AgentPanel } from "@/components/canvas/agent-panel";
 import { NodePicker } from "@/components/canvas/node-picker";
 import { RunControls } from "@/components/canvas/run-controls";
@@ -12,12 +11,10 @@ import { PriceBadge } from "@/components/canvas/price-badge";
 import { EmptyStateCard } from "@/components/canvas/empty-state-card";
 import { useCanvasStore } from "@/lib/canvas-store";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ArrowLeft, Bot, Copy, Eye, History, Settings2, X } from "lucide-react";
+import { ArrowLeft, Bot, Copy, Eye, History, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { RunHistoryPanel } from "@/components/canvas/run-history-panel";
 import { useT } from "@/lib/i18n";
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
-import type { Layout } from "react-resizable-panels";
 
 const canvasSearchSchema = z.object({
   workflowId: z.number().optional(),
@@ -142,8 +139,6 @@ function CanvasShell() {
   );
 }
 
-const PANEL_SIZES_KEY = "cortexia-canvas-panel-sizes";
-
 function CanvasInnerWrapper({
   workflowId,
   loadedRef,
@@ -178,21 +173,6 @@ function CanvasInnerWrapper({
   const t = useT();
   const { fitView } = useReactFlow();
   const setSelected = useCanvasStore((s) => s.setSelectedNodeId);
-  const [savedLayout, setSavedLayout] = useState<Layout | undefined>(() => {
-    try {
-      const raw = localStorage.getItem(PANEL_SIZES_KEY);
-      if (!raw) return undefined;
-      const parsed = JSON.parse(raw);
-      if (typeof parsed === "object" && parsed !== null && "canvas" in parsed && "inspector" in parsed) {
-        return parsed as Layout;
-      }
-    } catch { /* ignore */ }
-    return undefined;
-  });
-
-  const handleLayoutChanged = useCallback((layout: Layout) => {
-    try { localStorage.setItem(PANEL_SIZES_KEY, JSON.stringify(layout)); } catch { /* ignore */ }
-  }, []);
 
   // Load workflow from DB if workflowId is in URL
   useEffect(() => {
@@ -209,58 +189,18 @@ function CanvasInnerWrapper({
 
   return (
     <>
-      <ResizablePanelGroup
-        orientation="horizontal"
-        className="flex-1 min-h-0"
-        onLayoutChanged={handleLayoutChanged}
-      >
-        <ResizablePanel
-          id="canvas"
-          defaultSize={savedLayout?.canvas ?? "75"}
-          minSize="40"
-          className="rounded-2xl"
-        >
-          <div className="relative h-full rounded-2xl">
-            <CanvasFlow />
-            {showEmpty && (
-              <EmptyStateCard
-                onOpenAgent={(prompt) => {
-                  setPrefillPrompt(prompt);
-                  setAgentOpen(true);
-                }}
-                onHighlightNodeAdd={handleHighlightNodeAdd}
-              />
-            )}
-          </div>
-        </ResizablePanel>
-        {!isMobile && (
-          <>
-            <ResizableHandle withHandle />
-            <ResizablePanel
-              id="inspector"
-              defaultSize={savedLayout?.inspector ?? "25"}
-              minSize="15"
-              maxSize="50"
-              className="rounded-2xl"
-            >
-              <aside className="h-full rounded-2xl bg-surface-0/60 backdrop-blur-md flex flex-col">
-                <div className="flex items-center gap-2 border-b border-border px-4 py-3">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <Settings2 className="size-3.5" />
-                    <span className="text-sm font-medium">{t("canvas.tab.inspector")}</span>
-                  </div>
-                  <div className="ml-auto">
-                    <PriceBadge className="h-7 px-2.5 text-[11px]" />
-                  </div>
-                </div>
-                <div className="flex-1 min-h-0">
-                  <InspectorPanel onClose={() => setSelected(null)} />
-                </div>
-              </aside>
-            </ResizablePanel>
-          </>
+      <div className="flex-1 min-h-0 relative">
+        <CanvasFlow />
+        {showEmpty && (
+          <EmptyStateCard
+            onOpenAgent={(prompt) => {
+              setPrefillPrompt(prompt);
+              setAgentOpen(true);
+            }}
+            onHighlightNodeAdd={handleHighlightNodeAdd}
+          />
         )}
-      </ResizablePanelGroup>
+      </div>
 
       {selectedNodeIds.length > 0 && !isMobile && (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">

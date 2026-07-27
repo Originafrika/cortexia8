@@ -23,13 +23,7 @@ const CATEGORY_ICON: Record<ModelCategory, typeof ImageIcon> = {
   music: Music2,
 };
 
-const CATEGORY_LABEL: Record<ModelCategory, string> = {
-  image: "Image",
-  video: "Vidéo",
-  audio: "Voix",
-  text: "Texte",
-  music: "Musique",
-};
+const CATEGORIES: ModelCategory[] = ["image", "video", "audio", "text", "music"];
 
 type Props = {
   /** Render as a toolbar button instead of a dialog. */
@@ -106,36 +100,85 @@ function PickerBody({
 }) {
   const t = useT();
   const [q, setQ] = useState("");
+  const [activeCategory, setActiveCategory] = useState<ModelCategory | "all">("all");
   const addNode = useCanvasStore((s) => s.addNode);
 
   const grouped = useMemo(() => {
     const term = q.trim().toLowerCase();
     const filtered = MODELS.filter(
       (m) =>
-        term === "" ||
-        m.name.toLowerCase().includes(term) ||
-        m.provider.toLowerCase().includes(term) ||
-        m.blurb.toLowerCase().includes(term),
+        (activeCategory === "all" || m.category === activeCategory) &&
+        (term === "" ||
+          m.name.toLowerCase().includes(term) ||
+          m.provider.toLowerCase().includes(term) ||
+          m.blurb.toLowerCase().includes(term)),
     );
     const out: Record<ModelCategory, Model[]> = { image: [], video: [], audio: [], text: [], music: [] };
     filtered.forEach((m) => out[m.category].push(m));
     return out;
-  }, [q]);
+  }, [q, activeCategory]);
+
+  // Count models per category for the pills
+  const categoryCounts = useMemo(() => {
+    const counts: Record<ModelCategory, number> = { image: 0, video: 0, audio: 0, text: 0, music: 0 };
+    MODELS.forEach((m) => counts[m.category]++);
+    return counts;
+  }, []);
 
   return (
     <Command className="rounded-none border-t border-border">
+      {/* Category filter pills */}
+      <div className="flex items-center gap-1.5 px-4 py-2 border-b border-border overflow-x-auto">
+        <button
+          onClick={() => setActiveCategory("all")}
+          className={cn(
+            "shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
+            activeCategory === "all"
+              ? "bg-surface-2 text-foreground"
+              : "text-muted-foreground hover:text-foreground hover:bg-surface-2/50",
+          )}
+        >
+          {t("node.picker.all")}
+        </button>
+        {CATEGORIES.map((cat) => {
+          const accent = categoryAccent(cat);
+          const Icon = CATEGORY_ICON[cat];
+          const isActive = activeCategory === cat;
+          return (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className={cn(
+                "shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
+                isActive
+                  ? cn(accent.pill, "ring-1", accent.ring)
+                  : "text-muted-foreground hover:text-foreground hover:bg-surface-2/50",
+              )}
+            >
+              <Icon className="size-3" />
+              {t(`node.category.${cat}`)}
+              <span className="font-mono text-[10px] opacity-60">{categoryCounts[cat]}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Search */}
       <div className="flex items-center border-b border-border px-3">
         <Search className="mr-2 size-4 shrink-0 text-muted-foreground" />
         <CommandInput
           value={q}
           onValueChange={setQ}
-          placeholder="Kling, Seedream, Claude…"
+          placeholder="Kling, Seedream, Claude..."
           className="h-11"
         />
       </div>
-      <CommandList className="max-h-[55vh]">
+
+      {/* Model list */}
+      <CommandList className="max-h-[45vh]">
         {MODELS.every(
           (m) =>
+            (activeCategory === "all" || m.category === activeCategory) &&
             q.trim() !== "" &&
             !m.name.toLowerCase().includes(q.toLowerCase()) &&
             !m.provider.toLowerCase().includes(q.toLowerCase()) &&

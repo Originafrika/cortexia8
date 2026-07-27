@@ -87,52 +87,64 @@ export function categoryAccent(c: ModelCategory): {
   pill: string;
   ring: string;
   IconBg: string;
+  glow: string;
+  leftBorder: string;
 } {
   switch (c) {
     case "image":
       return {
-        bg: "bg-amber/10",
+        bg: "bg-gradient-to-r from-amber/8 to-amber/3",
         border: "border-amber/30",
         text: "text-amber-soft",
         pill: "bg-amber/20 text-amber-soft",
         ring: "ring-amber/40",
         IconBg: "from-amber to-amber-soft",
+        glow: "shadow-[0_0_20px_4px_oklch(0.78_0.16_70_/_0.15)]",
+        leftBorder: "border-l-amber",
       };
     case "video":
       return {
-        bg: "bg-violet-500/10",
+        bg: "bg-gradient-to-r from-violet-500/8 to-violet-500/3",
         border: "border-violet-500/30",
         text: "text-violet-300",
         pill: "bg-violet-500/20 text-violet-200",
         ring: "ring-violet-400/40",
         IconBg: "from-violet-500 to-violet-400",
+        glow: "shadow-[0_0_20px_4px_oklch(0.55_0.18_290_/_0.15)]",
+        leftBorder: "border-l-violet-500",
       };
     case "audio":
       return {
-        bg: "bg-emerald/10",
+        bg: "bg-gradient-to-r from-emerald/8 to-emerald/3",
         border: "border-emerald/30",
         text: "text-emerald",
         pill: "bg-emerald/20 text-emerald",
         ring: "ring-emerald/40",
         IconBg: "from-emerald to-emerald/70",
+        glow: "shadow-[0_0_20px_4px_oklch(0.72_0.14_155_/_0.15)]",
+        leftBorder: "border-l-emerald",
       };
     case "text":
       return {
-        bg: "bg-sky-500/10",
+        bg: "bg-gradient-to-r from-sky-500/8 to-sky-500/3",
         border: "border-sky-500/30",
         text: "text-sky-300",
         pill: "bg-sky-500/20 text-sky-200",
         ring: "ring-sky-400/40",
         IconBg: "from-sky-500 to-sky-400",
+        glow: "shadow-[0_0_20px_4px_oklch(0.60_0.15_240_/_0.15)]",
+        leftBorder: "border-l-sky-500",
       };
     case "music":
       return {
-        bg: "bg-orange-500/10",
+        bg: "bg-gradient-to-r from-orange-500/8 to-orange-500/3",
         border: "border-orange-500/30",
         text: "text-orange-300",
         pill: "bg-orange-500/20 text-orange-200",
         ring: "ring-orange-400/40",
         IconBg: "from-orange-500 to-orange-400",
+        glow: "shadow-[0_0_20px_4px_oklch(0.70_0.18_50_/_0.15)]",
+        leftBorder: "border-l-orange-500",
       };
   }
 }

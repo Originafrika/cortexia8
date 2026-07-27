@@ -1,11 +1,14 @@
+import { useState, useCallback } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useCanvasStore } from "@/lib/canvas-store";
 import { categoryAccent, portColor, portLabel, portsForCategory, type CanvasNode } from "@/lib/canvas-types";
 import { cn } from "@/lib/utils";
-import { Image as ImageIcon, Film, Music2, MessageSquare, Loader2, Check, AlertTriangle, Play, Sparkles, RefreshCw, PlayCircle } from "lucide-react";
+import { Image as ImageIcon, Film, Music2, MessageSquare, Loader2, Check, AlertTriangle, Play, Sparkles, RefreshCw, PlayCircle, ChevronDown, ChevronRight, MoreHorizontal } from "lucide-react";
 import { PriceDisplay } from "@/components/price-display";
-import type { ModelCategory } from "@/lib/models";
+import { getModel, type ModelCategory } from "@/lib/models";
+import { getPrimaryParams, ParamField } from "@/components/canvas/node-params";
+import { NodeParamsOverlay } from "@/components/canvas/node-params-overlay";
 import { useT } from "@/lib/i18n";
 
 const CATEGORY_ICON: Record<ModelCategory, typeof ImageIcon> = {
@@ -26,8 +29,12 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
   const rerunNode = useCanvasStore((s) => s.rerunNode);
   const runFromNode = useCanvasStore((s) => s.runFromNode);
   const removeNode = useCanvasStore((s) => s.removeNode);
+  const updateNodeParams = useCanvasStore((s) => s.updateNodeParams);
   const newNodeIds = useCanvasStore((s) => s.newNodeIds);
   const cascadeDelays = useCanvasStore((s) => s.cascadeDelays);
+
+  const [expanded, setExpanded] = useState(false);
+  const [showMoreOverlay, setShowMoreOverlay] = useState(false);
 
   const Icon = CATEGORY_ICON[data.category];
   const running = data.status === "running";
@@ -42,302 +49,242 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
   const inputPortType = ports.in[0];
   const isCompatible = isDragSource && draggingFromPort === inputPortType;
 
+  const model = getModel(data.modelSlug);
+  const primaryParams = model ? getPrimaryParams(model) : [];
+
+  const handleExpandToggle = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setExpanded((v) => !v);
+  }, []);
+
+  const handleParamChange = useCallback((key: string, value: unknown) => {
+    updateNodeParams(id, { [key]: value });
+  }, [id, updateNodeParams]);
+
   return (
-    <motion.div
-      initial={isNew ? { opacity: 0, scale: 0.8 } : false}
-      animate={isNew ? { opacity: 1, scale: 1 } : undefined}
-      transition={isNew ? { duration: 0.35, delay, ease: [0.22, 1, 0.36, 1] } : undefined}
-      onClick={(e) => {
-        e.stopPropagation();
-        setSelected(id);
-      }}
-      className={cn(
-        "group w-[260px] rounded-2xl border bg-surface-1/85 backdrop-blur overflow-hidden",
-        "transition-all surface-gradient-border",
-        selected
-          ? `${accent.border} ring-2 ${accent.ring} shadow-[0_18px_60px_-18px_oklch(0.78_0.16_70_/_0.30)]`
-          : `${accent.border} hover:border-border-strong`,
-        isDragSource && !isCompatible && "opacity-30 scale-[0.97]",
-        isDragSource && isCompatible && "ring-2 ring-emerald/50 shadow-[0_0_20px_4px_oklch(0.65_0.19_160_/_0.25)]",
-      )}
-    >
-      {/* Input handle */}
-      <Handle
-        type="target"
-        position={Position.Left}
-        id="in"
-        isConnectable={!readOnly}
-        style={{
-          background: portColor(ports.in[0]),
-          width: isDragSource ? (isCompatible ? 16 : 8) : 12,
-          height: isDragSource ? (isCompatible ? 16 : 8) : 12,
-          border: isDragSource
-            ? isCompatible
-              ? `3px solid ${portColor(ports.in[0])}`
-              : "2px solid var(--background)"
-            : "2px solid var(--background)",
-          boxShadow: isDragSource && isCompatible
-            ? `0 0 12px 4px ${portColor(ports.in[0])}80, 0 0 24px 8px ${portColor(ports.in[0])}40`
-            : isDragSource
-              ? "none"
-              : undefined,
-          opacity: isDragSource && !isCompatible ? 0.25 : 1,
-          transition: "all 0.2s ease",
+    <>
+      <motion.div
+        initial={isNew ? { opacity: 0, scale: 0.8 } : false}
+        animate={isNew ? { opacity: 1, scale: 1 } : undefined}
+        transition={isNew ? { duration: 0.35, delay, ease: [0.22, 1, 0.36, 1] } : undefined}
+        onClick={(e) => {
+          e.stopPropagation();
+          setSelected(id);
         }}
-        title={portLabel(ports.in[0])}
-      />
+        className={cn(
+          "group w-[280px] rounded-2xl border bg-surface-1/85 backdrop-blur overflow-hidden border-l-[3px]",
+          "transition-all duration-200",
+          accent.leftBorder,
+          selected
+            ? `${accent.border} ring-2 ${accent.ring} ${accent.glow}`
+            : `border-border/60 hover:border-border-strong`,
+          isDragSource && !isCompatible && "opacity-30 scale-[0.97]",
+          isDragSource && isCompatible && "ring-2 ring-emerald/50 shadow-[0_0_20px_4px_oklch(0.65_0.19_160_/_0.25)]",
+          running && "animate-pulse-slow",
+        )}
+      >
+        {/* Input handle */}
+        <Handle
+          type="target"
+          position={Position.Left}
+          id="in"
+          isConnectable={!readOnly}
+          style={{
+            background: portColor(ports.in[0]),
+            width: isDragSource ? (isCompatible ? 16 : 8) : 12,
+            height: isDragSource ? (isCompatible ? 16 : 8) : 12,
+            border: isDragSource
+              ? isCompatible
+                ? `3px solid ${portColor(ports.in[0])}`
+                : "2px solid var(--background)"
+              : "2px solid var(--background)",
+            boxShadow: isDragSource && isCompatible
+              ? `0 0 12px 4px ${portColor(ports.in[0])}80, 0 0 24px 8px ${portColor(ports.in[0])}40`
+              : isDragSource
+                ? "none"
+                : undefined,
+            opacity: isDragSource && !isCompatible ? 0.25 : 1,
+            transition: "all 0.2s ease",
+          }}
+          title={portLabel(ports.in[0])}
+        />
 
-      {/* Output handle */}
-      <Handle
-        type="source"
-        position={Position.Right}
-        id="out"
-        isConnectable={!readOnly}
-        style={{
-          background: portColor(ports.out),
-          width: 12,
-          height: 12,
-          border: "2px solid var(--background)",
-        }}
-        title={portLabel(ports.out)}
-      />
+        {/* Output handle */}
+        <Handle
+          type="source"
+          position={Position.Right}
+          id="out"
+          isConnectable={!readOnly}
+          style={{
+            background: portColor(ports.out),
+            width: 12,
+            height: 12,
+            border: "2px solid var(--background)",
+          }}
+          title={portLabel(ports.out)}
+        />
 
-      {/* Header */}
-      <div className={cn("flex items-center gap-2.5 px-3 py-2.5 border-b border-border/60", accent.bg)}>
+        {/* Header */}
         <div
           className={cn(
-            "grid place-items-center size-7 rounded-lg bg-gradient-to-br text-primary-foreground shrink-0",
-            accent.IconBg,
+            "flex items-center gap-2.5 px-3 py-2.5 cursor-pointer",
+            accent.bg,
           )}
+          onClick={handleExpandToggle}
         >
-          <Icon className="size-3.5" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="text-[13px] font-medium truncate leading-tight">{data.modelName}</div>
-          <div className="font-mono text-[9px] uppercase tracking-[0.22em] text-muted-foreground truncate">
-            {data.provider} · {data.category}
+          <div
+            className={cn(
+              "grid place-items-center size-7 rounded-lg bg-gradient-to-br text-primary-foreground shrink-0",
+              accent.IconBg,
+            )}
+          >
+            <Icon className="size-3.5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="text-[13px] font-medium truncate leading-tight">{data.modelName}</div>
+            <div className="font-mono text-[9px] uppercase tracking-[0.22em] text-muted-foreground truncate">
+              {data.provider} · {data.category}
+            </div>
+          </div>
+          <div className="flex items-center gap-1 shrink-0">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                removeNode(id);
+              }}
+              className="sm:opacity-0 sm:group-hover:opacity-100 text-muted-foreground hover:text-foreground transition p-1 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              aria-label={t("node.delete")}
+            >
+              ×
+            </button>
+            <motion.div
+              animate={{ rotate: expanded ? 180 : 0 }}
+              transition={{ duration: 0.2 }}
+              className="text-muted-foreground"
+            >
+              <ChevronDown className="size-3.5" />
+            </motion.div>
           </div>
         </div>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            removeNode(id);
-          }}
-          className="sm:opacity-0 sm:group-hover:opacity-100 text-muted-foreground hover:text-foreground transition p-1 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-          aria-label={t("node.delete")}
-        >
-          ×
-        </button>
-      </div>
 
-      {/* Body / status / result */}
-      <div className="px-3 py-2.5">
-        {running ? (
-          <div>
-            <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-[0.22em] text-muted-foreground">
-              <span className="flex items-center gap-1.5">
-                <Loader2 className="size-3 animate-spin text-amber" />
-                {data.step || "…"}
+        {/* Collapsed: Status + Price */}
+        {!expanded && (
+          <div className="px-3 py-2 flex items-center justify-between text-[11px]">
+            {running ? (
+              <span className="flex items-center gap-1.5 text-amber-soft">
+                <Loader2 className="size-3 animate-spin" />
+                {data.step || "..."}
               </span>
-              <span className="tabular text-foreground/80">{data.progress}%</span>
-            </div>
-            <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-surface-3">
-              <div
-                className="h-full bg-gradient-to-r from-amber to-amber-soft transition-[width] duration-200"
-                style={{ width: `${data.progress}%` }}
-              />
-            </div>
+            ) : done ? (
+              <span className="flex items-center gap-1.5 text-emerald">
+                <Check className="size-3" /> {t("node.status.ready")}
+              </span>
+            ) : err ? (
+              <span className="flex items-center gap-1.5 text-amber-soft">
+                <AlertTriangle className="size-3" /> {t("node.status.error")}
+              </span>
+            ) : (
+              <span className="flex items-center gap-1.5 text-muted-foreground">
+                <Sparkles className="size-3" /> {t("node.status.idle")}
+              </span>
+            )}
+            <PriceDisplay usd={data.priceUSD} className="text-[10px]" />
           </div>
-        ) : done && data.result ? (
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex-1 min-w-0">
-              <ResultPreview category={data.category} result={data.result} />
-            </div>
-            <div className="flex flex-col gap-1 shrink-0">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  runFromNode(id);
-                }}
-                disabled={readOnly}
-                title={t("node.run_from_here")}
-                className="inline-flex items-center gap-1 rounded-full bg-sky-600/90 px-2 py-1 text-[10px] font-medium text-primary-foreground hover:bg-sky-600 disabled:opacity-50 transition"
-              >
-                <PlayCircle className="size-2.5" /> {t("node.action.from_here")}
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  rerunNode(id);
-                }}
-                disabled={readOnly}
-                title={t("node.rerun")}
-                className="inline-flex items-center gap-1 rounded-full bg-emerald/90 px-2 py-1 text-[10px] font-medium text-primary-foreground hover:bg-emerald disabled:opacity-50 transition"
-              >
-                <RefreshCw className="size-2.5" /> {t("node.action.rerun")}
-              </button>
-            </div>
-          </div>
-        ) : err ? (
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-1.5 text-[11px] text-amber-soft">
-              <AlertTriangle className="size-3" /> {t("node.status.error")}
-            </div>
-            <div className="flex gap-1 shrink-0">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  runFromNode(id);
-                }}
-                disabled={readOnly}
-                title="Exécuter ce nœud et tous les nœuds en aval"
-                className="inline-flex items-center gap-1 rounded-full bg-sky-600/90 px-2 py-1 text-[10px] font-medium text-primary-foreground hover:bg-sky-600 disabled:opacity-50 transition"
-              >
-                <PlayCircle className="size-2.5" /> {t("node.action.from_here")}
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  rerunNode(id);
-                }}
-                disabled={readOnly}
-                title="Relancer ce nœud et ses dépendances"
-                className="inline-flex items-center gap-1 rounded-full bg-emerald/90 px-2 py-1 text-[10px] font-medium text-primary-foreground hover:bg-emerald disabled:opacity-50 transition"
-              >
-                <RefreshCw className="size-2.5" /> {t("node.action.rerun")}
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-            <span className="flex items-center gap-1.5">
-              <Sparkles className="size-3" /> {t("node.status.ready")}
-            </span>
-            <div className="flex gap-1">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  runFromNode(id);
-                }}
-                disabled={readOnly}
-                title="Exécuter ce nœud et tous les nœuds en aval"
-                className="inline-flex items-center gap-1 rounded-full bg-sky-600/90 px-2 py-0.5 text-[10px] font-medium text-primary-foreground hover:bg-sky-600 disabled:opacity-50 transition"
-              >
-                <PlayCircle className="size-2.5" /> {t("node.action.from_here")}
-              </button>
+        )}
+
+        {/* Expanded: Inline Params */}
+        <AnimatePresence>
+          {expanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: "easeInOut" }}
+              className="overflow-hidden"
+            >
+              <div className="px-3 pb-2 space-y-2 border-t border-border/40">
+                <div className="pt-2 space-y-2">
+                  {primaryParams.map((p, i) => (
+                    <ParamField
+                      key={i}
+                      p={p}
+                      value={data.params}
+                      onChange={handleParamChange}
+                      disabled={readOnly}
+                      compact
+                    />
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Footer: Actions */}
+        <div className={cn(
+          "flex items-center justify-between px-3 py-1.5 border-t border-border/40 bg-surface-0/40",
+          expanded && "border-t border-border/40",
+        )}>
+          <div className="flex items-center gap-1">
+            {running && (
+              <div className="h-1 w-12 overflow-hidden rounded-full bg-surface-3">
+                <div
+                  className="h-full bg-gradient-to-r from-amber to-amber-soft transition-[width] duration-200"
+                  style={{ width: `${data.progress}%` }}
+                />
+              </div>
+            )}
+            {!running && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   runNode(id);
                 }}
-                disabled={readOnly}
-                className="inline-flex items-center gap-1 rounded-full bg-amber/90 px-2 py-0.5 text-[10px] font-medium text-primary-foreground hover:bg-amber disabled:opacity-50 transition"
+                disabled={readOnly || done}
+                className="inline-flex items-center gap-1 rounded-full bg-amber/90 px-2.5 py-1 text-[10px] font-medium text-primary-foreground hover:bg-amber disabled:opacity-50 transition"
               >
                 <Play className="size-2.5" /> {t("node.action.run")}
               </button>
-            </div>
+            )}
           </div>
-        )}
-      </div>
+          <div className="flex items-center gap-1">
+            {done && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  rerunNode(id);
+                }}
+                disabled={readOnly}
+                className="inline-flex items-center gap-1 rounded-full bg-emerald/90 px-2 py-1 text-[10px] font-medium text-primary-foreground hover:bg-emerald disabled:opacity-50 transition"
+              >
+                <RefreshCw className="size-2.5" />
+              </button>
+            )}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowMoreOverlay(true);
+              }}
+              disabled={!model}
+              className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-2 py-1 text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-surface-3 disabled:opacity-50 transition"
+              title={t("node.more")}
+            >
+              <MoreHorizontal className="size-2.5" />
+            </button>
+          </div>
+        </div>
+      </motion.div>
 
-      {/* Footer */}
-      <div className="flex items-center justify-between px-3 py-1.5 border-t border-border/40 bg-surface-0/40">
-        <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-muted-foreground">
-          {data.status === "done" ? (
-            <span className="inline-flex items-center gap-1 text-emerald">
-              <Check className="size-2.5" /> {t("node.status.ready")}
-            </span>
-          ) : data.status === "running" ? (
-            <span className="text-amber-soft">{t("node.status.running")}</span>
-          ) : (
-            t("node.status.idle")
-          )}
-        </span>
-        <PriceDisplay
-          usd={data.priceUSD}
-          className={cn("text-[10px]", done && "text-foreground")}
-          emphasize={done}
+      {/* Full params overlay */}
+      {showMoreOverlay && model && (
+        <NodeParamsOverlay
+          nodeId={id}
+          modelSlug={data.modelSlug}
+          params={data.params}
+          open={showMoreOverlay}
+          onOpenChange={setShowMoreOverlay}
         />
-      </div>
-    </motion.div>
+      )}
+    </>
   );
-}
-
-function ResultPreview({
-  category,
-  result,
-}: {
-  category: ModelCategory;
-  result: NonNullable<CanvasNode["data"]["result"]>;
-}) {
-  const t = useT();
-  if (category === "image" && result.kind === "image") {
-    return (
-      <div className="rounded-lg overflow-hidden border border-border bg-surface-0/40 aspect-video">
-        <img src={result.url} alt="" className="h-full w-full object-cover" />
-      </div>
-    );
-  }
-  if (category === "video" && result.kind === "video") {
-    return (
-      <div
-        className="rounded-lg overflow-hidden border border-border bg-surface-0/40 aspect-video relative"
-        style={{
-          background: `linear-gradient(135deg, oklch(0.45 0.18 290), oklch(0.18 0.01 60))`,
-        }}
-      >
-        <div className="absolute inset-0 grid place-items-center">
-          <div className="size-10 rounded-full bg-black/40 backdrop-blur grid place-items-center border border-white/10">
-            <Play className="size-4 text-white fill-white" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-  if (category === "audio" && result.kind === "audio") {
-    return (
-      <div className="rounded-lg border border-border bg-surface-0/40 px-2.5 py-2 flex items-center gap-2">
-        <div className="grid place-items-center size-6 rounded-full bg-emerald/20 text-emerald">
-          <Music2 className="size-3" />
-        </div>
-        <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">{t("node.audio.ready")}</div>
-        <div className="ml-auto flex items-end gap-[2px] h-3">
-          {[0.4, 0.7, 1, 0.6, 0.9, 0.5, 0.8].map((h, i) => (
-            <span
-              key={i}
-              className="w-[2px] bg-emerald rounded-full"
-              style={{ height: `${h * 100}%` }}
-            />
-          ))}
-        </div>
-      </div>
-    );
-  }
-  if (category === "music" && result.kind === "audio") {
-    return (
-      <div className="rounded-lg border border-border bg-surface-0/40 px-2.5 py-2 flex items-center gap-2">
-        <div className="grid place-items-center size-6 rounded-full bg-orange-500/20 text-orange-400">
-          <Music2 className="size-3" />
-        </div>
-        <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">{t("node.music.ready")}</div>
-        <div className="ml-auto flex items-end gap-[2px] h-3">
-          {[0.4, 0.7, 1, 0.6, 0.9, 0.5, 0.8].map((h, i) => (
-            <span
-              key={i}
-              className="w-[2px] bg-orange-400 rounded-full"
-              style={{ height: `${h * 100}%` }}
-            />
-          ))}
-        </div>
-      </div>
-    );
-  }
-  if (category === "text" && result.kind === "text") {
-    return (
-      <div className="rounded-lg border border-border bg-surface-0/40 px-2.5 py-2 text-[11px] text-foreground/85 line-clamp-3">
-        {result.text}
-      </div>
-    );
-  }
-  return null;
 }
