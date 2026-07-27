@@ -7,12 +7,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { NodeParams } from "@/components/canvas/node-params";
 import { PriceDisplay } from "@/components/price-display";
-import { getModel, type Model } from "@/lib/models";
+import { getModel } from "@/lib/models";
 import { useCanvasStore } from "@/lib/canvas-store";
-import { categoryAccent } from "@/lib/canvas-types";
 import { useT } from "@/lib/i18n";
-import { cn } from "@/lib/utils";
-import { Play, X } from "lucide-react";
+import { Play } from "lucide-react";
 
 interface NodeParamsOverlayProps {
   nodeId: string;
@@ -37,8 +35,6 @@ export function NodeParamsOverlay({
 
   if (!model) return null;
 
-  const accent = categoryAccent(model.category);
-
   function handleChange(key: string, value: unknown) {
     updateNodeParams(nodeId, { [key]: value });
   }
@@ -53,13 +49,8 @@ export function NodeParamsOverlay({
       <DialogContent className="sm:max-w-lg max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <div
-              className={cn(
-                "grid place-items-center size-7 rounded-lg bg-gradient-to-br text-primary-foreground shrink-0",
-                accent.IconBg,
-              )}
-            >
-              <span className="text-xs">{model.name[0]}</span>
+            <div className="grid place-items-center size-7 rounded-lg bg-surface-2 text-muted-foreground shrink-0">
+              <span className="text-xs font-medium">{model.name[0]}</span>
             </div>
             <div className="min-w-0 flex-1">
               <div className="text-sm font-medium truncate">{model.name}</div>
@@ -82,7 +73,11 @@ export function NodeParamsOverlay({
         <div className="mt-6 flex items-center justify-between pt-4 border-t border-border">
           <PriceDisplay usd={model.priceUSD ?? 0} className="text-sm" />
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onOpenChange(false)}
+            >
               {t("node.close")}
             </Button>
             <Button

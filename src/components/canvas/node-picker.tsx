@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { MODELS, type Model, type ModelCategory } from "@/lib/models";
-import { categoryAccent } from "@/lib/canvas-types";
+import { categoryAccent, categoryPillColor } from "@/lib/canvas-types";
 import { useCanvasStore } from "@/lib/canvas-store";
 import { Image as ImageIcon, Film, Music2, MessageSquare, Plus, Search } from "lucide-react";
 import { PriceDisplay } from "@/components/price-display";
@@ -141,18 +141,18 @@ function PickerBody({
           {t("node.picker.all")}
         </button>
         {CATEGORIES.map((cat) => {
-          const accent = categoryAccent(cat);
           const Icon = CATEGORY_ICON[cat];
           const isActive = activeCategory === cat;
+          const pillColor = categoryPillColor(cat);
           return (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
               className={cn(
-                "shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
+                "shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium transition-colors border",
                 isActive
-                  ? cn(accent.pill, "ring-1", accent.ring)
-                  : "text-muted-foreground hover:text-foreground hover:bg-surface-2/50",
+                  ? pillColor
+                  : "text-muted-foreground hover:text-foreground hover:bg-surface-2/50 border-transparent",
               )}
             >
               <Icon className="size-3" />
@@ -188,7 +188,6 @@ function PickerBody({
           const list = grouped[cat];
           if (list.length === 0) return null;
           const Icon = CATEGORY_ICON[cat];
-          const accent = categoryAccent(cat);
           return (
             <CommandGroup
               key={cat}
@@ -210,12 +209,7 @@ function PickerBody({
                     }}
                     className="cursor-pointer"
                   >
-                    <span
-                      className={cn(
-                        "grid place-items-center size-7 rounded-lg bg-gradient-to-br text-primary-foreground shrink-0",
-                        accent.IconBg,
-                      )}
-                    >
+                    <span className="grid place-items-center size-7 rounded-lg bg-surface-2 text-muted-foreground shrink-0">
                       <Icon className="size-3.5" />
                     </span>
                     <div className="min-w-0 flex-1">

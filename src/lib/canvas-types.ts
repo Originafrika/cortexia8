@@ -1,5 +1,6 @@
 import type { Model, ModelCategory } from "@/lib/models";
 import type { Edge, Node } from "@xyflow/react";
+import { Image as ImageIcon, Film, Music2, MessageSquare } from "lucide-react";
 
 export type NodeStatus =
   | "unconfigured"
@@ -72,15 +73,48 @@ export function portLabel(t: PortType): string {
     case "image":
       return "Image";
     case "video":
-      return "Vidéo";
+      return "Video";
     case "audio":
       return "Audio";
     case "text":
-      return "Texte";
+      return "Text";
   }
 }
 
-export function categoryAccent(c: ModelCategory): {
+/** Returns the Lucide icon component for a port type. */
+export function portIcon(t: PortType) {
+  switch (t) {
+    case "image":
+      return ImageIcon;
+    case "video":
+      return Film;
+    case "audio":
+      return Music2;
+    case "text":
+      return MessageSquare;
+  }
+}
+
+/** Returns the Tailwind color class for a port type. */
+export function portColorClass(t: PortType): string {
+  switch (t) {
+    case "image":
+      return "text-amber";
+    case "video":
+      return "text-violet-400";
+    case "audio":
+      return "text-emerald";
+    case "text":
+      return "text-sky-400";
+  }
+}
+
+/**
+ * ElevenLabs-style: unified neutral node accent.
+ * All nodes use the same clean, minimal background.
+ * Category is shown as text label, not color.
+ */
+export function categoryAccent(_c: ModelCategory): {
   bg: string;
   border: string;
   text: string;
@@ -90,62 +124,31 @@ export function categoryAccent(c: ModelCategory): {
   glow: string;
   leftBorder: string;
 } {
+  return {
+    bg: "bg-surface-1",
+    border: "border-border",
+    text: "text-muted-foreground",
+    pill: "bg-surface-2 text-muted-foreground",
+    ring: "ring-border-strong",
+    IconBg: "bg-surface-2",
+    glow: "",
+    leftBorder: "",
+  };
+}
+
+/** Category-specific colors for the picker pills only. */
+export function categoryPillColor(c: ModelCategory): string {
   switch (c) {
     case "image":
-      return {
-        bg: "bg-gradient-to-r from-amber/8 to-amber/3",
-        border: "border-amber/30",
-        text: "text-amber-soft",
-        pill: "bg-amber/20 text-amber-soft",
-        ring: "ring-amber/40",
-        IconBg: "from-amber to-amber-soft",
-        glow: "shadow-[0_0_20px_4px_oklch(0.78_0.16_70_/_0.15)]",
-        leftBorder: "border-l-amber",
-      };
+      return "bg-amber/15 text-amber-soft border-amber/30";
     case "video":
-      return {
-        bg: "bg-gradient-to-r from-violet-500/8 to-violet-500/3",
-        border: "border-violet-500/30",
-        text: "text-violet-300",
-        pill: "bg-violet-500/20 text-violet-200",
-        ring: "ring-violet-400/40",
-        IconBg: "from-violet-500 to-violet-400",
-        glow: "shadow-[0_0_20px_4px_oklch(0.55_0.18_290_/_0.15)]",
-        leftBorder: "border-l-violet-500",
-      };
+      return "bg-violet-500/15 text-violet-300 border-violet-500/30";
     case "audio":
-      return {
-        bg: "bg-gradient-to-r from-emerald/8 to-emerald/3",
-        border: "border-emerald/30",
-        text: "text-emerald",
-        pill: "bg-emerald/20 text-emerald",
-        ring: "ring-emerald/40",
-        IconBg: "from-emerald to-emerald/70",
-        glow: "shadow-[0_0_20px_4px_oklch(0.72_0.14_155_/_0.15)]",
-        leftBorder: "border-l-emerald",
-      };
+      return "bg-emerald/15 text-emerald border-emerald/30";
     case "text":
-      return {
-        bg: "bg-gradient-to-r from-sky-500/8 to-sky-500/3",
-        border: "border-sky-500/30",
-        text: "text-sky-300",
-        pill: "bg-sky-500/20 text-sky-200",
-        ring: "ring-sky-400/40",
-        IconBg: "from-sky-500 to-sky-400",
-        glow: "shadow-[0_0_20px_4px_oklch(0.60_0.15_240_/_0.15)]",
-        leftBorder: "border-l-sky-500",
-      };
+      return "bg-sky-500/15 text-sky-300 border-sky-500/30";
     case "music":
-      return {
-        bg: "bg-gradient-to-r from-orange-500/8 to-orange-500/3",
-        border: "border-orange-500/30",
-        text: "text-orange-300",
-        pill: "bg-orange-500/20 text-orange-200",
-        ring: "ring-orange-400/40",
-        IconBg: "from-orange-500 to-orange-400",
-        glow: "shadow-[0_0_20px_4px_oklch(0.70_0.18_50_/_0.15)]",
-        leftBorder: "border-l-orange-500",
-      };
+      return "bg-rose-500/15 text-rose-300 border-rose-500/30";
   }
 }
 

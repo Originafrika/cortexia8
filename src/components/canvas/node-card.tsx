@@ -2,22 +2,31 @@ import { useState, useCallback } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCanvasStore } from "@/lib/canvas-store";
-import { categoryAccent, portColor, portLabel, portsForCategory, type CanvasNode } from "@/lib/canvas-types";
+import {
+  categoryAccent,
+  portColor,
+  portLabel,
+  portIcon,
+  portColorClass,
+  portsForCategory,
+  type CanvasNode,
+} from "@/lib/canvas-types";
 import { cn } from "@/lib/utils";
-import { Image as ImageIcon, Film, Music2, MessageSquare, Loader2, Check, AlertTriangle, Play, Sparkles, RefreshCw, PlayCircle, ChevronDown, ChevronRight, MoreHorizontal } from "lucide-react";
+import {
+  Loader2,
+  Check,
+  AlertTriangle,
+  Play,
+  Sparkles,
+  RefreshCw,
+  ChevronDown,
+  MoreHorizontal,
+} from "lucide-react";
 import { PriceDisplay } from "@/components/price-display";
 import { getModel, type ModelCategory } from "@/lib/models";
 import { getPrimaryParams, ParamField } from "@/components/canvas/node-params";
 import { NodeParamsOverlay } from "@/components/canvas/node-params-overlay";
 import { useT } from "@/lib/i18n";
-
-const CATEGORY_ICON: Record<ModelCategory, typeof ImageIcon> = {
-  image: ImageIcon,
-  video: Film,
-  audio: Music2,
-  text: MessageSquare,
-  music: Music2,
-};
 
 export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
   const t = useT();
@@ -27,8 +36,6 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
   const setSelected = useCanvasStore((s) => s.setSelectedNodeId);
   const runNode = useCanvasStore((s) => s.runNode);
   const rerunNode = useCanvasStore((s) => s.rerunNode);
-  const runFromNode = useCanvasStore((s) => s.runFromNode);
-  const removeNode = useCanvasStore((s) => s.removeNode);
   const updateNodeParams = useCanvasStore((s) => s.updateNodeParams);
   const newNodeIds = useCanvasStore((s) => s.newNodeIds);
   const cascadeDelays = useCanvasStore((s) => s.cascadeDelays);
@@ -36,7 +43,6 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
   const [expanded, setExpanded] = useState(false);
   const [showMoreOverlay, setShowMoreOverlay] = useState(false);
 
-  const Icon = CATEGORY_ICON[data.category];
   const running = data.status === "running";
   const done = data.status === "done";
   const err = data.status === "error";
@@ -52,96 +58,114 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
   const model = getModel(data.modelSlug);
   const primaryParams = model ? getPrimaryParams(model) : [];
 
+  // Port icons
+  const InputIcon = portIcon(ports.in[0]);
+  const OutputIcon = portIcon(ports.out);
+  const inputColorClass = portColorClass(ports.in[0]);
+  const outputColorClass = portColorClass(ports.out);
+
   const handleExpandToggle = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     setExpanded((v) => !v);
   }, []);
 
-  const handleParamChange = useCallback((key: string, value: unknown) => {
-    updateNodeParams(id, { [key]: value });
-  }, [id, updateNodeParams]);
+  const handleParamChange = useCallback(
+    (key: string, value: unknown) => {
+      updateNodeParams(id, { [key]: value });
+    },
+    [id, updateNodeParams],
+  );
 
   return (
     <>
       <motion.div
         initial={isNew ? { opacity: 0, scale: 0.8 } : false}
         animate={isNew ? { opacity: 1, scale: 1 } : undefined}
-        transition={isNew ? { duration: 0.35, delay, ease: [0.22, 1, 0.36, 1] } : undefined}
+        transition={
+          isNew
+            ? { duration: 0.35, delay, ease: [0.22, 1, 0.36, 1] }
+            : undefined
+        }
         onClick={(e) => {
           e.stopPropagation();
           setSelected(id);
         }}
         className={cn(
-          "group w-[280px] rounded-2xl border bg-surface-1/85 backdrop-blur overflow-hidden border-l-[3px]",
+          "group w-[260px] rounded-xl border bg-surface-1/90 backdrop-blur-sm overflow-hidden",
           "transition-all duration-200",
-          accent.leftBorder,
           selected
-            ? `${accent.border} ring-2 ${accent.ring} ${accent.glow}`
-            : `border-border/60 hover:border-border-strong`,
-          isDragSource && !isCompatible && "opacity-30 scale-[0.97]",
-          isDragSource && isCompatible && "ring-2 ring-emerald/50 shadow-[0_0_20px_4px_oklch(0.65_0.19_160_/_0.25)]",
-          running && "animate-pulse-slow",
+            ? "border-border-strong ring-1 ring-border-strong shadow-lg"
+            : "border-border hover:border-border-strong",
+          isDragSource &&
+            !isCompatible &&
+            "opacity-30 scale-[0.97]",
+          isDragSource &&
+            isCompatible &&
+            "ring-1 ring-emerald/50 shadow-[0_0_12px_2px_rgba(16,185,129,0.15)]",
         )}
       >
-        {/* Input handle */}
+        {/* Hidden handles — invisible but functional for connections */}
         <Handle
           type="target"
           position={Position.Left}
           id="in"
           isConnectable={!readOnly}
-          style={{
-            background: portColor(ports.in[0]),
-            width: isDragSource ? (isCompatible ? 16 : 8) : 12,
-            height: isDragSource ? (isCompatible ? 16 : 8) : 12,
-            border: isDragSource
-              ? isCompatible
-                ? `3px solid ${portColor(ports.in[0])}`
-                : "2px solid var(--background)"
-              : "2px solid var(--background)",
-            boxShadow: isDragSource && isCompatible
-              ? `0 0 12px 4px ${portColor(ports.in[0])}80, 0 0 24px 8px ${portColor(ports.in[0])}40`
-              : isDragSource
-                ? "none"
-                : undefined,
-            opacity: isDragSource && !isCompatible ? 0.25 : 1,
-            transition: "all 0.2s ease",
-          }}
+          className="!bg-transparent !border-0 !w-6 !h-6 !-left-3"
           title={portLabel(ports.in[0])}
         />
-
-        {/* Output handle */}
         <Handle
           type="source"
           position={Position.Right}
           id="out"
           isConnectable={!readOnly}
-          style={{
-            background: portColor(ports.out),
-            width: 12,
-            height: 12,
-            border: "2px solid var(--background)",
-          }}
+          className="!bg-transparent !border-0 !w-6 !h-6 !-right-3"
           title={portLabel(ports.out)}
         />
 
-        {/* Header */}
+        {/* Left edge icon — Input */}
         <div
           className={cn(
-            "flex items-center gap-2.5 px-3 py-2.5 cursor-pointer",
-            accent.bg,
+            "absolute -left-3 top-1/2 -translate-y-1/2 z-10",
+            "size-[22px] rounded-full bg-surface-2 border border-border",
+            "flex items-center justify-center",
+            "transition-all duration-200",
+            isDragSource &&
+              isCompatible &&
+              "border-emerald bg-emerald/10 scale-110",
+            isDragSource &&
+              !isCompatible &&
+              "opacity-30",
           )}
+          title={portLabel(ports.in[0])}
+        >
+          <InputIcon className={cn("size-3", inputColorClass)} />
+        </div>
+
+        {/* Right edge icon — Output */}
+        <div
+          className={cn(
+            "absolute -right-3 top-1/2 -translate-y-1/2 z-10",
+            "size-[22px] rounded-full bg-surface-2 border border-border",
+            "flex items-center justify-center",
+            "transition-all duration-200",
+            isDragSource &&
+              !isCompatible &&
+              "opacity-30",
+          )}
+          title={portLabel(ports.out)}
+        >
+          <OutputIcon className={cn("size-3", outputColorClass)} />
+        </div>
+
+        {/* Header — clickable to expand */}
+        <div
+          className="flex items-center gap-2.5 px-3 py-2.5 cursor-pointer hover:bg-surface-2/50 transition-colors"
           onClick={handleExpandToggle}
         >
-          <div
-            className={cn(
-              "grid place-items-center size-7 rounded-lg bg-gradient-to-br text-primary-foreground shrink-0",
-              accent.IconBg,
-            )}
-          >
-            <Icon className="size-3.5" />
-          </div>
           <div className="min-w-0 flex-1">
-            <div className="text-[13px] font-medium truncate leading-tight">{data.modelName}</div>
+            <div className="text-[13px] font-medium truncate leading-tight">
+              {data.modelName}
+            </div>
             <div className="font-mono text-[9px] uppercase tracking-[0.22em] text-muted-foreground truncate">
               {data.provider} · {data.category}
             </div>
@@ -150,7 +174,7 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                removeNode(id);
+                useCanvasStore.getState().removeNode(id);
               }}
               className="sm:opacity-0 sm:group-hover:opacity-100 text-muted-foreground hover:text-foreground transition p-1 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               aria-label={t("node.delete")}
@@ -159,7 +183,7 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
             </button>
             <motion.div
               animate={{ rotate: expanded ? 180 : 0 }}
-              transition={{ duration: 0.2 }}
+              transition={{ duration: 0.15 }}
               className="text-muted-foreground"
             >
               <ChevronDown className="size-3.5" />
@@ -169,7 +193,7 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
 
         {/* Collapsed: Status + Price */}
         {!expanded && (
-          <div className="px-3 py-2 flex items-center justify-between text-[11px]">
+          <div className="px-3 py-2 flex items-center justify-between text-[11px] border-t border-border/40">
             {running ? (
               <span className="flex items-center gap-1.5 text-amber-soft">
                 <Loader2 className="size-3 animate-spin" />
@@ -221,10 +245,7 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
         </AnimatePresence>
 
         {/* Footer: Actions */}
-        <div className={cn(
-          "flex items-center justify-between px-3 py-1.5 border-t border-border/40 bg-surface-0/40",
-          expanded && "border-t border-border/40",
-        )}>
+        <div className="flex items-center justify-between px-3 py-1.5 border-t border-border/40 bg-surface-0/40">
           <div className="flex items-center gap-1">
             {running && (
               <div className="h-1 w-12 overflow-hidden rounded-full bg-surface-3">
@@ -255,7 +276,7 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
                   rerunNode(id);
                 }}
                 disabled={readOnly}
-                className="inline-flex items-center gap-1 rounded-full bg-emerald/90 px-2 py-1 text-[10px] font-medium text-primary-foreground hover:bg-emerald disabled:opacity-50 transition"
+                className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-2 py-1 text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-surface-3 disabled:opacity-50 transition"
               >
                 <RefreshCw className="size-2.5" />
               </button>
