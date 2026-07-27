@@ -43,7 +43,6 @@ export const getHistory = createServerFn({ method: "GET" })
       const userId = await requireUserId(ctx);
       return await loadHistory(userId, data);
     } catch (err) {
-      if (err instanceof HttpError) throw err;
       throw toJsonResponse(err);
     }
   });

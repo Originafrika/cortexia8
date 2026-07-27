@@ -21,7 +21,6 @@ export const getUserBalance = createServerFn({ method: "GET" })
       const balance = await getBalance(userId);
       return { balance } as BalanceResponse;
     } catch (err) {
-      if (err instanceof HttpError) throw err;
       throw toJsonResponse(err);
     }
   });
@@ -52,7 +51,6 @@ export const getTransactionHistory = createServerFn({ method: "GET" })
       `) as TxRow[];
       return { transactions: rows };
     } catch (err) {
-      if (err instanceof HttpError) throw err;
       throw toJsonResponse(err);
     }
   });

@@ -19,7 +19,7 @@ import type { ModelCategory } from "@/lib/models";
  * Get the 2-3 most important params for inline editing based on category.
  */
 export function getPrimaryParams(model: Model): ParamSpec[] {
-  const params = model.params;
+  const params = model.params ?? [];
   if (params.length === 0) return [];
 
   const result: ParamSpec[] = [];
@@ -247,7 +247,7 @@ export function NodeParams({
   disabled?: boolean;
   compact?: boolean;
 }) {
-  if (model.params.length === 0) {
+  if ((model.params ?? []).length === 0) {
     return (
       <div className="text-xs text-muted-foreground py-2">
         No configurable parameters
@@ -257,7 +257,7 @@ export function NodeParams({
 
   return (
     <div className={cn("space-y-3", compact && "space-y-2")}>
-      {model.params.map((p, i) => (
+      {(model.params ?? []).map((p, i) => (
         <ParamField
           key={i}
           p={p}

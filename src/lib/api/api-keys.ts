@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { sql } from "@/lib/db";
-import { getRequestContext, HttpError, validateOrigin } from "./auth";
+import { getRequestContext, HttpError, toJsonResponse, validateOrigin } from "./auth";
 
 // ── Create API Key ────────────────────────────────────────────────────────
 
@@ -19,37 +19,41 @@ export const createApiKey = createServerFn({ method: "POST" })
     return { name: data.name.trim(), sessionToken: data.sessionToken };
   })
   .handler(async ({ data }) => {
-    const ctx = await getRequestContext(data.sessionToken);
-    if (ctx.userId == null) {
-      throw new HttpError(401, "Authentication required");
+    try {
+      const ctx = await getRequestContext(data.sessionToken);
+      if (ctx.userId == null) {
+        throw new HttpError(401, "Authentication required");
+      }
+      // CSRF: This is a state-changing POST. TanStack Start server functions do not
+      // expose raw request headers, so Origin/Referer validation is not possible here.
+      // Primary CSRF defense: SameSite=Strict session cookies + SameSite=Strict API key cookies.
+      // If headers become available, call validateOrigin(headers, allowedOrigins).
+
+      // Generate a random API key: cx_live_<48 hex chars>
+      const bytes = new Uint8Array(24);
+      crypto.getRandomValues(bytes);
+      const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+      const rawKey = `cx_live_${hex}`;
+      const prefix = rawKey.slice(0, 11); // cx_live_XXXX
+
+      // Hash the key for storage (never store raw keys)
+      const keyHash = await sha256Hex(rawKey);
+
+      const rows = (await sql`
+        INSERT INTO api_keys (user_id, key_hash, name, prefix, permissions, status)
+        VALUES (${ctx.userId}, ${keyHash}, ${data.name}, ${prefix}, '["generate:*"]'::jsonb, 'active')
+        RETURNING id
+      `) as { id: number }[];
+
+      return {
+        id: rows[0].id,
+        name: data.name,
+        prefix,
+        rawKey,
+      };
+    } catch (err) {
+      throw toJsonResponse(err);
     }
-    // CSRF: This is a state-changing POST. TanStack Start server functions do not
-    // expose raw request headers, so Origin/Referer validation is not possible here.
-    // Primary CSRF defense: SameSite=Strict session cookies + SameSite=Strict API key cookies.
-    // If headers become available, call validateOrigin(headers, allowedOrigins).
-
-    // Generate a random API key: cx_live_<48 hex chars>
-    const bytes = new Uint8Array(24);
-    crypto.getRandomValues(bytes);
-    const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
-    const rawKey = `cx_live_${hex}`;
-    const prefix = rawKey.slice(0, 11); // cx_live_XXXX
-
-    // Hash the key for storage (never store raw keys)
-    const keyHash = await sha256Hex(rawKey);
-
-    const rows = (await sql`
-      INSERT INTO api_keys (user_id, key_hash, name, prefix, permissions, status)
-      VALUES (${ctx.userId}, ${keyHash}, ${data.name}, ${prefix}, '["generate:*"]'::jsonb, 'active')
-      RETURNING id
-    `) as { id: number }[];
-
-    return {
-      id: rows[0].id,
-      name: data.name,
-      prefix,
-      rawKey,
-    };
   });
 
 // ── List API Keys ─────────────────────────────────────────────────────────
@@ -67,38 +71,42 @@ export type ApiKeyRow = {
 export const listApiKeys = createServerFn({ method: "GET" })
   .validator((data: { sessionToken?: string }) => data ?? {})
   .handler(async ({ data }) => {
-    const ctx = await getRequestContext(data.sessionToken);
-    if (ctx.userId == null) {
-      throw new HttpError(401, "Authentication required");
+    try {
+      const ctx = await getRequestContext(data.sessionToken);
+      if (ctx.userId == null) {
+        throw new HttpError(401, "Authentication required");
+      }
+
+      const rows = (await sql`
+        SELECT id, name, prefix, key_hash, permissions, status, last_used_at, created_at
+        FROM api_keys
+        WHERE user_id = ${ctx.userId}
+        ORDER BY created_at DESC
+      `) as {
+        id: number;
+        name: string;
+        prefix: string;
+        key_hash: string;
+        permissions: string;
+        status: string;
+        last_used_at: string | null;
+        created_at: string;
+      }[];
+
+      return rows.map((r) => ({
+        id: r.id,
+        name: r.name,
+        prefix: r.prefix || r.key_hash.slice(0, 11),
+        permissions: r.permissions,
+        status: r.status,
+        lastUsed: r.last_used_at
+          ? formatRelativeTime(new Date(r.last_used_at))
+          : "jamais",
+        created_at: r.created_at,
+      }));
+    } catch (err) {
+      throw toJsonResponse(err);
     }
-
-    const rows = (await sql`
-      SELECT id, name, prefix, key_hash, permissions, status, last_used_at, created_at
-      FROM api_keys
-      WHERE user_id = ${ctx.userId}
-      ORDER BY created_at DESC
-    `) as {
-      id: number;
-      name: string;
-      prefix: string;
-      key_hash: string;
-      permissions: string;
-      status: string;
-      last_used_at: string | null;
-      created_at: string;
-    }[];
-
-    return rows.map((r) => ({
-      id: r.id,
-      name: r.name,
-      prefix: r.prefix || r.key_hash.slice(0, 11),
-      permissions: r.permissions,
-      status: r.status,
-      lastUsed: r.last_used_at
-        ? formatRelativeTime(new Date(r.last_used_at))
-        : "jamais",
-      created_at: r.created_at,
-    }));
   });
 
 // ── Revoke API Key ────────────────────────────────────────────────────────
@@ -109,19 +117,23 @@ export const revokeApiKey = createServerFn({ method: "POST" })
     return { keyId: data.keyId, sessionToken: data.sessionToken };
   })
   .handler(async ({ data }) => {
-    const ctx = await getRequestContext(data.sessionToken);
-    if (ctx.userId == null) {
-      throw new HttpError(401, "Authentication required");
-    }
-    // CSRF: This is a state-changing POST. SameSite=Strict session cookies provide
-    // the primary CSRF defense. If request headers become available in this runtime,
-    // call validateOrigin(headers, allowedOrigins) here.
+    try {
+      const ctx = await getRequestContext(data.sessionToken);
+      if (ctx.userId == null) {
+        throw new HttpError(401, "Authentication required");
+      }
+      // CSRF: This is a state-changing POST. SameSite=Strict session cookies provide
+      // the primary CSRF defense. If request headers become available in this runtime,
+      // call validateOrigin(headers, allowedOrigins) here.
 
-    await sql`
-      UPDATE api_keys
-      SET status = 'revoked'
-      WHERE id = ${data.keyId} AND user_id = ${ctx.userId}
-    `;
+      await sql`
+        UPDATE api_keys
+        SET status = 'revoked'
+        WHERE id = ${data.keyId} AND user_id = ${ctx.userId}
+      `;
+    } catch (err) {
+      throw toJsonResponse(err);
+    }
   });
 
 // ── Helpers ───────────────────────────────────────────────────────────────

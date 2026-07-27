@@ -45,7 +45,7 @@ function AccountPage() {
   async function fetchTransactions() {
     try {
       const result = await getTransactionHistory({ data: { sessionToken: loadSession()?.token } });
-      setTxRows(result.transactions);
+      setTxRows(result?.transactions ?? []);
     } catch {
       setTxRows([]);
     }
@@ -273,7 +273,7 @@ function AccountPage() {
               </tr>
             </thead>
             <tbody>
-              {txRows.map((t) => {
+              {(txRows ?? []).map((t) => {
                 const amount = Number(t.amount);
                 const date = new Date(t.created_at);
                 const d = date.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });

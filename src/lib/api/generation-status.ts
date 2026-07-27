@@ -90,7 +90,6 @@ export const generationStatus = createServerFn({ method: "GET" })
 
       return await loadStatus(data);
     } catch (err) {
-      if (err instanceof HttpError) throw err;
       throw toJsonResponse(err);
     }
   });

@@ -152,6 +152,11 @@
   --ring: oklch(0.78 0.16 70 / 0.55);
 }
 
+/* Override ReactFlow base.css white background on nodes */
+.react-flow__node {
+  background: transparent !important;
+}
+
 @layer base {
   * {
     border-color: var(--color-border);
