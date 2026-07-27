@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
 import { loadSession } from "@/lib/auth-store";
 import { AmbientBackground } from "@/components/ambient-background";
 import { SiteHeader } from "@/components/site-header";
