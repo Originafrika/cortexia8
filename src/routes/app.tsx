@@ -50,8 +50,10 @@ function AppLayout() {
     async function fetchBalance() {
       try {
         const result = await getUserBalance({ data: { sessionToken: loadSession()?.token } });
-        setBalance(result.balance);
-      } catch {}
+        setBalance(result?.balance ?? 0);
+      } catch {
+        // Balance fetch failed — show $0, user can refresh
+      }
     }
     fetchBalance();
   }, []);
@@ -81,11 +83,11 @@ function AppShell({
   setOpen: (v: boolean) => void;
 }) {
   const NAV = [
-    { to: "/app/workflows", label: t("app.nav.workflows") || "Workflows", icon: Workflow },
+    { to: "/app/workflows", label: t("app.nav.workflows") || "Workflows", icon: Workflow, exact: true },
     { to: "/app/models", label: t("app.nav.models"), icon: LayoutGrid },
-    { to: "/app/history", label: t("app.nav.history"), icon: History },
-    { to: "/app/developers", label: t("app.nav.dev"), icon: Code2 },
-    { to: "/app/account", label: t("app.nav.account"), icon: Wallet },
+    { to: "/app/history", label: t("app.nav.history"), icon: History, exact: true },
+    { to: "/app/developers", label: t("app.nav.dev"), icon: Code2, exact: true },
+    { to: "/app/account", label: t("app.nav.account"), icon: Wallet, exact: true },
   ];
 
   const [mobileOpen, setMobileOpen] = useState(false);

@@ -311,7 +311,14 @@ function HistoryPage() {
                     <div className="mt-1 capitalize">{selected.model.category}</div>
                   </div>
                 </div>
-                <button className="mt-6 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber px-4 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-95 transition">
+                <button
+                  onClick={() => {
+                    if (selected?.model) {
+                      navigate({ to: `/app/models/${selected.model.slug}`, search: { prompt: selected.prompt } });
+                    }
+                  }}
+                  className="mt-6 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber px-4 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-95 transition"
+                >
                   <RefreshCw className="size-4" /> {t("history.regenerate")}
                 </button>
               </div>

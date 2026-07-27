@@ -77,7 +77,6 @@ export const verifyFedaPayTransaction = createServerFn({ method: "POST" })
 
       if (!response.ok) {
         const errText = await response.text();
-        console.error("[FedaPay] Verification API error:", response.status, errText);
         throw new HttpError(400, `FedaPay verification failed: ${response.status}`);
       }
 
@@ -195,7 +194,6 @@ export const createStripeCheckout = createServerFn({ method: "POST" })
 
       if (!response.ok) {
         const errBody = await response.text();
-        console.error("[Stripe] Checkout creation failed:", response.status, errBody);
         throw new HttpError(502, `Stripe checkout creation failed: ${response.status}`);
       }
 
