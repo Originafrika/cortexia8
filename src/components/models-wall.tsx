@@ -172,7 +172,6 @@ function WallCard({ item, index, onOpen }: { item: WallItem; index: number; onOp
           playsInline
           autoPlay
           preload="metadata"
-          loading="lazy"
           className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
         />
       )}
@@ -231,7 +230,7 @@ function WallModal({ item, onClose }: { item: WallItem | null; onClose: () => vo
             </button>
             <div className="relative bg-black">
               {item.kind === "video" && item.video ? (
-                <video src={item.video} controls autoPlay loop loading="lazy" className="w-full max-h-[60vh] object-contain bg-black" />
+                <video src={item.video} controls autoPlay loop className="w-full max-h-[60vh] object-contain bg-black" />
               ) : item.kind === "music" || item.kind === "voice" ? (
                 <>
                   <img src={item.image} alt="" loading="lazy" className="w-full max-h-[60vh] object-contain bg-black" />
@@ -286,7 +285,7 @@ export function WallPreview() {
           return (
             <motion.div key={item.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.05 * i }} className={cn("relative overflow-hidden rounded-xl border border-border aspect-[3/4]", i === 1 && "sm:row-span-2 sm:aspect-auto", i === 4 && "sm:row-span-2 sm:aspect-auto")}>
               {isVideo && item.video ? (
-                <video src={item.video} muted loop playsInline autoPlay preload="metadata" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+                <video src={item.video} muted loop playsInline autoPlay preload="metadata" className="absolute inset-0 h-full w-full object-cover" />
               ) : isVideo ? (
                 <div className="absolute inset-0 bg-gradient-to-br from-surface-2 to-surface-3" />
               ) : (

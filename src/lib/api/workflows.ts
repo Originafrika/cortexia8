@@ -186,7 +186,7 @@ export const getWorkflow = createServerFn({ method: "GET" })
         id: number;
         type: string;
         modelSlug: string;
-        config: Record<string, unknown>;
+  config: Record<string, string | number | boolean | null>;
         x: number;
         y: number;
         width: number;

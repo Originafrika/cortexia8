@@ -145,8 +145,7 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
       }
     });
 
-    try {
-      // Dry-run: get server-side cost estimate and confirmation flag
+    try {      // Dry-run: get server-side cost estimate and confirmation flag
       const dryResult = (await applyAgentPlan({
         data: {
           workflowId: Number(workflowId),
@@ -185,13 +184,6 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
     pushLog(`Application de ${response.operations.length} opération(s) via DB…`, "info");
 
     try {
-      const session = loadSession();
-      const userId = session?.user?.id ? Number(session.user.id) : null;
-      if (userId == null || isNaN(userId)) {
-        pushLog(`Erreur: session utilisateur invalide.`, "warn");
-        return;
-      }
-
       const serverOps = response.operations.map((op) => {
         switch (op.type) {
           case "ADD_NODE":

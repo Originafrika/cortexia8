@@ -8,7 +8,7 @@ export const checkUserRole = createServerFn({ method: "GET" })
     try {
       const ctx = await getRequestContext((data as { sessionToken?: string })?.sessionToken);
       const userId = await requireUserId(ctx);
-      const role = await getUserRole(String(userId));
+      const role = await getUserRole(userId);
       return { role };
     } catch (err) {
       if (err instanceof HttpError) throw err;

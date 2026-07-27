@@ -25,8 +25,9 @@ export type Unit =
   | "track";
 
 export type ParamSpec =
-  | { kind: "prompt"; label: string; placeholder?: string; required?: boolean }
-  | { kind: "upload"; label: string; multiple?: boolean; accepts?: string; required?: boolean }
+  | { kind: "prompt"; label: string; key: string; placeholder?: string; required?: boolean }
+  | { kind: "longtext"; label: string; key: string; placeholder?: string; required?: boolean }
+  | { kind: "upload"; label: string; key: string; multiple?: boolean; accepts?: string; required?: boolean }
   | { kind: "select"; label: string; key: string; options: string[]; advanced?: boolean; required?: boolean }
   | {
       kind: "slider";
@@ -40,7 +41,7 @@ export type ParamSpec =
       advanced?: boolean;
       required?: boolean;
     }
-  | { kind: "seed"; label: string; advanced?: boolean; required?: boolean }
+  | { kind: "seed"; label: string; key: string; advanced?: boolean; required?: boolean }
   | { kind: "toggle"; label: string; key: string; default?: boolean; advanced?: boolean; required?: boolean };
 
 export type PriceTier = _PriceTier;
@@ -87,13 +88,16 @@ function deriveParams(schema: InputSchemaField[]): ParamSpec[] {
     const advanced = ADVANCED_KEYS.has(f.key);
     switch (f.type) {
       case "text":
+        out.push({ kind: "prompt", label, key: f.key, required: f.required });
+        break;
       case "longtext":
-        out.push({ kind: "prompt", label, required: f.required });
+        out.push({ kind: "longtext", label, key: f.key, required: f.required });
         break;
       case "upload":
         out.push({
           kind: "upload",
           label,
+          key: f.key,
           required: f.required,
           ...(f.multiple ? { multiple: true } : {}),
           ...(f.accepts ? { accepts: f.accepts } : {}),
@@ -112,7 +116,7 @@ function deriveParams(schema: InputSchemaField[]): ParamSpec[] {
       case "number":
         // Treat wide-range unsigned integers as a seed control.
         if (f.min === 0 && f.max === 4294967295) {
-          out.push({ kind: "seed", label, advanced: true, required: f.required });
+          out.push({ kind: "seed", label, key: f.key, advanced: true, required: f.required });
         } else {
           out.push({
             kind: "slider",

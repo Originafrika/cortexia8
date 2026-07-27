@@ -40,7 +40,7 @@ export type AgentModel =
 export type GraphOperation =
   | { type: "ADD_NODE"; modelSlug: string; position?: { x: number; y: number } }
   | { type: "CONNECT_NODES"; source: string; target: string }
-  | { type: "UPDATE_NODE"; nodeId: string; params: Record<string, unknown> }
+  | { type: "UPDATE_NODE"; nodeId: string; params: Record<string, string | number | boolean | null> }
   | { type: "REMOVE_NODE"; nodeId: string };
 
 export type AgentResponse = {

@@ -785,7 +785,7 @@ const MAX_POLL_ATTEMPTS = 150;
 const MAX_CONSECUTIVE_ERRORS = 5;
 
 function pollGenerationStatus(
-  set: (partial: CanvasState | ((s: CanvasState) => Partial<CanvasState>)) => void,
+  set: (partial: Partial<CanvasState> | ((s: CanvasState) => Partial<CanvasState>)) => void,
   get: () => CanvasState,
   nodeId: string,
   runNodeExecId: number,

@@ -28,9 +28,9 @@ export const COST_CONFIRM_THRESHOLD = 2.00;
 // ── Types ─────────────────────────────────────────────────────────────────
 
 export type AgentOp =
-  | { op: "ADD_NODE"; modelSlug: string; position?: { x: number; y: number }; config?: Record<string, unknown> }
+  | { op: "ADD_NODE"; modelSlug: string; position?: { x: number; y: number }; config?: Record<string, string | number | boolean | null> }
   | { op: "CONNECT_NODES"; source: string; target: string; sourceOutputKey?: string; targetInputKey?: string }
-  | { op: "UPDATE_NODE"; nodeId: string; params: Record<string, unknown> }
+  | { op: "UPDATE_NODE"; nodeId: string; params: Record<string, string | number | boolean | null> }
   | { op: "REMOVE_NODE"; nodeId: string };
 
 export type AgentApplyInput = {
@@ -63,7 +63,8 @@ export const applyAgentPlan = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     try {
-      return await applyPlanImpl(data) as AgentApplyResponse;
+      const result = await applyPlanImpl(data);
+      return result as any;
     } catch (err) {
       if (err instanceof HttpError) throw err;
       throw toJsonResponse(err);
