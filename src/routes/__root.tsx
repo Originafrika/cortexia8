@@ -11,7 +11,8 @@ import { useEffect, type ReactNode } from "react";
 import { initTheme } from "../components/ui/theme-toggle";
 import { NeonAuthUIProvider } from "@neondatabase/auth-ui";
 import { authClient } from "../auth";
-import { useLang } from "../lib/i18n";
+import { useLang, useLocaleStore } from "../lib/i18n";
+import { useCurrencyStore } from "../lib/currency";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -136,6 +137,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
+function HydrateStores() {
+  useEffect(() => {
+    useLocaleStore.persist.rehydrate();
+    useCurrencyStore.persist.rehydrate();
+  }, []);
+  return null;
+}
+
 function RootShell({ children }: { children: ReactNode }) {
   useEffect(() => { initTheme(); }, []);
   const lang = useLang();
@@ -146,6 +155,7 @@ function RootShell({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
+        <HydrateStores />
         {children}
         <Scripts />
       </body>

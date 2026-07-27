@@ -2627,7 +2627,7 @@ export const useLocaleStore = create<State>()(
       setLang: (lang) => set({ lang, langOverridden: true }),
       setFromCurrency: (lang) => set((s) => (s.langOverridden ? s : { lang })),
     }),
-    { name: "cortexia-locale" },
+    { name: "cortexia-locale", skipHydration: true },
   ),
 );
 

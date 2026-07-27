@@ -36,7 +36,7 @@ export const useCurrencyStore = create<State>()(
       code: "USD",
       setCurrency: (code) => set({ code }),
     }),
-    { name: "cortexia-currency" },
+    { name: "cortexia-currency", skipHydration: true },
   ),
 );
 

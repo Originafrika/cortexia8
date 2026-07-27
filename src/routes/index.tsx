@@ -468,9 +468,14 @@ function FaqSection() {
 
 function FooterSection() {
   const t = useT();
-  const storedSession = loadSession();
-  const isSignedIn = !!storedSession?.user;
-  const teamHref = !isSignedIn ? "/auth/sign-in" : "/app-preview";
+  const [teamHref, setTeamHref] = useState("/auth/sign-in");
+
+  useEffect(() => {
+    const storedSession = loadSession();
+    if (storedSession?.user) {
+      setTeamHref("/app-preview");
+    }
+  }, []);
 
   return (
     <footer className="mt-8 border-t border-border">

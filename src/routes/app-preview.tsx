@@ -20,8 +20,14 @@ export const Route = createFileRoute("/app-preview")({
 
 function AppPreview() {
   const t = useT();
-  const storedSession = loadSession();
-  const isAdmin = storedSession?.user?.role === "admin";
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const storedSession = loadSession();
+    if (storedSession?.user?.role === "admin") {
+      setIsAdmin(true);
+    }
+  }, []);
   return (
     <div className="relative min-h-screen">
       <AmbientBackground />
