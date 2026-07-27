@@ -331,6 +331,7 @@ export function ModelPlaygroundContent({
                   setStatus("idle");
                   setError(null);
                 }}
+                aria-label="Dismiss error"
                 className="text-muted-foreground hover:text-foreground cursor-pointer"
               >
                 <X className="size-4" />
@@ -349,6 +350,7 @@ export function ModelPlaygroundContent({
                   setHistory([]);
                   setActiveId(null);
                 }}
+                aria-label="Clear history"
                 className="text-[11px] text-muted-foreground hover:text-foreground cursor-pointer"
               >
                 {t("playground.clear")}

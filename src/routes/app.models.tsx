@@ -7,6 +7,12 @@ import { cn } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/app/models")({
+  head: () => ({
+    meta: [
+      { title: "Cortexia — Models Catalog" },
+      { name: "description", content: "Browse the full catalog of AI models available on Cortexia — image, video, audio, music, and text generation." },
+    ],
+  }),
   component: ModelsLayout,
 });
 
@@ -77,7 +83,8 @@ function ModelsCatalog() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Kling, Claude, ElevenLabs…"
-            className="w-full sm:w-72 rounded-full border border-border bg-surface-1/70 pl-9 pr-4 py-2 text-sm focus:border-amber/40 outline-none"
+            aria-label="Search models"
+            className="w-full sm:w-72 rounded-full border border-border bg-surface-1/70 pl-9 pr-4 py-2 text-sm focus:border-amber/40 focus-visible:ring-2 focus-visible:ring-amber/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background outline-none"
           />
         </div>
       </div>
@@ -89,6 +96,8 @@ function ModelsCatalog() {
             <button
               key={c.key}
               onClick={() => setCat(c.key)}
+              aria-label={`Filter by ${t(c.labelKey)}`}
+              aria-pressed={active}
               className={cn(
                 "rounded-full border px-3.5 py-1.5 text-xs font-medium transition cursor-pointer",
                 active
@@ -123,16 +132,18 @@ function ModelsCatalog() {
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={safePage === 1}
+                aria-label="Previous page"
                 className="inline-flex items-center gap-1 rounded-full border border-border bg-surface-1/50 px-3 py-1.5 text-xs disabled:opacity-40 hover:border-amber/40 transition cursor-pointer"
               >
                 <ChevronLeft className="size-3.5" /> {t("models.prev")}
               </button>
               <div className="flex items-center gap-1">
                 {Array.from({ length: pageCount }).map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setPage(i + 1)}
-                    className={cn(
+              <button
+                key={i}
+                onClick={() => setPage(i + 1)}
+                aria-label={`Page ${i + 1}`}
+                className={cn(
                       "size-8 rounded-full text-xs font-mono transition cursor-pointer",
                       safePage === i + 1
                         ? "bg-amber text-primary-foreground"
@@ -146,6 +157,7 @@ function ModelsCatalog() {
               <button
                 onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
                 disabled={safePage === pageCount}
+                aria-label="Next page"
                 className="inline-flex items-center gap-1 rounded-full border border-border bg-surface-1/50 px-3 py-1.5 text-xs disabled:opacity-40 hover:border-amber/40 transition cursor-pointer"
               >
                 {t("models.next")} <ChevronRight className="size-3.5" />

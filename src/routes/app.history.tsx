@@ -10,6 +10,12 @@ import { useT } from "@/lib/i18n";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/app/history")({
+  head: () => ({
+    meta: [
+      { title: "Cortexia — Generation History" },
+      { name: "description", content: "Review your past AI generation jobs on Cortexia — prompts, models used, costs, and preview outputs." },
+    ],
+  }),
   component: HistoryPage,
 });
 
@@ -134,7 +140,8 @@ function HistoryPage() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder={t("history.search")}
-            className="w-full sm:w-72 rounded-full border border-border bg-surface-1/70 pl-9 pr-4 py-2 text-sm focus:border-amber/40 outline-none"
+            aria-label="Search history"
+            className="w-full sm:w-72 rounded-full border border-border bg-surface-1/70 pl-9 pr-4 py-2 text-sm focus:border-amber/40 focus-visible:ring-2 focus-visible:ring-amber/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background outline-none"
           />
         </div>
       </div>
@@ -147,6 +154,8 @@ function HistoryPage() {
               setCat(c.key);
               setModelSlug("all");
             }}
+            aria-label={`Filter by ${c.label}`}
+            aria-pressed={cat === c.key}
             className={cn(
               "rounded-full border px-3.5 py-1.5 text-xs font-medium transition",
               cat === c.key
@@ -195,6 +204,7 @@ function HistoryPage() {
             <button
               key={it.id}
               onClick={() => setSelected(it)}
+              aria-label={`${it.model.name}: ${it.prompt}`}
               className={
                 "mb-3 block w-full break-inside-avoid group relative overflow-hidden rounded-xl border border-border " +
                 it.ratio
@@ -251,6 +261,7 @@ function HistoryPage() {
                 </div>
                 <button
                   onClick={() => setSelected(null)}
+                  aria-label="Close detail panel"
                   className="rounded-lg p-1 hover:bg-surface-2"
                 >
                   <X className="size-4" />
@@ -274,6 +285,7 @@ function HistoryPage() {
                   <div className="text-xs text-muted-foreground">{t("history.prompt")}</div>
                   <button
                     onClick={() => copyPrompt(selected.prompt)}
+                    aria-label="Copy prompt"
                     className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground"
                   >
                     {copied ? (
@@ -317,6 +329,7 @@ function HistoryPage() {
                       navigate({ to: `/app/models/${selected.model.slug}`, search: { prompt: selected.prompt } });
                     }
                   }}
+                  aria-label="Regenerate with these parameters"
                   className="mt-6 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber px-4 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-95 transition"
                 >
                   <RefreshCw className="size-4" /> {t("history.regenerate")}

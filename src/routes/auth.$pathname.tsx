@@ -7,6 +7,12 @@ import { AmbientBackground } from "@/components/ambient-background";
 import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/auth/$pathname")({
+  head: () => ({
+    meta: [
+      { title: "Cortexia — Sign in / Sign up" },
+      { name: "description", content: "Sign in or create a Cortexia account to access AI generation models, manage your balance, and start creating." },
+    ],
+  }),
   component: Auth,
 });
 
@@ -348,7 +354,7 @@ function Input({
         onChange={(e) => onChange(e.target.value)}
         required={required}
         className={
-          "w-full rounded-xl border border-border bg-surface-0/80 py-3 text-sm placeholder:text-muted-foreground/60 focus:border-amber/50 focus:outline-none " +
+          "w-full rounded-xl border border-border bg-surface-0/80 py-3 text-sm placeholder:text-muted-foreground/60 focus:border-amber/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background " +
           (icon ? "pl-10 pr-3" : "px-4")
         }
       />
@@ -413,7 +419,8 @@ function VerifyForm({
           value={code}
           onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
           required
-          className="w-full rounded-xl border border-border bg-surface-0/80 px-4 py-4 text-center font-mono text-2xl tracking-[0.5em] placeholder:text-muted-foreground/40 focus:border-amber/50 focus:outline-none"
+          aria-label="Verification code"
+          className="w-full rounded-xl border border-border bg-surface-0/80 px-4 py-4 text-center font-mono text-2xl tracking-[0.5em] placeholder:text-muted-foreground/40 focus:border-amber/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         />
 
         {error && <Alert kind="error">{error}</Alert>}

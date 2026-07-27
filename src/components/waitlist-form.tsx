@@ -90,11 +90,13 @@ export function WaitlistForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder={t("waitlist.email_placeholder")}
-                className="w-full min-w-0 rounded-xl border border-border bg-surface-0/80 px-4 py-3 text-sm placeholder:text-muted-foreground/60 focus:border-amber/50"
+                aria-label="Email address"
+                className="w-full min-w-0 rounded-xl border border-border bg-surface-0/80 px-4 py-3 text-sm placeholder:text-muted-foreground/60 focus:border-amber/50 focus-visible:ring-2 focus-visible:ring-amber/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               />
               <button
                 type="submit"
                 disabled={status === "loading" || !email}
+                aria-label="Join waitlist"
                 className="group inline-flex items-center justify-center gap-2 rounded-xl bg-amber px-5 py-3 text-sm font-medium text-primary-foreground disabled:opacity-40 hover:opacity-95 transition"
               >
                 {status === "loading" ? (
@@ -206,6 +208,7 @@ function ConfirmationCard({
               setCopied(true);
               setTimeout(() => setCopied(false), 1500);
             }}
+            aria-label="Copy referral link"
             className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-2/50 px-3 py-2 text-xs hover:border-amber/40 transition"
           >
             {copied ? (
@@ -244,6 +247,7 @@ function ConfirmationCard({
             <button
               key={network}
               onClick={onClick}
+              aria-label={`Share on ${network}`}
               className="rounded-full border border-border bg-surface-2/50 px-3 py-1.5 text-xs text-foreground/85 hover:border-border-strong hover:text-foreground transition"
             >
               {t("waitlist.confirm.share").replace("{network}", network)}

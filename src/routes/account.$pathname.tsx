@@ -3,6 +3,13 @@ import { AccountView } from "@neondatabase/auth-ui";
 import { loadSession } from "@/lib/auth-store";
 
 export const Route = createFileRoute("/account/$pathname")({
+  head: () => ({
+    meta: [
+      { title: "Cortexia — Account Settings" },
+      { name: "description", content: "Manage your Cortexia account settings, profile, and authentication preferences." },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   beforeLoad: ({ location }) => {
     const session = loadSession();
     if (!session) {

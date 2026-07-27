@@ -7,6 +7,12 @@ import { listWorkflows, createWorkflow, type WorkflowListItem } from "@/lib/api/
 import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/app/workflows")({
+  head: () => ({
+    meta: [
+      { title: "Cortexia — Workflows" },
+      { name: "description", content: "Create, run, and manage multi-step AI generation workflows on Cortexia." },
+    ],
+  }),
   component: WorkflowsPage,
 });
 

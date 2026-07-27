@@ -13,7 +13,7 @@ export function SiteHeader({ variant = "landing" }: { variant?: "landing" | "pre
     <header className="sticky top-0 z-30 backdrop-blur-md bg-background/60 border-b border-border">
       <div className="mx-auto max-w-7xl px-5 sm:px-8 h-14 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
-          <Link to="/" className="flex items-center gap-2 group shrink-0">
+          <Link to="/" aria-label="Cortexia — Home" className="flex items-center gap-2 group shrink-0">
             <div className="grid place-items-center size-7 rounded-lg bg-gradient-to-br from-amber to-amber-soft text-primary-foreground shadow-[0_6px_20px_-6px_oklch(0.78_0.16_70_/_0.6)]">
               <span className="font-display text-sm font-semibold leading-none">C</span>
             </div>

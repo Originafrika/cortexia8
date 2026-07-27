@@ -11,6 +11,12 @@ import { getUserBalance, getTransactionHistory } from "@/lib/api/balance";
 import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/app/account")({
+  head: () => ({
+    meta: [
+      { title: "Cortexia — Account & Recharge" },
+      { name: "description", content: "Manage your Cortexia account balance, recharge credits via Mobile Money, card, or crypto, and view transaction history." },
+    ],
+  }),
   component: AccountPage,
 });
 
@@ -169,6 +175,8 @@ function AccountPage() {
                 <button
                   key={m.key}
                   onClick={() => setMethod(m.key)}
+                  aria-label={m.nameKey?.startsWith("account.") ? t(m.nameKey) : m.nameKey}
+                  aria-pressed={active}
                   className={cn(
                     "flex items-start gap-3 rounded-xl border p-3 text-left transition",
                     active
@@ -204,6 +212,8 @@ function AccountPage() {
                 <button
                   key={v}
                   onClick={() => setAmount(v)}
+                  aria-label={`Recharge ${formatMoney(v, c)}`}
+                  aria-pressed={amount === v}
                   className={
                     "rounded-full border px-3 py-1.5 text-xs transition " +
                     (amount === v
@@ -232,6 +242,7 @@ function AccountPage() {
               <button
                 onClick={handleRecharge}
                 disabled={loading || isUnsupported}
+                aria-label={`Recharge ${formatMoney(amount, c)}`}
                 className={cn(
                   "mt-5 w-full inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-medium transition",
                   isUnsupported
@@ -323,14 +334,25 @@ function FedaPayWidget({
   const t = useT();
   const [FedaCheckoutButton, setFedaCheckoutButton] = useState<any>(null);
 
-  // Dynamic import to avoid SSR issues with the FedaPay CDN script
-  useState(() => {
-    if (typeof window !== "undefined") {
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    if (!document.querySelector('script[src*="cdn.fedapay.com/checkout.js"]')) {
+      const script = document.createElement("script");
+      script.src = "https://cdn.fedapay.com/checkout.js?v=1.1.7";
+      script.async = true;
+      script.onload = () => {
+        import("fedapay-reactjs").then((mod) => {
+          setFedaCheckoutButton(() => mod.FedaCheckoutButton);
+        });
+      };
+      document.body.appendChild(script);
+    } else {
       import("fedapay-reactjs").then((mod) => {
         setFedaCheckoutButton(() => mod.FedaCheckoutButton);
       });
     }
-  });
+  }, []);
 
   if (!FedaCheckoutButton) {
     return (

@@ -4,6 +4,13 @@ import { clearSession } from "@/lib/auth-store";
 import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/access-denied")({
+  head: () => ({
+    meta: [
+      { title: "Cortexia — Access Denied" },
+      { name: "description", content: "You do not have permission to access this page on Cortexia." },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: () => {
     const navigate = useNavigate();
     const t = useT();
