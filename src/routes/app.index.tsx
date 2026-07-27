@@ -19,6 +19,7 @@ import { useT } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { generate } from "@/lib/api/generate";
 import { generationStatus } from "@/lib/api/generation-status";
+import { loadSession } from "@/lib/auth-store";
 export const Route = createFileRoute("/app/")({
   component: AgentPage,
 });
@@ -152,7 +153,7 @@ function AgentPage() {
     );
 
     try {
-      const res = await generate({ data: { modelSlug: model.slug, input: { prompt: promptText } } });
+      const res = await generate({ data: { modelSlug: model.slug, input: { prompt: promptText } }, sessionToken: loadSession()?.token });
 
       setTurns((ts) =>
         ts.map((t) =>
@@ -177,7 +178,7 @@ function AgentPage() {
         }
 
         try {
-          const st = await generationStatus({ data: { id: res.runNodeExecutionId } });
+          const st = await generationStatus({ data: { id: res.runNodeExecutionId }, sessionToken: loadSession()?.token });
           const node = st.nodes[0];
           const nodeStatus = node?.status ?? st.status;
           const pct = nodeStatus === "success" ? 100 : Math.min(20 + pollCount, 95);

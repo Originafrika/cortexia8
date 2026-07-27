@@ -98,7 +98,7 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
     if (workflowId == null || conversationLoadedRef.current) return;
     conversationLoadedRef.current = true;
 
-    getConversationByWorkflow({ data: { workflowId } })
+    getConversationByWorkflow({ data: { workflowId }, sessionToken: loadSession()?.token })
       .then((conv: any) => {
         if (conv && conv.id) {
           conversationIdRef.current = conv.id;
@@ -152,6 +152,7 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
           operations: serverOps,
           dryRun: true,
         },
+        sessionToken: loadSession()?.token,
       })) as AgentApplyResponse;
 
       // Approve-each mode: always show confirmation
@@ -207,6 +208,7 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
           operations: serverOps,
           launch,
         },
+        sessionToken: loadSession()?.token,
       })) as AgentApplyResponse;
 
       pushLog(`${result.applied} opération(s) appliquée(s) dans la DB.`, "ok");
@@ -252,7 +254,7 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
     try {
       // Create conversation on first message if needed
       if (conversationIdRef.current == null && workflowId != null) {
-        const conv = await createConversation({ data: { workflowId } });
+        const conv = await createConversation({ data: { workflowId }, sessionToken: loadSession()?.token });
         conversationIdRef.current = conv.id;
       }
 
@@ -264,6 +266,7 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
             role: "user",
             content: text,
           },
+          sessionToken: loadSession()?.token,
         });
         conversationHistoryRef.current.push({ role: "user", content: text });
       }
@@ -283,6 +286,7 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
           },
           graphState: currentGraphState,
         },
+        sessionToken: loadSession()?.token,
       });
 
       // Save assistant message
@@ -294,6 +298,7 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
             content: response.text,
             proposedPlan: response.operations.length > 0 ? (response as any) : undefined,
           },
+          sessionToken: loadSession()?.token,
         });
         conversationHistoryRef.current.push({
           role: "assistant",

@@ -27,6 +27,7 @@ import { cn } from "@/lib/utils";
 import { generate } from "@/lib/api/generate";
 import { generationStatus } from "@/lib/api/generation-status";
 import { useT } from "@/lib/i18n";
+import { loadSession } from "@/lib/auth-store";
 
 export const Route = createFileRoute("/app/models/$slug")({
   loader: ({ params }) => {
@@ -188,7 +189,7 @@ export function ModelPlaygroundContent({
     const input: Record<string, unknown> = { ...state };
     if (prompt.trim()) input.prompt = prompt.trim();
 
-    generate({ data: { modelSlug: model.slug, input } })
+    generate({ data: { modelSlug: model.slug, input }, sessionToken: loadSession()?.token })
       .then((res) => {
         const newResult: Result = {
           id: res.runId.toString(),
@@ -213,7 +214,7 @@ export function ModelPlaygroundContent({
             setError(t("playground.timeout"));
             return;
           }
-          generationStatus({ data: { id: res.runId } })
+          generationStatus({ data: { id: res.runId }, sessionToken: loadSession()?.token })
             .then((statusRes) => {
               const node = statusRes.nodes[0];
               if (!node) return;

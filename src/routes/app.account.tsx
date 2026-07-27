@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { verifyFedaPayTransaction, createStripeCheckout } from "@/lib/api/payments";
 import { getUserBalance, getTransactionHistory, type TxRow } from "@/lib/api/balance";
 import { useT } from "@/lib/i18n";
+import { loadSession } from "@/lib/auth-store";
 
 export const Route = createFileRoute("/app/account")({
   head: () => ({
@@ -40,7 +41,7 @@ function AccountPage() {
 
   async function fetchBalance() {
     try {
-      const result = await getUserBalance({ data: {} });
+      const result = await getUserBalance({ data: {}, sessionToken: loadSession()?.token });
       setBalance(result.balance);
     } catch {
       // silently ignore — balance stays null
@@ -49,7 +50,7 @@ function AccountPage() {
 
   async function fetchTransactions() {
     try {
-      const result = await getTransactionHistory({ data: {} });
+      const result = await getTransactionHistory({ data: {}, sessionToken: loadSession()?.token });
       setTxRows(result?.transactions ?? []);
     } catch {
       setTxRows([]);
@@ -77,6 +78,7 @@ function AccountPage() {
       if (method === "card") {
         const result = await createStripeCheckout({
           data: { amount, currency: "usd" },
+          sessionToken: loadSession()?.token,
         });
         if (result.ok && result.url) {
           window.location.href = result.url;
@@ -98,7 +100,8 @@ function AccountPage() {
   async function handleFedaPayComplete(transactionId: string) {
     try {
       const result = await verifyFedaPayTransaction({
-        data: { transactionId, amount: amount * CURRENCIES.XOF.rate }, // Convert USD to XOF
+        data: { transactionId, amount: amount * CURRENCIES.XOF.rate },
+        sessionToken: loadSession()?.token,
       });
       if (result.ok) {
         if (result.balance != null) {

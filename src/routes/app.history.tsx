@@ -7,6 +7,7 @@ import { X, RefreshCw, Search, Copy, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getHistory, type HistoryItem } from "@/lib/api/history";
 import { useT } from "@/lib/i18n";
+import { loadSession } from "@/lib/auth-store";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/app/history")({
@@ -69,7 +70,7 @@ function HistoryPage() {
   useEffect(() => {
     async function fetchHistory() {
       try {
-        const result = await getHistory({ data: { limit: 100 } });
+        const result = await getHistory({ data: { limit: 100 }, sessionToken: loadSession()?.token });
         const mapped: DisplayItem[] = result.items.map((item: HistoryItem, i: number) => {
           const model = MODELS.find((m) => m.slug === item.modelSlug) ?? MODELS[0];
           return {

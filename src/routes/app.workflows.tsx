@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { listWorkflows, createWorkflow, type WorkflowListItem } from "@/lib/api/workflows";
 import { useT } from "@/lib/i18n";
+import { loadSession } from "@/lib/auth-store";
 
 export const Route = createFileRoute("/app/workflows")({
   head: () => ({
@@ -39,7 +40,7 @@ function WorkflowsPage() {
   const [creating, setCreating] = useState(false);
 
   useEffect(() => {
-    listWorkflows({ data: {} })
+    listWorkflows({ data: {}, sessionToken: loadSession()?.token })
       .then((wf) => {
         setWorkflows(wf);
       })
@@ -52,7 +53,7 @@ function WorkflowsPage() {
   async function handleCreate() {
     setCreating(true);
     try {
-      const result = await createWorkflow({ data: {} });
+      const result = await createWorkflow({ data: {}, sessionToken: loadSession()?.token });
       navigate({ to: "/canvas", search: { workflowId: result.id } });
     } catch (err) {
       setCreating(false);
