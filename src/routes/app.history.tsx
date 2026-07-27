@@ -264,6 +264,7 @@ function HistoryPage() {
                   <img
                     src={selected.previewUrl}
                     alt=""
+                    loading="lazy"
                     className="h-full w-full object-cover"
                   />
                 )}

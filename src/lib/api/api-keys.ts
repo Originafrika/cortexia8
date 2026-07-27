@@ -78,7 +78,7 @@ export const listApiKeys = createServerFn({ method: "GET" })
       }
 
       const rows = (await sql`
-        SELECT id, name, prefix, key_hash, permissions, status, last_used_at, created_at
+        SELECT id, name, prefix, permissions, status, last_used_at, created_at
         FROM api_keys
         WHERE user_id = ${ctx.userId}
         ORDER BY created_at DESC
@@ -86,7 +86,6 @@ export const listApiKeys = createServerFn({ method: "GET" })
         id: number;
         name: string;
         prefix: string;
-        key_hash: string;
         permissions: string;
         status: string;
         last_used_at: string | null;
@@ -96,7 +95,7 @@ export const listApiKeys = createServerFn({ method: "GET" })
       return rows.map((r) => ({
         id: r.id,
         name: r.name,
-        prefix: r.prefix || r.key_hash.slice(0, 11),
+        prefix: r.prefix,
         permissions: r.permissions,
         status: r.status,
         lastUsed: r.last_used_at

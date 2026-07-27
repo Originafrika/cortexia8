@@ -162,7 +162,7 @@ async function handleSuccess(
       (user_id, run_node_execution_id, model_slug, type, storage_url, preview_url, metadata)
     VALUES
       (${verification.userId}, ${verification.runNodeExecutionId}, ${verification.modelSlug},
-       ${categoryToAssetType(verification.modelSlug)},
+       ${verification.category},
        ${storageUrl}, ${previewUrl},
        ${JSON.stringify({
          kieTaskId: taskId,

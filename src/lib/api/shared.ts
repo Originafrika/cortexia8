@@ -51,6 +51,37 @@ export async function getActiveModelBySlug(slug: string): Promise<ModelRow | nul
   return rows[0] ?? null;
 }
 
+/** Resolve multiple models by slug in a single query (avoids N+1). */
+export async function getActiveModelsBySlugs(slugs: string[]): Promise<Map<string, ModelRow | null>> {
+  const uniqueSlugs = [...new Set(slugs)];
+  const result = new Map<string, ModelRow | null>();
+
+  if (uniqueSlugs.length === 0) return result;
+
+  const rows = (await sql`
+    SELECT id, slug, name, provider, category, api_family, kie_endpoint,
+           input_schema, output_type, pricing_unit,
+           provider_cost_usd::text AS provider_cost_usd,
+           cortexia_price_usd::text AS cortexia_price_usd,
+           fidelity_status, supports_reference_upload, active
+    FROM models
+    WHERE slug = ANY(${uniqueSlugs}) AND active = TRUE
+  `) as ModelRow[];
+
+  for (const row of rows) {
+    result.set(row.slug, row);
+  }
+
+  // Mark missing slugs as null
+  for (const slug of uniqueSlugs) {
+    if (!result.has(slug)) {
+      result.set(slug, null);
+    }
+  }
+
+  return result;
+}
+
 /** Convert a numeric/decimal string to a JS number. */
 export function toNumber(value: string | number | null | undefined): number {
   if (value == null) return 0;

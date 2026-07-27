@@ -29,7 +29,7 @@ export function extractTaskId(body: unknown): string | null {
 }
 
 export type WebhookVerification =
-  | { ok: true; runNodeExecutionId: number; userId: number | null; modelSlug: string }
+  | { ok: true; runNodeExecutionId: number; userId: number | null; modelSlug: string; category: string }
   | { ok: false; reason: string };
 
 /**
@@ -39,9 +39,10 @@ export type WebhookVerification =
 export async function verifyTaskId(taskId: string): Promise<WebhookVerification> {
   if (!taskId) return { ok: false, reason: "missing taskId" };
   const rows = (await sql`
-    SELECT rne.id, rne.run_id, wn.model_slug, r.user_id
+    SELECT rne.id, rne.run_id, wn.model_slug, m.category, r.user_id
     FROM run_node_executions rne
     JOIN workflow_nodes wn ON wn.id = rne.workflow_node_id
+    JOIN models m ON m.slug = wn.model_slug
     JOIN runs r ON r.id = rne.run_id
     WHERE rne.kie_task_id = ${taskId}
     LIMIT 1
@@ -49,6 +50,7 @@ export async function verifyTaskId(taskId: string): Promise<WebhookVerification>
     id: number;
     run_id: number;
     model_slug: string;
+    category: string;
     user_id: number | null;
   }[];
   if (rows.length === 0) {
@@ -60,5 +62,6 @@ export async function verifyTaskId(taskId: string): Promise<WebhookVerification>
     runNodeExecutionId: row.id,
     userId: row.user_id,
     modelSlug: row.model_slug,
+    category: row.category,
   };
 }

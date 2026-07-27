@@ -17,7 +17,7 @@ import {
   InsufficientCreditsError,
 } from "@/lib/credits";
 import {
-  getActiveModelBySlug,
+  getActiveModelsBySlugs,
   nodeCostUsd,
   resolveUploads,
   topoLevels,
@@ -134,13 +134,8 @@ async function runCanvasImpl(input: RunInput, userId: number): Promise<RunRespon
     WHERE workflow_id = ${workflow.id}
   `) as WorkflowEdgeRow[];
 
-  // 2. Resolve all model slugs in one go (cache).
-  const modelCache = new Map<string, ModelRow | null>();
-  for (const n of nodes) {
-    if (!modelCache.has(n.model_slug)) {
-      modelCache.set(n.model_slug, await getActiveModelBySlug(n.model_slug));
-    }
-  }
+  // 2. Resolve all model slugs in one query (batch).
+  const modelCache = await getActiveModelsBySlugs(nodes.map((n) => n.model_slug));
 
   // 3. Determine which nodes to execute vs reuse
   const rerunNodeId = input.rerunNodeId;

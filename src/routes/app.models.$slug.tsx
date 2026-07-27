@@ -380,6 +380,7 @@ export function ModelPlaygroundContent({
                     <img
                       src={item.resultUrl}
                       alt={item.prompt}
+                      loading="lazy"
                       className="w-full h-full object-cover"
                     />
                   )}
