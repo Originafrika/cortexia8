@@ -29,6 +29,8 @@ import {
 
 export const Route = createFileRoute("/app")({
   beforeLoad: ({ location }) => {
+    // Skip auth check during SSR — localStorage is not available on server
+    if (typeof window === "undefined") return;
     const session = loadSession();
     if (!session) {
       throw redirect({ to: "/auth/$pathname" as "/auth/$pathname", params: { pathname: "sign-in" }, search: { redirect: location.href } });
@@ -49,7 +51,7 @@ function AppLayout() {
   useEffect(() => {
     async function fetchBalance() {
       try {
-        const result = await getUserBalance({ data: {} });
+        const result = await getUserBalance({ data: { sessionToken: loadSession()?.token } });
         setBalance(result?.balance ?? 0);
       } catch {
         // Balance fetch failed — show $0, user can refresh

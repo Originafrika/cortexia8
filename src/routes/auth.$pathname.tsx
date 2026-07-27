@@ -84,11 +84,14 @@ function Auth() {
     setLoading(true);
     try {
       const result = await authClient.signIn.email({ email, password });
+      console.log("[AUTH_DEBUG] signIn result:", { hasData: !!result.data, hasUser: !!result.data?.user, token: result.data?.token ? result.data.token.slice(0, 12) + "..." : "UNDEFINED", dataKeys: result.data ? Object.keys(result.data) : [] });
       if (result.error) throw result.error;
       if (result.data?.user) {
         const role = (result.data.user as any).role ?? "user";
+        const token = result.data.token ?? (result.data as any).session?.token ?? "";
+        console.log("[AUTH_DEBUG] saving session with token:", token ? token.slice(0, 12) + "..." : "EMPTY");
         saveSession({
-          token: result.data.token,
+          token,
           user: {
             id: result.data.user.id,
             name: result.data.user.name,
