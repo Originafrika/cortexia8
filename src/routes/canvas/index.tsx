@@ -58,12 +58,6 @@ function CanvasShell() {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, []);
 
-  // Force dark mode on canvas
-  useEffect(() => {
-    document.documentElement.classList.add("dark");
-    document.documentElement.classList.remove("light");
-  }, []);
-
   const handleOpenAgent = useCallback((prompt: string) => {
     setPrefillPrompt(prompt);
     setAgentOpen(true);
