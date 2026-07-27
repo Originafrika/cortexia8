@@ -4,6 +4,7 @@ import { MODELS, basePrice, unitLabel, type ModelCategory, type Model } from "@/
 import { PriceDisplay } from "@/components/price-display";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/app/models")({
   component: ModelsLayout,
@@ -20,18 +21,19 @@ function ModelsLayout() {
   return <ModelsCatalog />;
 }
 
-const CATS: { key: ModelCategory | "all"; label: string }[] = [
-  { key: "all", label: "Tout" },
-  { key: "image", label: "Image" },
-  { key: "video", label: "Vidéo" },
-  { key: "audio", label: "Voix" },
-  { key: "music", label: "Musique" },
-  { key: "text", label: "Texte" },
+const CATS: { key: ModelCategory | "all"; labelKey: string }[] = [
+  { key: "all", labelKey: "models.cat_all" },
+  { key: "image", labelKey: "models.cat_image" },
+  { key: "video", labelKey: "models.cat_video" },
+  { key: "audio", labelKey: "models.cat_voice" },
+  { key: "music", labelKey: "models.cat_music" },
+  { key: "text", labelKey: "models.cat_text" },
 ];
 
 const PAGE_SIZE = 12;
 
 function ModelsCatalog() {
+  const t = useT();
   const [cat, setCat] = useState<ModelCategory | "all">("all");
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
@@ -60,13 +62,13 @@ function ModelsCatalog() {
       <div className="grid gap-4 sm:flex sm:items-end sm:justify-between">
         <div className="min-w-0">
           <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-            Catalogue
+            {t("models.section")}
           </div>
           <h1 className="mt-2 font-display text-4xl sm:text-5xl tracking-[-0.03em]">
-            Tous les modèles disponibles.
+            {t("models.title")}
           </h1>
           <p className="mt-2 text-muted-foreground">
-            Prix affichés déjà majorés — pas de surprise à la facturation.
+            {t("models.subtitle")}
           </p>
         </div>
         <div className="relative">
@@ -94,19 +96,19 @@ function ModelsCatalog() {
                   : "border-border bg-surface-1/50 text-muted-foreground hover:text-foreground hover:border-border-strong",
               )}
             >
-              {c.label}
+              {t(c.labelKey)}
             </button>
           );
         })}
         <div className="ml-auto text-xs text-muted-foreground font-mono">
-          {filtered.length} modèle{filtered.length > 1 ? "s" : ""}
+          {filtered.length === 1 ? t("models.count_one") : t("models.count_many").replace("{n}", String(filtered.length))}
         </div>
       </div>
 
       {paged.length === 0 ? (
         <div className="mt-16 text-center text-muted-foreground">
-          <div className="font-display text-2xl mb-2">Aucun modèle ne correspond.</div>
-          <div className="text-sm">Essaie un autre nom ou une autre catégorie.</div>
+          <div className="font-display text-2xl mb-2">{t("models.empty")}</div>
+          <div className="text-sm">{t("models.empty_hint")}</div>
         </div>
       ) : (
         <>
@@ -123,7 +125,7 @@ function ModelsCatalog() {
                 disabled={safePage === 1}
                 className="inline-flex items-center gap-1 rounded-full border border-border bg-surface-1/50 px-3 py-1.5 text-xs disabled:opacity-40 hover:border-amber/40 transition cursor-pointer"
               >
-                <ChevronLeft className="size-3.5" /> Précédent
+                <ChevronLeft className="size-3.5" /> {t("models.prev")}
               </button>
               <div className="flex items-center gap-1">
                 {Array.from({ length: pageCount }).map((_, i) => (
@@ -146,7 +148,7 @@ function ModelsCatalog() {
                 disabled={safePage === pageCount}
                 className="inline-flex items-center gap-1 rounded-full border border-border bg-surface-1/50 px-3 py-1.5 text-xs disabled:opacity-40 hover:border-amber/40 transition cursor-pointer"
               >
-                Suivant <ChevronRight className="size-3.5" />
+                {t("models.next")} <ChevronRight className="size-3.5" />
               </button>
             </div>
           )}
@@ -157,6 +159,7 @@ function ModelsCatalog() {
 }
 
 function ModelCard({ m }: { m: Model }) {
+  const t = useT();
   return (
     <Link
       to="/app/models/$slug"
@@ -178,7 +181,7 @@ function ModelCard({ m }: { m: Model }) {
                       : "bg-surface-3 text-muted-foreground")
                 }
               >
-                {m.badge === "popular" ? "Populaire" : m.badge === "new" ? "Nouveau" : "Pro"}
+                {m.badge === "popular" ? t("models.badge_popular") : m.badge === "new" ? t("models.badge_new") : t("models.badge_pro")}
               </span>
             )}
           </div>

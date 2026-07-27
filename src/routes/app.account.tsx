@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { verifyFedaPayTransaction, createStripeCheckout } from "@/lib/api/payments";
 import { getUserBalance, getTransactionHistory } from "@/lib/api/balance";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/app/account")({
   component: AccountPage,
@@ -16,13 +17,14 @@ export const Route = createFileRoute("/app/account")({
 type TxRow = { d: string; label: string; amount: number; kind: "debit" | "credit" };
 
 const METHODS = [
-  { key: "mm", name: "Mobile Money", desc: "Orange · MTN · Wave · M-Pesa", icon: Smartphone },
-  { key: "card", name: "Carte", desc: "Visa · Mastercard · Amex", icon: CreditCard },
-  { key: "crypto", name: "Crypto", desc: "USDT · USDC · BTC · ETH", icon: Bitcoin },
-  { key: "ali", name: "Alipay", desc: "Chine et Asie du Sud-Est", icon: Wallet },
+  { key: "mm", nameKey: "Mobile Money", desc: "Orange · MTN · Wave · M-Pesa", icon: Smartphone },
+  { key: "card", nameKey: "account.method_card", desc: "Visa · Mastercard · Amex", icon: CreditCard },
+  { key: "crypto", nameKey: "Crypto", desc: "USDT · USDC · BTC · ETH", icon: Bitcoin },
+  { key: "ali", nameKey: "Alipay", descKey: "account.method_ali_desc", icon: Wallet },
 ];
 
 function AccountPage() {
+  const t = useT();
   const c = useCurrency();
   const [method, setMethod] = useState<string>("mm");
   const [amount, setAmount] = useState<number>(10);
@@ -64,7 +66,7 @@ function AccountPage() {
       if (method === "mm") {
         // FedaPay: the button handles its own flow.
         // We only reach here if FedaPay isn't loaded — fall through.
-        toast.info("Veuillez utiliser le bouton FedaPay ci-dessous.");
+        toast.info(t("account.use_fedapay"));
         return;
       }
 
@@ -75,15 +77,15 @@ function AccountPage() {
         if (result.ok && result.url) {
           window.location.href = result.url;
         } else {
-          toast.error(result.error ?? "Impossible de créer la session Stripe.");
+          toast.error(result.error ?? t("account.stripe_error"));
         }
         return;
       }
 
-      toast.info("Ce mode de paiement n'est pas encore disponible.");
+      toast.info(t("account.method_unavailable"));
     } catch (err) {
       console.error(err);
-      toast.error("Une erreur est survenue. Réessaie.");
+      toast.error(t("account.error_retry"));
     } finally {
       setLoading(false);
     }
@@ -100,13 +102,13 @@ function AccountPage() {
         } else {
           fetchBalance();
         }
-        toast.success("Crédits ajoutés avec succès !");
+        toast.success(t("account.credits_added"));
       } else {
-        toast.error(result.message ?? "Vérification échouée.");
+        toast.error(result.message ?? t("account.verification_failed"));
       }
     } catch (err) {
       console.error(err);
-      toast.error("Erreur lors de la vérification FedaPay.");
+      toast.error(t("account.fedapay_error"));
     }
   }
 
@@ -119,9 +121,9 @@ function AccountPage() {
     <div className="mx-auto max-w-6xl px-5 sm:px-8 py-10 space-y-10">
       <div>
         <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-          Compte
+          {t("account.section")}
         </div>
-        <h1 className="mt-2 font-display text-4xl tracking-[-0.03em]">Solde et facturation.</h1>
+        <h1 className="mt-2 font-display text-4xl tracking-[-0.03em]">{t("account.title")}</h1>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1fr,1.2fr]">
@@ -131,7 +133,7 @@ function AccountPage() {
           <div className="relative z-10 flex items-start justify-between">
             <div>
               <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-soft/90">
-                Solde disponible
+                {t("account.balance_available")}
               </div>
               <PriceDisplay
                 usd={balance ?? 0}
@@ -145,7 +147,7 @@ function AccountPage() {
           </div>
           <div className="relative z-10">
             <div className="font-mono text-xs text-foreground/70 uppercase tracking-wider">
-              Cortexia — Compte principal
+              {t("account.card_name")}
             </div>
             <div className="mt-1 font-mono text-sm text-foreground/90">
               •••• •••• •••• {new Date().getFullYear().toString().slice(-4)}
@@ -156,9 +158,9 @@ function AccountPage() {
         {/* Recharge */}
         <div className="surface-gradient-border rounded-3xl bg-surface-1/60 p-6">
           <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-            Recharger
+            {t("account.recharge_section")}
           </div>
-          <h2 className="mt-2 font-display text-2xl tracking-[-0.02em]">Ajoute des crédits.</h2>
+          <h2 className="mt-2 font-display text-2xl tracking-[-0.02em]">{t("account.add_credits")}</h2>
           <div className="mt-5 grid gap-2 sm:grid-cols-2">
             {METHODS.map((m) => {
               const active = method === m.key;
@@ -183,8 +185,8 @@ function AccountPage() {
                     <Icon className="size-4" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium">{m.name}</div>
-                    <div className="text-[11px] text-muted-foreground">{m.desc}</div>
+                    <div className="text-sm font-medium">{m.nameKey?.startsWith("account.") ? t(m.nameKey) : m.nameKey}</div>
+                    <div className="text-[11px] text-muted-foreground">{m.descKey ? t(m.descKey) : m.desc}</div>
                   </div>
                   {active && <Check className="size-4 text-amber" />}
                 </button>
@@ -194,7 +196,7 @@ function AccountPage() {
 
           <div className="mt-5">
             <div className="flex items-baseline justify-between mb-2">
-              <span className="text-xs text-muted-foreground">Montant à recharger</span>
+              <span className="text-xs text-muted-foreground">{t("account.amount_to_recharge")}</span>
               <span className="text-xs text-muted-foreground">= {formatMoney(amount, c)}</span>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -240,14 +242,14 @@ function AccountPage() {
                 {loading ? (
                   <Loader2 className="size-4 animate-spin" />
                 ) : (
-                  `Recharger ${formatMoney(amount, c)}`
+                  t("account.recharge_btn").replace("{amount}", formatMoney(amount, c))
                 )}
               </button>
             )}
 
             {isUnsupported && (
               <p className="mt-2 text-[11px] text-muted-foreground">
-                Bientôt disponible.
+                {t("account.coming_soon")}
               </p>
             )}
           </div>
@@ -258,7 +260,7 @@ function AccountPage() {
         <div className="flex items-end justify-between mb-4 gap-4 flex-wrap">
           <h2 className="font-display text-2xl tracking-[-0.02em]">Transactions</h2>
           <div className="flex items-center gap-3">
-            <span className="text-xs text-muted-foreground">Devise d'affichage :</span>
+            <span className="text-xs text-muted-foreground">{t("account.display_currency")}</span>
             <CurrencyPicker />
           </div>
         </div>
@@ -266,9 +268,9 @@ function AccountPage() {
           <table className="w-full text-sm min-w-[500px]">
             <thead className="text-left text-xs font-mono uppercase tracking-wider text-muted-foreground">
               <tr className="border-b border-border">
-                <th className="p-4 font-normal">Date</th>
-                <th className="p-4 font-normal">Description</th>
-                <th className="p-4 font-normal text-right">Montant</th>
+                <th className="p-4 font-normal">{t("account.date")}</th>
+                <th className="p-4 font-normal">{t("account.description")}</th>
+                <th className="p-4 font-normal text-right">{t("account.amount")}</th>
               </tr>
             </thead>
             <tbody>
@@ -318,6 +320,7 @@ function FedaPayWidget({
   public_key: string;
   onComplete: (transactionId: string) => void;
 }) {
+  const t = useT();
   const [FedaCheckoutButton, setFedaCheckoutButton] = useState<any>(null);
 
   // Dynamic import to avoid SSR issues with the FedaPay CDN script
@@ -333,7 +336,7 @@ function FedaPayWidget({
     return (
       <button disabled className="mt-5 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber px-5 py-3 text-sm font-medium text-primary-foreground opacity-60 cursor-wait">
         <Loader2 className="size-4 animate-spin" />
-        Chargement FedaPay…
+        {t("account.loading_fedapay")}
       </button>
     );
   }
@@ -342,14 +345,14 @@ function FedaPayWidget({
     public_key,
     transaction: {
       amount: amount * 600, // Convert USD to XOF (CFA Franc) — 1 USD ≈ 600 XOF
-      description: "Recharge de crédits Cortexia",
+      description: t("account.fedapay_description"),
     },
     currency: {
       iso: "XOF" as const,
     },
     button: {
       class: "mt-5 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber px-5 py-3 text-sm font-medium text-primary-foreground hover:opacity-95 transition",
-      text: `Recharger ${formatMoney(amount, { code: "USD" })}`,
+      text: t("account.recharge_btn").replace("{amount}", formatMoney(amount, { code: "USD" })),
     },
     onComplete(resp: { reason?: string; transaction?: { id?: number } }) {
       const FedaPay = window.FedaPay;

@@ -4,6 +4,7 @@ import { authClient } from "@/auth";
 import { saveSession } from "@/lib/auth-store";
 import { ArrowRight, Mail, KeyRound, AlertCircle } from "lucide-react";
 import { AmbientBackground } from "@/components/ambient-background";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/auth/$pathname")({
   component: Auth,
@@ -12,6 +13,7 @@ export const Route = createFileRoute("/auth/$pathname")({
 type Mode = "sign-in" | "sign-up";
 
 function Auth() {
+  const t = useT();
   const { pathname } = Route.useParams();
   const navigate = useNavigate();
 
@@ -46,7 +48,7 @@ function Auth() {
       if (error) throw error;
 
       if (data?.user && !data.user.emailVerified) {
-        setInfo("Un code de vérification vient de t'être envoyé par email.");
+        setInfo(t("auth.verification_code_sent"));
         setStep("verify");
       } else if (data?.user) {
         saveSession({
@@ -63,7 +65,7 @@ function Auth() {
         navigate({ to: "/app-preview" });
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Une erreur est survenue.");
+      setError(err instanceof Error ? err.message : t("auth.error_generic"));
     } finally {
       setLoading(false);
     }
@@ -96,7 +98,7 @@ function Auth() {
         navigate({ to: "/app-preview" });
       }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Identifiants invalides.";
+      const msg = err instanceof Error ? err.message : t("auth.invalid_credentials");
       // If Neon returned "email not verified", switch to the verify step and send a code.
       if (/verif/i.test(msg)) {
         try {
@@ -104,7 +106,7 @@ function Auth() {
             email,
             callbackURL: window.location.origin + "/app",
           });
-          setInfo("Ton email n'est pas encore vérifié. On vient de t'envoyer un nouveau code.");
+          setInfo(t("auth.email_not_verified_resend"));
           setStep("verify");
         } catch {
           setError(msg);
@@ -165,12 +167,12 @@ function Auth() {
         navigate({ to: "/app-preview" });
         return;
       }
-      setInfo("Email vérifié. Tu peux maintenant te connecter.");
+      setInfo(t("auth.email_verified_signin"));
       setMode("sign-in");
       setStep("auth");
       setCode("");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Code invalide ou expiré.");
+      setError(err instanceof Error ? err.message : t("auth.invalid_code"));
     } finally {
       setLoading(false);
     }
@@ -185,9 +187,9 @@ function Auth() {
         callbackURL: window.location.origin + "/app",
       });
       if (error) throw error;
-      setInfo("Nouveau code envoyé. Vérifie ta boîte de réception.");
+      setInfo(t("auth.code_resent"));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Impossible de renvoyer le code.");
+      setError(err instanceof Error ? err.message : t("auth.code_resend_error"));
     } finally {
       setLoading(false);
     }
@@ -229,10 +231,10 @@ function Auth() {
             ) : (
               <>
                 <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-                  {mode === "sign-up" ? "Créer un compte" : "Se connecter"}
+                  {mode === "sign-up" ? t("auth.create_account") : t("auth.sign_in")}
                 </div>
                 <h1 className="mt-2 font-display text-3xl tracking-[-0.02em]">
-                  {mode === "sign-up" ? "Bienvenue chez Cortexia." : "Bon retour."}
+                  {mode === "sign-up" ? t("auth.welcome_new") : t("auth.welcome_back")}
                 </h1>
 
                 <form
@@ -242,14 +244,14 @@ function Auth() {
                   {mode === "sign-up" && (
                     <Input
                       type="text"
-                      placeholder="Ton nom (optionnel)"
+                      placeholder={t("auth.name_placeholder")}
                       value={name}
                       onChange={(v) => setName(v)}
                     />
                   )}
                   <Input
                     type="email"
-                    placeholder="Email"
+                    placeholder={t("auth.email_placeholder")}
                     value={email}
                     onChange={(v) => setEmail(v)}
                     required
@@ -257,7 +259,7 @@ function Auth() {
                   />
                   <Input
                     type="password"
-                    placeholder="Mot de passe"
+                    placeholder={t("auth.password_placeholder")}
                     value={password}
                     onChange={(v) => setPassword(v)}
                     required
@@ -272,7 +274,7 @@ function Auth() {
                     disabled={loading || !email || !password}
                     className="group mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-amber px-5 py-3 text-sm font-medium text-primary-foreground disabled:opacity-40 hover:opacity-95 transition"
                   >
-                    {loading ? "…" : mode === "sign-up" ? "Créer mon compte" : "Se connecter"}
+                    {loading ? "…" : mode === "sign-up" ? t("auth.create_my_account") : t("auth.sign_in")}
                     {!loading && (
                       <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
                     )}
@@ -282,7 +284,7 @@ function Auth() {
                 <div className="mt-5 text-center text-xs text-muted-foreground">
                   {mode === "sign-up" ? (
                     <>
-                      Déjà un compte ?{" "}
+                      {t("auth.already_account")}{" "}
                       <button
                         onClick={() => {
                           setMode("sign-in");
@@ -290,12 +292,12 @@ function Auth() {
                         }}
                         className="text-amber-soft hover:underline"
                       >
-                        Se connecter
+                        {t("auth.sign_in")}
                       </button>
                     </>
                   ) : (
                     <>
-                      Pas encore de compte ?{" "}
+                      {t("auth.no_account")}{" "}
                       <button
                         onClick={() => {
                           setMode("sign-up");
@@ -303,7 +305,7 @@ function Auth() {
                         }}
                         className="text-amber-soft hover:underline"
                       >
-                        Créer un compte
+                        {t("auth.create_account")}
                       </button>
                     </>
                   )}
@@ -391,14 +393,15 @@ function VerifyForm({
   info: string;
   onBack: () => void;
 }) {
+  const t = useT();
   return (
     <>
       <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-        Vérification
+        {t("auth.verification")}
       </div>
-      <h1 className="mt-2 font-display text-3xl tracking-[-0.02em]">Vérifie ton email.</h1>
+      <h1 className="mt-2 font-display text-3xl tracking-[-0.02em]">{t("auth.verify_email")}</h1>
       <p className="mt-2 text-sm text-muted-foreground">
-        Code à 6 chiffres envoyé à <span className="text-foreground/90">{email}</span>.
+        {t("auth.code_sent_to")} <span className="text-foreground/90">{email}</span>.
       </p>
 
       <form onSubmit={onSubmit} className="mt-6 space-y-3">
@@ -421,20 +424,20 @@ function VerifyForm({
           disabled={loading || code.length < 6}
           className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-amber px-5 py-3 text-sm font-medium text-primary-foreground disabled:opacity-40 hover:opacity-95 transition"
         >
-          {loading ? "…" : "Vérifier"}
+          {loading ? "…" : t("auth.verify")}
         </button>
       </form>
 
       <div className="mt-5 flex items-center justify-between text-xs">
         <button onClick={onBack} className="text-muted-foreground hover:text-foreground transition">
-          ← Retour
+          {t("auth.back")}
         </button>
         <button
           onClick={onResend}
           disabled={loading}
           className="text-amber-soft hover:underline disabled:opacity-40"
         >
-          Renvoyer le code
+          {t("auth.resend_code")}
         </button>
       </div>
     </>
