@@ -33,13 +33,12 @@ export { getHistory } from "./history";
 export type { HistoryInput, HistoryItem, HistoryResponse };
 export { applyAgentPlan } from "./agent-apply";
 export type { AgentApplyInput, AgentApplyResponse, AgentOp } from "./agent-apply";
-export { verifyFedaPayTransaction, createStripeCheckout, stripeWebhook } from "./payments";
+export { verifyFedaPayTransaction, createStripeCheckout } from "./payments";
 export type {
   FedaPayVerifyInput,
   PaymentResponse,
   StripeCheckoutInput,
   StripeCheckoutResponse,
-  StripeWebhookResponse,
 } from "./payments";
 export { getUserBalance } from "./balance";
 export type { BalanceInput, BalanceResponse } from "./balance";

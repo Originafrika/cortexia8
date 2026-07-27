@@ -30,11 +30,8 @@ export const createWorkflow = createServerFn({ method: "POST" })
   })
   .handler(async ({ data, headers }) => {
     try {
-      console.log("[workflows:create] called with sessionToken:", (data as any).sessionToken ? (data as any).sessionToken.slice(0, 12) + "..." : "UNDEFINED");
       const ctx = await getRequestContext((data as any).sessionToken);
-      console.log("[workflows:create] auth context:", ctx);
       const userId = await requireUserId(ctx);
-      console.log("[workflows:create] userId:", userId);
       // CSRF: validate origin for state-changing endpoint.
       // NOTE: TanStack Start server functions do not expose raw request headers.
       // When headers are available (via client-side fetch with credentials), this
@@ -74,9 +71,7 @@ export const listWorkflows = createServerFn({ method: "GET" })
   .validator((_data: { sessionToken?: string } | void) => _data ?? {})
   .handler(async ({ data }) => {
     try {
-      console.log("[getWorkflow] called, workflowId:", data.workflowId, "sessionToken:", data.sessionToken ? data.sessionToken.slice(0, 12) + "..." : "NONE");
       const ctx = await getRequestContext(data.sessionToken);
-      console.log("[getWorkflow] auth ctx:", ctx);
       const userId = await requireUserId(ctx);
 
       const rows = (await sql`
@@ -173,7 +168,6 @@ export const getWorkflow = createServerFn({ method: "GET" })
         LIMIT 1
       `) as { id: number; name: string; status: string }[];
 
-      console.log("[getWorkflow] workflow rows:", wRows.length, wRows.length > 0 ? wRows[0] : "(none)");
       if (wRows.length === 0) {
         throw new HttpError(404, "Workflow not found");
       }
@@ -233,7 +227,6 @@ export const getWorkflow = createServerFn({ method: "GET" })
       } satisfies GetWorkflowResponse;
     } catch (err) {
       if (err instanceof HttpError) throw err;
-      console.error("[getWorkflow] FAILED:", err instanceof Error ? err.message : String(err));
       throw toJsonResponse(err);
     }
   });

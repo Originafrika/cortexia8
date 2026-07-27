@@ -12,12 +12,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { sql } from "@/lib/db";
 import { getTaskDetail, parseResultJson } from "@/lib/kie-api/common";
-import { HttpError, toJsonResponse } from "./auth";
+import { HttpError, toJsonResponse, getRequestContext, requireUserId } from "./auth";
 
 export type StatusInput = {
   id: number;
-  /** Refresh the state from kie.ai even if our row is terminal. */
+  /** Refresh the state from kie.ai even if our row is still in terminal. */
   force?: boolean;
+  sessionToken?: string;
 };
 
 type AssetSummary = {
@@ -63,6 +64,30 @@ export const generationStatus = createServerFn({ method: "GET" })
   })
   .handler(async ({ data }) => {
     try {
+      // Verify user is authenticated
+      const ctx = await getRequestContext(data.sessionToken);
+      const userId = await requireUserId(ctx);
+
+      // Verify the run belongs to this user
+      const runCheck = (await sql`
+        SELECT r.id FROM runs r
+        JOIN workflows w ON w.id = r.workflow_id
+        WHERE r.id = ${data.id} AND w.user_id = ${userId}
+        LIMIT 1
+      `) as { id: number }[];
+
+      const execCheck = (await sql`
+        SELECT r.id FROM runs r
+        JOIN workflows w ON w.id = r.workflow_id
+        JOIN run_node_executions e ON e.run_id = r.id
+        WHERE e.id = ${data.id} AND w.user_id = ${userId}
+        LIMIT 1
+      `) as { id: number }[];
+
+      if (runCheck.length === 0 && execCheck.length === 0) {
+        throw new HttpError(404, "Not found");
+      }
+
       return await loadStatus(data);
     } catch (err) {
       if (err instanceof HttpError) throw err;

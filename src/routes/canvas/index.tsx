@@ -49,6 +49,15 @@ function CanvasShell() {
   const { workflowId } = Route.useSearch();
   const loadedRef = useRef(false);
 
+  // Auto-save on tab close
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      useCanvasStore.getState().saveWorkflow();
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, []);
+
   const handleOpenAgent = useCallback((prompt: string) => {
     setPrefillPrompt(prompt);
     setAgentOpen(true);

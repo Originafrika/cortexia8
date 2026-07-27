@@ -128,13 +128,13 @@ async function applyPlanImpl(input: AgentApplyInput): Promise<AgentApplyResponse
   let runId: number | undefined;
   if (input.launch) {
     const run = await runCanvas({
-      data: { workflowId: input.workflowId },
+      data: { workflowId: input.workflowId, sessionToken: input.sessionToken },
     });
     runId = run.runId;
   }
 
   // 5. Return the refreshed graph
-  const graph = await getWorkflow({ data: { workflowId: input.workflowId } });
+  const graph = await getWorkflow({ data: { workflowId: input.workflowId, sessionToken: input.sessionToken } });
 
   return { graph, applied, runId, requiresConfirmation, estimatedTotalCostUsd };
 }

@@ -46,7 +46,7 @@ export function AnimatedEdge(props: EdgeProps) {
         id={props.id}
         path={edgePath}
         style={{
-          stroke: "var(--ring)",
+          stroke: "var(--muted-foreground)",
           strokeWidth: 1.5,
           strokeDasharray: dashLen,
           strokeDashoffset: offset,

@@ -91,7 +91,7 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
           setSelected(id);
         }}
         className={cn(
-          "group w-[260px] rounded-xl border bg-surface-1/90 backdrop-blur-sm overflow-hidden",
+          "group w-[260px] rounded-xl border bg-surface-1 overflow-hidden",
           "transition-all duration-200",
           selected
             ? "border-border-strong ring-1 ring-border-strong shadow-lg"
@@ -125,7 +125,7 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
         {/* Left edge icon — Input */}
         <div
           className={cn(
-            "absolute -left-3 top-1/2 -translate-y-1/2 z-10",
+            "absolute -left-4 top-1/2 -translate-y-1/2 z-10",
             "size-[22px] rounded-full bg-surface-2 border border-border",
             "flex items-center justify-center",
             "transition-all duration-200",
@@ -144,7 +144,7 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
         {/* Right edge icon — Output */}
         <div
           className={cn(
-            "absolute -right-3 top-1/2 -translate-y-1/2 z-10",
+            "absolute -right-4 top-1/2 -translate-y-1/2 z-10",
             "size-[22px] rounded-full bg-surface-2 border border-border",
             "flex items-center justify-center",
             "transition-all duration-200",

@@ -222,32 +222,8 @@ export const createStripeCheckout = createServerFn({ method: "POST" })
 // be used in production — it cannot verify the Stripe signature.
 // ---------------------------------------------------------------------------
 
-export type StripeWebhookResponse = {
-  ok: boolean;
-  action?: string;
-  error?: string;
-};
-
-export const stripeWebhook = createServerFn({ method: "POST" })
-  .validator((data: Record<string, unknown>): Record<string, unknown> => {
-    // Accept raw body — the webhook handler reads it
-    return data;
-  })
-  .handler(async ({ data }) => {
-    try {
-      return await handleStripeWebhook(data);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Webhook error";
-      console.error("[Stripe webhook]", message);
-      return { ok: false, error: message } as StripeWebhookResponse;
-    }
-  });
-
-// TODO: Stripe signature verification is not possible here because createServerFn
-// consumes and parses the raw body before the handler runs. The raw body is needed
-// for stripe.webhooks.constructEvent(). To properly verify webhooks, migrate to a
-// custom route handler (e.g., a catch-all API route) that preserves the raw request body.
-// For now, we at least validate the event type before processing.
+// stripeWebhook removed — use raw route handler at server/api/webhooks/stripe.ts instead
+// (createServerFn cannot verify Stripe signatures)
 
 async function handleStripeWebhook(
   body: Record<string, unknown>,
