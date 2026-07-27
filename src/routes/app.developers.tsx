@@ -5,7 +5,6 @@ import { ApiDocs } from "@/components/api-docs";
 import { motion, AnimatePresence } from "framer-motion";
 import { createApiKey, listApiKeys, revokeApiKey, type ApiKeyRow } from "@/lib/api/api-keys";
 import { useT } from "@/lib/i18n";
-import { loadSession } from "@/lib/auth-store";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -26,7 +25,7 @@ function DevelopersPage() {
   const [creatingKey, setCreatingKey] = useState(false);
 
   useEffect(() => {
-    listApiKeys({ data: { sessionToken: loadSession()?.token } })
+    listApiKeys({ data: {} })
       .then((data) => setKeys(data as ApiKeyRow[]))
       .catch(() => {
         setKeys([]);
@@ -82,10 +81,10 @@ print(url, cost)`,
     if (!keyName.trim() || creatingKey) return;
     setCreatingKey(true);
     try {
-      const result = await createApiKey({ data: { name: keyName.trim(), scope: keyScope, sessionToken: loadSession()?.token } });
+      const result = await createApiKey({ data: { name: keyName.trim(), scope: keyScope } });
       setShowNewKey(result.rawKey);
       setKeyName("");
-      const updated = await listApiKeys({ data: { sessionToken: loadSession()?.token } });
+      const updated = await listApiKeys({ data: {} });
       setKeys(updated as ApiKeyRow[]);
     } catch (err) {
       toast.error(t("dev.key_create_error"));
@@ -96,7 +95,7 @@ print(url, cost)`,
 
   async function handleRevokeKey(keyId: number) {
     try {
-      await revokeApiKey({ data: { keyId, sessionToken: loadSession()?.token } });
+      await revokeApiKey({ data: { keyId } });
       setKeys((prev) =>
         prev.map((k) => (k.id === keyId ? { ...k, status: "revoked" } : k))
       );

@@ -38,7 +38,6 @@ export type AgentApplyInput = {
   operations: AgentOp[];
   launch?: boolean;
   dryRun?: boolean;
-  sessionToken?: string;
 };
 
 export type AgentApplyResponse = {
@@ -60,7 +59,7 @@ export const applyAgentPlan = createServerFn({ method: "POST" })
     if (!Array.isArray(data.operations) || data.operations.length === 0) {
       throw new HttpError(400, "operations must be a non-empty array");
     }
-    return { ...data, sessionToken: data.sessionToken };
+    return { ...data };
   })
   .handler(async ({ data }) => {
     try {
@@ -90,7 +89,7 @@ function estimateOperationsCost(operations: AgentOp[]): number {
 // ── Implementation ────────────────────────────────────────────────────────
 
 async function applyPlanImpl(input: AgentApplyInput): Promise<AgentApplyResponse> {
-  const ctx = await getRequestContext(input.sessionToken);
+  const ctx = await getRequestContext();
   const userId = await requireUserId(ctx);
 
   // 1. Verify workflow ownership
@@ -128,13 +127,13 @@ async function applyPlanImpl(input: AgentApplyInput): Promise<AgentApplyResponse
   let runId: number | undefined;
   if (input.launch) {
     const run = await runCanvas({
-      data: { workflowId: input.workflowId, sessionToken: input.sessionToken },
+      data: { workflowId: input.workflowId },
     });
     runId = run.runId;
   }
 
   // 5. Return the refreshed graph
-  const graph = await getWorkflow({ data: { workflowId: input.workflowId, sessionToken: input.sessionToken } });
+  const graph = await getWorkflow({ data: { workflowId: input.workflowId } });
 
   return { graph, applied, runId, requiresConfirmation, estimatedTotalCostUsd };
 }

@@ -4,7 +4,6 @@ import { Plus, Workflow, Clock, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { listWorkflows, createWorkflow, type WorkflowListItem } from "@/lib/api/workflows";
-import { loadSession } from "@/lib/auth-store";
 import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/app/workflows")({
@@ -34,8 +33,7 @@ function WorkflowsPage() {
   const [creating, setCreating] = useState(false);
 
   useEffect(() => {
-    const session = loadSession();
-    listWorkflows({ data: { sessionToken: session?.token } })
+    listWorkflows({ data: {} })
       .then((wf) => {
         setWorkflows(wf);
       })
@@ -46,10 +44,9 @@ function WorkflowsPage() {
   }, []);
 
   async function handleCreate() {
-    const session = loadSession();
     setCreating(true);
     try {
-      const result = await createWorkflow({ data: { sessionToken: session?.token } });
+      const result = await createWorkflow({ data: {} });
       navigate({ to: "/canvas", search: { workflowId: result.id } });
     } catch (err) {
       setCreating(false);

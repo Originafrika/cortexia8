@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, RefreshCw, Search, Copy, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getHistory, type HistoryItem } from "@/lib/api/history";
-import { loadSession } from "@/lib/auth-store";
 import { useT } from "@/lib/i18n";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -63,7 +62,7 @@ function HistoryPage() {
   useEffect(() => {
     async function fetchHistory() {
       try {
-        const result = await getHistory({ data: { limit: 100, sessionToken: loadSession()?.token } });
+        const result = await getHistory({ data: { limit: 100 } });
         const mapped: DisplayItem[] = result.items.map((item: HistoryItem, i: number) => {
           const model = MODELS.find((m) => m.slug === item.modelSlug) ?? MODELS[0];
           return {
