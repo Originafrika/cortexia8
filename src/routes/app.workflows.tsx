@@ -35,30 +35,23 @@ function WorkflowsPage() {
 
   useEffect(() => {
     const session = loadSession();
-    console.log("[workflows] useEffect — session:", session ? { token: session.token.slice(0, 12) + "...", user: session.user.email } : "NULL");
     listWorkflows({ data: { sessionToken: session?.token } })
       .then((wf) => {
-        console.log("[workflows] listWorkflows result:", wf.length, "workflows");
         setWorkflows(wf);
       })
       .catch((err) => {
-        console.error("[workflows] listWorkflows FAILED:", err);
         setWorkflows([]);
       })
       .finally(() => setLoading(false));
   }, []);
 
   async function handleCreate() {
-    console.log("[workflows] handleCreate called");
     const session = loadSession();
-    console.log("[workflows] handleCreate session:", session ? { token: session.token.slice(0, 12) + "...", user: session.user.email } : "NULL");
     setCreating(true);
     try {
       const result = await createWorkflow({ data: { sessionToken: session?.token } });
-      console.log("[workflows] createWorkflow result:", result);
       navigate({ to: "/canvas", search: { workflowId: result.id } });
     } catch (err) {
-      console.error("[workflows] createWorkflow FAILED:", err);
       setCreating(false);
       toast.error(t("workflows.create_error"));
     }

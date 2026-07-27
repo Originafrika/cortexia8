@@ -93,7 +93,7 @@ function AccountPage() {
   async function handleFedaPayComplete(transactionId: string) {
     try {
       const result = await verifyFedaPayTransaction({
-        data: { transactionId, amount, sessionToken: loadSession()?.token },
+        data: { transactionId, amount: amount * 600, sessionToken: loadSession()?.token }, // Convert USD to XOF
       });
       if (result.ok) {
         if (result.balance != null) {
@@ -342,7 +342,7 @@ function FedaPayWidget({
   const options = {
     public_key,
     transaction: {
-      amount,
+      amount: amount * 600, // Convert USD to XOF (CFA Franc) — 1 USD ≈ 600 XOF
       description: "Recharge de crédits Cortexia",
     },
     currency: {
@@ -350,7 +350,7 @@ function FedaPayWidget({
     },
     button: {
       class: "mt-5 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber px-5 py-3 text-sm font-medium text-primary-foreground hover:opacity-95 transition",
-      text: `Recharger ${amount} XOF`,
+      text: `Recharger ${formatMoney(amount, { code: "USD" })}`,
     },
     onComplete(resp: { reason?: string; transaction?: { id?: number } }) {
       const FedaPay = window.FedaPay;
