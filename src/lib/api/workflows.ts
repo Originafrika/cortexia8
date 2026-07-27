@@ -28,7 +28,7 @@ export const createWorkflow = createServerFn({ method: "POST" })
   .validator((data: CreateWorkflowInput): CreateWorkflowInput => {
     return { name: data?.name, sessionToken: data?.sessionToken };
   })
-  .handler(async ({ data, headers }) => {
+  .handler(async ({ data }) => {
     try {
       const ctx = await getRequestContext((data as any).sessionToken);
       const userId = await requireUserId(ctx);

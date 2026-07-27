@@ -19,17 +19,17 @@ export const waitlistSignup = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const code = generateReferralCode(data.email);
 
-    const result = await sql`
+    const result = (await sql`
       INSERT INTO waitlist (email, profession, referral_code, referred_by)
       VALUES (${data.email}, ${data.profession}, ${code}, ${data.referred_by ?? null})
       ON CONFLICT (email) DO NOTHING
       RETURNING id, referral_code, created_at
-    `;
+    `) as { id: number; referral_code: string; created_at: string }[];
 
     if (result.length === 0) {
-      const existing = await sql`
+      const existing = (await sql`
         SELECT id, referral_code, created_at FROM waitlist WHERE email = ${data.email}
-      `;
+      `) as { id: number; referral_code: string; created_at: string }[];
       if (existing.length === 0) throw new Error("Erreur d'inscription");
       return existing[0] as { id: number; referral_code: string; created_at: string };
     }
@@ -39,19 +39,19 @@ export const waitlistSignup = createServerFn({ method: "POST" })
 
 export const getWaitlistCount = createServerFn({ method: "GET" })
   .handler(async () => {
-    const result = await sql`SELECT COUNT(*) as count FROM waitlist`;
+    const result = (await sql`SELECT COUNT(*) as count FROM waitlist`) as { count: number }[];
     return Number(result[0].count);
   });
 
 export const getRank = createServerFn({ method: "GET" })
   .validator((d: { email: string }) => d)
   .handler(async ({ data }) => {
-    const result = await sql`
+    const result = (await sql`
       SELECT rank FROM (
         SELECT email, ROW_NUMBER() OVER (ORDER BY created_at ASC) as rank
         FROM waitlist
       ) sub WHERE email = ${data.email}
-    `;
+    `) as { rank: number }[];
     return result.length > 0 ? Number(result[0].rank) : null;
   });
 
@@ -61,8 +61,8 @@ export const lookupReferralCode = createServerFn({ method: "GET" })
     return d;
   })
   .handler(async ({ data }) => {
-    const result = await sql`
+    const result = (await sql`
       SELECT email FROM waitlist WHERE referral_code = ${data.code}
-    `;
+    `) as { email: string }[];
     return result.length > 0 ? (result[0].email as string) : null;
   });

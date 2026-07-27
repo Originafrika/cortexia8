@@ -374,7 +374,7 @@ function parseAgentResponse(raw: string): AgentResponse {
         validatedOps.push({
           type: "UPDATE_NODE",
           nodeId: op.nodeId,
-          params: op.params as Record<string, unknown>,
+          params: op.params as Record<string, string | number | boolean | null>,
         });
         break;
       }

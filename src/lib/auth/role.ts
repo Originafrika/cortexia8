@@ -3,7 +3,7 @@ import { sql } from "@/lib/db";
 export type UserRole = "user" | "admin";
 
 export async function getUserRole(userId: number): Promise<UserRole> {
-  const result = await sql`SELECT role FROM users WHERE id = ${userId}`;
+  const result = (await sql`SELECT role FROM users WHERE id = ${userId}`) as { role: string }[];
   return (result[0]?.role === "admin") ? "admin" : "user";
 }
 

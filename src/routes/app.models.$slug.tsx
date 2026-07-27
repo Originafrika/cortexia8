@@ -564,7 +564,7 @@ function ParamIconButton({
   setState: React.Dispatch<React.SetStateAction<Record<string, unknown>>>;
 }) {
   const t = useT();
-  const key = "key" in p ? p.key : p.kind;
+  const key = p.key;
   const Icon = iconForParam(key, p.kind);
   const label = p.label;
 
@@ -575,7 +575,7 @@ function ParamIconButton({
     preview = `${state[p.key] ?? p.default}${p.suffix ?? ""}`;
   else if (p.kind === "toggle") preview = state[p.key] ? t("playground.toggle_on") : null;
 
-  const uploadCount = p.kind === "upload" ? ((state[p.key] as File[]) ?? []).length : 0;
+  const uploadCount = p.kind === "upload" && "multiple" in p ? ((state[p.key] as File[]) ?? []).length : 0;
 
   const isActive =
     (p.kind === "toggle" && !!state[p.key]) ||
@@ -626,7 +626,7 @@ function UploadParamEditor({
   state,
   setState,
 }: {
-  p: ParamSpec;
+  p: Extract<ParamSpec, { kind: "upload" }>;
   state: Record<string, unknown>;
   setState: React.Dispatch<React.SetStateAction<Record<string, unknown>>>;
 }) {

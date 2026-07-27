@@ -169,9 +169,9 @@ function CanvasInnerWrapper({
   prefillPrompt: string | undefined;
   setPrefillPrompt: (v: string | undefined) => void;
   agentOpen: boolean;
-  setAgentOpen: (v: boolean) => void;
+  setAgentOpen: (v: boolean | ((prev: boolean) => boolean)) => void;
   historyOpen: boolean;
-  setHistoryOpen: (v: boolean) => void;
+  setHistoryOpen: (v: boolean | ((prev: boolean) => boolean)) => void;
   handleOpenAgent: (prompt: string) => void;
   handleHighlightNodeAdd: () => void;
   isMobile: boolean;

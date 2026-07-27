@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { MODELS, basePrice, type Model, type ModelCategory } from "@/lib/models";
 import { PriceDisplay } from "@/components/price-display";
@@ -50,6 +50,7 @@ function formatRelative(dateStr: string, t: (key: string) => string): string {
 
 function HistoryPage() {
   const t = useT();
+  const navigate = useNavigate();
   const CATS: { key: ModelCategory | "all"; label: string }[] = [
     { key: "all", label: t("cat.all") },
     { key: "image", label: t("cat.image") },
@@ -326,7 +327,7 @@ function HistoryPage() {
                 <button
                   onClick={() => {
                     if (selected?.model) {
-                      navigate({ to: `/app/models/${selected.model.slug}`, search: { prompt: selected.prompt } });
+                      navigate({ to: `/app/models/${selected.model.slug}` });
                     }
                   }}
                   aria-label="Regenerate with these parameters"

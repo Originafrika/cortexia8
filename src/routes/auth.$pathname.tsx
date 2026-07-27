@@ -85,7 +85,7 @@ function Auth() {
       const result = await authClient.signIn.email({ email, password });
       if (result.error) throw result.error;
       if (result.data?.user) {
-        const role = result.data.user.role ?? "user";
+        const role = (result.data.user as any).role ?? "user";
         saveSession({
           user: {
             id: result.data.user.id,
@@ -138,7 +138,7 @@ function Auth() {
       if (password) {
         const signResult = await authClient.signIn.email({ email, password });
         if (!signResult.error && signResult.data?.user) {
-          const role = signResult.data.user.role ?? "user";
+          const role = (signResult.data.user as any).role ?? "user";
           saveSession({
             user: {
               id: signResult.data.user.id,

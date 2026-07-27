@@ -8,7 +8,7 @@ export const sendAllMagicLinks = createServerFn({ method: "POST" })
     return d;
   })
   .handler(async () => {
-    const rows = await sql`SELECT email FROM waitlist ORDER BY created_at ASC`;
+    const rows = (await sql`SELECT email FROM waitlist ORDER BY created_at ASC`) as { email: string }[];
     return { sent: 0, total: rows.length, results: [] as { email: string; ok: boolean }[] };
   });
 
@@ -18,7 +18,7 @@ export const sendMagicLink = createServerFn({ method: "POST" })
     return d;
   })
   .handler(async ({ data }) => {
-    const exists = await sql`SELECT id FROM waitlist WHERE email = ${data.email}`;
+    const exists = (await sql`SELECT id FROM waitlist WHERE email = ${data.email}`) as { id: number }[];
     if (exists.length === 0) throw new Error("Email non trouvé dans la waitlist");
     return { ok: true, email: data.email };
   });

@@ -19,7 +19,7 @@
  */
 
 import { createServerFn } from "@tanstack/react-start";
-import { sql } from "@/lib/db";
+
 import { recordTransaction } from "@/lib/credits";
 import { getRequestContext, HttpError, requireUserId, toJsonResponse } from "./auth";
 import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
@@ -221,59 +221,7 @@ export const createStripeCheckout = createServerFn({ method: "POST" })
 // NOTE: The Stripe webhook has been migrated from createServerFn to a raw
 // Nitro event handler at server/api/webhooks/stripe.ts. That handler can
 // read the raw request body needed for stripe webhook signature verification.
-// The handler below is retained for backward compatibility but should not
-// be used in production — it cannot verify the Stripe signature.
 // ---------------------------------------------------------------------------
 
 // stripeWebhook removed — use raw route handler at server/api/webhooks/stripe.ts instead
 // (createServerFn cannot verify Stripe signatures)
-
-async function handleStripeWebhook(
-  body: Record<string, unknown>,
-): Promise<StripeWebhookResponse> {
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-
-  // Parse the event
-  const eventType = body.type as string | undefined;
-  const event = body.data as { object?: Record<string, unknown> } | undefined;
-
-  if (!eventType || !event?.object) {
-    return { ok: false, error: "Invalid webhook payload" };
-  }
-
-  // Only process checkout.session.completed — reject all other event types
-  if (eventType !== "checkout.session.completed") {
-    return { ok: true, action: "no-op" };
-  }
-
-  const session = event.object;
-  const userId = Number(session.metadata?.userId ?? session.userId);
-  const amount = Number(session.metadata?.amount ?? 0);
-  const sessionId = session.id as string;
-
-  if (!userId || amount <= 0) {
-    return { ok: false, error: "Missing userId or amount in session metadata" };
-  }
-
-  // Check for duplicate processing
-  const existing = (await sql`
-    SELECT id FROM credits_ledger
-    WHERE reference = ${`stripe:${sessionId}`}
-    LIMIT 1
-  `) as { id: number }[];
-  if (existing.length > 0) {
-    return { ok: true, action: "already-processed" };
-  }
-
-  const result = await recordTransaction({
-    userId,
-    amount,
-    type: "purchase",
-    reference: `stripe:${sessionId}`,
-  });
-
-  return {
-    ok: true,
-    action: "credited",
-  };
-}

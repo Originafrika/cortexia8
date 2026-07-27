@@ -25,7 +25,7 @@ export const Route = createFileRoute("/access-denied")({
             onClick={async () => {
               await authClient.signOut();
               clearSession();
-              navigate({ to: "/auth/sign-in" });
+              navigate({ to: "/auth/$pathname" as "/auth/$pathname", params: { pathname: "sign-in" } });
             }}
             className="mt-6 underline text-sm"
           >

@@ -64,7 +64,7 @@ export type ApiKeyRow = {
   prefix: string;
   permissions: string;
   status: string;
-  last_used_at: string | null;
+  lastUsed: string;
   created_at: string;
 };
 

@@ -30,7 +30,7 @@ export type { WebhookInput, WebhookResponse };
 export { generationStatus } from "./generation-status";
 export type { StatusInput, GenerationStatus };
 export { getHistory } from "./history";
-export type { HistoryInput, HistoryItem, HistoryResponse };
+export type { HistoryInput, HistoryItem, HistoryResponse } from "./history";
 export { applyAgentPlan } from "./agent-apply";
 export type { AgentApplyInput, AgentApplyResponse, AgentOp } from "./agent-apply";
 export { verifyFedaPayTransaction, createStripeCheckout } from "./payments";

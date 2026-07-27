@@ -7,7 +7,7 @@ import { useCurrency, formatMoney, CURRENCIES } from "@/lib/currency";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { verifyFedaPayTransaction, createStripeCheckout } from "@/lib/api/payments";
-import { getUserBalance, getTransactionHistory } from "@/lib/api/balance";
+import { getUserBalance, getTransactionHistory, type TxRow } from "@/lib/api/balance";
 import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/app/account")({
@@ -19,8 +19,6 @@ export const Route = createFileRoute("/app/account")({
   }),
   component: AccountPage,
 });
-
-type TxRow = { d: string; label: string; amount: number; kind: "debit" | "credit" };
 
 const METHODS = [
   { key: "mm", nameKey: "Mobile Money", desc: "Orange · MTN · Wave · M-Pesa", icon: Smartphone },
@@ -374,10 +372,10 @@ function FedaPayWidget({
     },
     button: {
       class: "mt-5 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber px-5 py-3 text-sm font-medium text-primary-foreground hover:opacity-95 transition",
-      text: t("account.recharge_btn").replace("{amount}", formatMoney(amount, { code: "USD" })),
+      text: t("account.recharge_btn").replace("{amount}", formatMoney(amount, CURRENCIES.USD)),
     },
     onComplete(resp: { reason?: string; transaction?: { id?: number } }) {
-      const FedaPay = window.FedaPay;
+      const FedaPay = (window as any).FedaPay;
       if (FedaPay && resp.reason === FedaPay.DIALOG_DISMISSED) return;
       if (resp.transaction?.id) {
         onComplete(String(resp.transaction.id));

@@ -31,7 +31,7 @@ export const Route = createFileRoute("/app")({
   beforeLoad: ({ location }) => {
     const session = loadSession();
     if (!session) {
-      throw redirect({ to: "/auth/sign-in", search: { redirect: location.href } });
+      throw redirect({ to: "/auth/$pathname" as "/auth/$pathname", params: { pathname: "sign-in" }, search: { redirect: location.href } });
     }
   },
   head: () => ({

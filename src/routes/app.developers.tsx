@@ -87,7 +87,7 @@ print(url, cost)`,
     if (!keyName.trim() || creatingKey) return;
     setCreatingKey(true);
     try {
-      const result = await createApiKey({ data: { name: keyName.trim(), scope: keyScope } });
+      const result = await createApiKey({ data: { name: keyName.trim() } });
       setShowNewKey(result.rawKey);
       setKeyName("");
       const updated = await listApiKeys({ data: {} });

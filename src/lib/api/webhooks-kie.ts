@@ -99,7 +99,7 @@ async function handleWebhook(body: WebhookInput): Promise<WebhookResponse> {
 async function handleSuccess(
   taskId: string,
   info: Awaited<ReturnType<typeof getTaskDetail>>,
-  verification: { ok: true; runNodeExecutionId: number; userId: number | null; modelSlug: string },
+  verification: { ok: true; runNodeExecutionId: number; userId: number | null; modelSlug: string; category: string },
 ): Promise<WebhookResponse> {
   const { resultUrls, resultObject } = parseResultJson(info.resultJson);
 
@@ -196,7 +196,7 @@ async function handleSuccess(
 async function handleFailure(
   taskId: string,
   info: Awaited<ReturnType<typeof getTaskDetail>>,
-  verification: { ok: true; runNodeExecutionId: number; userId: number | null; modelSlug: string },
+  verification: { ok: true; runNodeExecutionId: number; userId: number | null; modelSlug: string; category: string },
 ): Promise<WebhookResponse> {
   // Refund any upfront debit. The reference is `run:N/node:M` or
   // `run:N/exec:M` depending on the entry point.
