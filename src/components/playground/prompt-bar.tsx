@@ -59,7 +59,7 @@ export function PromptBar({
           }}
           rows={2}
           placeholder={placeholder}
-          className="w-full resize-none bg-transparent px-2 py-1.5 text-sm outline-none placeholder:text-muted-foreground/70"
+          className="w-full resize-none bg-transparent px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-amber/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background placeholder:text-muted-foreground/70 rounded-md"
         />
       ) : (
         <div className="px-2 py-1.5 text-sm text-muted-foreground">
