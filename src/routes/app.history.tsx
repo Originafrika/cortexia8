@@ -143,7 +143,7 @@ function HistoryPage() {
             onChange={(e) => setQ(e.target.value)}
             placeholder={t("history.search")}
             aria-label="Search history"
-            className="w-full sm:w-72 rounded-full border border-border bg-surface-1/70 pl-9 pr-4 py-2 text-sm focus:border-amber/40 focus-visible:ring-2 focus-visible:ring-amber/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background outline-none"
+            className="w-full sm:w-72 h-9 rounded-full border border-input bg-transparent pl-9 pr-4 py-2 text-sm focus:border-amber/40 focus-visible:ring-2 focus-visible:ring-amber/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background outline-none"
           />
         </div>
       </div>

@@ -154,7 +154,7 @@ export function ParamField({
       <div>
         <Label className="text-xs text-muted-foreground mb-1.5 block">{p.label}</Label>
         <Select value={v} onValueChange={(nv) => onChange(p.key, nv)} disabled={disabled}>
-          <SelectTrigger className="h-8 text-xs">
+          <SelectTrigger className="h-9 text-xs">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -212,7 +212,7 @@ export function ParamField({
             onChange={(e) => onChange("seed", e.target.value)}
             placeholder={t("inspector.seed_placeholder")}
             disabled={disabled}
-            className="font-mono text-xs h-8"
+            className="font-mono text-xs h-9"
           />
           <button
             type="button"

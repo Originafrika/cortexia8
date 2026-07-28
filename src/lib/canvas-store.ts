@@ -449,6 +449,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
       set({ workflowId: String(id), workflowName: res?.name ?? "", nodes, edges, selectedNodeId: null });
     } catch (err) {
       console.error("[canvas-store] loadWorkflow failed", err);
+      set({ nodes: [], edges: [], workflowId: null, workflowName: "" });
     }
   },
 

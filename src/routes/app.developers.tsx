@@ -92,7 +92,7 @@ print(url, cost)`,
       setShowNewKey(result.rawKey);
       setKeyName("");
       const updated = await listApiKeys({ data: { sessionToken: loadSession()?.token } });
-      setKeys(updated as ApiKeyRow[]);
+      setKeys(Array.isArray(updated) ? (updated as ApiKeyRow[]) : []);
     } catch (err) {
       toast.error(t("dev.key_create_error"));
     } finally {
@@ -188,7 +188,7 @@ print(url, cost)`,
               onChange={(e) => setKeyName(e.target.value)}
               placeholder={t("dev.key_name_placeholder")}
               aria-label="API key name"
-              className="rounded-full border border-border bg-surface-1/70 px-3 py-1.5 text-sm focus:border-amber/40 focus-visible:ring-2 focus-visible:ring-amber/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background outline-none w-full sm:w-48"
+              className="h-9 rounded-full border border-input bg-transparent px-3 py-2 text-sm focus:border-amber/40 focus-visible:ring-2 focus-visible:ring-amber/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background outline-none w-full sm:w-48"
             />
             <Select value={keyScope} onValueChange={setKeyScope}>
               <SelectTrigger className="rounded-full w-[180px] h-9 text-sm">

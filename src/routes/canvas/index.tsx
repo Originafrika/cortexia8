@@ -89,7 +89,7 @@ function CanvasShell() {
               type="text"
               value={useCanvasStore((s) => s.workflowName) || "Canvas"}
               onChange={(e) => useCanvasStore.getState().renameWorkflow(e.target.value)}
-              className="font-display text-base tracking-[-0.02em] bg-transparent border-none outline-none focus:ring-1 focus:ring-amber/50 rounded px-1 -ml-1 min-w-0 max-w-[300px]"
+              className="font-display text-base tracking-[-0.02em] bg-transparent border-none outline-none focus:ring-1 focus:ring-amber/50 rounded-md px-1 -ml-1 min-w-0 max-w-[300px]"
               maxLength={200}
             />
             <div className="font-mono text-[9px] uppercase tracking-[0.22em] text-muted-foreground">

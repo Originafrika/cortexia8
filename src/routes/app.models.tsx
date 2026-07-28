@@ -1,7 +1,7 @@
-import { createFileRoute, Link, Outlet, useMatchRoute } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useMatchRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { MODELS, basePrice, unitLabel, type ModelCategory, type Model } from "@/lib/models";
-import { PriceDisplay } from "@/components/price-display";
+import { MODELS, type ModelCategory } from "@/lib/models";
+import { ModelCard } from "@/components/model-card";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
@@ -84,7 +84,7 @@ function ModelsCatalog() {
             onChange={(e) => setQ(e.target.value)}
             placeholder="Kling, Claude, ElevenLabs…"
             aria-label="Search models"
-            className="w-full sm:w-72 rounded-full border border-border bg-surface-1/70 pl-9 pr-4 py-2 text-sm focus:border-amber/40 focus-visible:ring-2 focus-visible:ring-amber/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background outline-none"
+            className="w-full sm:w-72 h-9 rounded-full border border-input bg-transparent pl-9 pr-4 py-2 text-sm focus:border-amber/40 focus-visible:ring-2 focus-visible:ring-amber/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background outline-none"
           />
         </div>
       </div>
@@ -123,7 +123,7 @@ function ModelsCatalog() {
         <>
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {paged.map((m) => (
-              <ModelCard key={m.slug} m={m} />
+              <ModelCard key={m.slug} model={m} />
             ))}
           </div>
 
@@ -137,22 +137,40 @@ function ModelsCatalog() {
               >
                 <ChevronLeft className="size-3.5" /> {t("models.prev")}
               </button>
-              <div className="flex items-center gap-1">
-                {Array.from({ length: pageCount }).map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setPage(i + 1)}
-                aria-label={`Page ${i + 1}`}
-                className={cn(
-                      "size-8 rounded-full text-xs font-mono transition cursor-pointer",
-                      safePage === i + 1
-                        ? "bg-amber text-primary-foreground"
-                        : "text-muted-foreground hover:text-foreground hover:bg-surface-2",
-                    )}
-                  >
-                    {i + 1}
-                  </button>
-                ))}
+              <div className="flex items-center gap-1 overflow-x-auto max-w-[300px]">
+                {(() => {
+                  const pageNumbers: (number | "ellipsis")[] = [];
+                  if (pageCount <= 7) {
+                    for (let i = 1; i <= pageCount; i++) pageNumbers.push(i);
+                  } else {
+                    pageNumbers.push(1);
+                    if (safePage > 3) pageNumbers.push("ellipsis");
+                    const start = Math.max(2, safePage - 1);
+                    const end = Math.min(pageCount - 1, safePage + 1);
+                    for (let i = start; i <= end; i++) pageNumbers.push(i);
+                    if (safePage < pageCount - 2) pageNumbers.push("ellipsis");
+                    pageNumbers.push(pageCount);
+                  }
+                  return pageNumbers.map((pageNum, idx) =>
+                    pageNum === "ellipsis" ? (
+                      <span key={`e${idx}`} className="px-1 text-xs text-muted-foreground font-mono">…</span>
+                    ) : (
+                      <button
+                        key={pageNum}
+                        onClick={() => setPage(pageNum)}
+                        aria-label={`Page ${pageNum}`}
+                        className={cn(
+                          "size-8 shrink-0 rounded-full text-xs font-mono transition cursor-pointer",
+                          safePage === pageNum
+                            ? "bg-amber text-primary-foreground"
+                            : "text-muted-foreground hover:text-foreground hover:bg-surface-2",
+                        )}
+                      >
+                        {pageNum}
+                      </button>
+                    )
+                  );
+                })()}
               </div>
               <button
                 onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
@@ -167,50 +185,5 @@ function ModelsCatalog() {
         </>
       )}
     </div>
-  );
-}
-
-function ModelCard({ m }: { m: Model }) {
-  const t = useT();
-  return (
-    <Link
-      to="/app/models/$slug"
-      params={{ slug: m.slug }}
-      className="group surface-gradient-border rounded-2xl bg-surface-1/60 backdrop-blur p-5 hover:bg-surface-1/80 transition-all hover:-translate-y-0.5 hover:shadow-[0_20px_60px_-20px_oklch(0.78_0.16_70_/_0.25)]"
-    >
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="font-display text-lg tracking-[-0.01em] truncate">{m.name}</span>
-            {m.badge && (
-              <span
-                className={
-                  "shrink-0 rounded-full px-2 py-0.5 text-[9px] font-mono uppercase tracking-wider " +
-                  (m.badge === "popular"
-                    ? "bg-amber/20 text-amber-soft"
-                    : m.badge === "new"
-                      ? "bg-emerald/20 text-emerald"
-                      : "bg-surface-3 text-muted-foreground")
-                }
-              >
-                {m.badge === "popular" ? t("models.badge_popular") : m.badge === "new" ? t("models.badge_new") : t("models.badge_pro")}
-              </span>
-            )}
-          </div>
-          <div className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-            {m.provider} · {m.category}
-          </div>
-        </div>
-      </div>
-      <p className="mt-3 text-sm text-foreground/80 leading-relaxed line-clamp-2">{m.blurb}</p>
-      <div className="mt-4 pt-4 border-t border-border flex items-baseline justify-between">
-        <PriceDisplay
-          usd={basePrice(m)}
-          className="font-display text-2xl tracking-[-0.02em]"
-          emphasize
-        />
-        <span className="text-[11px] text-muted-foreground font-mono">{unitLabel(m)}</span>
-      </div>
-    </Link>
   );
 }

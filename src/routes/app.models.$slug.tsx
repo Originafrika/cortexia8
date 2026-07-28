@@ -1,13 +1,10 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { getModel, basePrice, unitLabel, MODELS, type Model, type ParamSpec } from "@/lib/models";
+import { getModel, basePrice, unitLabel, type Model, type ParamSpec } from "@/lib/models";
 import { PriceDisplay } from "@/components/price-display";
 import {
   ArrowLeft,
-  ArrowUp,
   Sparkles,
-  RefreshCw,
-  Download,
   AlertTriangle,
   Loader2,
   Image as ImageIcon,
@@ -18,17 +15,18 @@ import {
   Volume2,
   Upload,
   SlidersHorizontal,
-  Settings2,
-  X,
   MessageSquare,
+  X,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { generate } from "@/lib/api/generate";
 import { generationStatus } from "@/lib/api/generation-status";
 import { useT } from "@/lib/i18n";
 import { loadSession } from "@/lib/auth-store";
+import { PromptBar } from "@/components/playground/prompt-bar";
+import { ResultView } from "@/components/playground/result-view";
+import { HistoryGrid } from "@/components/playground/history-grid";
+import { SimilarModels } from "@/components/playground/similar-models";
 
 export const Route = createFileRoute("/app/models/$slug")({
   loader: ({ params }) => {
@@ -67,9 +65,9 @@ function ModelNotFoundComponent() {
   );
 }
 
-type Status = "idle" | "loading" | "success" | "error";
+export type Status = "idle" | "loading" | "success" | "error";
 
-type Result = {
+export type Result = {
   id: string;
   model: Model;
   prompt: string;
@@ -80,7 +78,7 @@ type Result = {
   timestamp: Date;
 };
 
-function iconForParam(key: string, kind: ParamSpec["kind"]) {
+export function iconForParam(key: string, kind: ParamSpec["kind"]) {
   if (kind === "longtext") return MessageSquare;
   if (kind === "upload") return Upload;
   if (kind === "seed") return Dice5;
@@ -308,7 +306,7 @@ export function ModelPlaygroundContent({
           {/* Active result hero */}
           {active && (
             <div className="mb-6">
-              <ActiveResultView
+              <ResultView
                 result={active}
                 onRegenerate={() => {
                   setPrompt(active.prompt);
@@ -365,47 +363,11 @@ export function ModelPlaygroundContent({
 
           {/* History grid */}
           {history.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-              {history.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveId(item.id)}
-                  className={cn(
-                    "group relative rounded-xl overflow-hidden border text-left transition",
-                    "aspect-square",
-                    activeId === item.id
-                      ? "border-amber ring-2 ring-amber/30"
-                      : "border-border hover:border-amber/40",
-                  )}
-                  style={
-                    item.resultUrl
-                      ? undefined
-                      : { background: `linear-gradient(135deg, var(--surface-2), var(--background))` }
-                  }
-                >
-                  {item.resultUrl && (
-                    <img
-                      src={item.resultUrl}
-                      alt={item.prompt}
-                      loading="lazy"
-                      className="w-full h-full object-cover"
-                    />
-                  )}
-                  {!item.resultUrl && (
-                    <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
-                      <Loader2 className="size-4 animate-spin" />
-                    </div>
-                  )}
-                  <div className="absolute inset-0 bg-foreground/30 opacity-0 group-hover:opacity-100 transition" />
-                  <div                   className="absolute bottom-1.5 left-1.5 right-1.5 text-[9px] font-mono text-background/90 bg-foreground/60 backdrop-blur px-1.5 py-0.5 rounded truncate">
-                    {item.prompt}
-                  </div>
-                  <div className="absolute top-1.5 right-1.5 rounded-full bg-foreground/60 backdrop-blur px-1.5 py-0.5 text-[9px] font-mono text-background/80">
-                    <PriceDisplay usd={item.cost} className="text-[9px]" />
-                  </div>
-                </button>
-              ))}
-            </div>
+            <HistoryGrid
+              history={history}
+              activeId={activeId}
+              onSelect={setActiveId}
+            />
           ) : (
             status !== "loading" && !active && <EmptyState model={model} />
           )}
@@ -451,405 +413,7 @@ function initState(model: Model): Record<string, unknown> {
   return init;
 }
 
-function PromptBar({
-  model,
-  iconParams,
-  state,
-  setState,
-  prompt,
-  setPrompt,
-  hasPrompt,
-  onGenerate,
-  status,
-  progress,
-  currentPrice,
-  showAdvanced,
-  onToggleAdvanced,
-  canGenerate,
-}: {
-  model: Model;
-  iconParams: ParamSpec[];
-  state: Record<string, unknown>;
-  setState: React.Dispatch<React.SetStateAction<Record<string, unknown>>>;
-  prompt: string;
-  setPrompt: (v: string) => void;
-  hasPrompt: boolean;
-  onGenerate: () => void;
-  status: Status;
-  progress: number;
-  currentPrice: number;
-  showAdvanced: boolean;
-  onToggleAdvanced: () => void;
-  canGenerate: boolean;
-}) {
-  const t = useT();
-  const promptSpec = model.params.find((p) => p.kind === "prompt");
-  const placeholder =
-    (promptSpec && "placeholder" in promptSpec && promptSpec.placeholder) ||
-    t("playground.placeholder");
 
-  return (
-    <div className="surface-gradient-border rounded-2xl bg-surface-1/70 p-3">
-      {hasPrompt ? (
-        <textarea
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-              e.preventDefault();
-              onGenerate();
-            }
-          }}
-          rows={2}
-          placeholder={placeholder}
-          className="w-full resize-none bg-transparent px-2 py-1.5 text-sm outline-none placeholder:text-muted-foreground/70"
-        />
-      ) : (
-        <div className="px-2 py-1.5 text-sm text-muted-foreground">
-          {t("playground.helper")}
-        </div>
-      )}
-
-      <div className="mt-2 flex items-center gap-1.5 flex-wrap">
-        {iconParams.map((p, i) => (
-          <ParamIconButton key={i} p={p} state={state} setState={setState} />
-        ))}
-
-        {model.params.some((p) => "advanced" in p && p.advanced) && (
-          <button
-            type="button"
-            onClick={onToggleAdvanced}
-            className={cn(
-              "inline-flex items-center gap-1 rounded-full border h-8 px-2.5 text-[11px] transition cursor-pointer",
-              showAdvanced
-                ? "border-amber/60 bg-amber/10 text-amber-soft"
-                : "border-border bg-surface-2/40 text-muted-foreground hover:text-foreground hover:border-border-strong",
-            )}
-          >
-            <Settings2 className="size-3" />
-            <span className="hidden sm:inline">{showAdvanced ? t("playground.advanced") : t("playground.simple")}</span>
-          </button>
-        )}
-
-        <div className="ml-auto flex items-center gap-2">
-          <div className="hidden sm:flex items-center gap-1 text-[11px] text-muted-foreground font-mono">
-            <span>{t("playground.cost")}</span>
-            <PriceDisplay usd={currentPrice} className="text-[11px] text-foreground" />
-          </div>
-          <button
-            onClick={onGenerate}
-            disabled={status === "loading" || !canGenerate}
-            className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber px-4 h-9 text-sm font-medium text-primary-foreground hover:opacity-95 transition disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
-          >
-            {status === "loading" ? (
-              <>
-                <Loader2 className="size-4 animate-spin" />
-                <span className="hidden sm:inline">{progress}%</span>
-              </>
-            ) : (
-              <>
-                <span className="hidden sm:inline">{t("playground.generate")}</span>
-                <ArrowUp className="size-4" />
-              </>
-            )}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ParamIconButton({
-  p,
-  state,
-  setState,
-}: {
-  p: ParamSpec;
-  state: Record<string, unknown>;
-  setState: React.Dispatch<React.SetStateAction<Record<string, unknown>>>;
-}) {
-  const t = useT();
-  const key = p.key;
-  const Icon = iconForParam(key, p.kind);
-  const label = p.label;
-
-  // Compact value preview
-  let preview: string | null = null;
-  if (p.kind === "select") preview = String(state[p.key] ?? "");
-  else if (p.kind === "slider")
-    preview = `${state[p.key] ?? p.default}${p.suffix ?? ""}`;
-  else if (p.kind === "toggle") preview = state[p.key] ? t("playground.toggle_on") : null;
-
-  const uploadCount = p.kind === "upload" && "multiple" in p ? ((state[p.key] as File[]) ?? []).length : 0;
-
-  const isActive =
-    (p.kind === "toggle" && !!state[p.key]) ||
-    (p.kind === "select" && p.options[0] !== state[p.key]) ||
-    (p.kind === "slider" && state[p.key] !== p.default) ||
-    (p.kind === "upload" && uploadCount > 0);
-
-  return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <button
-          className={cn(
-            "inline-flex items-center gap-1.5 rounded-full border h-8 px-2.5 text-xs transition cursor-pointer",
-            isActive
-              ? "border-amber/60 bg-amber/10 text-amber-soft"
-              : "border-border bg-surface-2/40 text-muted-foreground hover:text-foreground hover:border-border-strong",
-          )}
-          title={label}
-        >
-          <Icon className="size-3.5" />
-          {preview && (
-            <span className="font-mono text-[10px] uppercase tracking-wider">{preview}</span>
-          )}
-          {p.kind === "upload" && uploadCount > 0 && (
-            <span className="inline-flex items-center justify-center size-4 rounded-full bg-amber text-[9px] font-bold text-primary-foreground">
-              {uploadCount}
-            </span>
-          )}
-        </button>
-      </PopoverTrigger>
-      <PopoverContent
-        side="top"
-        align="start"
-        className="w-72 bg-surface-1/95 backdrop-blur border-border"
-      >
-        <div className="flex items-center gap-2 mb-3">
-          <Icon className="size-4 text-amber" />
-          <div className="text-xs font-medium">{label}</div>
-        </div>
-        <ParamEditor p={p} state={state} setState={setState} />
-      </PopoverContent>
-    </Popover>
-  );
-}
-
-function UploadParamEditor({
-  p,
-  state,
-  setState,
-}: {
-  p: Extract<ParamSpec, { kind: "upload" }>;
-  state: Record<string, unknown>;
-  setState: React.Dispatch<React.SetStateAction<Record<string, unknown>>>;
-}) {
-  const t = useT();
-  const files = (state[p.key] as File[]) ?? [];
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [isDragOver, setIsDragOver] = useState(false);
-
-  function handleFiles(fileList: FileList | null) {
-    if (!fileList) return;
-    const newFiles = Array.from(fileList);
-    setState((s) => ({
-      ...s,
-      [p.key]: p.multiple ? [...((s[p.key] as File[]) ?? []), ...newFiles] : newFiles,
-    }));
-  }
-
-  function handleDrop(e: React.DragEvent) {
-    e.preventDefault();
-    setIsDragOver(false);
-    handleFiles(e.dataTransfer.files);
-  }
-
-  function handleDragOver(e: React.DragEvent) {
-    e.preventDefault();
-    setIsDragOver(true);
-  }
-
-  function handleDragLeave() {
-    setIsDragOver(false);
-  }
-
-  function removeFile(index: number) {
-    setState((s) => ({
-      ...s,
-      [p.key]: ((s[p.key] as File[]) ?? []).filter((_, i) => i !== index),
-    }));
-  }
-
-  return (
-    <div>
-      <div
-        onClick={() => inputRef.current?.click()}
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        className={cn(
-          "rounded-xl border px-3 py-6 text-center text-xs cursor-pointer transition",
-          files.length === 0 && !isDragOver ? "border-dashed" : "border-solid",
-          files.length > 0 || isDragOver
-            ? "border-amber/60 bg-amber/5 text-amber-soft"
-            : "border-border bg-surface-0/40 text-muted-foreground hover:border-amber/40",
-        )}
-      >
-        <input
-          ref={inputRef}
-          type="file"
-          accept={p.accepts}
-          multiple={p.multiple}
-          className="hidden"
-          onChange={(e) => handleFiles(e.target.files)}
-        />
-        {files.length > 0 ? (
-          <div className="space-y-1">
-            <Upload className="size-4 mx-auto text-amber" />
-            <span>
-              {files.length} {t("playground.files_selected")}
-            </span>
-          </div>
-        ) : (
-          <span>{t("playground.upload_text")}</span>
-        )}
-      </div>
-      {files.length > 0 && (
-        <div className="mt-2 space-y-1">
-          {files.map((f, i) => (
-            <div key={i} className="flex items-center justify-between rounded-lg bg-surface-2/40 px-2.5 py-1.5 text-[11px]">
-              <span className="truncate text-foreground">{f.name}</span>
-              <button
-                onClick={(e) => { e.stopPropagation(); removeFile(i); }}
-                className="ml-2 text-muted-foreground hover:text-foreground cursor-pointer"
-              >
-                <X className="size-3" />
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function ParamEditor({
-  p,
-  state,
-  setState,
-}: {
-  p: ParamSpec;
-  state: Record<string, unknown>;
-  setState: React.Dispatch<React.SetStateAction<Record<string, unknown>>>;
-}) {
-  const t = useT();
-  if (p.kind === "upload") {
-    return <UploadParamEditor p={p} state={state} setState={setState} />;
-  }
-  if (p.kind === "select") {
-    const val = state[p.key] as string;
-    return (
-      <div className="flex flex-wrap gap-1.5">
-        {p.options.map((o) => (
-          <button
-            key={o}
-            onClick={() => setState((s) => ({ ...s, [p.key]: o }))}
-            className={cn(
-              "rounded-full border px-2.5 py-1 text-xs transition cursor-pointer",
-              val === o
-                ? "border-amber/60 bg-amber/15 text-amber-soft"
-                : "border-border text-muted-foreground hover:text-foreground",
-            )}
-          >
-            {o}
-          </button>
-        ))}
-      </div>
-    );
-  }
-  if (p.kind === "slider") {
-    const val = state[p.key] as number;
-    return (
-      <div>
-        <div className="flex items-baseline justify-between mb-2">
-          <span className="text-[11px] text-muted-foreground">
-            {p.min}
-            {p.suffix ?? ""} – {p.max}
-            {p.suffix ?? ""}
-          </span>
-          <span className="font-mono text-xs">
-            {val}
-            {p.suffix ?? ""}
-          </span>
-        </div>
-        <input
-          type="range"
-          min={p.min}
-          max={p.max}
-          step={p.step}
-          value={val}
-          onChange={(e) => setState((s) => ({ ...s, [p.key]: parseFloat(e.target.value) }))}
-          className="w-full accent-amber h-1.5 appearance-none rounded-full bg-surface-3 cursor-pointer"
-        />
-      </div>
-    );
-  }
-  if (p.kind === "seed") {
-    const val = state[p.key] as number | undefined;
-    return (
-      <div className="flex items-center gap-2">
-        <input
-          type="number"
-          value={val ?? ""}
-          placeholder={t("playground.seed_placeholder")}
-          onChange={(e) =>
-            setState((s) => ({
-              ...s,
-              [p.key]: e.target.value === "" ? undefined : parseInt(e.target.value, 10),
-            }))
-          }
-          className="w-full rounded-xl border border-border bg-surface-0/60 px-3 py-2 text-xs font-mono outline-none focus:border-amber/50"
-        />
-        <button
-          type="button"
-          onClick={() => setState((s) => ({ ...s, [p.key]: Math.floor(Math.random() * 0xffffffff) }))}
-          className="shrink-0 rounded-xl border border-border bg-surface-0/60 px-3 py-2 text-xs hover:border-amber/50 hover:bg-amber/5 transition"
-          title={t("playground.seed_tooltip")}
-        >
-          🎲
-        </button>
-      </div>
-    );
-  }
-  if (p.kind === "longtext") {
-    const val = (state[p.key] as string) ?? "";
-    return (
-      <textarea
-        value={val}
-        onChange={(e) => setState((s) => ({ ...s, [p.key]: e.target.value }))}
-        rows={4}
-        placeholder={("placeholder" in p ? (p as any).placeholder : undefined) || ""}
-        className="w-full rounded-xl border border-border bg-surface-0/60 px-3 py-2 text-xs font-mono outline-none focus:border-amber/50 resize-none"
-      />
-    );
-  }
-  if (p.kind === "toggle") {
-    const val = !!state[p.key];
-    return (
-      <button
-        onClick={() => setState((s) => ({ ...s, [p.key]: !val }))}
-        className="w-full flex items-center justify-between rounded-lg bg-surface-2/40 px-3 py-2 cursor-pointer"
-      >
-        <span className="text-xs">{p.label}</span>
-        <span
-          className={cn(
-            "relative h-5 w-9 rounded-full transition",
-            val ? "bg-amber" : "bg-surface-3",
-          )}
-        >
-          <span
-            className={cn(
-              "absolute top-0.5 size-4 rounded-full bg-background transition-transform",
-              val ? "translate-x-4" : "translate-x-0.5",
-            )}
-          />
-        </span>
-      </button>
-    );
-  }
-  return null;
-}
 
 function LoadingCard({ model, progress }: { model: Model; progress: number }) {
   const t = useT();
@@ -881,118 +445,7 @@ function LoadingCard({ model, progress }: { model: Model; progress: number }) {
   );
 }
 
-function ActiveResultView({
-  result,
-  onRegenerate,
-}: {
-  result: Result;
-  onRegenerate: () => void;
-}) {
-  const t = useT();
-  const hasResult = !!result.resultUrl;
-  const isImage = result.model.category === "image";
-  const isVideo = result.model.category === "video";
-  const isAudio = result.model.category === "audio";
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]"
-    >
-      <div className="flex items-center justify-center min-w-0">
-        <div
-          className={cn(
-            "surface-gradient-border rounded-2xl overflow-hidden relative",
-            "h-[min(58dvh,520px)] max-w-full w-auto",
-            !hasResult && "aspect-square",
-          )}
-          style={
-            hasResult
-              ? undefined
-              : { background: `linear-gradient(135deg, var(--surface-2), var(--background))` }
-          }
-        >
-          {hasResult && isImage && (
-            <img
-              src={result.resultUrl!}
-              alt={result.prompt}
-              className="w-full h-full object-contain"
-            />
-          )}
-          {hasResult && isVideo && (
-            <video
-              src={result.resultUrl!}
-              controls
-              className="w-full h-full object-contain"
-            />
-          )}
-          {hasResult && isAudio && (
-            <div className="flex flex-col items-center justify-center h-full gap-3 p-4">
-              <audio src={result.resultUrl!} controls className="w-full max-w-xs" />
-            </div>
-          )}
-          {!hasResult && (
-            <div className="absolute inset-0 flex items-center justify-center text-muted-foreground text-sm">
-              <Loader2 className="size-6 animate-spin" />
-            </div>
-          )}
-          <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between gap-2">
-            <div className="rounded-full bg-foreground/60 backdrop-blur px-2 py-1 text-[10px] font-mono uppercase tracking-wider text-background/90 truncate">
-              {result.model.category}
-            </div>
-            <div className="rounded-full bg-foreground/60 backdrop-blur px-2 py-1 shrink-0 text-background/90">
-              <PriceDisplay usd={result.cost} className="text-[10px]" />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="space-y-3 min-w-0">
-        <div className="surface-gradient-border rounded-2xl bg-surface-1/60 p-4">
-          <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-muted-foreground">
-            {t("history.prompt")}
-          </div>
-          <div className="mt-1.5 text-sm text-foreground/90 leading-relaxed line-clamp-4">
-            {result.prompt}
-          </div>
-        </div>
-        <div className="surface-gradient-border rounded-2xl bg-surface-1/60 p-4">
-          <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-muted-foreground">
-            {t("playground.params")}
-          </div>
-          <div className="flex flex-wrap gap-1.5">
-            {Object.entries(result.state).map(([k, v]) => (
-              <span
-                key={k}
-                className="inline-flex items-center gap-1 rounded-full border border-border bg-surface-2/40 px-2 py-0.5 text-[10px] font-mono text-muted-foreground"
-              >
-                <Settings2 className="size-3" /> {k}: {String(v)}
-              </span>
-            ))}
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={onRegenerate}
-            className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-border bg-surface-2/40 px-3 py-2 text-xs hover:border-amber/40 transition cursor-pointer"
-          >
-            <RefreshCw className="size-3.5" /> {t("playground.regenerate")}
-          </button>
-          {hasResult && (
-            <a
-              href={result.resultUrl!}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber text-primary-foreground px-3 py-2 text-xs font-medium hover:opacity-95 transition"
-            >
-              <Download className="size-3.5" /> {t("playground.download")}
-            </a>
-          )}
-        </div>
-      </div>
-    </motion.div>
-  );
-}
 
 function EmptyState({ model }: { model: Model }) {
   const t = useT();
@@ -1024,66 +477,4 @@ function estimatePrice(m: Model, state: Record<string, unknown>): number {
     return unit * d;
   }
   return unit;
-}
-
-function SimilarModels({ model }: { model: Model }) {
-  const t = useT();
-  const similar = useMemo(
-    () =>
-      MODELS.filter((m) => m.category === model.category && m.slug !== model.slug).slice(0, 6),
-    [model.category, model.slug],
-  );
-
-  if (similar.length === 0) return null;
-
-  return (
-    <div className="mt-10">
-      <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-4">
-        {t("playground.similar")}
-      </div>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {similar.map((m) => (
-          <Link
-            key={m.slug}
-            to="/app/models/$slug"
-            params={{ slug: m.slug }}
-            className="group surface-gradient-border rounded-2xl bg-surface-1/60 backdrop-blur p-4 hover:bg-surface-1/80 transition-all hover:-translate-y-0.5 hover:shadow-[0_20px_60px_-20px_color-mix(in_oklab,var(--amber)_25%,transparent)]"
-          >
-            <div className="flex items-start justify-between gap-2">
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="font-display text-base tracking-[-0.01em] truncate">{m.name}</span>
-                  {m.badge && (
-                    <span
-                      className={
-                        "shrink-0 rounded-full px-2 py-0.5 text-[9px] font-mono uppercase tracking-wider " +
-                        (m.badge === "popular"
-                          ? "bg-amber/20 text-amber-soft"
-                          : m.badge === "new"
-                            ? "bg-emerald/20 text-emerald"
-                            : "bg-surface-3 text-muted-foreground")
-                      }
-                    >
-                      {m.badge === "popular" ? t("playground.badge.popular") : m.badge === "new" ? t("playground.badge.new") : t("playground.badge.pro")}
-                    </span>
-                  )}
-                </div>
-                <div className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-                  {m.provider}
-                </div>
-              </div>
-            </div>
-            <div className="mt-3 pt-3 border-t border-border flex items-baseline justify-between">
-              <PriceDisplay
-                usd={basePrice(m)}
-                className="font-display text-xl tracking-[-0.02em]"
-                emphasize
-              />
-              <span className="text-[10px] text-muted-foreground font-mono">{unitLabel(m)}</span>
-            </div>
-          </Link>
-        ))}
-      </div>
-    </div>
-  );
 }

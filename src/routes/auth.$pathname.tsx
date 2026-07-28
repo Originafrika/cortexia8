@@ -361,8 +361,8 @@ function Input({
         onChange={(e) => onChange(e.target.value)}
         required={required}
         className={
-          "w-full rounded-xl border border-border bg-surface-0/80 py-3 text-sm placeholder:text-muted-foreground/60 focus:border-amber/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background " +
-          (icon ? "pl-10 pr-3" : "px-4")
+          "w-full h-9 rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground/60 focus:border-amber/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background " +
+          (icon ? "pl-10" : "")
         }
       />
     </label>

@@ -91,7 +91,7 @@ export function WaitlistForm() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder={t("waitlist.email_placeholder")}
                 aria-label="Email address"
-                className="w-full min-w-0 rounded-xl border border-border bg-surface-0/80 px-4 py-3 text-sm placeholder:text-muted-foreground/60 focus:border-amber/50 focus-visible:ring-2 focus-visible:ring-amber/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                className="w-full min-w-0 h-9 rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground/60 focus:border-amber/50 focus-visible:ring-2 focus-visible:ring-amber/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               />
               <button
                 type="submit"
