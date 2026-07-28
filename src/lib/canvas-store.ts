@@ -58,8 +58,8 @@ function persistStatusChange(nodeId: string, status: string) {
   graphOps({
     data: {
       ops: [{ op: "updateNode", nodeId: dbId, patch: { status } }],
+      sessionToken: loadSession()?.token,
     },
-    sessionToken: loadSession()?.token,
   }).catch((err) => {
     console.error("[canvas-store] persistStatusChange graphOps failed", err);
   });
@@ -187,9 +187,9 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
               targetNodeId: tgtDbId,
               sourceOutputKey: connection.sourceHandle ?? undefined,
               targetInputKey: connection.targetHandle ?? undefined,
+              sessionToken: loadSession()?.token,
             }],
           },
-          sessionToken: loadSession()?.token,
         }).catch((err) => {
           console.error("[canvas-store] createEdge graphOps failed", err);
         });
@@ -243,9 +243,9 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
             x: pos.x,
             y: pos.y,
             config: initStateForModel(m),
+            sessionToken: loadSession()?.token,
           }],
         },
-        sessionToken: loadSession()?.token,
       }).then((res) => {
         const ok = res.results[0];
         const dbId = ok && ok.status === "ok" ? ok.result?.nodeId : undefined;
@@ -297,8 +297,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
         ops.push({ op: "updateNode", nodeId: dbId, patch: { status: newStatus } });
       }
       graphOps({
-        data: { ops },
-        sessionToken: loadSession()?.token,
+        data: { ops, sessionToken: loadSession()?.token },
       }).catch((err) => {
         console.error("[canvas-store] updateNodeParams graphOps failed", err);
       });
@@ -322,8 +321,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
       }
       ops.push({ op: "deleteNode", nodeId: dbId });
       graphOps({
-        data: { ops },
-        sessionToken: loadSession()?.token,
+        data: { ops, sessionToken: loadSession()?.token },
       }).catch((err) => {
         console.error("[canvas-store] removeNode graphOps failed", err);
       });
@@ -395,7 +393,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
         });
       }
       if (ops.length > 0) {
-        graphOps({ data: { ops }, sessionToken: loadSession()?.token }).catch((err) => {
+        graphOps({ data: { ops, sessionToken: loadSession()?.token } }).catch((err) => {
           console.error("[canvas-store] duplicateBranch createNode graphOps failed", err);
         });
       }
@@ -407,7 +405,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
 
   loadWorkflow: async (id) => {
     try {
-      const res = await getWorkflow({ data: { workflowId: id }, sessionToken: loadSession()?.token });
+      const res = await getWorkflow({ data: { workflowId: id, sessionToken: loadSession()?.token } });
       const dbNodeIds = new Map<number, string>();
 
       const nodes: CanvasNode[] = (res?.nodes ?? []).map((n) => {
@@ -490,7 +488,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
 
       if (ops.length === 0) return;
       try {
-        await graphOps({ data: { ops }, sessionToken: loadSession()?.token });
+        await graphOps({ data: { ops, sessionToken: loadSession()?.token } });
       } catch (err) {
         console.error("[canvas-store] saveWorkflow failed", err);
       }
@@ -516,8 +514,8 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
         data: {
           modelSlug: node.data.modelSlug,
           input: node.data.params,
+          sessionToken: loadSession()?.token,
         },
-        sessionToken: loadSession()?.token,
       });
 
       const runNodeExecId = res.runNodeExecutionId;
@@ -628,8 +626,8 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
         data: {
           workflowId: Number(workflowId),
           rerunNodeId: dbNodeId,
+          sessionToken: loadSession()?.token,
         },
-        sessionToken: loadSession()?.token,
       });
 
       // For nodes that are not descendants, restore their visual status
@@ -648,7 +646,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
       // Poll status for each descendant that was re-run
       // First find the node execution IDs from the run
       const affectedNodeIds = [id, ...descendantIds];
-      const runStatus = await generationStatus({ data: { id: res.runId }, sessionToken: loadSession()?.token });
+      const runStatus = await generationStatus({ data: { id: res.runId, sessionToken: loadSession()?.token } });
       for (const nodeId of affectedNodeIds) {
         const nodeDbId = parseDbNodeId(nodeId);
         if (nodeDbId == null) continue;
@@ -719,8 +717,8 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
         data: {
           workflowId: Number(workflowId),
           rerunNodeId: dbNodeId,
+          sessionToken: loadSession()?.token,
         },
-        sessionToken: loadSession()?.token,
       });
 
       set({
@@ -733,7 +731,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
       });
 
       const affectedNodeIds = [id, ...downstreamIds];
-      const runStatus = await generationStatus({ data: { id: res.runId }, sessionToken: loadSession()?.token });
+      const runStatus = await generationStatus({ data: { id: res.runId, sessionToken: loadSession()?.token } });
       for (const nodeId of affectedNodeIds) {
         const nodeDbId = parseDbNodeId(nodeId);
         if (nodeDbId == null) continue;
@@ -820,7 +818,7 @@ function pollGenerationStatus(
       await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
 
       try {
-        const status = await generationStatus({ data: { id: runNodeExecId }, sessionToken: loadSession()?.token });
+        const status = await generationStatus({ data: { id: runNodeExecId, sessionToken: loadSession()?.token } });
         consecutiveErrors = 0;
 
         const nodeExec = status.nodes.find((n) => n.id === runNodeExecId);
