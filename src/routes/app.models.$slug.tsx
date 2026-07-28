@@ -16,6 +16,7 @@ import {
   Upload,
   SlidersHorizontal,
   MessageSquare,
+  Ban,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -79,7 +80,11 @@ export type Result = {
 };
 
 export function iconForParam(key: string, kind: ParamSpec["kind"]) {
-  if (kind === "longtext") return MessageSquare;
+  // Secondary text params (not the main prompt)
+  if (key === "negative_prompt") return Ban;
+  if (key === "lyrics" || key === "script" || key === "description") return MessageSquare;
+  
+  // Other param types
   if (kind === "upload") return Upload;
   if (kind === "seed") return Dice5;
   if (key === "ratio") return Ratio;
