@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RunMigrationRouteImport } from './routes/run-migration'
 import { Route as AppPreviewRouteImport } from './routes/app-preview'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as AccessDeniedRouteImport } from './routes/access-denied'
@@ -25,6 +26,11 @@ import { Route as AppAccountRouteImport } from './routes/app.account'
 import { Route as AccountPathnameRouteImport } from './routes/account.$pathname'
 import { Route as AppModelsSlugRouteImport } from './routes/app.models.$slug'
 
+const RunMigrationRoute = RunMigrationRouteImport.update({
+  id: '/run-migration',
+  path: '/run-migration',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppPreviewRoute = AppPreviewRouteImport.update({
   id: '/app-preview',
   path: '/app-preview',
@@ -106,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/access-denied': typeof AccessDeniedRoute
   '/app': typeof AppRouteWithChildren
   '/app-preview': typeof AppPreviewRoute
+  '/run-migration': typeof RunMigrationRoute
   '/account/$pathname': typeof AccountPathnameRoute
   '/app/account': typeof AppAccountRoute
   '/app/developers': typeof AppDevelopersRoute
@@ -122,6 +129,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/access-denied': typeof AccessDeniedRoute
   '/app-preview': typeof AppPreviewRoute
+  '/run-migration': typeof RunMigrationRoute
   '/account/$pathname': typeof AccountPathnameRoute
   '/app/account': typeof AppAccountRoute
   '/app/developers': typeof AppDevelopersRoute
@@ -140,6 +148,7 @@ export interface FileRoutesById {
   '/access-denied': typeof AccessDeniedRoute
   '/app': typeof AppRouteWithChildren
   '/app-preview': typeof AppPreviewRoute
+  '/run-migration': typeof RunMigrationRoute
   '/account/$pathname': typeof AccountPathnameRoute
   '/app/account': typeof AppAccountRoute
   '/app/developers': typeof AppDevelopersRoute
@@ -159,6 +168,7 @@ export interface FileRouteTypes {
     | '/access-denied'
     | '/app'
     | '/app-preview'
+    | '/run-migration'
     | '/account/$pathname'
     | '/app/account'
     | '/app/developers'
@@ -175,6 +185,7 @@ export interface FileRouteTypes {
     | '/'
     | '/access-denied'
     | '/app-preview'
+    | '/run-migration'
     | '/account/$pathname'
     | '/app/account'
     | '/app/developers'
@@ -192,6 +203,7 @@ export interface FileRouteTypes {
     | '/access-denied'
     | '/app'
     | '/app-preview'
+    | '/run-migration'
     | '/account/$pathname'
     | '/app/account'
     | '/app/developers'
@@ -210,6 +222,7 @@ export interface RootRouteChildren {
   AccessDeniedRoute: typeof AccessDeniedRoute
   AppRoute: typeof AppRouteWithChildren
   AppPreviewRoute: typeof AppPreviewRoute
+  RunMigrationRoute: typeof RunMigrationRoute
   AccountPathnameRoute: typeof AccountPathnameRoute
   AuthPathnameRoute: typeof AuthPathnameRoute
   RCodeRoute: typeof RCodeRoute
@@ -218,6 +231,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/run-migration': {
+      id: '/run-migration'
+      path: '/run-migration'
+      fullPath: '/run-migration'
+      preLoaderRoute: typeof RunMigrationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app-preview': {
       id: '/app-preview'
       path: '/app-preview'
@@ -363,6 +383,7 @@ const rootRouteChildren: RootRouteChildren = {
   AccessDeniedRoute: AccessDeniedRoute,
   AppRoute: AppRouteWithChildren,
   AppPreviewRoute: AppPreviewRoute,
+  RunMigrationRoute: RunMigrationRoute,
   AccountPathnameRoute: AccountPathnameRoute,
   AuthPathnameRoute: AuthPathnameRoute,
   RCodeRoute: RCodeRoute,
