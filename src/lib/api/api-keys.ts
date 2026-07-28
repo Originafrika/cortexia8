@@ -52,6 +52,7 @@ export const createApiKey = createServerFn({ method: "POST" })
         rawKey,
       };
     } catch (err) {
+      if (err instanceof HttpError) throw err;
       throw toJsonResponse(err);
     }
   });
@@ -104,6 +105,7 @@ export const listApiKeys = createServerFn({ method: "GET" })
         created_at: r.created_at,
       }));
     } catch (err) {
+      if (err instanceof HttpError) throw err;
       throw toJsonResponse(err);
     }
   });
@@ -131,6 +133,7 @@ export const revokeApiKey = createServerFn({ method: "POST" })
         WHERE id = ${data.keyId} AND user_id = ${ctx.userId}
       `;
     } catch (err) {
+      if (err instanceof HttpError) throw err;
       throw toJsonResponse(err);
     }
   });

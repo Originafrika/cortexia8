@@ -48,6 +48,7 @@ export const createWorkflow = createServerFn({ method: "POST" })
 
       return { id: rows[0].id } satisfies CreateWorkflowResponse;
     } catch (err) {
+      if (err instanceof HttpError) throw err;
       throw toJsonResponse(err);
     }
   });
@@ -106,6 +107,7 @@ export const listWorkflows = createServerFn({ method: "GET" })
         lastRunStatus: r.last_run_status,
       })) satisfies WorkflowListItem[];
     } catch (err) {
+      if (err instanceof HttpError) throw err;
       throw toJsonResponse(err);
     }
   });
@@ -224,6 +226,7 @@ export const getWorkflow = createServerFn({ method: "GET" })
         edges: eRows,
       } satisfies GetWorkflowResponse;
     } catch (err) {
+      if (err instanceof HttpError) throw err;
       throw toJsonResponse(err);
     }
   });
@@ -272,6 +275,7 @@ export const deleteWorkflow = createServerFn({ method: "POST" })
 
       return { deleted: true } satisfies DeleteWorkflowResponse;
     } catch (err) {
+      if (err instanceof HttpError) throw err;
       throw toJsonResponse(err);
     }
   });
