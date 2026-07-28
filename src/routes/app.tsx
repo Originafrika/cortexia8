@@ -35,11 +35,9 @@ export const Route = createFileRoute("/app")({
     if (!session) {
       throw redirect({ to: "/auth/$pathname" as "/auth/$pathname", params: { pathname: "sign-in" }, search: { redirect: location.href } });
     }
+    // Redirect /app to /app/models
+    throw redirect({ to: "/app/models" });
   },
-  head: () => ({
-    meta: [{ title: "Cortexia — App" }, { name: "robots", content: "noindex,nofollow" }],
-  }),
-  component: AppLayout,
 });
 
 function AppLayout() {
