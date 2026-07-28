@@ -187,8 +187,8 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
               targetNodeId: tgtDbId,
               sourceOutputKey: connection.sourceHandle ?? undefined,
               targetInputKey: connection.targetHandle ?? undefined,
-              sessionToken: loadSession()?.token,
             }],
+            sessionToken: loadSession()?.token,
           },
         }).catch((err) => {
           console.error("[canvas-store] createEdge graphOps failed", err);
@@ -243,8 +243,8 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
             x: pos.x,
             y: pos.y,
             config: initStateForModel(m),
-            sessionToken: loadSession()?.token,
           }],
+          sessionToken: loadSession()?.token,
         },
       }).then((res) => {
         const ok = res.results[0];
