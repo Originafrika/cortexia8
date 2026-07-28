@@ -38,7 +38,7 @@ const CATS: { key: ModelCategory | "all"; labelKey: string }[] = [
 
 const PAGE_SIZE = 12;
 
-function ModelsCatalog() {
+export function ModelsCatalog() {
   const t = useT();
   const [cat, setCat] = useState<ModelCategory | "all">("all");
   const [q, setQ] = useState("");
