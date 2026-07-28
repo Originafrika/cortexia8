@@ -134,7 +134,9 @@ export function ModelPlaygroundContent({
   const [showAdvanced, setShowAdvanced] = useState(false);
 
   const currentPrice = useMemo(() => estimatePrice(model, state), [model, state]);
-  const hasPrompt = model.params.some((p) => p.kind === "prompt" || p.kind === "longtext");
+  const hasPrompt = model.params.some((p) => 
+    (p.kind === "prompt") || (p.kind === "longtext" && p.key === "prompt")
+  );
   const active = history.find((h) => h.id === activeId) ?? null;
 
   const canGenerate = useMemo(() => {
@@ -154,7 +156,10 @@ export function ModelPlaygroundContent({
   }, [model.params, prompt, state]);
 
   const iconParams = model.params.filter((p) => {
+    // Exclude main prompt (goes in textarea)
     if (p.kind === "prompt") return false;
+    if (p.kind === "longtext" && p.key === "prompt") return false;
+    // Exclude advanced params when not showing advanced
     if (!showAdvanced && "advanced" in p && p.advanced) return false;
     return true;
   });
