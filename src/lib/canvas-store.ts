@@ -11,7 +11,7 @@ import {
 import { getModel, type Model } from "@/lib/models";
 import { generate } from "@/lib/api/generate";
 import { generationStatus } from "@/lib/api/generation-status";
-import { getWorkflow } from "@/lib/api/workflows";
+import { getWorkflow, renameWorkflow } from "@/lib/api/workflows";
 import { graphOps } from "@/lib/api/canvas-graph-ops";
 import {
   estimateNodePrice,
@@ -72,6 +72,7 @@ type CanvasState = {
   selectedNodeIds: string[];
   readOnly: boolean;
   workflowId: string | null;
+  workflowName: string;
   newNodeIds: Set<string>;
   newEdgeIds: Set<string>;
   cascadeDelays: Map<string, number>;
@@ -124,6 +125,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
   selectedNodeIds: [],
   readOnly: false,
   workflowId: null,
+  workflowName: "",
   newNodeIds: new Set<string>(),
   newEdgeIds: new Set<string>(),
   cascadeDelays: new Map<string, number>(),
@@ -408,7 +410,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
       const res = await getWorkflow({ data: { workflowId: id }, sessionToken: loadSession()?.token });
       const dbNodeIds = new Map<number, string>();
 
-      const nodes: CanvasNode[] = res.nodes.map((n) => {
+      const nodes: CanvasNode[] = (res?.nodes ?? []).map((n) => {
         const cid = dbNodeId(n.id);
         dbNodeIds.set(n.id, cid);
         const m = getModel(n.modelSlug);
@@ -435,7 +437,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
         };
       });
 
-      const edges: CanvasEdge[] = res.edges.map((e) => ({
+      const edges: CanvasEdge[] = (res?.edges ?? []).map((e) => ({
         id: `e_db_${e.id}`,
         source: dbNodeIds.get(e.sourceNodeId) ?? String(e.sourceNodeId),
         target: dbNodeIds.get(e.targetNodeId) ?? String(e.targetNodeId),
@@ -444,9 +446,20 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
         animated: true,
       }));
 
-      set({ workflowId: String(id), nodes, edges, selectedNodeId: null });
+      set({ workflowId: String(id), workflowName: res?.name ?? "", nodes, edges, selectedNodeId: null });
     } catch (err) {
       console.error("[canvas-store] loadWorkflow failed", err);
+    }
+  },
+
+  renameWorkflow: async (name: string) => {
+    const wid = get().workflowId;
+    if (!wid) return;
+    set({ workflowName: name });
+    try {
+      await renameWorkflow({ data: { workflowId: Number(wid), name, sessionToken: loadSession()?.token } });
+    } catch (err) {
+      console.error("[canvas-store] renameWorkflow failed", err);
     }
   },
 

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Plus, Workflow, Clock, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { listWorkflows, createWorkflow, type WorkflowListItem } from "@/lib/api/workflows";
+import { listWorkflows, createWorkflow, renameWorkflow, type WorkflowListItem } from "@/lib/api/workflows";
 import { useT } from "@/lib/i18n";
 import { loadSession } from "@/lib/auth-store";
 
@@ -119,9 +119,25 @@ function WorkflowsPage() {
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="font-display text-lg tracking-[-0.01em] truncate">
-                      {wf.name}
-                    </span>
+                    <input
+                      type="text"
+                      defaultValue={wf.name}
+                      onBlur={(e) => {
+                        const newName = e.target.value.trim();
+                        if (newName && newName !== wf.name) {
+                          renameWorkflow({ data: { workflowId: wf.id, name: newName, sessionToken: loadSession()?.token } });
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          (e.target as HTMLInputElement).blur();
+                        }
+                        e.stopPropagation();
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                      className="font-display text-lg tracking-[-0.01em] bg-transparent border-none outline-none focus:ring-1 focus:ring-amber/50 rounded px-1 -ml-1 min-w-0 w-full"
+                      maxLength={200}
+                    />
                   </div>
                   <div className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
                     {wf.status === "running"

@@ -33,7 +33,7 @@ function DevelopersPage() {
 
   useEffect(() => {
     listApiKeys({ data: { sessionToken: loadSession()?.token } })
-      .then((data) => setKeys(data as ApiKeyRow[]))
+      .then((data) => setKeys(Array.isArray(data) ? (data as ApiKeyRow[]) : []))
       .catch(() => {
         setKeys([]);
         toast.error(t("dev.keys_load_error"));

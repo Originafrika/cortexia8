@@ -85,9 +85,15 @@ function CanvasShell() {
             <ArrowLeft className="size-3.5" /> <span className="hidden sm:inline">{t("canvas.back")}</span>
           </Link>
           <div className="hidden md:flex flex-col min-w-0">
-            <div className="font-display text-base tracking-[-0.02em] truncate">Canvas</div>
+            <input
+              type="text"
+              value={useCanvasStore((s) => s.workflowName) || "Canvas"}
+              onChange={(e) => useCanvasStore.getState().renameWorkflow(e.target.value)}
+              className="font-display text-base tracking-[-0.02em] bg-transparent border-none outline-none focus:ring-1 focus:ring-amber/50 rounded px-1 -ml-1 min-w-0 max-w-[300px]"
+              maxLength={200}
+            />
             <div className="font-mono text-[9px] uppercase tracking-[0.22em] text-muted-foreground">
-              {t("canvas.subtitle")} · {nodes.length} nœud{nodes.length > 1 ? "s" : ""}
+              {t("canvas.subtitle")} · {nodes.length} noeud{nodes.length > 1 ? "s" : ""}
             </div>
           </div>
           <div className="ml-auto flex items-center gap-2">

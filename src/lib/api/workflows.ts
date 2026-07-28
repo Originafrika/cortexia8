@@ -49,7 +49,7 @@ export const createWorkflow = createServerFn({ method: "POST" })
       return { id: rows[0].id } satisfies CreateWorkflowResponse;
     } catch (err) {
       if (err instanceof HttpError) throw err;
-      throw toJsonResponse(err);
+      throw new HttpError(500, "Internal server error");
     }
   });
 
@@ -108,7 +108,7 @@ export const listWorkflows = createServerFn({ method: "GET" })
       })) satisfies WorkflowListItem[];
     } catch (err) {
       if (err instanceof HttpError) throw err;
-      throw toJsonResponse(err);
+      throw new HttpError(500, "Internal server error");
     }
   });
 
@@ -227,7 +227,7 @@ export const getWorkflow = createServerFn({ method: "GET" })
       } satisfies GetWorkflowResponse;
     } catch (err) {
       if (err instanceof HttpError) throw err;
-      throw toJsonResponse(err);
+      throw new HttpError(500, "Internal server error");
     }
   });
 
@@ -276,6 +276,45 @@ export const deleteWorkflow = createServerFn({ method: "POST" })
       return { deleted: true } satisfies DeleteWorkflowResponse;
     } catch (err) {
       if (err instanceof HttpError) throw err;
-      throw toJsonResponse(err);
+      throw new HttpError(500, "Internal server error");
+    }
+  });
+
+// ---------------------------------------------------------------------------
+// renameWorkflow
+// ---------------------------------------------------------------------------
+
+export type RenameWorkflowInput = {
+  workflowId: number;
+  name: string;
+  sessionToken?: string;
+};
+
+export const renameWorkflow = createServerFn({ method: "POST" })
+  .validator((data: RenameWorkflowInput): RenameWorkflowInput => {
+    if (!data || typeof data !== "object") throw new HttpError(400, "Invalid input");
+    if (!Number.isInteger(data.workflowId)) throw new HttpError(400, "workflowId is required");
+    if (!data.name || typeof data.name !== "string") throw new HttpError(400, "name is required");
+    return { workflowId: data.workflowId, name: data.name.trim().slice(0, 200), sessionToken: data.sessionToken };
+  })
+  .handler(async ({ data }) => {
+    try {
+      const ctx = await getRequestContext(data.sessionToken);
+      const userId = await requireUserId(ctx);
+
+      const result = await sql`
+        UPDATE workflows SET name = ${data.name}, updated_at = NOW()
+        WHERE id = ${data.workflowId} AND user_id = ${userId}
+        RETURNING id
+      ` as { id: number }[];
+
+      if (result.length === 0) {
+        throw new HttpError(404, "Workflow not found");
+      }
+
+      return { ok: true };
+    } catch (err) {
+      if (err instanceof HttpError) throw err;
+      throw new HttpError(500, "Internal server error");
     }
   });

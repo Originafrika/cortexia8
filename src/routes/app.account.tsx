@@ -21,7 +21,7 @@ export const Route = createFileRoute("/app/account")({
   component: AccountPage,
 });
 
-const METHODS = [
+const ALL_METHODS = [
   { key: "mm", nameKey: "Mobile Money", desc: "Orange · MTN · Wave · M-Pesa", icon: Smartphone },
   { key: "card", nameKey: "account.method_card", desc: "Visa · Mastercard · Amex", icon: CreditCard },
   { key: "crypto", nameKey: "Crypto", desc: "USDT · USDC · BTC · ETH", icon: Bitcoin },
@@ -38,6 +38,7 @@ function AccountPage() {
   const [txRows, setTxRows] = useState<TxRow[]>([]);
 
   const fedapayKey = import.meta.env.VITE_FEDAPAY_PUBLIC_KEY as string | undefined;
+  const METHODS = fedapayKey ? ALL_METHODS : ALL_METHODS.filter((m) => m.key !== "mm");
 
   async function fetchBalance() {
     try {
@@ -353,7 +354,7 @@ function FedaPayWidget({
     }
   }, []);
 
-  if (!FedaCheckoutButton) {
+  if (!FedaCheckoutButton || typeof window === "undefined" || !(window as any).FedaPay) {
     return (
       <button disabled className="mt-5 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber px-5 py-3 text-sm font-medium text-primary-foreground opacity-60 cursor-wait">
         <Loader2 className="size-4 animate-spin" />

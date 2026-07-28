@@ -53,7 +53,7 @@ export const createApiKey = createServerFn({ method: "POST" })
       };
     } catch (err) {
       if (err instanceof HttpError) throw err;
-      throw toJsonResponse(err);
+      throw new HttpError(500, "Internal server error");
     }
   });
 
@@ -106,7 +106,7 @@ export const listApiKeys = createServerFn({ method: "GET" })
       }));
     } catch (err) {
       if (err instanceof HttpError) throw err;
-      throw toJsonResponse(err);
+      throw new HttpError(500, "Internal server error");
     }
   });
 
@@ -134,7 +134,7 @@ export const revokeApiKey = createServerFn({ method: "POST" })
       `;
     } catch (err) {
       if (err instanceof HttpError) throw err;
-      throw toJsonResponse(err);
+      throw new HttpError(500, "Internal server error");
     }
   });
 

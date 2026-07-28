@@ -20,6 +20,7 @@ import {
   SlidersHorizontal,
   Settings2,
   X,
+  MessageSquare,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -80,6 +81,7 @@ type Result = {
 };
 
 function iconForParam(key: string, kind: ParamSpec["kind"]) {
+  if (kind === "longtext") return MessageSquare;
   if (kind === "upload") return Upload;
   if (kind === "seed") return Dice5;
   if (key === "ratio") return Ratio;
@@ -129,7 +131,7 @@ export function ModelPlaygroundContent({
   const [showAdvanced, setShowAdvanced] = useState(false);
 
   const currentPrice = useMemo(() => estimatePrice(model, state), [model, state]);
-  const hasPrompt = model.params.some((p) => p.kind === "prompt");
+  const hasPrompt = model.params.some((p) => p.kind === "prompt" || p.kind === "longtext");
   const active = history.find((h) => h.id === activeId) ?? null;
 
   const canGenerate = useMemo(() => {
@@ -187,7 +189,9 @@ export function ModelPlaygroundContent({
     setProgress(0);
 
     const input: Record<string, unknown> = { ...state };
-    if (prompt.trim()) input.prompt = prompt.trim();
+    const promptParam = model.params.find((p) => p.kind === "prompt" || p.kind === "longtext");
+    const promptKey = promptParam && "key" in promptParam ? (promptParam as any).key : "prompt";
+    if (prompt.trim()) input[promptKey] = prompt.trim();
 
     generate({ data: { modelSlug: model.slug, input, sessionToken: loadSession()?.token } })
       .then((res) => {
@@ -806,6 +810,18 @@ function ParamEditor({
           🎲
         </button>
       </div>
+    );
+  }
+  if (p.kind === "longtext") {
+    const val = (state[p.key] as string) ?? "";
+    return (
+      <textarea
+        value={val}
+        onChange={(e) => setState((s) => ({ ...s, [p.key]: e.target.value }))}
+        rows={4}
+        placeholder={("placeholder" in p ? (p as any).placeholder : undefined) || ""}
+        className="w-full rounded-xl border border-border bg-surface-0/60 px-3 py-2 text-xs font-mono outline-none focus:border-amber/50 resize-none"
+      />
     );
   }
   if (p.kind === "toggle") {
