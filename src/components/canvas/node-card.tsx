@@ -114,6 +114,7 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
             "!size-[22px] !rounded-full !bg-surface-2 !border !border-border",
             "!-left-4 !top-1/2 !-translate-y-1/2",
             "!cursor-grab !flex !items-center !justify-center",
+            "!z-20",
             "hover:!border-border-strong hover:!bg-surface-3",
             "transition-all duration-200",
             isDragSource &&
@@ -138,6 +139,7 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
             "!size-[22px] !rounded-full !bg-surface-2 !border !border-border",
             "!-right-4 !top-1/2 !-translate-y-1/2",
             "!cursor-grab !flex !items-center !justify-center",
+            "!z-20",
             "hover:!border-border-strong hover:!bg-surface-3",
             "transition-all duration-200",
             isDragSource &&

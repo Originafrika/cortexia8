@@ -152,37 +152,40 @@
   --ring: oklch(0.78 0.16 70 / 0.55);
 }
 
-/* Canvas forces dark theme — overrides .light on <html> for ReactFlow nodes */
+/* Force dark theme for ReactFlow canvas — overrides .light on <html> */
 .react-flow,
-.react-flow__node {
-  --background: oklch(0.14 0.005 60);
-  --foreground: oklch(0.96 0.01 80);
-  --surface-0: oklch(0.14 0.005 60);
-  --surface-1: oklch(0.17 0.008 65);
-  --surface-2: oklch(0.20 0.010 70);
-  --surface-3: oklch(0.24 0.012 72);
-  --card: oklch(0.17 0.008 65);
-  --card-foreground: oklch(0.96 0.01 80);
-  --popover: oklch(0.19 0.010 70);
-  --popover-foreground: oklch(0.96 0.01 80);
-  --primary: oklch(0.78 0.16 70);
-  --primary-foreground: oklch(0.16 0.01 70);
-  --amber: oklch(0.78 0.16 70);
-  --amber-soft: oklch(0.86 0.09 75);
-  --emerald: oklch(0.72 0.14 155);
-  --secondary: oklch(0.22 0.010 70);
-  --secondary-foreground: oklch(0.96 0.01 80);
-  --muted: oklch(0.22 0.008 70);
-  --muted-foreground: oklch(0.68 0.015 75);
-  --accent: oklch(0.78 0.16 70);
-  --accent-foreground: oklch(0.16 0.01 70);
-  --destructive: oklch(0.63 0.22 25);
-  --destructive-foreground: oklch(0.98 0.01 80);
-  --border: oklch(1 0 0 / 0.08);
-  --border-strong: oklch(1 0 0 / 0.14);
-  --input: oklch(1 0 0 / 0.10);
-  --ring: oklch(0.78 0.16 70 / 0.55);
-  background: transparent !important;
+.react-flow__node,
+.react-flow__node *,
+.react-flow__edge,
+.react-flow__controls,
+.react-flow__minimap {
+  --background: oklch(0.14 0.005 60) !important;
+  --foreground: oklch(0.96 0.01 80) !important;
+  --surface-0: oklch(0.14 0.005 60) !important;
+  --surface-1: oklch(0.17 0.008 65) !important;
+  --surface-2: oklch(0.20 0.010 70) !important;
+  --surface-3: oklch(0.24 0.012 72) !important;
+  --card: oklch(0.17 0.008 65) !important;
+  --card-foreground: oklch(0.96 0.01 80) !important;
+  --popover: oklch(0.19 0.010 70) !important;
+  --popover-foreground: oklch(0.96 0.01 80) !important;
+  --primary: oklch(0.78 0.16 70) !important;
+  --primary-foreground: oklch(0.16 0.01 70) !important;
+  --amber: oklch(0.78 0.16 70) !important;
+  --amber-soft: oklch(0.86 0.09 75) !important;
+  --emerald: oklch(0.72 0.14 155) !important;
+  --secondary: oklch(0.22 0.010 70) !important;
+  --secondary-foreground: oklch(0.96 0.01 80) !important;
+  --muted: oklch(0.22 0.008 70) !important;
+  --muted-foreground: oklch(0.68 0.015 75) !important;
+  --accent: oklch(0.78 0.16 70) !important;
+  --accent-foreground: oklch(0.16 0.01 70) !important;
+  --destructive: oklch(0.63 0.22 25) !important;
+  --destructive-foreground: oklch(0.98 0.01 80) !important;
+  --border: oklch(1 0 0 / 0.08) !important;
+  --border-strong: oklch(1 0 0 / 0.14) !important;
+  --input: oklch(1 0 0 / 0.10) !important;
+  --ring: oklch(0.78 0.16 70 / 0.55) !important;
 }
 
 @layer base {

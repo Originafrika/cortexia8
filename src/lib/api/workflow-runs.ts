@@ -153,6 +153,7 @@ export const getWorkflowRuns = createServerFn({ method: "GET" })
       return { runs } satisfies WorkflowRunsResponse;
     } catch (err) {
       if (err instanceof HttpError) throw err;
+      console.error("[workflow-runs]", err);
       throw new HttpError(500, "Internal server error");
     }
   });
