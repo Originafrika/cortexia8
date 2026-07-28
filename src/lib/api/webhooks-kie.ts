@@ -19,7 +19,7 @@ import { extractTaskId, verifyTaskId, type WebhookPayload } from "@/lib/kie-api/
 import { getFreshDownloadUrl, getTaskDetail, parseResultJson } from "@/lib/kie-api/common";
 import { buildAssetKey, downloadToBuffer, putObject } from "@/lib/storage/r2";
 import { refundGeneration } from "@/lib/credits";
-import { HttpError, toJsonResponse } from "./auth";
+import { HttpError } from "./auth";
 
 export type WebhookInput = WebhookPayload | Record<string, unknown>;
 
@@ -56,7 +56,7 @@ export const kieWebhook = createServerFn({ method: "POST" })
           reason: err.message,
         } satisfies WebhookResponse;
       }
-      throw toJsonResponse(err);
+      throw new HttpError(500, "Internal server error");
     }
   });
 

@@ -19,7 +19,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { withTransaction } from "@/lib/db";
 import type { PoolClient } from "@/lib/db";
-import { getRequestContext, HttpError, requireUserId, toJsonResponse } from "./auth";
+import { getRequestContext, HttpError, requireUserId } from "./auth";
 
 type CreateNodeOp = {
   op: "createNode";
@@ -97,7 +97,7 @@ export const graphOps = createServerFn({ method: "POST" })
       return await applyOps(data, userId);
     } catch (err) {
       if (err instanceof HttpError) throw err;
-      throw toJsonResponse(err);
+      throw new HttpError(500, "Internal server error");
     }
   });
 

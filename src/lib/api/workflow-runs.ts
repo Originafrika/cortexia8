@@ -7,7 +7,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { sql } from "@/lib/db";
 import { getModel } from "@/lib/models";
-import { getRequestContext, HttpError, requireUserId, toJsonResponse } from "./auth";
+import { getRequestContext, HttpError, requireUserId } from "./auth";
 
 export type WorkflowRunNodeExec = {
   id: number;
@@ -153,6 +153,6 @@ export const getWorkflowRuns = createServerFn({ method: "GET" })
       return { runs } satisfies WorkflowRunsResponse;
     } catch (err) {
       if (err instanceof HttpError) throw err;
-      throw toJsonResponse(err);
+      throw new HttpError(500, "Internal server error");
     }
   });

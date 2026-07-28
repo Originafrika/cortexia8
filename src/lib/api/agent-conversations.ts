@@ -9,7 +9,7 @@
 
 import { createServerFn } from "@tanstack/react-start";
 import { sql } from "@/lib/db";
-import { getRequestContext, HttpError, requireUserId, toJsonResponse } from "./auth";
+import { getRequestContext, HttpError, requireUserId } from "./auth";
 
 // ---------------------------------------------------------------------------
 // createConversation
@@ -44,7 +44,7 @@ export const createConversation = createServerFn({ method: "POST" })
       return { id: rows[0].id } satisfies CreateConversationResponse;
     } catch (err) {
       if (err instanceof HttpError) throw err;
-      throw toJsonResponse(err);
+      throw new HttpError(500, "Internal server error");
     }
   });
 
@@ -86,7 +86,7 @@ export const saveMessage = createServerFn({ method: "POST" })
       return { id: rows[0].id } satisfies SaveMessageResponse;
     } catch (err) {
       if (err instanceof HttpError) throw err;
-      throw toJsonResponse(err);
+      throw new HttpError(500, "Internal server error");
     }
   });
 
@@ -158,7 +158,7 @@ export const getConversation = createServerFn({ method: "GET" })
       } satisfies GetConversationResponse;
     } catch (err) {
       if (err instanceof HttpError) throw err;
-      throw toJsonResponse(err);
+      throw new HttpError(500, "Internal server error");
     }
   });
 
@@ -217,6 +217,6 @@ export const getConversationByWorkflow = createServerFn({ method: "GET" })
       } satisfies GetConversationResponse;
     } catch (err) {
       if (err instanceof HttpError) throw err;
-      throw toJsonResponse(err);
+      throw new HttpError(500, "Internal server error");
     }
   });

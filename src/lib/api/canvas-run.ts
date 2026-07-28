@@ -23,7 +23,7 @@ import {
   topoLevels,
   type ModelRow,
 } from "./shared";
-import { getRequestContext, HttpError, requireUserId, toJsonResponse } from "./auth";
+import { getRequestContext, HttpError, requireUserId } from "./auth";
 
 export type RunInput = {
   workflowId: number;
@@ -69,7 +69,7 @@ export const runCanvas = createServerFn({ method: "POST" })
       return await runCanvasImpl(data, userId);
     } catch (err) {
       if (err instanceof HttpError) throw err;
-      throw toJsonResponse(err);
+      throw new HttpError(500, "Internal server error");
     }
   });
 

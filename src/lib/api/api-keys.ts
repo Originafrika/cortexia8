@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { sql } from "@/lib/db";
-import { getRequestContext, HttpError, toJsonResponse, validateOrigin } from "./auth";
+import { getRequestContext, HttpError, validateOrigin } from "./auth";
 
 // ── Create API Key ────────────────────────────────────────────────────────
 

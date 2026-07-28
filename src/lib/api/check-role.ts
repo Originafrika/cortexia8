@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getUserRole } from "@/lib/auth/role";
-import { getRequestContext, HttpError, requireUserId, toJsonResponse } from "./auth";
+import { getRequestContext, HttpError, requireUserId } from "./auth";
 
 export const checkUserRole = createServerFn({ method: "GET" })
   .validator((_data: { sessionToken?: string } | void) => _data ?? {})
@@ -12,6 +12,6 @@ export const checkUserRole = createServerFn({ method: "GET" })
       return { role };
     } catch (err) {
       if (err instanceof HttpError) throw err;
-      throw toJsonResponse(err);
+      throw new HttpError(500, "Internal server error");
     }
   });

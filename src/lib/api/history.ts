@@ -9,7 +9,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { sql } from "@/lib/db";
 import { getModel, type Model } from "@/lib/models";
-import { HttpError, getRequestContext, requireUserId, toJsonResponse } from "./auth";
+import { HttpError, getRequestContext, requireUserId } from "./auth";
 
 export type HistoryInput = {
   limit?: number;
@@ -44,7 +44,7 @@ export const getHistory = createServerFn({ method: "GET" })
       return await loadHistory(userId, data);
     } catch (err) {
       if (err instanceof HttpError) throw err;
-      throw toJsonResponse(err);
+      throw new HttpError(500, "Internal server error");
     }
   });
 

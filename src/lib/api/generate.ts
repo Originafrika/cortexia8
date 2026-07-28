@@ -39,7 +39,6 @@ import {
   getRequestContext,
   HttpError,
   requireUserId,
-  toJsonResponse,
   validateOrigin,
 } from "./auth";
 import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
@@ -92,7 +91,7 @@ export const generate = createServerFn({ method: "POST" })
       return result;
     } catch (err) {
       if (err instanceof HttpError) throw err;
-      throw toJsonResponse(err);
+      throw new HttpError(500, "Internal server error");
     }
   });
 

@@ -5,7 +5,7 @@
 
 import { createServerFn } from "@tanstack/react-start";
 import { runAgent, type AgentConfig, type AgentResponse } from "@/lib/agent";
-import { getRequestContext, requireUserId, HttpError, toJsonResponse } from "./auth";
+import { getRequestContext, requireUserId, HttpError } from "./auth";
 
 export type AgentRunInput = {
   message: string;
@@ -35,6 +35,6 @@ export const agentRun = createServerFn({ method: "POST" })
       return await runAgent(data.message, config, data.graphState) as AgentResponse;
     } catch (err) {
       if (err instanceof HttpError) throw err;
-      throw toJsonResponse(err);
+      throw new HttpError(500, "Internal server error");
     }
   });

@@ -16,7 +16,7 @@
 
 import { createServerFn } from "@tanstack/react-start";
 import { withTransaction, sql, type PoolClient } from "@/lib/db";
-import { getRequestContext, HttpError, requireUserId, toJsonResponse } from "./auth";
+import { getRequestContext, HttpError, requireUserId } from "./auth";
 import { runCanvas } from "./canvas-run";
 import { getWorkflow, type GetWorkflowResponse } from "./workflows";
 import { MODELS } from "@/lib/models";
@@ -67,7 +67,7 @@ export const applyAgentPlan = createServerFn({ method: "POST" })
       return result as any;
     } catch (err) {
       if (err instanceof HttpError) throw err;
-      throw toJsonResponse(err);
+      throw new HttpError(500, "Internal server error");
     }
   });
 

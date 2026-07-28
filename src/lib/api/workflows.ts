@@ -9,7 +9,7 @@
 
 import { createServerFn } from "@tanstack/react-start";
 import { sql } from "@/lib/db";
-import { getRequestContext, HttpError, requireUserId, toJsonResponse, validateOrigin } from "./auth";
+import { getRequestContext, HttpError, requireUserId, validateOrigin } from "./auth";
 
 // ---------------------------------------------------------------------------
 // createWorkflow

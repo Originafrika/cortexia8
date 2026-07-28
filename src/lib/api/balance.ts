@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { sql } from "@/lib/db";
 import { getBalance } from "@/lib/credits";
-import { getRequestContext, HttpError, requireUserId, toJsonResponse } from "./auth";
+import { getRequestContext, HttpError, requireUserId } from "./auth";
 
 export type BalanceInput = { sessionToken?: string };
 
@@ -22,7 +22,7 @@ export const getUserBalance = createServerFn({ method: "GET" })
       return { balance } as BalanceResponse;
     } catch (err) {
       if (err instanceof HttpError) throw err;
-      throw toJsonResponse(err);
+      throw new HttpError(500, "Internal server error");
     }
   });
 
@@ -53,6 +53,6 @@ export const getTransactionHistory = createServerFn({ method: "GET" })
       return { transactions: rows };
     } catch (err) {
       if (err instanceof HttpError) throw err;
-      throw toJsonResponse(err);
+      throw new HttpError(500, "Internal server error");
     }
   });

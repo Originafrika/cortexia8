@@ -21,7 +21,7 @@
 import { createServerFn } from "@tanstack/react-start";
 
 import { recordTransaction } from "@/lib/credits";
-import { getRequestContext, HttpError, requireUserId, toJsonResponse } from "./auth";
+import { getRequestContext, HttpError, requireUserId } from "./auth";
 import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 
 // ---------------------------------------------------------------------------
@@ -125,7 +125,7 @@ export const verifyFedaPayTransaction = createServerFn({ method: "POST" })
       } as PaymentResponse;
     } catch (err) {
       if (err instanceof HttpError) throw err;
-      throw toJsonResponse(err);
+      throw new HttpError(500, "Internal server error");
     }
   });
 
@@ -211,7 +211,7 @@ export const createStripeCheckout = createServerFn({ method: "POST" })
       } as StripeCheckoutResponse;
     } catch (err) {
       if (err instanceof HttpError) throw err;
-      throw toJsonResponse(err);
+      throw new HttpError(500, "Internal server error");
     }
   });
 

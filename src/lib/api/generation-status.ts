@@ -12,7 +12,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { sql } from "@/lib/db";
 import { getTaskDetail, parseResultJson } from "@/lib/kie-api/common";
-import { HttpError, toJsonResponse, getRequestContext, requireUserId } from "./auth";
+import { HttpError, getRequestContext, requireUserId } from "./auth";
 
 export type StatusInput = {
   id: number;
@@ -91,7 +91,7 @@ export const generationStatus = createServerFn({ method: "GET" })
       return await loadStatus(data);
     } catch (err) {
       if (err instanceof HttpError) throw err;
-      throw toJsonResponse(err);
+      throw new HttpError(500, "Internal server error");
     }
   });
 
