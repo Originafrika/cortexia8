@@ -33,7 +33,7 @@ export function getPrimaryParams(model: Model): ParamSpec[] {
     case "image":
       // Style select + seed
       if (result.length < 3) {
-        const styleParam = params.find((p) => p.kind === "select" && p.key !== "model");
+        const styleParam = params.find((p) => p.kind === "select" && p.key !== "model" && Array.isArray(p.options));
         if (styleParam && !result.includes(styleParam)) result.push(styleParam);
       }
       if (result.length < 3) {
@@ -158,7 +158,7 @@ export function ParamField({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {p.options.map((o) => (
+            {(p.options ?? []).map((o) => (
               <SelectItem key={o} value={o} className="text-xs">
                 {o}
               </SelectItem>
@@ -170,7 +170,7 @@ export function ParamField({
   }
 
   if (p.kind === "slider") {
-    const v = (value[p.key] as number | undefined) ?? p.default;
+    const v = (value[p.key] as number | undefined) ?? p.default ?? p.min ?? 0;
     return (
       <div>
         <div className="flex items-center justify-between mb-1.5">

@@ -68,6 +68,7 @@ export function CanvasFlow() {
   return (
     <div className="absolute inset-0 dark">
       <ReactFlow
+        colorMode="dark"
         nodes={nodes}
         edges={edges}
         nodeTypes={nodeTypes}
