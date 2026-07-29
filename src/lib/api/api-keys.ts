@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { sql } from "@/lib/db";
-import { getRequestContext, HttpError, validateOrigin } from "./auth";
+import { getRequestContext, HttpError } from "./auth";
 
 // ── Create API Key ────────────────────────────────────────────────────────
 
@@ -63,14 +63,17 @@ export type ApiKeyRow = {
   id: number;
   name: string;
   prefix: string;
-  permissions: string;
+  permissions: unknown;
   status: string;
   lastUsed: string;
   created_at: string;
 };
 
-export const listApiKeys = createServerFn({ method: "GET" })
-  .validator((data: { sessionToken?: string }) => data ?? {})
+export const listApiKeys = createServerFn({ method: "POST" })
+  .validator((data: { sessionToken?: string }) => {
+    if (data && typeof data !== "object") throw new HttpError(400, "Invalid body");
+    return { sessionToken: data?.sessionToken };
+  })
   .handler(async ({ data }) => {
     try {
       const ctx = await getRequestContext(data.sessionToken);
