@@ -12,11 +12,11 @@ export type CreateKeyResult = {
 };
 
 export const createApiKey = createServerFn({ method: "POST" })
-  .validator((data: { name: string; sessionToken?: string }) => {
+  .validator((data: { name: string; scope?: string; sessionToken?: string }) => {
     if (!data?.name || typeof data.name !== "string" || data.name.trim().length === 0) {
       throw new HttpError(400, "name is required");
     }
-    return { name: data.name.trim(), sessionToken: data.sessionToken };
+    return { name: data.name.trim(), scope: data.scope ?? "generate:*", sessionToken: data.sessionToken };
   })
   .handler(async ({ data }) => {
     try {
@@ -41,7 +41,7 @@ export const createApiKey = createServerFn({ method: "POST" })
 
       const rows = (await sql`
         INSERT INTO api_keys (user_id, key_hash, name, prefix, permissions, status)
-        VALUES (${ctx.userId}, ${keyHash}, ${data.name}, ${prefix}, '["generate:*"]'::jsonb, 'active')
+        VALUES (${ctx.userId}, ${keyHash}, ${data.name}, ${prefix}, ${JSON.stringify([data.scope])}::jsonb, 'active')
         RETURNING id
       `) as { id: number }[];
 

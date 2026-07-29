@@ -88,7 +88,7 @@ print(url, cost)`,
     if (!keyName.trim() || creatingKey) return;
     setCreatingKey(true);
     try {
-      const result = await createApiKey({ data: { name: keyName.trim(), sessionToken: loadSession()?.token } });
+      const result = await createApiKey({ data: { name: keyName.trim(), scope: keyScope, sessionToken: loadSession()?.token } });
       setShowNewKey(result.rawKey);
       setKeyName("");
       const updated = await listApiKeys({ data: { sessionToken: loadSession()?.token } });
