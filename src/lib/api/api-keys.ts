@@ -20,7 +20,9 @@ export const createApiKey = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     try {
+      console.log("[api-keys] createApiKey called, name:", data.name, "scope:", data.scope);
       const ctx = await getRequestContext(data.sessionToken);
+      console.log("[api-keys] auth ctx:", ctx);
       if (ctx.userId == null) {
         throw new HttpError(401, "Authentication required");
       }
@@ -52,6 +54,7 @@ export const createApiKey = createServerFn({ method: "POST" })
         rawKey,
       };
     } catch (err) {
+      console.error("[api-keys] createApiKey FAILED:", err);
       if (err instanceof HttpError) throw err;
       throw new HttpError(500, "Internal server error");
     }
@@ -76,7 +79,9 @@ export const listApiKeys = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     try {
+      console.log("[api-keys] listApiKeys called, sessionToken:", data.sessionToken ? data.sessionToken.slice(0, 12) + "..." : "NONE");
       const ctx = await getRequestContext(data.sessionToken);
+      console.log("[api-keys] auth ctx:", ctx);
       if (ctx.userId == null) {
         throw new HttpError(401, "Authentication required");
       }
@@ -96,6 +101,7 @@ export const listApiKeys = createServerFn({ method: "POST" })
         created_at: string;
       }[];
 
+      console.log("[api-keys] found", rows.length, "keys");
       return rows.map((r) => ({
         id: r.id,
         name: r.name,
@@ -108,6 +114,7 @@ export const listApiKeys = createServerFn({ method: "POST" })
         created_at: r.created_at,
       }));
     } catch (err) {
+      console.error("[api-keys] listApiKeys FAILED:", err);
       if (err instanceof HttpError) throw err;
       throw new HttpError(500, "Internal server error");
     }
