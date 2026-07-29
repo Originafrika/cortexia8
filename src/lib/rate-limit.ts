@@ -1,6 +1,12 @@
 /**
  * In-memory rate limiter for server functions.
- * Resets on server restart. For production, consider Redis-based limiter.
+ * 
+ * NOTE: On Cloudflare Workers, this rate limiter resets between requests
+ * because Workers are stateless. For production on Cloudflare, consider
+ * migrating to Cloudflare KV or Durable Objects for persistent rate limiting.
+ * 
+ * For Vercel/Node.js deployments, this works correctly within a single
+ * server instance but resets on restart.
  */
 
 const rateLimits = new Map<string, { count: number; resetAt: number }>();

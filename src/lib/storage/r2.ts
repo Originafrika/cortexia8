@@ -80,7 +80,7 @@ export async function downloadToBuffer(
   }
   const contentType = res.headers.get("content-type") ?? "application/octet-stream";
   const ab = await res.arrayBuffer();
-  return { body: Buffer.from(ab), contentType };
+  return { body: new Uint8Array(ab), contentType };
 }
 
 /** Cheap content-type guess from a key's extension. */

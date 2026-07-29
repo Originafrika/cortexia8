@@ -47,9 +47,13 @@ function authHeaders(): Record<string, string> {
 }
 
 function bytesToBase64(bytes: ArrayBuffer): string {
-  // Buffer is available in the Node runtime Vercel Functions use.
-  const buf = Buffer.from(bytes);
-  return buf.toString("base64");
+  // Use Uint8Array instead of Buffer for Cloudflare Workers compatibility
+  const uint8 = new Uint8Array(bytes);
+  let binary = "";
+  for (let i = 0; i < uint8.byteLength; i++) {
+    binary += String.fromCharCode(uint8[i]);
+  }
+  return btoa(binary);
 }
 
 /** Strip the `data:<mime>;base64,` prefix if present. */
