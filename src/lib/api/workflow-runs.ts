@@ -62,14 +62,14 @@ export const getWorkflowRuns = createServerFn({ method: "GET" })
         throw new HttpError(404, "Workflow not found");
       }
 
-      // Fetch runs
+      // Fetch runs — use COALESCE to handle column name variations
       const runRows = (await sql`
         SELECT
           r.id,
           r.status,
           r.started_at,
-          r.completed_at,
-          r.total_cost_usd::text AS total_cost_usd
+          COALESCE(r.completed_at, r.finished_at) AS completed_at,
+          COALESCE(r.total_cost_usd, 0)::text AS total_cost_usd
         FROM runs r
         WHERE r.workflow_id = ${data.workflowId}
         ORDER BY r.started_at DESC
