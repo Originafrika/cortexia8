@@ -230,7 +230,9 @@ function AccountPage() {
             {isFedaPayReady && (
               <div className="mt-5">
                 <FedaPayWidget
+                  key={amount}
                   amount={amount}
+                  currency={c}
                   public_key={fedapayKey!}
                   onComplete={handleFedaPayComplete}
                 />
@@ -324,10 +326,12 @@ function AccountPage() {
 
 function FedaPayWidget({
   amount,
+  currency,
   public_key,
   onComplete,
 }: {
   amount: number;
+  currency: { code: string; rate: number; symbol: string };
   public_key: string;
   onComplete: (transactionId: string) => void;
 }) {
@@ -374,7 +378,7 @@ function FedaPayWidget({
     },
     button: {
       class: "mt-5 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber px-5 py-3 text-sm font-medium text-primary-foreground hover:opacity-95 transition",
-      text: t("account.recharge_btn").replace("{amount}", formatMoney(amount, CURRENCIES.USD)),
+      text: t("account.recharge_btn").replace("{amount}", formatMoney(amount, currency)),
     },
     onComplete(resp: { reason?: string; transaction?: { id?: number } }) {
       const FedaPay = (window as any).FedaPay;
