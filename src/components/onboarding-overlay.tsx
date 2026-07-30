@@ -95,16 +95,7 @@ export function OnboardingOverlay({ open, onClose }: Props) {
                 </h2>
                 <p className="mt-3 text-foreground/80 leading-relaxed">{t(Step.bodyKey)}</p>
 
-                {isLast && (
-                  <div className="mt-6 rounded-2xl border border-amber/40 bg-amber/10 p-4">
-                    <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-soft">
-                      {t("app.onb.welcome_label")}
-                    </div>
-                    <div className="mt-1 text-sm text-foreground">
-                      {t("app.onb.welcome_credit")}
-                    </div>
-                  </div>
-                )}
+
               </motion.div>
             </AnimatePresence>
 
