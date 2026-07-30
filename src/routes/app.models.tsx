@@ -99,7 +99,7 @@ export function ModelsCatalog() {
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Kling, Claude, ElevenLabs…"
+            placeholder={t("models.search_placeholder")}
             aria-label="Search models"
             className="w-full sm:w-72 h-9 rounded-full border border-input bg-transparent pl-9 pr-4 py-2 text-sm focus:border-amber/40 focus-visible:ring-2 focus-visible:ring-amber/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background outline-none"
           />

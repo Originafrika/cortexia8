@@ -27,15 +27,12 @@ export type AgentModel =
   | "gemini-2-5-pro"
   | "gemini-2-5-flash"
   | "grok-3"
-  | "claude-fable-5"
-  | "claude-sonnet-5"
-  | "claude-opus-47"
-  | "claude-sonnet-46"
-  | "gpt-55"
-  | "gpt-56-luna"
-  | "gemini-3-pro"
-  | "gemini-3-flash"
-  | "grok-43";
+  | "seedream-5-pro"
+  | "flux2-pro"
+  | "gpt-image-2"
+  | "kling-30"
+  | "sora2"
+  | "veo31-video";
 
 export type GraphOperation =
   | { type: "ADD_NODE"; modelSlug: string; position?: { x: number; y: number } }
@@ -470,24 +467,21 @@ export function shouldConfirmOperation(
 
 export const AGENT_MODELS: Array<{ value: AgentModel; label: string }> = [
   { value: "gpt-5-2", label: "GPT 5.2" },
-  { value: "gpt-55", label: "GPT 5.5" },
   { value: "gpt-5", label: "GPT 5" },
-  { value: "gpt-56-luna", label: "GPT 5.6 Luna" },
   { value: "gpt-4.1", label: "GPT 4.1" },
   { value: "gpt-4.1-mini", label: "GPT 4.1 Mini" },
-  { value: "claude-sonnet-5", label: "Claude Sonnet 5" },
   { value: "claude-sonnet-4-5", label: "Claude Sonnet 4.5" },
-  { value: "claude-sonnet-46", label: "Claude Sonnet 4.6" },
-  { value: "claude-opus-47", label: "Claude Opus 4.7" },
   { value: "claude-opus-4", label: "Claude Opus 4" },
-  { value: "claude-fable-5", label: "Claude Fable 5" },
   { value: "claude-haiku-3-5", label: "Claude Haiku 3.5" },
-  { value: "gemini-3-pro", label: "Gemini 3 Pro" },
   { value: "gemini-2-5-pro", label: "Gemini 2.5 Pro" },
-  { value: "gemini-3-flash", label: "Gemini 3 Flash" },
   { value: "gemini-2-5-flash", label: "Gemini 2.5 Flash" },
-  { value: "grok-43", label: "Grok 4.3" },
   { value: "grok-3", label: "Grok 3" },
+  { value: "seedream-5-pro", label: "Seedream 5 Pro" },
+  { value: "flux2-pro", label: "Flux 2 Pro" },
+  { value: "gpt-image-2", label: "GPT Image 2" },
+  { value: "kling-30", label: "Kling 3.0" },
+  { value: "sora2", label: "Sora 2" },
+  { value: "veo31-video", label: "Veo 3.1" },
 ];
 
 export const COST_THRESHOLD = DEFAULT_COST_THRESHOLD;

@@ -13,9 +13,13 @@ import { NeonAuthUIProvider } from "@neondatabase/auth-ui";
 import { authClient } from "../auth";
 import { useLang, useLocaleStore } from "../lib/i18n";
 import { useCurrencyStore } from "../lib/currency";
+import { initSentry } from "../lib/sentry";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+
+// Initialize Sentry on module load
+initSentry();
 
 function NotFoundComponent() {
   return (
@@ -128,6 +132,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap",
+      },
+      {
+        rel: "preconnect",
+        href: "https://plausible.io",
+      },
+    ],
+    scripts: [
+      {
+        src: "https://plausible.io/js/script.js",
+        defer: true,
+        "data-domain": "cortexia.originafrika.online",
       },
     ],
   }),

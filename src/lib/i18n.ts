@@ -567,6 +567,7 @@ const fr: Dict = {
   "models.sort_price_asc": "Prix : croissant",
   "models.sort_price_desc": "Prix : décroissant",
   "models.sort_az": "A → Z",
+  "models.search_placeholder": "Kling, Claude, ElevenLabs…",
 };
 
 const en: Dict = {
@@ -1109,6 +1110,7 @@ const en: Dict = {
   "models.sort_price_asc": "Price: Low → High",
   "models.sort_price_desc": "Price: High → Low",
   "models.sort_az": "A → Z",
+  "models.search_placeholder": "Kling, Claude, ElevenLabs…",
 };
 
 // Portuguese, Spanish, Indonesian , cover the core landing strings.
@@ -1623,6 +1625,7 @@ const pt: Dict = {
   "models.sort_price_asc": "Preço: crescente",
   "models.sort_price_desc": "Preço: decrescente",
   "models.sort_az": "A → Z",
+  "models.search_placeholder": "Kling, Claude, ElevenLabs…",
 };
 
 const es: Dict = {
@@ -2135,6 +2138,7 @@ const es: Dict = {
   "models.sort_price_asc": "Precio: menor → mayor",
   "models.sort_price_desc": "Precio: mayor → menor",
   "models.sort_az": "A → Z",
+  "models.search_placeholder": "Kling, Claude, ElevenLabs…",
 };
 
 const id: Dict = {
@@ -2647,6 +2651,7 @@ const id: Dict = {
   "models.sort_price_asc": "Harga: rendah → tinggi",
   "models.sort_price_desc": "Harga: tinggi → rendah",
   "models.sort_az": "A → Z",
+  "models.search_placeholder": "Kling, Claude, ElevenLabs…",
 };
 
 const DICTS: Record<Lang, Dict> = { fr, en, pt, id, es };
