@@ -68,6 +68,15 @@ function ModelNotFoundComponent() {
 
 export type Status = "idle" | "loading" | "success" | "error";
 
+export type ActiveGeneration = {
+  id: string;
+  status: Status;
+  progress: number;
+  error: string | null;
+  runId: number | null;
+  prompt: string;
+};
+
 export type Result = {
   id: string;
   model: Model;
@@ -114,18 +123,16 @@ export function ModelPlaygroundContent({
 
   useEffect(() => {
     setPrompt("");
-    setStatus("idle");
+    setActiveGens(new Map());
     setHistory([]);
-    setError(null);
-    setProgress(0);
     setActiveId(null);
     setState(initState(model));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [model.slug]);
 
-  const [status, setStatus] = useState<Status>("idle");
-  const [progress, setProgress] = useState(0);
-  const [error, setError] = useState<string | null>(null);
+  const [activeGens, setActiveGens] = useState<Map<string, ActiveGeneration>>(new Map());
+  const activeCount = activeGens.size;
+  const MAX_CONCURRENT = 3;
   const [history, setHistory] = useState<Result[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const timers = useRef<number[]>([]);
@@ -170,7 +177,7 @@ export function ModelPlaygroundContent({
   }
 
   function handleGenerate() {
-    if (status === "loading") return;
+    if (activeCount >= MAX_CONCURRENT) return;
 
     const missingFields: string[] = [];
     for (const p of model.params) {
@@ -186,15 +193,29 @@ export function ModelPlaygroundContent({
       }
     }
     if (missingFields.length > 0) {
-      setStatus("error");
-      setError(`${t("playground.missing_fields")} ${missingFields.join(", ")}`);
+      const errGenId = `err_${Date.now()}`;
+      setActiveGens(prev => new Map(prev).set(errGenId, {
+        id: errGenId,
+        status: "error",
+        progress: 0,
+        error: `${t("playground.missing_fields")} ${missingFields.join(", ")}`,
+        runId: null,
+        prompt: prompt.trim(),
+      }));
       return;
     }
 
     clearTimers();
-    setStatus("loading");
-    setError(null);
-    setProgress(0);
+
+    const genId = `gen_${Date.now()}`;
+    setActiveGens(prev => new Map(prev).set(genId, {
+      id: genId,
+      status: "loading",
+      progress: 0,
+      error: null,
+      runId: null,
+      prompt: prompt.trim(),
+    }));
 
     const input: Record<string, unknown> = { ...state };
     const promptParam = model.params.find((p) => p.kind === "prompt" || p.kind === "longtext");
@@ -215,15 +236,25 @@ export function ModelPlaygroundContent({
         };
         setHistory((prev) => [newResult, ...prev]);
         setActiveId(newResult.id);
-        setProgress(10);
+
+        setActiveGens(prev => {
+          const next = new Map(prev);
+          const gen = next.get(genId);
+          if (gen) next.set(genId, { ...gen, runId: res.runId, progress: 10 });
+          return next;
+        });
 
         let pollCount = 0;
         const maxPolls = 300;
         const poll = () => {
           pollCount++;
           if (pollCount > maxPolls) {
-            setStatus("error");
-            setError(t("playground.timeout"));
+            setActiveGens(prev => {
+              const next = new Map(prev);
+              const gen = next.get(genId);
+              if (gen) next.set(genId, { ...gen, status: "error", error: t("playground.timeout") });
+              return next;
+            });
             return;
           }
           generationStatus({ data: { id: res.runId, sessionToken: loadSession()?.token } })
@@ -231,7 +262,13 @@ export function ModelPlaygroundContent({
               const node = statusRes.nodes[0];
               if (!node) return;
               const pct = statusRes.status === "success" ? 100 : Math.min(10 + pollCount, 95);
-              setProgress(pct);
+
+              setActiveGens(prev => {
+                const next = new Map(prev);
+                const gen = next.get(genId);
+                if (gen) next.set(genId, { ...gen, progress: pct });
+                return next;
+              });
 
               if (statusRes.status === "success" || (node.status === "success" && node.asset)) {
                 const url = node.asset?.previewUrl || node.asset?.storageUrl || null;
@@ -240,8 +277,11 @@ export function ModelPlaygroundContent({
                     r.id === newResult.id ? { ...r, resultUrl: url } : r,
                   ),
                 );
-                setStatus("success");
-                setProgress(100);
+                setActiveGens(prev => {
+                  const next = new Map(prev);
+                  next.delete(genId);
+                  return next;
+                });
                 requestAnimationFrame(() => {
                   galleryRef.current?.scrollTo({ top: 0, behavior: "smooth" });
                 });
@@ -249,8 +289,12 @@ export function ModelPlaygroundContent({
               }
 
               if (statusRes.status === "error" || node.status === "error") {
-                setStatus("error");
-                setError(node.errorMessage || t("playground.gen_error"));
+                setActiveGens(prev => {
+                  const next = new Map(prev);
+                  const gen = next.get(genId);
+                  if (gen) next.set(genId, { ...gen, status: "error", error: node.errorMessage || t("playground.gen_error") });
+                  return next;
+                });
                 return;
               }
 
@@ -263,8 +307,12 @@ export function ModelPlaygroundContent({
         timers.current.push(window.setTimeout(poll, 2000));
       })
       .catch((err) => {
-        setStatus("error");
-        setError(err?.message || t("playground.gen_impossible"));
+        setActiveGens(prev => {
+          const next = new Map(prev);
+          const gen = next.get(genId);
+          if (gen) next.set(genId, { ...gen, status: "error", error: err?.message || t("playground.gen_impossible") });
+          return next;
+        });
       });
   }
 
@@ -328,29 +376,37 @@ export function ModelPlaygroundContent({
             </div>
           )}
 
-          {/* Loading placeholder pinned at top when generating */}
-          {status === "loading" && (
-            <div className="mb-6">
-              <LoadingCard model={model} progress={progress} />
-            </div>
-          )}
+          {/* Loading cards for all active generations */}
+          {Array.from(activeGens.values()).map(gen => (
+            gen.status === "loading" && (
+              <div key={gen.id} className="mb-6">
+                <LoadingCard model={model} progress={gen.progress} />
+              </div>
+            )
+          ))}
 
-          {status === "error" && (
-            <div className="mb-6 rounded-2xl border border-amber/40 bg-amber/5 p-4 flex items-start gap-3">
-              <AlertTriangle className="size-4 text-amber shrink-0 mt-0.5" />
-              <div className="text-sm text-foreground/80 flex-1">{error}</div>
-              <button
-                onClick={() => {
-                  setStatus("idle");
-                  setError(null);
-                }}
-                aria-label="Dismiss error"
-                className="text-muted-foreground hover:text-foreground cursor-pointer"
-              >
-                <X className="size-4" />
-              </button>
-            </div>
-          )}
+          {/* Error messages from active generations */}
+          {Array.from(activeGens.values()).map(gen => (
+            gen.status === "error" && gen.error && (
+              <div key={gen.id} className="mb-6 rounded-2xl border border-amber/40 bg-amber/5 p-4 flex items-start gap-3">
+                <AlertTriangle className="size-4 text-amber shrink-0 mt-0.5" />
+                <div className="text-sm text-foreground/80 flex-1">{gen.error}</div>
+                <button
+                  onClick={() => {
+                    setActiveGens(prev => {
+                      const next = new Map(prev);
+                      next.delete(gen.id);
+                      return next;
+                    });
+                  }}
+                  aria-label="Dismiss error"
+                  className="text-muted-foreground hover:text-foreground cursor-pointer"
+                >
+                  <X className="size-4" />
+                </button>
+              </div>
+            )
+          ))}
 
           {/* History header */}
           {history.length > 0 && (
@@ -379,7 +435,7 @@ export function ModelPlaygroundContent({
               onSelect={setActiveId}
             />
           ) : (
-            status !== "loading" && !active && <EmptyState model={model} />
+            activeCount === 0 && !active && <EmptyState model={model} />
           )}
 
           <SimilarModels model={model} />
@@ -398,8 +454,8 @@ export function ModelPlaygroundContent({
             setPrompt={setPrompt}
             hasPrompt={hasPrompt}
             onGenerate={handleGenerate}
-            status={status}
-            progress={progress}
+            activeCount={activeCount}
+            maxConcurrent={MAX_CONCURRENT}
             currentPrice={currentPrice}
             showAdvanced={showAdvanced}
             onToggleAdvanced={() => setShowAdvanced((v) => !v)}

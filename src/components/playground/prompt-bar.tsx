@@ -4,7 +4,6 @@ import { useT } from "@/lib/i18n";
 import { PriceDisplay } from "@/components/price-display";
 import { ParamIconButton } from "./param-editor";
 import type { Model, ParamSpec } from "@/lib/models";
-import type { Status } from "@/routes/app.models.$slug";
 
 type PromptBarProps = {
   model: Model;
@@ -15,8 +14,8 @@ type PromptBarProps = {
   setPrompt: (v: string) => void;
   hasPrompt: boolean;
   onGenerate: () => void;
-  status: Status;
-  progress: number;
+  activeCount: number;
+  maxConcurrent: number;
   currentPrice: number;
   showAdvanced: boolean;
   onToggleAdvanced: () => void;
@@ -32,14 +31,15 @@ export function PromptBar({
   setPrompt,
   hasPrompt,
   onGenerate,
-  status,
-  progress,
+  activeCount,
+  maxConcurrent,
   currentPrice,
   showAdvanced,
   onToggleAdvanced,
   canGenerate,
 }: PromptBarProps) {
   const t = useT();
+  const isAtLimit = activeCount >= maxConcurrent;
   const promptSpec = model.params.find((p) => p.kind === "prompt");
   const placeholder =
     (promptSpec && "placeholder" in promptSpec && promptSpec.placeholder) ||
@@ -95,13 +95,13 @@ export function PromptBar({
           </div>
           <button
             onClick={onGenerate}
-            disabled={status === "loading" || !canGenerate}
+            disabled={!canGenerate || isAtLimit}
             className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber px-4 h-9 text-sm font-medium text-primary-foreground hover:opacity-95 transition disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
           >
-            {status === "loading" ? (
+            {activeCount > 0 ? (
               <>
                 <Loader2 className="size-4 animate-spin" />
-                <span className="hidden sm:inline">{progress}%</span>
+                <span className="hidden sm:inline">{activeCount}/{maxConcurrent}</span>
               </>
             ) : (
               <>
