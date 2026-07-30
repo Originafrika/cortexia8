@@ -1,8 +1,8 @@
 import { createFileRoute, Outlet, useMatchRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { MODELS, type ModelCategory } from "@/lib/models";
+import { MODELS, type Model, type ModelCategory } from "@/lib/models";
 import { ModelCard } from "@/components/model-card";
-import { Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
 
@@ -43,6 +43,7 @@ export function ModelsCatalog() {
   const [cat, setCat] = useState<ModelCategory | "all">("all");
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
+  const [sortBy, setSortBy] = useState<"newest" | "price_asc" | "price_desc" | "az">("newest");
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
@@ -56,12 +57,32 @@ export function ModelsCatalog() {
     );
   }, [cat, q]);
 
-  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const sorted = useMemo(() => {
+    const result = [...filtered];
+    switch (sortBy) {
+      case "newest":
+        return result.sort((a, b) => {
+          if (a.badge === "new" && b.badge !== "new") return -1;
+          if (b.badge === "new" && a.badge !== "new") return 1;
+          return 0;
+        });
+      case "price_asc":
+        return result.sort((a, b) => a.priceUSD - b.priceUSD);
+      case "price_desc":
+        return result.sort((a, b) => b.priceUSD - a.priceUSD);
+      case "az":
+        return result.sort((a, b) => a.name.localeCompare(b.name));
+      default:
+        return result;
+    }
+  }, [sortBy, filtered]);
+
+  const pageCount = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
   useEffect(() => {
     setPage(1);
-  }, [cat, q]);
+  }, [cat, q, sortBy]);
   const safePage = Math.min(page, pageCount);
-  const paged = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+  const paged = sorted.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   return (
     <div className="mx-auto max-w-7xl px-5 sm:px-8 py-10">
@@ -110,8 +131,25 @@ export function ModelsCatalog() {
           );
         })}
         <div className="ml-auto text-xs text-muted-foreground font-mono">
-          {filtered.length === 1 ? t("models.count_one") : t("models.count_many").replace("{n}", String(filtered.length))}
+          {sorted.length === 1 ? t("models.count_one") : t("models.count_many").replace("{n}", String(sorted.length))}
         </div>
+      </div>
+
+      <div className="mt-4 flex items-center gap-3">
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <ArrowUpDown className="size-3" />
+          <span>{t("models.sort")}</span>
+        </div>
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+          className="rounded-full border border-border bg-surface-1/50 px-3 py-1.5 text-xs text-foreground focus:border-amber/40 focus-visible:ring-2 focus-visible:ring-amber/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background outline-none cursor-pointer"
+        >
+          <option value="newest">{t("models.sort_newest")}</option>
+          <option value="price_asc">{t("models.sort_price_asc")}</option>
+          <option value="price_desc">{t("models.sort_price_desc")}</option>
+          <option value="az">{t("models.sort_az")}</option>
+        </select>
       </div>
 
       {paged.length === 0 ? (

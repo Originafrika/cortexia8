@@ -562,6 +562,11 @@ const fr: Dict = {
   "models.badge_popular": "Populaire",
   "models.badge_new": "Nouveau",
   "models.badge_pro": "Pro",
+  "models.sort": "Trier par :",
+  "models.sort_newest": "Plus récents",
+  "models.sort_price_asc": "Prix : croissant",
+  "models.sort_price_desc": "Prix : décroissant",
+  "models.sort_az": "A → Z",
 };
 
 const en: Dict = {
@@ -1099,6 +1104,11 @@ const en: Dict = {
   "models.badge_popular": "Popular",
   "models.badge_new": "New",
   "models.badge_pro": "Pro",
+  "models.sort": "Sort by:",
+  "models.sort_newest": "Newest",
+  "models.sort_price_asc": "Price: Low → High",
+  "models.sort_price_desc": "Price: High → Low",
+  "models.sort_az": "A → Z",
 };
 
 // Portuguese, Spanish, Indonesian , cover the core landing strings.
@@ -1608,6 +1618,11 @@ const pt: Dict = {
   "models.badge_popular": "Popular",
   "models.badge_new": "Novo",
   "models.badge_pro": "Pro",
+  "models.sort": "Ordenar por:",
+  "models.sort_newest": "Mais recentes",
+  "models.sort_price_asc": "Preço: crescente",
+  "models.sort_price_desc": "Preço: decrescente",
+  "models.sort_az": "A → Z",
 };
 
 const es: Dict = {
@@ -2115,6 +2130,11 @@ const es: Dict = {
   "models.badge_popular": "Popular",
   "models.badge_new": "Nuevo",
   "models.badge_pro": "Pro",
+  "models.sort": "Ordenar por:",
+  "models.sort_newest": "Más recientes",
+  "models.sort_price_asc": "Precio: menor → mayor",
+  "models.sort_price_desc": "Precio: mayor → menor",
+  "models.sort_az": "A → Z",
 };
 
 const id: Dict = {
@@ -2622,6 +2642,11 @@ const id: Dict = {
   "models.badge_popular": "Populer",
   "models.badge_new": "Baru",
   "models.badge_pro": "Pro",
+  "models.sort": "Urutkan:",
+  "models.sort_newest": "Terbaru",
+  "models.sort_price_asc": "Harga: rendah → tinggi",
+  "models.sort_price_desc": "Harga: tinggi → rendah",
+  "models.sort_az": "A → Z",
 };
 
 const DICTS: Record<Lang, Dict> = { fr, en, pt, id, es };
