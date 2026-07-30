@@ -22,7 +22,7 @@ const endpoints = [
   "object": "generation",
   "status": "completed",
   "model": "seedream-5-pro",
-  "url": "https://cdn.cortexia.ai/gen_3x8kL2.webp",
+  "url": "https://cortexia-assets.r2.dev/gen_3x8kL2.webp",
   "cost": {
     "amount": 0.04,
     "currency": "USD"
@@ -48,7 +48,7 @@ const endpoints = [
   "object": "generation",
   "status": "completed",
   "model": "seedream-5-pro",
-  "url": "https://cdn.cortexia.ai/gen_3x8kL2.webp",
+  "url": "https://cortexia-assets.r2.dev/gen_3x8kL2.webp",
   "cost": {
     "amount": 0.04,
     "currency": "USD"
@@ -189,7 +189,7 @@ const endpoints = [
       "status": "completed",
       "model": "seedream-5-pro",
       "prompt": "Un flacon ambré sur marbre travertin",
-      "url": "https://cdn.cortexia.ai/gen_3x8kL2.webp",
+      "url": "https://cortexia-assets.r2.dev/gen_3x8kL2.webp",
       "cost": {
         "amount": 0.04,
         "currency": "USD"
