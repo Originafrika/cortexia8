@@ -299,25 +299,25 @@ function AccountPage() {
               </tr>
             </thead>
             <tbody>
-              {(txRows ?? []).map((t) => {
-                const amount = Number(t.amount);
-                const date = new Date(t.created_at);
-                const d = date.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
-                const label = t.reference ?? t.type;
+              {(txRows ?? []).map((tx) => {
+                const txAmount = Number(tx.amount);
+                const date = new Date(tx.created_at);
+                const d = date.toLocaleDateString(undefined, { day: "numeric", month: "short" });
+                const label = tx.reference ?? tx.type;
                 return (
-                  <tr key={t.id} className="border-b border-border last:border-0 hover:bg-surface-2/40">
+                  <tr key={tx.id} className="border-b border-border last:border-0 hover:bg-surface-2/40">
                     <td className="p-4 text-muted-foreground font-mono text-xs">{d}</td>
                     <td className="p-4">{label}</td>
                     <td
                       className={
                         "p-4 text-right font-mono tabular " +
-                        (amount > 0 ? "text-emerald" : "text-foreground/85")
+                        (txAmount > 0 ? "text-emerald" : "text-foreground/85")
                       }
                     >
-                      {amount > 0 ? "+" : ""}
+                      {txAmount > 0 ? "+" : ""}
                       <PriceDisplay
-                        usd={Math.abs(amount)}
-                        className={amount > 0 ? "text-emerald" : ""}
+                        usd={Math.abs(txAmount)}
+                        className={txAmount > 0 ? "text-emerald" : ""}
                         forceDecimals={4}
                       />
                     </td>

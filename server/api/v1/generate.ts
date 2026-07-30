@@ -15,24 +15,18 @@
  *   model: string — model slug
  */
 
-import { defineEventHandler, getHeader, readBody } from "h3";
+import { defineEventHandler, getHeader, readBody, setResponseStatus } from "h3";
 import { sql } from "@/lib/db";
 import { createTask } from "@/lib/kie-api/client";
 import { getActiveModelBySlug } from "@/lib/api/shared";
-
-async function sha256Hex(input: string): Promise<string> {
-  const data = new TextEncoder().encode(input);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  return Array.from(new Uint8Array(hashBuffer))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
+import { sha256Hex } from "../../../src/lib/utils/crypto";
 
 export default defineEventHandler(async (event) => {
   try {
     // 1. Authenticate via Bearer API key
     const auth = getHeader(event, "authorization");
     if (!auth?.startsWith("Bearer cx_")) {
+      setResponseStatus(event, 401);
       return { error: "Invalid API key format. Use: Authorization: Bearer cx_..." };
     }
     const token = auth.slice(7);
@@ -45,6 +39,7 @@ export default defineEventHandler(async (event) => {
     `) as { id: number; user_id: number }[];
 
     if (keyRows.length === 0) {
+      setResponseStatus(event, 401);
       return { error: "Invalid or inactive API key" };
     }
 
@@ -55,15 +50,18 @@ export default defineEventHandler(async (event) => {
     const { model: modelSlug, prompt, resolution } = body;
 
     if (!modelSlug || typeof modelSlug !== "string") {
+      setResponseStatus(event, 400);
       return { error: "model is required" };
     }
     if (!prompt || typeof prompt !== "string") {
+      setResponseStatus(event, 400);
       return { error: "prompt is required" };
     }
 
     // 3. Look up model
     const model = await getActiveModelBySlug(modelSlug);
     if (!model) {
+      setResponseStatus(event, 404);
       return { error: `Model '${modelSlug}' not found or inactive` };
     }
 
@@ -76,6 +74,7 @@ export default defineEventHandler(async (event) => {
     const cost = Number(model.cortexia_price_usd ?? 0);
 
     if (balance < cost) {
+      setResponseStatus(event, 402);
       return { error: "Insufficient credits", balance, required: cost };
     }
 
@@ -96,9 +95,11 @@ export default defineEventHandler(async (event) => {
       object: "generation",
       status: "processing",
       model: modelSlug,
+      created_at: new Date().toISOString(),
     };
   } catch (err) {
     console.error("[api/v1/generate]", err);
+    setResponseStatus(event, 500);
     return { error: "Internal server error" };
   }
 });

@@ -12,22 +12,16 @@
  *   cost: { amount: number, currency: string } (if completed)
  */
 
-import { defineEventHandler, getHeader, getRouterParam } from "h3";
+import { defineEventHandler, getHeader, getRouterParam, setResponseStatus } from "h3";
 import { sql } from "@/lib/db";
-
-async function sha256Hex(input: string): Promise<string> {
-  const data = new TextEncoder().encode(input);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  return Array.from(new Uint8Array(hashBuffer))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
+import { sha256Hex } from "../../../src/lib/utils/crypto";
 
 export default defineEventHandler(async (event) => {
   try {
     // 1. Authenticate via Bearer API key
     const auth = getHeader(event, "authorization");
     if (!auth?.startsWith("Bearer cx_")) {
+      setResponseStatus(event, 401);
       return { error: "Invalid API key format. Use: Authorization: Bearer cx_..." };
     }
     const token = auth.slice(7);
@@ -40,12 +34,14 @@ export default defineEventHandler(async (event) => {
     `) as { id: number; user_id: number }[];
 
     if (keyRows.length === 0) {
+      setResponseStatus(event, 401);
       return { error: "Invalid or inactive API key" };
     }
 
     // 2. Get generation ID from URL
     const id = getRouterParam(event, "id");
     if (!id) {
+      setResponseStatus(event, 400);
       return { error: "Generation ID is required" };
     }
 
@@ -72,6 +68,7 @@ export default defineEventHandler(async (event) => {
     }[];
 
     if (execRows.length === 0) {
+      setResponseStatus(event, 404);
       return { error: "Generation not found" };
     }
 
@@ -87,6 +84,7 @@ export default defineEventHandler(async (event) => {
     };
   } catch (err) {
     console.error("[api/v1/generations]", err);
+    setResponseStatus(event, 500);
     return { error: "Internal server error" };
   }
 });

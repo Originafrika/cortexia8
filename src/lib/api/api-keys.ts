@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { sql } from "@/lib/db";
 import { getRequestContext, HttpError } from "./auth";
+import { sha256Hex } from "@/lib/utils/crypto";
 
 // ── Create API Key ────────────────────────────────────────────────────────
 
@@ -110,7 +111,7 @@ export const listApiKeys = createServerFn({ method: "POST" })
         status: r.status,
         lastUsed: r.last_used_at
           ? formatRelativeTime(new Date(r.last_used_at))
-          : "jamais",
+          : "never",
         created_at: r.created_at,
       }));
     } catch (err) {
@@ -150,22 +151,14 @@ export const revokeApiKey = createServerFn({ method: "POST" })
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
-async function sha256Hex(input: string): Promise<string> {
-  const data = new TextEncoder().encode(input);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  return Array.from(new Uint8Array(hashBuffer))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
-
 function formatRelativeTime(date: Date): string {
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   const diffMin = Math.floor(diffMs / 60000);
-  if (diffMin < 1) return "à l'instant";
-  if (diffMin < 60) return `il y a ${diffMin} min`;
+  if (diffMin < 1) return "just now";
+  if (diffMin < 60) return `${diffMin} min ago`;
   const diffH = Math.floor(diffMin / 60);
-  if (diffH < 24) return `il y a ${diffH}h`;
+  if (diffH < 24) return `${diffH}h ago`;
   const diffD = Math.floor(diffH / 24);
-  return `il y a ${diffD}j`;
+  return `${diffD}d ago`;
 }
