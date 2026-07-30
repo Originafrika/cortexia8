@@ -15,6 +15,7 @@
 import { defineEventHandler, getHeader, getRouterParam, setResponseStatus } from "h3";
 import { sql } from "@/lib/db";
 import { sha256Hex } from "../../../src/lib/utils/crypto";
+import { checkRateLimit, getRemainingRequests, getResetTime, RATE_LIMITS } from "../../../src/lib/rate-limit";
 
 export default defineEventHandler(async (event) => {
   try {
@@ -37,6 +38,22 @@ export default defineEventHandler(async (event) => {
       setResponseStatus(event, 401);
       return { error: "Invalid or inactive API key" };
     }
+
+    const userId = keyRows[0].user_id;
+
+    // Rate limit
+    const rlKey = `api:status:${userId}`;
+    if (!checkRateLimit(rlKey, RATE_LIMITS.statusPolling)) {
+      setResponseStatus(event, 429);
+      return { error: "Rate limit exceeded" };
+    }
+
+    // Set rate limit headers
+    const remaining = getRemainingRequests(rlKey, RATE_LIMITS.statusPolling);
+    const resetMs = getResetTime(rlKey);
+    event.node.res.setHeader("X-RateLimit-Limit", String(RATE_LIMITS.statusPolling.limit));
+    event.node.res.setHeader("X-RateLimit-Remaining", String(remaining));
+    event.node.res.setHeader("X-RateLimit-Reset", String(Math.ceil(resetMs / 1000)));
 
     // 2. Get generation ID from URL
     const id = getRouterParam(event, "id");

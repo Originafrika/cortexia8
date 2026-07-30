@@ -20,6 +20,7 @@ import { sql } from "@/lib/db";
 import { createTask } from "@/lib/kie-api/client";
 import { getActiveModelBySlug } from "@/lib/api/shared";
 import { sha256Hex } from "../../../src/lib/utils/crypto";
+import { checkRateLimit, getRemainingRequests, getResetTime, RATE_LIMITS } from "../../../src/lib/rate-limit";
 
 export default defineEventHandler(async (event) => {
   try {
@@ -44,6 +45,20 @@ export default defineEventHandler(async (event) => {
     }
 
     const userId = keyRows[0].user_id;
+
+    // Rate limit
+    const rlKey = `api:generate:${userId}`;
+    if (!checkRateLimit(rlKey, RATE_LIMITS.generation)) {
+      setResponseStatus(event, 429);
+      return { error: "Rate limit exceeded" };
+    }
+
+    // Set rate limit headers
+    const remaining = getRemainingRequests(rlKey, RATE_LIMITS.generation);
+    const resetMs = getResetTime(rlKey);
+    event.node.res.setHeader("X-RateLimit-Limit", String(RATE_LIMITS.generation.limit));
+    event.node.res.setHeader("X-RateLimit-Remaining", String(remaining));
+    event.node.res.setHeader("X-RateLimit-Reset", String(Math.ceil(resetMs / 1000)));
 
     // 2. Parse request body
     const body = await readBody(event);
