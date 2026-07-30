@@ -20,7 +20,7 @@
 
 import { createServerFn } from "@tanstack/react-start";
 
-import { recordTransaction } from "@/lib/credits";
+import { recordTransaction, getBalance } from "@/lib/credits";
 import { getRequestContext, HttpError, requireUserId } from "./auth";
 import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 
@@ -108,6 +108,21 @@ export const verifyFedaPayTransaction = createServerFn({ method: "POST" })
         return {
           ok: false,
           message: "Transaction amount is invalid",
+        } as PaymentResponse;
+      }
+
+      // Duplicate prevention — check if this transaction was already processed
+      const reference = `fedapay:${data.transactionId}`;
+      const existing = (await sql`
+        SELECT id FROM credits_ledger
+        WHERE reference = ${reference}
+        LIMIT 1
+      `) as { id: number }[];
+      if (existing.length > 0) {
+        return {
+          ok: true,
+          message: "Transaction already processed",
+          balance: await getBalance(userId),
         } as PaymentResponse;
       }
 

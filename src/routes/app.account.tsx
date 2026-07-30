@@ -108,6 +108,7 @@ function AccountPage() {
         } else {
           fetchBalance();
         }
+        fetchTransactions();
         toast.success(t("account.credits_added"));
       } else {
         toast.error(result.message ?? t("account.verification_failed"));
@@ -226,6 +227,22 @@ function AccountPage() {
               ))}
             </div>
 
+            <div className="mt-3">
+              <label className="text-xs text-muted-foreground mb-1 block">{t("account.custom_amount")}</label>
+              <input
+                type="number"
+                min={1}
+                max={500}
+                value={amount}
+                onChange={(e) => {
+                  const v = Number(e.target.value);
+                  if (v >= 1 && v <= 500) setAmount(v);
+                }}
+                placeholder={t("account.custom_amount_placeholder")}
+                className="w-full rounded-xl border border-border bg-surface-2/40 px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-amber/60"
+              />
+            </div>
+
             {/* FedaPay button (Mobile Money) */}
             {isFedaPayReady && (
               <div className="mt-5">
@@ -235,6 +252,7 @@ function AccountPage() {
                   currency={c}
                   public_key={fedapayKey!}
                   onComplete={handleFedaPayComplete}
+                  onCancel={() => toast.info(t("account.payment_cancelled"))}
                 />
               </div>
             )}
@@ -329,11 +347,13 @@ function FedaPayWidget({
   currency,
   public_key,
   onComplete,
+  onCancel,
 }: {
   amount: number;
   currency: { code: string; rate: number; symbol: string };
   public_key: string;
   onComplete: (transactionId: string) => void;
+  onCancel?: () => void;
 }) {
   const t = useT();
   const [FedaCheckoutButton, setFedaCheckoutButton] = useState<any>(null);
@@ -382,7 +402,10 @@ function FedaPayWidget({
     },
     onComplete(resp: { reason?: string; transaction?: { id?: number } }) {
       const FedaPay = (window as any).FedaPay;
-      if (FedaPay && resp.reason === FedaPay.DIALOG_DISMISSED) return;
+      if (FedaPay && resp.reason === FedaPay.DIALOG_DISMISSED) {
+        onCancel?.();
+        return;
+      }
       if (resp.transaction?.id) {
         onComplete(String(resp.transaction.id));
       }

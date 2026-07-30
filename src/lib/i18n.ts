@@ -538,6 +538,10 @@ const fr: Dict = {
   "account.loading_fedapay": "Chargement FedaPay…",
   "account.fedapay_description": "Recharge de crédits Cortexia",
   "account.recharge_btn": "Recharger {amount}",
+  "account.payment_cancelled": "Paiement annulé.",
+  "account.custom_amount": "Autre montant",
+  "account.custom_amount_placeholder": "Min 1 $",
+  "account.custom_amount_min": "Le montant minimum est {min} $",
 
   // Models catalog
   "models.section": "Catalogue",
@@ -1071,6 +1075,10 @@ const en: Dict = {
   "account.loading_fedapay": "Loading FedaPay…",
   "account.fedapay_description": "Cortexia credits top-up",
   "account.recharge_btn": "Top up {amount}",
+  "account.payment_cancelled": "Payment cancelled.",
+  "account.custom_amount": "Custom amount",
+  "account.custom_amount_placeholder": "Min $1",
+  "account.custom_amount_min": "Minimum amount is ${min}",
 
   // Models catalog
   "models.section": "Catalog",
@@ -1578,8 +1586,10 @@ const pt: Dict = {
   "account.loading_fedapay": "Carregando FedaPay…",
   "account.fedapay_description": "Recarga de créditos Cortexia",
   "account.recharge_btn": "Recarregar {amount}",
-
-  // Models catalog
+  "account.payment_cancelled": "Pagamento cancelado.",
+  "account.custom_amount": "Valor personalizado",
+  "account.custom_amount_placeholder": "Mín. $1",
+  "account.custom_amount_min": "O valor mínimo é ${min}",
   "models.section": "Catálogo",
   "models.title": "Todos os modelos disponíveis.",
   "models.subtitle": "Preços exibidos com tudo incluso — sem surpresas na fatura.",
@@ -2083,8 +2093,10 @@ const es: Dict = {
   "account.loading_fedapay": "Cargando FedaPay…",
   "account.fedapay_description": "Recarga de créditos Cortexia",
   "account.recharge_btn": "Recargar {amount}",
-
-  // Models catalog
+  "account.payment_cancelled": "Pago cancelado.",
+  "account.custom_amount": "Monto personalizado",
+  "account.custom_amount_placeholder": "Mín. $1",
+  "account.custom_amount_min": "El monto mínimo es ${min}",
   "models.section": "Catálogo",
   "models.title": "Todos los modelos disponibles.",
   "models.subtitle": "Precios mostrados todo incluido — sin sorpresas en la factura.",
@@ -2588,8 +2600,10 @@ const id: Dict = {
   "account.loading_fedapay": "Memuat FedaPay…",
   "account.fedapay_description": "Isi ulang kredit Cortexia",
   "account.recharge_btn": "Isi ulang {amount}",
-
-  // Models catalog
+  "account.payment_cancelled": "Pembayaran dibatalkan.",
+  "account.custom_amount": "Jumlah kustom",
+  "account.custom_amount_placeholder": "Min. $1",
+  "account.custom_amount_min": "Jumlah minimum adalah ${min}",
   "models.section": "Katalog",
   "models.title": "Semua model yang tersedia.",
   "models.subtitle": "Harga yang ditampilkan sudah termasuk semua — tanpa kejutan penagihan.",
