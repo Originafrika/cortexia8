@@ -61,11 +61,7 @@ export function ModelsCatalog() {
     const result = [...filtered];
     switch (sortBy) {
       case "newest":
-        return result.sort((a, b) => {
-          if (a.badge === "new" && b.badge !== "new") return -1;
-          if (b.badge === "new" && a.badge !== "new") return 1;
-          return 0;
-        });
+        return result.sort((a, b) => b.order - a.order);
       case "price_asc":
         return result.sort((a, b) => a.priceUSD - b.priceUSD);
       case "price_desc":

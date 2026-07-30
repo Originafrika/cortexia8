@@ -63,6 +63,7 @@ export type Model = {
   active: boolean;
   inputSchema: InputSchemaField[];
   badge?: "popular" | "new" | "pro";
+  order: number; // Higher = newer. Used for default sort.
   blurb: string;
   params: ParamSpec[];
 };
@@ -174,14 +175,10 @@ export const MODELS: Model[] = CATALOGUE.map((e) => ({
   active: e.active,
   inputSchema: e.inputSchema,
   ...(e.badge ? { badge: e.badge } : {}),
+  order: e.order,
   blurb: e.blurb,
   params: deriveParams(e.inputSchema),
-})).sort((a, b) => {
-  // Default sort: badge:"new" first, then preserve array order
-  if (a.badge === "new" && b.badge !== "new") return -1;
-  if (b.badge === "new" && a.badge !== "new") return 1;
-  return 0;
-});
+})).sort((a, b) => b.order - a.order);
 
 // ── Helpers ──────────────────────────────────────────────────────────────
 
