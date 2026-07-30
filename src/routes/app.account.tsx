@@ -76,9 +76,15 @@ function AccountPage() {
         return;
       }
 
-      if (method === "card") {
+      // card, crypto, and alipay all go through Stripe Checkout
+      if (method === "card" || method === "crypto" || method === "ali") {
         const result = await createStripeCheckout({
-          data: { amount, currency: c.code.toLowerCase(), sessionToken: loadSession()?.token },
+          data: {
+            amount,
+            currency: c.code.toLowerCase(),
+            method: method === "ali" ? "alipay" : method,
+            sessionToken: loadSession()?.token,
+          },
         });
         if (result.ok && result.url) {
           window.location.href = result.url;
@@ -120,9 +126,8 @@ function AccountPage() {
   }
 
   const isFedaPayReady = method === "mm" && !!fedapayKey;
-  const isStripeReady = method === "card";
-  const canRecharge = isStripeReady || method === "mm";
-  const isUnsupported = method === "crypto" || method === "ali";
+  const isStripeReady = method === "card" || method === "crypto" || method === "ali";
+  const canRecharge = isFedaPayReady || isStripeReady;
 
   return (
     <div className="mx-auto max-w-6xl px-5 sm:px-8 py-10 space-y-10">
@@ -257,18 +262,13 @@ function AccountPage() {
               </div>
             )}
 
-            {/* Generic recharge button (Stripe / unsupported) */}
+            {/* Generic recharge button (Stripe) */}
             {!isFedaPayReady && (
               <button
                 onClick={handleRecharge}
-                disabled={loading || isUnsupported}
+                disabled={loading}
                 aria-label={`Recharge ${formatMoney(amount, c)}`}
-                className={cn(
-                  "mt-5 w-full inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-medium transition",
-                  isUnsupported
-                    ? "bg-surface-3 text-muted-foreground cursor-not-allowed"
-                    : "bg-amber text-primary-foreground hover:opacity-95",
-                )}
+                className="mt-5 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber px-5 py-3 text-sm font-medium text-primary-foreground hover:opacity-95 transition"
               >
                 {loading ? (
                   <Loader2 className="size-4 animate-spin" />
@@ -276,12 +276,6 @@ function AccountPage() {
                   t("account.recharge_btn").replace("{amount}", formatMoney(amount, c))
                 )}
               </button>
-            )}
-
-            {isUnsupported && (
-              <p className="mt-2 text-[11px] text-muted-foreground">
-                {t("account.coming_soon")}
-              </p>
             )}
           </div>
         </div>

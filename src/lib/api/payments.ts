@@ -151,6 +151,7 @@ export const verifyFedaPayTransaction = createServerFn({ method: "POST" })
 export type StripeCheckoutInput = {
   amount: number;
   currency?: string;
+  method?: string; // "card" | "alipay" | "crypto"
   successUrl?: string;
   cancelUrl?: string;
   sessionToken?: string;
@@ -184,6 +185,18 @@ export const createStripeCheckout = createServerFn({ method: "POST" })
       }
 
       const currency = (data.currency ?? "usd").toLowerCase();
+      const method = (data.method ?? "card").toLowerCase();
+
+      // Alipay and Crypto have currency restrictions — fallback to USD
+      const ALIPAY_CURRENCIES = ["usd", "eur", "gbp", "aud", "cad", "hkd", "jpy", "sgd"];
+      const CRYPTO_CURRENCIES = ["usd", "eur", "gbp"];
+      let finalCurrency = currency;
+      if (method === "alipay" && !ALIPAY_CURRENCIES.includes(currency)) {
+        finalCurrency = "usd";
+      } else if (method === "crypto" && !CRYPTO_CURRENCIES.includes(currency)) {
+        finalCurrency = "usd";
+      }
+
       const appUrl =
         process.env.APP_URL ??
         (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
@@ -198,10 +211,16 @@ export const createStripeCheckout = createServerFn({ method: "POST" })
       params.append("cancel_url", cancelUrl);
       params.append("metadata[userId]", String(userId));
       params.append("metadata[amount]", String(data.amount));
-      params.append("line_items[0][price_data][currency]", currency);
+      params.append("line_items[0][price_data][currency]", finalCurrency);
       params.append("line_items[0][price_data][product_data][name]", "Crédits Cortexia");
       params.append("line_items[0][price_data][unit_amount]", String(Math.round(data.amount * 100)));
       params.append("line_items[0][quantity]", "1");
+
+      // Payment method types — card is always included as fallback
+      params.append("payment_method_types[0]", method);
+      if (method !== "card") {
+        params.append("payment_method_types[1]", "card");
+      }
 
       const response = await fetch("https://api.stripe.com/v1/checkout/sessions", {
         method: "POST",
