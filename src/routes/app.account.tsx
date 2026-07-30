@@ -78,7 +78,7 @@ function AccountPage() {
 
       if (method === "card") {
         const result = await createStripeCheckout({
-          data: { amount, currency: "usd", sessionToken: loadSession()?.token },
+          data: { amount, currency: c.code.toLowerCase(), sessionToken: loadSession()?.token },
         });
         if (result.ok && result.url) {
           window.location.href = result.url;
