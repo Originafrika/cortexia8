@@ -193,6 +193,7 @@ export function ModelPlaygroundContent({
 
   function handleGenerate() {
     if (activeCount >= MAX_CONCURRENT) return;
+    console.log(`[Generate] Starting generation for model: ${model.slug}`);
 
     const missingFields: string[] = [];
     for (const p of model.params) {
@@ -239,6 +240,7 @@ export function ModelPlaygroundContent({
 
     generate({ data: { modelSlug: model.slug, input, sessionToken: loadSession()?.token } })
       .then((res) => {
+        console.log(`[Generate] Success: runId=${res.runId}, cost=${res.estimatedCostUsd}`);
         const newResult: Result = {
           id: res.runId.toString(),
           model,
@@ -322,6 +324,7 @@ export function ModelPlaygroundContent({
         const genTimers = timersRef.current.get(genId) ?? []; genTimers.push(window.setTimeout(poll, 2000)); timersRef.current.set(genId, genTimers);
       })
       .catch((err) => {
+        console.error(`[Generate] Failed:`, err);
         setActiveGens(prev => {
           const next = new Map(prev);
           const gen = next.get(genId);
