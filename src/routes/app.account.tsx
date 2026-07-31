@@ -69,15 +69,15 @@ function AccountPage() {
   async function handleRecharge() {
     setLoading(true);
     try {
-      if (method === "mm") {
-        // FedaPay: the button handles its own flow.
-        // We only reach here if FedaPay isn't loaded — fall through.
+      if (method === "mm" || method === "card") {
+        // FedaPay handles both Mobile Money and Card payments
+        // The FedaPay widget handles its own flow
         toast.info(t("account.use_fedapay"));
         return;
       }
 
-      // card, crypto, and alipay all go through Stripe Checkout
-      if (method === "card" || method === "crypto" || method === "ali") {
+      // crypto and alipay go through Stripe Checkout
+      if (method === "crypto" || method === "ali") {
         const result = await createStripeCheckout({
           data: {
             amount,
@@ -104,15 +104,10 @@ function AccountPage() {
   }
 
   async function handleFedaPayComplete(transactionId: string) {
-    console.log(`[Browser] FedaPay onComplete called with transactionId: ${transactionId}`);
-    const session = loadSession();
-    console.log(`[Browser] Session token: ${session?.token ? "present (" + session.token.slice(0, 10) + "...)" : "MISSING"}`);
     try {
-      console.log(`[Browser] Calling verifyFedaPayTransaction for transaction ${transactionId}`);
       const result = await verifyFedaPayTransaction({
         data: { transactionId, amount: Math.round(amount * CURRENCIES.XOF.rate), sessionToken: loadSession()?.token },
       });
-      console.log(`[Browser] verifyFedaPayTransaction result:`, result);
       if (result.ok) {
         if (result.balance != null) {
           setBalance(result.balance);
@@ -125,14 +120,13 @@ function AccountPage() {
         toast.error(result.message ?? t("account.verification_failed"));
       }
     } catch (err) {
-      console.error("[Browser] FedaPay verification failed:", err);
       const msg = err instanceof Error ? err.message : String(err);
       toast.error(`${t("account.fedapay_error")}: ${msg}`);
     }
   }
 
-  const isFedaPayReady = method === "mm" && !!fedapayKey;
-  const isStripeReady = method === "card" || method === "crypto" || method === "ali";
+  const isFedaPayReady = (method === "mm" || method === "card") && !!fedapayKey;
+  const isStripeReady = method === "crypto" || method === "ali";
   const canRecharge = isFedaPayReady || isStripeReady;
 
   return (
@@ -413,14 +407,9 @@ function FedaPayWidget({
       onCancel?.();
       return;
     }
-    console.log(`[Browser] FedaPay widget onComplete:`, resp);
     if (resp.transaction?.id) {
-      if (processed) {
-        console.log(`[Browser] Ignoring duplicate onComplete for transaction ${resp.transaction.id}`);
-        return;
-      }
+      if (processed) return;
       processed = true;
-      console.log(`[Browser] Transaction ID: ${resp.transaction.id}`);
       onComplete(String(resp.transaction.id));
     }
   };

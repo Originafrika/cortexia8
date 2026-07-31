@@ -91,6 +91,7 @@ export const generate = createServerFn({ method: "POST" })
       return result;
     } catch (err) {
       if (err instanceof HttpError) throw err;
+      console.error("[Generate] Error:", err);
       throw new HttpError(500, "Internal server error");
     }
   });
@@ -100,6 +101,8 @@ async function runGenerate(
   userId: number,
   _apiKeyId: number | null,
 ): Promise<GenerateResponse> {
+  console.log(`[Generate] Starting generation for user ${userId}, model: ${data.modelSlug}`);
+  
   const model = await getActiveModelBySlug(data.modelSlug);
   if (!model) {
     throw new HttpError(404, `Model '${data.modelSlug}' not found or inactive`);
@@ -107,12 +110,15 @@ async function runGenerate(
 
   // 1. Upload references (if any markers in the input).
   const { resolved: resolvedInput, uploadedCount } = await resolveUploads(data.input);
+  console.log(`[Generate] Resolved input, uploaded: ${uploadedCount}`);
 
   // 2. Cost + credit check.
   const cost = nodeCostUsd(model, resolvedInput);
+  console.log(`[Generate] Cost: ${cost}, model: ${model.slug}`);
   if (cost != null && cost > 0) {
     const check = await ensureSufficientCredits(userId, cost);
     if (!check.ok) {
+      console.log(`[Generate] Insufficient credits: balance=${check.balance}, required=${check.required}`);
       throw new InsufficientCreditsError(check.balance, check.required);
     }
   }
@@ -149,12 +155,14 @@ async function runGenerate(
 
   // 4. Submit to kie.ai — branch on api_family.
   const callback = tryBuildCallback();
+  console.log(`[Generate] Submitting task to kie.ai, model: ${model.slug}, apiFamily: ${model.api_family}`);
   const taskId = await submitTask({
     apiFamily: model.api_family,
     model,
     input: resolvedInput,
     callback,
   });
+  console.log(`[Generate] Task submitted, taskId: ${taskId}`);
 
   // 5. Persist run + execution rows so the webhook can find them.
   const { runId, nodeExecutionId } = await persistRunWithExecution({
@@ -165,6 +173,7 @@ async function runGenerate(
     cost: cost ?? 0,
     taskId,
   });
+  console.log(`[Generate] Persisted run: ${runId}, execution: ${nodeExecutionId}`);
 
   // 6. Debit credits now (for fixed-price units). LLM cost (1m-tokens-io)
   //    is settled after the run completes — we record a pending 0 debit.
