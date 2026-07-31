@@ -17,6 +17,7 @@ import { initSentry } from "../lib/sentry";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { verifyActiveGens } from "../lib/app-store";
 
 // Initialize Sentry on module load
 initSentry();
@@ -156,6 +157,8 @@ function HydrateStores() {
   useEffect(() => {
     useLocaleStore.persist.rehydrate();
     useCurrencyStore.persist.rehydrate();
+    // Restore generation state from localStorage
+    verifyActiveGens().catch(() => {});
   }, []);
   return null;
 }

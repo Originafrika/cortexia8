@@ -28,6 +28,7 @@ import { PromptBar } from "@/components/playground/prompt-bar";
 import { ResultView } from "@/components/playground/result-view";
 import { HistoryGrid } from "@/components/playground/history-grid";
 import { SimilarModels } from "@/components/playground/similar-models";
+import { useAppStore } from "@/lib/app-store";
 
 export const Route = createFileRoute("/app/models/$slug")({
   loader: ({ params }) => {
@@ -139,6 +140,13 @@ export function ModelPlaygroundContent({
   const galleryRef = useRef<HTMLDivElement>(null);
 
   const [showAdvanced, setShowAdvanced] = useState(false);
+
+  // Global store for persistence
+  const storeAddGen = useAppStore((s) => s.addGeneration);
+  const storeUpdateGen = useAppStore((s) => s.updateGeneration);
+  const storeRemoveGen = useAppStore((s) => s.removeGeneration);
+  const storeAddHistory = useAppStore((s) => s.addToHistory);
+  const storeSetBalance = useAppStore((s) => s.setBalance);
 
   const currentPrice = useMemo(() => estimatePrice(model, state), [model, state]);
   const hasPrompt = model.params.some((p) => 
