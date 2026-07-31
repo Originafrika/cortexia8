@@ -17,7 +17,6 @@
 import { defineEventHandler, readRawBody, setResponseStatus } from "h3";
 import { sql } from "@/lib/db";
 import { recordTransaction } from "@/lib/credits";
-import { recordTransaction } from "@/lib/credits";
 
 export default defineEventHandler(async (event) => {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;

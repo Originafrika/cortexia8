@@ -67,7 +67,7 @@ export async function recordTransaction(opts: {
     )
     SELECT i.id, i.user_id, i.amount::text AS amount, i.type, i.reference, i.created_at::text AS created_at,
            u.credits_balance::text AS credits_balance
-    FROM inserted i, updated u
+    FROM inserted i LEFT JOIN updated u ON true
   `) as LedgerEntry[];
   if (rows.length === 0) {
     // Could be user not found OR insufficient balance
