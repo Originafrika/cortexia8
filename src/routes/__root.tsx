@@ -13,14 +13,11 @@ import { NeonAuthUIProvider } from "@neondatabase/auth-ui";
 import { authClient } from "../auth";
 import { useLang, useLocaleStore } from "../lib/i18n";
 import { useCurrencyStore } from "../lib/currency";
-import { initSentry } from "../lib/sentry";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { verifyActiveGens } from "../lib/app-store";
 
-// Initialize Sentry on module load
-initSentry();
 
 function NotFoundComponent() {
   return (
