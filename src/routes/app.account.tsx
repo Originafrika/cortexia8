@@ -403,6 +403,7 @@ function FedaPayWidget({
       class: "mt-5 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber px-5 py-3 text-sm font-medium text-primary-foreground hover:opacity-95 transition",
       text: t("account.recharge_btn").replace("{amount}", formatMoney(amount, currency)),
     },
+    let processed = false;
     onComplete(resp: { reason?: string; transaction?: { id?: number } }) {
       const FedaPay = (window as any).FedaPay;
       if (FedaPay && resp.reason === FedaPay.DIALOG_DISMISSED) {
@@ -411,6 +412,11 @@ function FedaPayWidget({
       }
       console.log(`[Browser] FedaPay widget onComplete:`, resp);
       if (resp.transaction?.id) {
+        if (processed) {
+          console.log(`[Browser] Ignoring duplicate onComplete for transaction ${resp.transaction.id}`);
+          return;
+        }
+        processed = true;
         console.log(`[Browser] Transaction ID: ${resp.transaction.id}`);
         onComplete(String(resp.transaction.id));
       }

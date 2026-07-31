@@ -17,6 +17,7 @@
 import { defineEventHandler, readRawBody, setResponseStatus } from "h3";
 import { sql } from "@/lib/db";
 import { recordTransaction } from "@/lib/credits";
+import { recordTransaction } from "@/lib/credits";
 
 export default defineEventHandler(async (event) => {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -89,25 +90,33 @@ export default defineEventHandler(async (event) => {
     return { ok: false, error: "Missing userId or invalid amount" };
   }
 
-  // 4. Atomic duplicate prevention
+  // 4. Atomic credit: INSERT ledger + UPDATE balance in single CTE
   const reference = `stripe:${sessionId}`;
-  const inserted = (await sql`
-    INSERT INTO credits_ledger (user_id, amount, type, reference)
-    VALUES (${userId}, ${amount}, 'purchase', ${reference})
-    ON CONFLICT (reference) DO NOTHING
-    RETURNING id
+  
+  // Check for duplicate first (fast path)
+  const existing = (await sql`
+    SELECT id FROM credits_ledger WHERE reference = ${reference} LIMIT 1
   `) as { id: number }[];
-
-  if (inserted.length === 0) {
+  
+  if (existing.length > 0) {
     return { ok: true, action: "already-processed" };
   }
 
-  // 5. Update user balance atomically
-  await sql`
-    UPDATE users
-    SET credits_balance = credits_balance + ${amount}
-    WHERE id = ${userId}
-  `;
+  // Atomic: insert ledger + update balance in single CTE
+  try {
+    await recordTransaction({
+      userId,
+      amount,
+      type: "purchase",
+      reference,
+    });
+  } catch (recordErr: any) {
+    // Handle unique_violation (race condition)
+    if (recordErr?.code === "23505" || recordErr?.message?.includes("unique")) {
+      return { ok: true, action: "already-processed" };
+    }
+    throw recordErr;
+  }
 
   return { ok: true, action: "credited" };
 });

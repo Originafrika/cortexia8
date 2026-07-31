@@ -134,21 +134,16 @@ export const verifyFedaPayTransaction = createServerFn({ method: "POST" })
         } as PaymentResponse;
       }
 
-      // Atomic duplicate prevention: INSERT ... ON CONFLICT DO NOTHING
+      // Atomic credit: INSERT ledger + UPDATE balance in single CTE
       const reference = `fedapay:${data.transactionId}`;
-      console.log(`[FedaPay] Attempting insert with reference: ${reference}`);
+      console.log(`[FedaPay] Attempting credit with reference: ${reference}`);
       
-      let inserted: { id: number }[] = [];
-      try {
-        inserted = (await sql`
-        INSERT INTO credits_ledger (user_id, amount, type, reference)
-        VALUES (${userId}, ${confirmedAmount}, 'purchase', ${reference})
-        ON CONFLICT (reference) DO NOTHING
-        RETURNING id
+      // Check for duplicate first (fast path)
+      const existing = (await sql`
+        SELECT id FROM credits_ledger WHERE reference = ${reference} LIMIT 1
       `) as { id: number }[];
-
-      if (inserted.length === 0) {
-        // Duplicate — already processed
+      
+      if (existing.length > 0) {
         console.log(`[FedaPay] Duplicate detected: ${reference}`);
         return {
           ok: true,
@@ -156,29 +151,29 @@ export const verifyFedaPayTransaction = createServerFn({ method: "POST" })
           balance: await getBalance(userId),
         } as PaymentResponse;
       }
-      } catch (insertErr: any) {
-        if (insertErr?.code === "23505" || insertErr?.message?.includes("unique")) {
-          console.log(`[FedaPay] Duplicate detected via error: ${reference}`);
+
+      // Atomic: insert ledger + update balance in single CTE
+      let result;
+      try {
+        result = await recordTransaction({
+          userId,
+          amount: confirmedAmount,
+          type: "purchase",
+          reference,
+        });
+      } catch (recordErr: any) {
+        // Handle unique_violation (race condition: another request inserted first)
+        if (recordErr?.code === "23505" || recordErr?.message?.includes("unique")) {
+          console.log(`[FedaPay] Duplicate detected via race condition: ${reference}`);
           return {
             ok: true,
             message: "Transaction already processed",
             balance: await getBalance(userId),
           } as PaymentResponse;
         }
-        throw insertErr;
+        throw recordErr;
       }
 
-      console.log(`[FedaPay] Inserted ledger row ${inserted[0].id}, updating balance`);
-
-      // Update user balance atomically
-      const balanceResult = (await sql`
-        UPDATE users
-        SET credits_balance = credits_balance + ${confirmedAmount}
-        WHERE id = ${userId}
-        RETURNING credits_balance
-      `) as { credits_balance: number }[];
-
-      const result = { balance: Number(balanceResult[0]?.credits_balance ?? 0) };
       console.log(`[FedaPay] Success! Credited ${confirmedAmount} USD. New balance: ${result.balance}`);
       
       return {
