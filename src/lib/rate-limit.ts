@@ -104,4 +104,7 @@ export const RATE_LIMITS = {
 
   /** General API: 60 requests per minute */
   general: { limit: 60, windowMs: 60 * 1000 },
+
+  /** kie.ai global limit: 15 requests per 10 seconds (safe margin below 20/10s) */
+  kie: { limit: 15, windowMs: 10 * 1000 },
 } as const;

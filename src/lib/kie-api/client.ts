@@ -15,6 +15,8 @@
  *   POST /api/v1/common/file-upload         upload a file, get a hosted URL
  */
 
+import { checkRateLimit, getResetTime, RATE_LIMITS } from "../rate-limit";
+
 const KIE_API_BASE = process.env.KIE_API_BASE ?? "https://api.kie.ai";
 
 export const kieApiBase = () => KIE_API_BASE.replace(/\/+$/, "");
@@ -112,6 +114,13 @@ export async function createTask(opts: {
     input: opts.input,
   };
   if (opts.callBackUrl) body.callBackUrl = opts.callBackUrl;
+
+  // Global rate limit: protect shared kie.ai API key (15/10s)
+  const KIE_RATE_KEY = "kie:global";
+  while (!checkRateLimit(KIE_RATE_KEY, RATE_LIMITS.kie)) {
+    const waitMs = getResetTime(KIE_RATE_KEY);
+    if (waitMs > 0) await new Promise(r => setTimeout(r, Math.min(waitMs + 100, 5000)));
+  }
 
   const res = await fetch(`${kieApiBase()}${endpoint}`, {
     method: "POST",
