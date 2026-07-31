@@ -21,6 +21,7 @@
 import { createServerFn } from "@tanstack/react-start";
 
 import { recordTransaction, getBalance } from "@/lib/credits";
+import { sql } from "@/lib/db";
 import { getRequestContext, HttpError, requireUserId } from "./auth";
 import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 
