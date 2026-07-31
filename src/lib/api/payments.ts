@@ -138,7 +138,9 @@ export const verifyFedaPayTransaction = createServerFn({ method: "POST" })
       const reference = `fedapay:${data.transactionId}`;
       console.log(`[FedaPay] Attempting insert with reference: ${reference}`);
       
-      const inserted = (await sql`
+      let inserted: { id: number }[] = [];
+      try {
+        inserted = (await sql`
         INSERT INTO credits_ledger (user_id, amount, type, reference)
         VALUES (${userId}, ${confirmedAmount}, 'purchase', ${reference})
         ON CONFLICT (reference) DO NOTHING
@@ -153,6 +155,17 @@ export const verifyFedaPayTransaction = createServerFn({ method: "POST" })
           message: "Transaction already processed",
           balance: await getBalance(userId),
         } as PaymentResponse;
+      }
+      } catch (insertErr: any) {
+        if (insertErr?.code === "23505" || insertErr?.message?.includes("unique")) {
+          console.log(`[FedaPay] Duplicate detected via error: ${reference}`);
+          return {
+            ok: true,
+            message: "Transaction already processed",
+            balance: await getBalance(userId),
+          } as PaymentResponse;
+        }
+        throw insertErr;
       }
 
       console.log(`[FedaPay] Inserted ledger row ${inserted[0].id}, updating balance`);
