@@ -92,12 +92,13 @@ export const verifyFedaPayTransaction = createServerFn({ method: "POST" })
       const rawResponse = await response.json();
       console.log("[FedaPay] Raw API response:", JSON.stringify(rawResponse));
       
-      // FedaPay API may wrap response in { data: { ... } } or return directly
-      const tx = (rawResponse.data || rawResponse) as {
+      // FedaPay API wraps response in { "v1/transaction": { ... } }
+      const tx = (rawResponse["v1/transaction"] || rawResponse.data || rawResponse) as {
         id?: number;
         status?: string;
         amount?: number;
         currency?: { iso?: string };
+        currency_id?: number;
       };
 
       console.log(`[FedaPay] Parsed response: status=${tx.status}, amount=${tx.amount}, currency=${tx.currency?.iso}`);
@@ -114,8 +115,10 @@ export const verifyFedaPayTransaction = createServerFn({ method: "POST" })
       }
 
       // Record the credit — use the API-confirmed amount, NOT client-supplied data.amount
-      const rawAmount = Number(tx.amount);
-      const currencyIso = tx.currency?.iso?.toUpperCase() ?? "XOF";
+      const rawAmount = Number(tx.amount || data.amount);
+      // FedaPay returns currency_id: 1=XOF, 2=USD, etc.
+      // Default to XOF if not provided
+      const currencyIso = tx.currency_id === 2 ? "USD" : "XOF";
       const XOF_TO_USD = 1 / 605;
       const confirmedAmount = currencyIso === "XOF" || currencyIso === "CFA"
         ? Math.round(rawAmount * XOF_TO_USD * 100) / 100
