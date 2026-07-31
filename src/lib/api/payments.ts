@@ -104,7 +104,12 @@ export const verifyFedaPayTransaction = createServerFn({ method: "POST" })
       }
 
       // Record the credit — use the API-confirmed amount, NOT client-supplied data.amount
-      const confirmedAmount = Number(tx.amount);
+      const rawAmount = Number(tx.amount);
+      const currencyIso = tx.currency?.iso?.toUpperCase() ?? "XOF";
+      const XOF_TO_USD = 1 / 605;
+      const confirmedAmount = currencyIso === "XOF" || currencyIso === "CFA"
+        ? Math.round(rawAmount * XOF_TO_USD * 100) / 100
+        : rawAmount;
       if (!confirmedAmount || confirmedAmount <= 0) {
         return {
           ok: false,
@@ -112,14 +117,16 @@ export const verifyFedaPayTransaction = createServerFn({ method: "POST" })
         } as PaymentResponse;
       }
 
-      // Duplicate prevention — check if this transaction was already processed
+// Atomic duplicate prevention � INSERT ... ON CONFLICT DO NOTHING
       const reference = `fedapay:${data.transactionId}`;
-      const existing = (await sql`
-        SELECT id FROM credits_ledger
-        WHERE reference = ${reference}
-        LIMIT 1
+      const inserted = (await sql`
+        INSERT INTO credits_ledger (user_id, amount, type, reference)
+        VALUES (${userId}, ${confirmedAmount}, 'purchase', ${reference})
+        ON CONFLICT (reference) DO NOTHING
+        RETURNING id
       `) as { id: number }[];
-      if (existing.length > 0) {
+
+      if (inserted.length === 0) {
         return {
           ok: true,
           message: "Transaction already processed",
@@ -127,13 +134,15 @@ export const verifyFedaPayTransaction = createServerFn({ method: "POST" })
         } as PaymentResponse;
       }
 
-      const result = await recordTransaction({
-        userId,
-        amount: confirmedAmount,
-        type: "purchase",
-        reference: `fedapay:${data.transactionId}`,
-      });
+      // Update user balance atomically
+      const balanceResult = (await sql`
+        UPDATE users
+        SET credits_balance = credits_balance + ${confirmedAmount}
+        WHERE id = ${userId}
+        RETURNING credits_balance
+      `) as { credits_balance: number }[];
 
+      const result = { balance: Number(balanceResult[0]?.credits_balance ?? 0) };
       return {
         ok: true,
         balance: result.balance,

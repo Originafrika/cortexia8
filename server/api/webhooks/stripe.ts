@@ -77,31 +77,37 @@ export default defineEventHandler(async (event) => {
 
   const session = dataObj.object;
   const userId = Number(session.metadata?.userId ?? session.userId);
-  const amount = Number(session.metadata?.amount ?? 0);
   const sessionId = session.id as string;
+
+  // Use session.amount_total (what Stripe actually charged) instead of metadata.amount
+  // amount_total is in cents, so divide by 100
+  const amountTotal = Number(session.amount_total ?? 0);
+  const amount = amountTotal / 100;
 
   if (!userId || amount <= 0) {
     setResponseStatus(event, 400);
-    return { ok: false, error: "Missing userId or amount in session metadata" };
+    return { ok: false, error: "Missing userId or invalid amount" };
   }
 
-  // 4. Check for duplicate processing
-  const existing = (await sql`
-    SELECT id FROM credits_ledger
-    WHERE reference = ${`stripe:${sessionId}`}
-    LIMIT 1
+  // 4. Atomic duplicate prevention
+  const reference = `stripe:${sessionId}`;
+  const inserted = (await sql`
+    INSERT INTO credits_ledger (user_id, amount, type, reference)
+    VALUES (${userId}, ${amount}, 'purchase', ${reference})
+    ON CONFLICT (reference) DO NOTHING
+    RETURNING id
   `) as { id: number }[];
-  if (existing.length > 0) {
+
+  if (inserted.length === 0) {
     return { ok: true, action: "already-processed" };
   }
 
-  // 5. Credit user account
-  await recordTransaction({
-    userId,
-    amount,
-    type: "purchase",
-    reference: `stripe:${sessionId}`,
-  });
+  // 5. Update user balance atomically
+  await sql`
+    UPDATE users
+    SET credits_balance = credits_balance + ${amount}
+    WHERE id = ${userId}
+  `;
 
   return { ok: true, action: "credited" };
 });

@@ -48,11 +48,16 @@ export async function recordTransaction(opts: {
   type: CreditTxType;
   reference?: string;
 }): Promise<{ balance: number; entry: LedgerEntry }> {
+  // For debits (negative amount), ensure balance doesn't go below zero
+  const balanceGuard = opts.amount < 0
+    ? sql` AND credits_balance + ${opts.amount} >= 0`
+    : sql``;
+
   const rows = (await sql`
     WITH updated AS (
       UPDATE users
       SET credits_balance = credits_balance + ${opts.amount}
-      WHERE id = ${opts.userId}
+      WHERE id = ${opts.userId}${balanceGuard}
       RETURNING credits_balance
     ),
     inserted AS (
@@ -65,6 +70,10 @@ export async function recordTransaction(opts: {
     FROM inserted i, updated u
   `) as LedgerEntry[];
   if (rows.length === 0) {
+    // Could be user not found OR insufficient balance
+    if (opts.amount < 0) {
+      throw new Error("Insufficient credits");
+    }
     throw new Error(`User ${opts.userId} not found`);
   }
   return { balance: Number(rows[0].credits_balance), entry: rows[0] };
