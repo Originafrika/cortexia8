@@ -168,7 +168,7 @@ function Auth() {
       if (anyData?.session?.user) {
         const u = anyData.session.user;
         saveSession({
-          token: anyData.token ?? "",
+          token: anyData.token ?? anyData.session?.token ?? "",
           user: {
             id: u.id ?? "",
             name: u.name ?? "",

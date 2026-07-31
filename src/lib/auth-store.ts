@@ -13,10 +13,12 @@ export interface StoredSession {
 
 export function saveSession(data: { token: string; user: StoredSession["user"] }) {
   if (typeof window === "undefined") return; // SSR guard
+  console.log("[Auth] Saving session with token:", data.token ? data.token.slice(0, 10) + "..." : "MISSING");
   try {
     localStorage.setItem(SESSION_KEY, JSON.stringify(data));
-  } catch {
-    // silently ignore storage failures
+    console.log("[Auth] Session saved to localStorage");
+  } catch (err) {
+    console.error("[Auth] Failed to save session:", err);
   }
 }
 
