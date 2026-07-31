@@ -106,7 +106,7 @@ function AccountPage() {
   async function handleFedaPayComplete(transactionId: string) {
     try {
       const result = await verifyFedaPayTransaction({
-        data: { transactionId, amount: amount * CURRENCIES.XOF.rate, sessionToken: loadSession()?.token },
+        data: { transactionId, amount: Math.round(amount * CURRENCIES.XOF.rate), sessionToken: loadSession()?.token },
       });
       if (result.ok) {
         if (result.balance != null) {
@@ -384,7 +384,7 @@ function FedaPayWidget({
   const options = {
     public_key,
     transaction: {
-      amount: amount * CURRENCIES.XOF.rate, // Convert USD to XOF (CFA Franc)
+      amount: Math.round(amount * CURRENCIES.XOF.rate), // Convert USD to XOF (CFA Franc), must be integer
       description: t("account.fedapay_description"),
     },
     currency: {
