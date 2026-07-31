@@ -117,16 +117,16 @@ export const verifyFedaPayTransaction = createServerFn({ method: "POST" })
         } as PaymentResponse;
       }
 
-// Atomic duplicate prevention � INSERT ... ON CONFLICT DO NOTHING
+// Atomic credit: INSERT ledger + UPDATE balance in single CTE
+      // Duplicate detection: if reference already exists, recordTransaction will throw
       const reference = `fedapay:${data.transactionId}`;
-      const inserted = (await sql`
-        INSERT INTO credits_ledger (user_id, amount, type, reference)
-        VALUES (${userId}, ${confirmedAmount}, 'purchase', ${reference})
-        ON CONFLICT (reference) DO NOTHING
-        RETURNING id
+      
+      // Check for duplicate first (fast path)
+      const existing = (await sql`
+        SELECT id FROM credits_ledger WHERE reference = ${reference} LIMIT 1
       `) as { id: number }[];
-
-      if (inserted.length === 0) {
+      
+      if (existing.length > 0) {
         return {
           ok: true,
           message: "Transaction already processed",
@@ -134,15 +134,13 @@ export const verifyFedaPayTransaction = createServerFn({ method: "POST" })
         } as PaymentResponse;
       }
 
-      // Update user balance atomically
-      const balanceResult = (await sql`
-        UPDATE users
-        SET credits_balance = credits_balance + ${confirmedAmount}
-        WHERE id = ${userId}
-        RETURNING credits_balance
-      `) as { credits_balance: number }[];
-
-      const result = { balance: Number(balanceResult[0]?.credits_balance ?? 0) };
+      // Atomic: insert ledger + update balance in single CTE
+      const result = await recordTransaction({
+        userId,
+        amount: confirmedAmount,
+        type: "purchase",
+        reference,
+      });
       return {
         ok: true,
         balance: result.balance,
@@ -150,6 +148,7 @@ export const verifyFedaPayTransaction = createServerFn({ method: "POST" })
       } as PaymentResponse;
     } catch (err) {
       if (err instanceof HttpError) throw err;
+      console.error("[FedaPay] Unexpected error:", err);
       throw new HttpError(500, "Internal server error");
     }
   });
