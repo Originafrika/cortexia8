@@ -70,6 +70,8 @@ export const verifyFedaPayTransaction = createServerFn({ method: "POST" })
         throw new HttpError(500, "FedaPay secret key not configured");
       }
 
+      console.log(`[FedaPay] Verifying transaction ${data.transactionId} for user ${userId}`);
+
       // Fetch transaction from FedaPay API
       const response = await fetch(
         `https://app.fedapay.com/api/v1/transactions/${data.transactionId}.json`,
@@ -83,6 +85,7 @@ export const verifyFedaPayTransaction = createServerFn({ method: "POST" })
 
       if (!response.ok) {
         const errText = await response.text();
+        console.error(`[FedaPay] API error: ${response.status} - ${errText}`);
         throw new HttpError(400, "FedaPay verification failed");
       }
 
@@ -93,10 +96,13 @@ export const verifyFedaPayTransaction = createServerFn({ method: "POST" })
         currency?: { iso?: string };
       };
 
+      console.log(`[FedaPay] API response: status=${tx.status}, amount=${tx.amount}, currency=${tx.currency?.iso}`);
+
       // Accept "approved" or "completed" as valid statuses (FedaPay uses different labels
       // across API versions). Also accept "approved" for test mode.
       const validStatuses = ["approved", "completed", "paid"];
       if (!tx.status || !validStatuses.includes(tx.status.toLowerCase())) {
+        console.log(`[FedaPay] Invalid status: ${tx.status}`);
         return {
           ok: false,
           message: `Transaction status "${tx.status}" is not accepted`,
@@ -110,23 +116,31 @@ export const verifyFedaPayTransaction = createServerFn({ method: "POST" })
       const confirmedAmount = currencyIso === "XOF" || currencyIso === "CFA"
         ? Math.round(rawAmount * XOF_TO_USD * 100) / 100
         : rawAmount;
+      
+      console.log(`[FedaPay] Currency conversion: ${rawAmount} ${currencyIso} → ${confirmedAmount} USD`);
+
       if (!confirmedAmount || confirmedAmount <= 0) {
+        console.log(`[FedaPay] Invalid amount: ${confirmedAmount}`);
         return {
           ok: false,
           message: "Transaction amount is invalid",
         } as PaymentResponse;
       }
 
-// Atomic credit: INSERT ledger + UPDATE balance in single CTE
-      // Duplicate detection: if reference already exists, recordTransaction will throw
+      // Atomic duplicate prevention: INSERT ... ON CONFLICT DO NOTHING
       const reference = `fedapay:${data.transactionId}`;
+      console.log(`[FedaPay] Attempting insert with reference: ${reference}`);
       
-      // Check for duplicate first (fast path)
-      const existing = (await sql`
-        SELECT id FROM credits_ledger WHERE reference = ${reference} LIMIT 1
+      const inserted = (await sql`
+        INSERT INTO credits_ledger (user_id, amount, type, reference)
+        VALUES (${userId}, ${confirmedAmount}, 'purchase', ${reference})
+        ON CONFLICT (reference) DO NOTHING
+        RETURNING id
       `) as { id: number }[];
-      
-      if (existing.length > 0) {
+
+      if (inserted.length === 0) {
+        // Duplicate — already processed
+        console.log(`[FedaPay] Duplicate detected: ${reference}`);
         return {
           ok: true,
           message: "Transaction already processed",
@@ -134,13 +148,19 @@ export const verifyFedaPayTransaction = createServerFn({ method: "POST" })
         } as PaymentResponse;
       }
 
-      // Atomic: insert ledger + update balance in single CTE
-      const result = await recordTransaction({
-        userId,
-        amount: confirmedAmount,
-        type: "purchase",
-        reference,
-      });
+      console.log(`[FedaPay] Inserted ledger row ${inserted[0].id}, updating balance`);
+
+      // Update user balance atomically
+      const balanceResult = (await sql`
+        UPDATE users
+        SET credits_balance = credits_balance + ${confirmedAmount}
+        WHERE id = ${userId}
+        RETURNING credits_balance
+      `) as { credits_balance: number }[];
+
+      const result = { balance: Number(balanceResult[0]?.credits_balance ?? 0) };
+      console.log(`[FedaPay] Success! Credited ${confirmedAmount} USD. New balance: ${result.balance}`);
+      
       return {
         ok: true,
         balance: result.balance,

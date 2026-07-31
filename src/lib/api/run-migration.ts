@@ -19,6 +19,7 @@ export const runMigration = createServerFn({ method: "GET" })
       `;
       await sql`CREATE INDEX IF NOT EXISTS credits_ledger_user_idx ON credits_ledger (user_id)`;
       await sql`CREATE INDEX IF NOT EXISTS credits_ledger_type_idx ON credits_ledger (type)`;
+      await sql`CREATE UNIQUE INDEX IF NOT EXISTS credits_ledger_reference_unique_idx ON credits_ledger (reference) WHERE reference IS NOT NULL`;
       results.push("credits_ledger: OK");
     } catch (e) {
       results.push(`credits_ledger: ${String(e)}`);
