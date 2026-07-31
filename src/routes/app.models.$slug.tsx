@@ -157,7 +157,7 @@ export function ModelPlaygroundContent({
   const canGenerate = useMemo(() => {
     for (const p of model.params) {
       if (!p.required) continue;
-      if (p.kind === "prompt") {
+      if (p.kind === "prompt" || (p.kind === "longtext" && p.key === "prompt")) {
         if (prompt.trim().length < 3) return false;
       } else if (p.kind === "upload") {
         const val = state[p.key ?? ""] ?? [];
@@ -197,7 +197,7 @@ export function ModelPlaygroundContent({
     const missingFields: string[] = [];
     for (const p of model.params) {
       if (!p.required) continue;
-      if (p.kind === "prompt") {
+      if (p.kind === "prompt" || (p.kind === "longtext" && p.key === "prompt")) {
         if (prompt.trim().length < 3) missingFields.push(p.label);
       } else if (p.kind === "upload") {
         const val = state[p.key ?? ""] ?? [];

@@ -154,6 +154,7 @@ function AccountPage() {
                 {t("account.balance_available")}
               </div>
               <PriceDisplay
+                key={balance}
                 usd={balance ?? 0}
                 className="mt-2 font-display text-5xl tracking-[-0.03em]"
                 emphasize
