@@ -406,24 +406,23 @@ function FedaPayWidget({
   };
 
   let processed = false;
-    onComplete(resp: { reason?: string; transaction?: { id?: number } }) {
-      const FedaPay = (window as any).FedaPay;
-      if (FedaPay && resp.reason === FedaPay.DIALOG_DISMISSED) {
-        onCancel?.();
+  const handleComplete = (resp: { reason?: string; transaction?: { id?: number } }) => {
+    const FedaPay = (window as any).FedaPay;
+    if (FedaPay && resp.reason === FedaPay.DIALOG_DISMISSED) {
+      onCancel?.();
+      return;
+    }
+    console.log(`[Browser] FedaPay widget onComplete:`, resp);
+    if (resp.transaction?.id) {
+      if (processed) {
+        console.log(`[Browser] Ignoring duplicate onComplete for transaction ${resp.transaction.id}`);
         return;
       }
-      console.log(`[Browser] FedaPay widget onComplete:`, resp);
-      if (resp.transaction?.id) {
-        if (processed) {
-          console.log(`[Browser] Ignoring duplicate onComplete for transaction ${resp.transaction.id}`);
-          return;
-        }
-        processed = true;
-        console.log(`[Browser] Transaction ID: ${resp.transaction.id}`);
-        onComplete(String(resp.transaction.id));
-      }
-    },
+      processed = true;
+      console.log(`[Browser] Transaction ID: ${resp.transaction.id}`);
+      onComplete(String(resp.transaction.id));
+    }
   };
 
-  return <FedaCheckoutButton options={options as any} />;
+  return <FedaCheckoutButton options={{...options, onComplete: handleComplete} as any} />;
 }
