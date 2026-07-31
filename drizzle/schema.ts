@@ -1,6 +1,7 @@
 import {
   boolean,
   index,
+  uniqueIndex,
   integer,
   jsonb,
   numeric,
@@ -227,6 +228,7 @@ export const creditsLedger = pgTable(
   (table) => ({
     userIdx: index("credits_ledger_user_idx").on(table.userId),
     typeIdx: index("credits_ledger_type_idx").on(table.type),
+    referenceIdx: uniqueIndex("credits_ledger_reference_unique_idx").on(table.reference),
   }),
 );
 
