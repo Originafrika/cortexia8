@@ -402,7 +402,7 @@ function FedaPayWidget({
     button: {
       class: "mt-5 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber px-5 py-3 text-sm font-medium text-primary-foreground hover:opacity-95 transition",
       text: t("account.recharge_btn").replace("{amount}", formatMoney(amount, currency)),
-    },
+    };
     let processed = false;
     onComplete(resp: { reason?: string; transaction?: { id?: number } }) {
       const FedaPay = (window as any).FedaPay;
