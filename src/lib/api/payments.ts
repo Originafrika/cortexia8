@@ -89,14 +89,18 @@ export const verifyFedaPayTransaction = createServerFn({ method: "POST" })
         throw new HttpError(400, "FedaPay verification failed");
       }
 
-      const tx = (await response.json()) as {
+      const rawResponse = await response.json();
+      console.log("[FedaPay] Raw API response:", JSON.stringify(rawResponse));
+      
+      // FedaPay API may wrap response in { data: { ... } } or return directly
+      const tx = (rawResponse.data || rawResponse) as {
         id?: number;
         status?: string;
         amount?: number;
         currency?: { iso?: string };
       };
 
-      console.log(`[FedaPay] API response: status=${tx.status}, amount=${tx.amount}, currency=${tx.currency?.iso}`);
+      console.log(`[FedaPay] Parsed response: status=${tx.status}, amount=${tx.amount}, currency=${tx.currency?.iso}`);
 
       // Accept "approved" or "completed" as valid statuses (FedaPay uses different labels
       // across API versions). Also accept "approved" for test mode.
