@@ -111,7 +111,7 @@ export default defineEventHandler(async (event) => {
     });
   } catch (recordErr: any) {
     // Handle unique_violation (race condition)
-    if (recordErr?.code === "23505" || recordErr?.message?.includes("unique")) {
+    if (recordErr?.code === "23505") {
       return { ok: true, action: "already-processed" };
     }
     throw recordErr;

@@ -163,7 +163,7 @@ export const verifyFedaPayTransaction = createServerFn({ method: "POST" })
         });
       } catch (recordErr: any) {
         // Handle unique_violation (race condition: another request inserted first)
-        if (recordErr?.code === "23505" || recordErr?.message?.includes("unique")) {
+        if (recordErr?.code === "23505") {
           console.log(`[FedaPay] Duplicate detected via race condition: ${reference}`);
           return {
             ok: true,
