@@ -135,7 +135,7 @@ export function ModelPlaygroundContent({
   const MAX_CONCURRENT = 3;
   const [history, setHistory] = useState<Result[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const timers = useRef<number[]>([]);
+  const timersRef = useRef<Map<string, number[]>>(new Map());
   const galleryRef = useRef<HTMLDivElement>(null);
 
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -171,9 +171,16 @@ export function ModelPlaygroundContent({
     return true;
   });
 
-  function clearTimers() {
-    timers.current.forEach((t) => window.clearTimeout(t));
-    timers.current = [];
+  function clearGenTimers(genId: string) {
+    const genTimers = timersRef.current.get(genId) ?? [];
+    genTimers.forEach((t) => window.clearTimeout(t));
+    timersRef.current.delete(genId);
+  }
+  function clearAllTimers() {
+    for (const [, genTimers] of timersRef.current) {
+      genTimers.forEach((t) => window.clearTimeout(t));
+    }
+    timersRef.current.clear();
   }
 
   function handleGenerate() {
@@ -193,7 +200,7 @@ export function ModelPlaygroundContent({
       }
     }
     if (missingFields.length > 0) {
-      const errGenId = `err_${Date.now()}`;
+      const errGenId = `err_${crypto.randomUUID()}`;
       setActiveGens(prev => new Map(prev).set(errGenId, {
         id: errGenId,
         status: "error",
@@ -205,9 +212,9 @@ export function ModelPlaygroundContent({
       return;
     }
 
-    clearTimers();
+    clearAllTimers();
 
-    const genId = `gen_${Date.now()}`;
+    const genId = `gen_${crypto.randomUUID()}`;
     setActiveGens(prev => new Map(prev).set(genId, {
       id: genId,
       status: "loading",
@@ -298,13 +305,13 @@ export function ModelPlaygroundContent({
                 return;
               }
 
-              timers.current.push(window.setTimeout(poll, 2000));
+              const genTimers = timersRef.current.get(genId) ?? []; genTimers.push(window.setTimeout(poll, 2000)); timersRef.current.set(genId, genTimers);
             })
             .catch(() => {
-              timers.current.push(window.setTimeout(poll, 2000));
+              const genTimers = timersRef.current.get(genId) ?? []; genTimers.push(window.setTimeout(poll, 2000)); timersRef.current.set(genId, genTimers);
             });
         };
-        timers.current.push(window.setTimeout(poll, 2000));
+        const genTimers = timersRef.current.get(genId) ?? []; genTimers.push(window.setTimeout(poll, 2000)); timersRef.current.set(genId, genTimers);
       })
       .catch((err) => {
         setActiveGens(prev => {
@@ -316,7 +323,7 @@ export function ModelPlaygroundContent({
       });
   }
 
-  useEffect(() => () => clearTimers(), []);
+  useEffect(() => () => clearAllTimers(), []);
 
   return (
     <div
@@ -475,13 +482,15 @@ function initState(model: Model): Record<string, unknown> {
     if (p.kind === "toggle") init[p.key] = !!p.default;
     if (p.kind === "seed") init[p.key] = undefined;
     if (p.kind === "upload") init[p.key] = [];
+    if (p.kind === "longtext") init[p.key] = "";
+    if (p.kind === "prompt") init[p.key] = "";
   });
   return init;
 }
 
 
 
-function LoadingCard({ model, progress }: { model: Model; progress: number }) {
+function LoadingCard({ model, progress, onCancel }: { model: Model; progress: number; onCancel?: () => void }) {
   const t = useT();
   return (
     <div className="surface-gradient-border rounded-2xl bg-surface-1/60 overflow-hidden">

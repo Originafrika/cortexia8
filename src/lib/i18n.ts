@@ -420,6 +420,7 @@ const fr: Dict = {
   "playground.seed_placeholder": "aléatoire",
   "playground.seed_tooltip": "Seed aléatoire",
   "playground.ready": "Prêt à générer.",
+  "playground.cancel": "Annuler",
   "playground.ready_desc": "Écris ton prompt en bas...",
   "playground.similar": "Modèles similaires",
   "playground.badge.popular": "Populaire",

@@ -72,6 +72,10 @@ export default defineEventHandler(async (event) => {
       setResponseStatus(event, 400);
       return { error: "prompt is required" };
     }
+    if (prompt.length > 10000) {
+      setResponseStatus(event, 400);
+      return { error: "prompt too long (max 10000 characters)" };
+    }
 
     // 3. Look up model
     const model = await getActiveModelBySlug(modelSlug);

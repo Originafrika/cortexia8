@@ -24,6 +24,9 @@ export const agentRun = createServerFn({ method: "POST" })
     if (!data.message || typeof data.message !== "string") {
       throw new HttpError(400, "message is required");
     }
+    if (data.message.length > 10000) {
+      throw new HttpError(400, "Message too long");
+    }
     return data;
   })
   .handler(async ({ data }) => {

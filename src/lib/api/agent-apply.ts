@@ -150,6 +150,9 @@ async function applyOneOp(
 ) {
   switch (op.op) {
     case "ADD_NODE": {
+      if (typeof op.modelSlug !== "string" || !MODELS.find((m) => m.slug === op.modelSlug)) {
+        throw new HttpError(400, `Unknown model: ${op.modelSlug}`);
+      }
       const pos = op.position ?? { x: 120 + Math.random() * 80, y: 120 + Math.random() * 80 };
       const res = await client.query<{ id: number }>(
         `INSERT INTO workflow_nodes
