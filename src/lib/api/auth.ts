@@ -28,6 +28,7 @@ function parseCookies(header: string): Record<string, string> {
 }
 
 export async function getRequestContext(sessionToken?: string): Promise<RequestContext> {
+  console.log(`[Auth] getRequestContext called, sessionToken: ${sessionToken ? "provided (" + sessionToken.slice(0, 10) + "...)" : "undefined"}`);
   // ── 1. Bearer API key (cx_…) ───────────────────────────────────────────
   const headers = getEventHeaders();
   if (headers) {
@@ -126,6 +127,7 @@ async function resolveSessionFromToken(
 }
 
 export async function requireUserId(ctx: RequestContext): Promise<number> {
+  console.log(`[Auth] requireUserId: userId=${ctx.userId}`);
   if (ctx.userId == null) {
     throw new HttpError(401, "Authentication required");
   }

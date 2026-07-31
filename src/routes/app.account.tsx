@@ -105,6 +105,8 @@ function AccountPage() {
 
   async function handleFedaPayComplete(transactionId: string) {
     console.log(`[Browser] FedaPay onComplete called with transactionId: ${transactionId}`);
+    const session = loadSession();
+    console.log(`[Browser] Session token: ${session?.token ? "present (" + session.token.slice(0, 10) + "...)" : "MISSING"}`);
     try {
       console.log(`[Browser] Calling verifyFedaPayTransaction for transaction ${transactionId}`);
       const result = await verifyFedaPayTransaction({
