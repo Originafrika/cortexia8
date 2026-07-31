@@ -74,7 +74,7 @@ export const verifyFedaPayTransaction = createServerFn({ method: "POST" })
 
       // Fetch transaction from FedaPay API
       const response = await fetch(
-        `https://app.fedapay.com/api/v1/transactions/${data.transactionId}.json`,
+        `https://api.fedapay.com/api/v1/transactions/${data.transactionId}.json`,
         {
           headers: {
             Authorization: `Bearer ${apiKey}`,
