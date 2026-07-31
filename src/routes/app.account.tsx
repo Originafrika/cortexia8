@@ -104,10 +104,13 @@ function AccountPage() {
   }
 
   async function handleFedaPayComplete(transactionId: string) {
+    console.log(`[Browser] FedaPay onComplete called with transactionId: ${transactionId}`);
     try {
+      console.log(`[Browser] Calling verifyFedaPayTransaction for transaction ${transactionId}`);
       const result = await verifyFedaPayTransaction({
         data: { transactionId, amount: Math.round(amount * CURRENCIES.XOF.rate), sessionToken: loadSession()?.token },
       });
+      console.log(`[Browser] verifyFedaPayTransaction result:`, result);
       if (result.ok) {
         if (result.balance != null) {
           setBalance(result.balance);
@@ -120,8 +123,9 @@ function AccountPage() {
         toast.error(result.message ?? t("account.verification_failed"));
       }
     } catch (err) {
-      console.error(err);
-      toast.error(t("account.fedapay_error"));
+      console.error("[Browser] FedaPay verification failed:", err);
+      const msg = err instanceof Error ? err.message : String(err);
+      toast.error(`${t("account.fedapay_error")}: ${msg}`);
     }
   }
 
@@ -365,6 +369,9 @@ function FedaPayWidget({
         });
       };
       document.body.appendChild(script);
+    script.onerror = (e) => {
+      console.error("[Browser] Failed to load FedaPay SDK:", e);
+    };
     } else {
       import("fedapay-reactjs").then((mod) => {
         setFedaCheckoutButton(() => mod.FedaCheckoutButton);
@@ -400,7 +407,9 @@ function FedaPayWidget({
         onCancel?.();
         return;
       }
+      console.log(`[Browser] FedaPay widget onComplete:`, resp);
       if (resp.transaction?.id) {
+        console.log(`[Browser] Transaction ID: ${resp.transaction.id}`);
         onComplete(String(resp.transaction.id));
       }
     },
