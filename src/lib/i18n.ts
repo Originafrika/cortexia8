@@ -547,6 +547,9 @@ const fr: Dict = {
   "account.custom_amount": "Autre montant",
   "account.custom_amount_placeholder": "Min 1 $",
   "account.custom_amount_min": "Le montant minimum est {min} $",
+  "account.sign_out": "Déconnexion",
+  "account.sign_out_desc": "Se déconnecter de votre compte Cortexia.",
+  "account.disconnect": "Se déconnecter",
 
   // Models catalog
   "models.section": "Catalogue",
@@ -1094,6 +1097,9 @@ const en: Dict = {
   "account.custom_amount": "Custom amount",
   "account.custom_amount_placeholder": "Min $1",
   "account.custom_amount_min": "Minimum amount is ${min}",
+  "account.sign_out": "Sign Out",
+  "account.sign_out_desc": "Disconnect from your Cortexia account.",
+  "account.disconnect": "Disconnect",
 
   // Models catalog
   "models.section": "Catalog",

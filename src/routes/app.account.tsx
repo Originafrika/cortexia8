@@ -1,8 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { PriceDisplay } from "@/components/price-display";
 import { CurrencyPicker } from "@/components/currency-picker";
-import { CreditCard, Smartphone, Bitcoin, Wallet, Check, Loader2 } from "lucide-react";
+import { CreditCard, Smartphone, Bitcoin, Wallet, Check, Loader2, LogOut } from "lucide-react";
 import { useCurrency, formatMoney, CURRENCIES } from "@/lib/currency";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -10,6 +10,8 @@ import { verifyFedaPayTransaction, createStripeCheckout } from "@/lib/api/paymen
 import { getUserBalance, getTransactionHistory, type TxRow } from "@/lib/api/balance";
 import { useT } from "@/lib/i18n";
 import { loadSession } from "@/lib/auth-store";
+import { authClient } from "@/auth";
+import { clearSession } from "@/lib/auth-store";
 
 export const Route = createFileRoute("/app/account")({
   head: () => ({
@@ -31,6 +33,7 @@ const ALL_METHODS = [
 function AccountPage() {
   const t = useT();
   const c = useCurrency();
+  const navigate = useNavigate();
   const [method, setMethod] = useState<string>("mm");
   const [amount, setAmount] = useState<number>(10);
   const [loading, setLoading] = useState(false);
@@ -326,6 +329,33 @@ function AccountPage() {
               })}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      {/* Sign Out */}
+      <div className="mt-8">
+        <div className="surface-gradient-border rounded-2xl bg-surface-1/60 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="font-display text-lg">{t("account.sign_out")}</div>
+              <div className="text-sm text-muted-foreground mt-1">{t("account.sign_out_desc")}</div>
+            </div>
+            <button
+              onClick={async () => {
+                try {
+                  await authClient.signOut();
+                } catch {
+                  // Ignore sign-out errors
+                }
+                clearSession();
+                navigate({ to: "/auth/$pathname" as "/auth/$pathname", params: { pathname: "sign-in" } });
+              }}
+              className="inline-flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm text-red-400 hover:bg-red-500/20 transition cursor-pointer"
+            >
+              <LogOut className="size-4" />
+              {t("account.disconnect")}
+            </button>
+          </div>
         </div>
       </div>
     </div>
