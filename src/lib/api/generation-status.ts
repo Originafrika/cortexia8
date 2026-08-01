@@ -13,6 +13,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { sql } from "@/lib/db";
 import { getTaskDetail, parseResultJson } from "@/lib/kie-api/common";
 import { HttpError, getRequestContext, requireUserId } from "./auth";
+import { handleWebhook } from "./webhooks-kie";
 
 export type StatusInput = {
   id: number;
@@ -161,6 +162,8 @@ async function loadRun(
   }[];
 
   // Optional live refresh from kie.ai for still-in-flight executions.
+  // If the webhook hasn't fired but kie.ai says the task is done, we
+  // process the result inline (safety net for failed callbacks).
   const nodes: NodeSummary[] = [];
   for (const row of nodeRows) {
     let liveState = row.status;
@@ -168,10 +171,27 @@ async function loadRun(
       try {
         const info = await getTaskDetail(row.kie_task_id);
         liveState = info.state;
-        const { resultUrls } = parseResultJson(info.resultJson);
-        if (info.state === "success" && resultUrls.length > 0 && !row.asset_id) {
-          // The webhook hasn't fired yet; the user can still see the
-          // first result URL via this endpoint.
+
+        // Safety net: if kie.ai says done but DB hasn't been updated,
+        // trigger the webhook handler inline to process the result.
+        if (
+          (info.state === "success" || info.state === "fail") &&
+          (row.status === "queued" || row.status === "running")
+        ) {
+          console.log(`[generation-status] Webhook fallback: taskId=${row.kie_task_id} is ${info.state} but DB says ${row.status} — processing inline`);
+          try {
+            await handleWebhook({ taskId: row.kie_task_id, state: info.state });
+            // Re-read the row to get updated status/asset
+            const updated = (await sql`
+              SELECT status, completed_at, output_asset_id FROM run_node_executions
+              WHERE id = ${row.id} LIMIT 1
+            `) as { status: string; completed_at: string | null; output_asset_id: number | null }[];
+            if (updated.length > 0) {
+              liveState = updated[0].status;
+            }
+          } catch (hookErr) {
+            console.error(`[generation-status] Webhook fallback failed for taskId=${row.kie_task_id}:`, hookErr);
+          }
         }
       } catch {
         // keep the local state — kie.ai might be briefly down

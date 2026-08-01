@@ -60,7 +60,7 @@ export const kieWebhook = createServerFn({ method: "POST" })
     }
   });
 
-async function handleWebhook(body: WebhookInput): Promise<WebhookResponse> {
+export async function handleWebhook(body: WebhookInput): Promise<WebhookResponse> {
   const taskId = extractTaskId(body);
   if (!taskId) {
     return { ok: false, taskId: null, action: "rejected", reason: "missing taskId" };
