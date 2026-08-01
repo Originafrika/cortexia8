@@ -100,11 +100,7 @@ function Auth() {
             emailVerified: result.data.user.emailVerified ?? false,
           },
         });
-        if (role === "admin") {
-          navigate({ to: "/app-preview" });
-        } else {
-          navigate({ to: "/access-denied" });
-        }
+        navigate({ to: "/app-preview" });
       } else {
         navigate({ to: "/app-preview" });
       }
@@ -154,11 +150,7 @@ function Auth() {
               emailVerified: true,
             },
           });
-          if (role === "admin") {
-            navigate({ to: "/app-preview" });
-          } else {
-            navigate({ to: "/access-denied" });
-          }
+          navigate({ to: "/app-preview" });
           return;
         }
       } else {
