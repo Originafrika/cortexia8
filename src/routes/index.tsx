@@ -1,5 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { loadSession } from "@/lib/auth-store";
+import { isWaitlist } from "@/lib/launch";
 import { AmbientBackground } from "@/components/ambient-background";
 import { SiteHeader } from "@/components/site-header";
 import { EditorialCountdown } from "@/components/editorial-countdown";
@@ -17,6 +18,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, ArrowRight, Bot, Sliders } from "lucide-react";
 
 export const Route = createFileRoute("/")({
+  beforeLoad: () => {
+    if (typeof window === "undefined") return;
+    if (!isWaitlist()) {
+      const session = loadSession();
+      if (session) {
+        throw redirect({ to: "/app-preview" });
+      }
+    }
+  },
   head: () => ({
     meta: [
       { title: "Cortexia — Un accès. Tous les modèles. Waitlist ouverte." },

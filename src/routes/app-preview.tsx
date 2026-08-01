@@ -1,5 +1,4 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
 import { loadSession } from "@/lib/auth-store";
 import { AmbientBackground } from "@/components/ambient-background";
 import { SiteHeader } from "@/components/site-header";
@@ -13,7 +12,7 @@ import { useT } from "@/lib/i18n";
 export const Route = createFileRoute("/app-preview")({
   head: () => ({
     meta: [
-      { name: "robots", content: "noindex,nofollow" },
+      { name: "description", content: "Cortexia — AI generation platform with 200+ models." },
     ],
   }),
   component: AppPreview,
@@ -21,14 +20,7 @@ export const Route = createFileRoute("/app-preview")({
 
 function AppPreview() {
   const t = useT();
-  const [isAdmin, setIsAdmin] = useState(false);
-
-  useEffect(() => {
-    const storedSession = loadSession();
-    if (storedSession?.user?.role === "admin") {
-      setIsAdmin(true);
-    }
-  }, []);
+  const session = loadSession();
   return (
     <div className="relative min-h-screen">
       <AmbientBackground />
@@ -112,12 +104,20 @@ function AppPreview() {
       <footer className="mt-8 border-t border-border">
         <div className="mx-auto max-w-7xl px-5 sm:px-8 py-10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
           <span>{t("preview.footer_copy")}</span>
-          {isAdmin && (
+          {session ? (
             <Link
               to="/app"
               className="hover:text-foreground transition inline-flex items-center gap-1"
             >
               {t("preview.footer_open")} <ArrowRight className="size-3" />
+            </Link>
+          ) : (
+            <Link
+              to="/auth/$pathname"
+              params={{ pathname: "sign-in" }}
+              className="hover:text-foreground transition inline-flex items-center gap-1"
+            >
+              Sign in <ArrowRight className="size-3" />
             </Link>
           )}
         </div>
