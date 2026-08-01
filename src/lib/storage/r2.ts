@@ -264,8 +264,6 @@ async function s3PutObject(cfg: R2Config, opts: PutOptions): Promise<void> {
 
 // ── Proxy helpers for browser-inaccessible URLs ────────────────────────
 
-import { proxyImage } from "@/lib/api/proxy-image";
-
 /**
  * Returns true when the URL points at a private R2 endpoint or a
  * third-party host that the browser can't load directly (CORS / auth).
@@ -291,9 +289,6 @@ export function needsProxy(url: string | null | undefined): boolean {
  */
 export function proxiedUrl(url: string | null | undefined): string {
   if (!url || !needsProxy(url)) return url ?? "";
-  // For <img src>, we can't use server function directly.
-  // Return the original URL — callers that need proxying should use
-  // fetchProxiedImage() instead for blob URL creation.
   return url;
 }
 
@@ -306,6 +301,8 @@ export async function fetchProxiedImage(url: string | null | undefined): Promise
   if (!url || !needsProxy(url)) return url ?? "";
 
   try {
+    // Lazy-load to avoid SSR issues with createServerFn import chain
+    const { proxyImage } = await import("@/lib/api/proxy-image");
     const result = await proxyImage({ data: { url } });
     const binary = atob(result.data);
     const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
