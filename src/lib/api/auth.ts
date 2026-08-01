@@ -156,17 +156,6 @@ export class HttpError extends Error {
   }
 }
 
-export function toJsonResponse(err: unknown): Response {
-  if (err instanceof HttpError) {
-    return Response.json(
-      { error: err.message, detail: err.detail ?? null },
-      { status: err.status },
-    );
-  }
-  // Sanitize 500 errors — never leak internal details to clients
-  return Response.json({ error: "Internal server error" }, { status: 500 });
-}
-
 async function sha256Hex(s: string): Promise<string> {
   // Use Web Crypto (available in Vercel's Node 22 runtime).
   const data = new TextEncoder().encode(s);

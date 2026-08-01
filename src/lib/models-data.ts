@@ -1033,7 +1033,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     name: "Grok Video 1.5",
     provider: "xAI",
     category: "video",
-    kieEndpoint: "grok-imagine-video-1.5-preview",
+    kieEndpoint: "grok-imagine-video-1-5-preview",
     fidelityStatus: "fidele",
     supportsReferenceUpload: false,
     providerCostUsd: 0.0119,

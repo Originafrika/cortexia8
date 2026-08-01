@@ -108,6 +108,15 @@ async function runGenerate(
     throw new HttpError(404, `Model '${data.modelSlug}' not found or inactive`);
   }
 
+  // Validate kie_endpoint is properly configured before calling kie.ai
+  if (!model.kie_endpoint) {
+    throw new HttpError(500, `Model '${model.slug}' is misconfigured: kie_endpoint is empty`);
+  }
+  if (model.kie_endpoint === model.slug) {
+    console.error(`[Generate] CRITICAL: kie_endpoint equals slug for '${model.slug}' — bad seed`);
+    throw new HttpError(500, `Model '${model.slug}' is misconfigured: kie_endpoint matches slug`);
+  }
+
   // 1. Upload references (if any markers in the input).
   const { resolved: resolvedInput, uploadedCount } = await resolveUploads(data.input);
   console.log(`[Generate] Resolved input, uploaded: ${uploadedCount}`);
@@ -217,7 +226,10 @@ async function submitTask(opts: {
   input: Record<string, unknown>;
   callback?: string;
 }): Promise<string> {
-  const family = opts.apiFamily ?? "market_unified";
+  if (!opts.apiFamily) {
+    throw new HttpError(500, `Model '${opts.model.slug}' is misconfigured: api_family is NULL`);
+  }
+  const family = opts.apiFamily;
 
   switch (family) {
     case "market_unified": {
