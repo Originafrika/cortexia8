@@ -1,9 +1,10 @@
 -- 0017: Set correct api_family for all chat/text models.
 -- Previously all models were set to 'market_unified' which routes
 -- through createTask — chat models need dedicated chat endpoints.
+-- 'chat_google_native' was removed from codebase; Gemini uses OpenAI-compat.
 
--- Google native (direct generateContent API via kie.ai)
-UPDATE models SET api_family = 'chat_google_native' WHERE slug IN (
+-- Gemini (OpenAI-compatible endpoint: /${model}/v1/chat/completions)
+UPDATE models SET api_family = 'chat_openai' WHERE slug IN (
   'gemini-25-pro', 'gemini-3-pro', 'gemini-31-pro',
   'gemini-25-flash', 'gemini-3-flash', 'gemini-35-flash',
   'gemini-3-flash-v1beta'
