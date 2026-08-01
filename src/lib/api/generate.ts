@@ -112,10 +112,6 @@ async function runGenerate(
   if (!model.kie_endpoint) {
     throw new HttpError(500, `Model '${model.slug}' is misconfigured: kie_endpoint is empty`);
   }
-  if (model.kie_endpoint === model.slug) {
-    console.error(`[Generate] CRITICAL: kie_endpoint equals slug for '${model.slug}' — bad seed`);
-    throw new HttpError(500, `Model '${model.slug}' is misconfigured: kie_endpoint matches slug`);
-  }
 
   // 1. Upload references (if any markers in the input).
   const { resolved: resolvedInput, uploadedCount } = await resolveUploads(data.input);
