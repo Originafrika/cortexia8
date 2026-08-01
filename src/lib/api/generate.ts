@@ -123,6 +123,18 @@ async function runGenerate(
   const { resolved: resolvedInput, uploadedCount } = await resolveUploads(data.input);
   console.log(`[Generate] Resolved input, uploaded: ${uploadedCount}`);
 
+  // 1b. Auto-wrap plain-text messages into OpenAI format for text models.
+  //     Users type "hi" in the textarea; kie.ai expects [{role:"user",content:"hi"}].
+  if (model.category === "text" && typeof resolvedInput.messages === "string") {
+    const text = resolvedInput.messages.trim();
+    if (text) {
+      resolvedInput.messages = [{ role: "user", content: text }];
+    } else {
+      resolvedInput.messages = [];
+    }
+    console.log(`[Generate] Auto-wrapped messages string into OpenAI format`);
+  }
+
   // 2. Cost + credit check.
   const cost = nodeCostUsd(model, resolvedInput);
   console.log(`[Generate] Cost: ${cost}, model: ${model.slug}`);

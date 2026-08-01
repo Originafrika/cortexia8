@@ -180,7 +180,7 @@ export const schemaClaudeDefault: InputSchemaField[] = [
 ];
 
 export const schemaGPT: InputSchemaField[] = [
-  { key: "messages", type: "longtext", required: true, label: "Messages (JSON array)" },
+  { key: "messages", type: "longtext", required: true, label: "Prompt" },
   { key: "reasoning_effort", type: "enum", options: ["low", "high"], default: "high" },
 ];
 
