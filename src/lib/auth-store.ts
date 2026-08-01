@@ -34,6 +34,11 @@ export function loadSession(): StoredSession | null {
   }
 }
 
+export function isAdmin(): boolean {
+  const session = loadSession();
+  return session?.user?.role === "admin";
+}
+
 export function clearSession() {
   if (typeof window === "undefined") return; // SSR guard
   try {
