@@ -17,24 +17,20 @@ import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, ArrowRight, Bot, Sliders } from "lucide-react";
 
+const LiveLanding = () => import("./app-preview").then((m) => ({ default: m.AppPreview }));
+
 export const Route = createFileRoute("/")({
-  beforeLoad: () => {
-    if (typeof window === "undefined") return;
-    if (!isWaitlist()) {
-      throw redirect({ to: "/app-preview" });
-    }
-  },
   head: () => ({
     meta: [
-      { title: "Cortexia — Un accès. Tous les modèles. Waitlist ouverte." },
+      { title: "Cortexia — Un accès. Tous les modèles." },
       {
         name: "description",
         content:
-          "Cortexia ouvre le 1er août : le catalogue complet — Kling, Seedream, Claude, ElevenLabs — en accès direct, playground par playground. L'agent choisit pour toi ou tu gardes la main. Facturé à l'usage. Rejoins la waitlist.",
+          "Cortexia — AI generation platform with 200+ models. Image, video, voice, music, text. Pay per use.",
       },
     ],
   }),
-  component: WaitlistLanding,
+  component: isWaitlist() ? WaitlistLanding : LiveLanding,
 });
 
 function WaitlistLanding() {
