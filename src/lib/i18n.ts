@@ -421,6 +421,8 @@ const fr: Dict = {
   "playground.seed_tooltip": "Seed aléatoire",
   "playground.ready": "Prêt à générer.",
   "playground.cancel": "Annuler",
+  "playground.new_chat": "Nouvelle session",
+  "playground.no_sessions": "Aucune session",
   "playground.ready_desc": "Écris ton prompt en bas...",
   "playground.similar": "Modèles similaires",
   "playground.badge.popular": "Populaire",
@@ -978,6 +980,8 @@ const en: Dict = {
   "playground.render_audio": "Voice synthesis",
   "playground.render_text": "Writing",
   "playground.render_image": "Image rendering",
+  "playground.new_chat": "New chat",
+  "playground.no_sessions": "No sessions yet",
 
   // Categories
   "cat.all": "All",
@@ -1495,6 +1499,8 @@ const pt: Dict = {
   "playground.render_audio": "Síntese de voz",
   "playground.render_text": "Redação",
   "playground.render_image": "Renderização de imagem",
+  "playground.new_chat": "Nova sessão",
+  "playground.no_sessions": "Nenhuma sessão",
 
   // Categories
   "cat.all": "Todos",
@@ -2008,6 +2014,8 @@ const es: Dict = {
   "playground.render_audio": "Síntesis de voz",
   "playground.render_text": "Redacción",
   "playground.render_image": "Renderizado de imagen",
+  "playground.new_chat": "Nueva sesión",
+  "playground.no_sessions": "Sin sesiones",
 
   // Categories
   "cat.all": "Todos",
@@ -2521,6 +2529,8 @@ const id: Dict = {
   "playground.render_audio": "Sintesis suara",
   "playground.render_text": "Penulisan",
   "playground.render_image": "Rendering gambar",
+  "playground.new_chat": "Sesi baru",
+  "playground.no_sessions": "Belum ada sesi",
 
   // Categories
   "cat.all": "Semua",
