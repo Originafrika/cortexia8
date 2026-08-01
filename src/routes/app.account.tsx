@@ -69,15 +69,14 @@ function AccountPage() {
   async function handleRecharge() {
     setLoading(true);
     try {
-      if (method === "mm" || method === "card") {
-        // FedaPay handles both Mobile Money and Card payments
-        // The FedaPay widget handles its own flow
+      if (method === "mm") {
+        // FedaPay handles Mobile Money — widget handles its own flow
         toast.info(t("account.use_fedapay"));
         return;
       }
 
-      // crypto and alipay go through Stripe Checkout
-      if (method === "crypto" || method === "ali") {
+      // Card, crypto, and alipay go through Stripe Checkout
+      if (method === "card" || method === "crypto" || method === "ali") {
         const result = await createStripeCheckout({
           data: {
             amount,
@@ -125,8 +124,8 @@ function AccountPage() {
     }
   }
 
-  const isFedaPayReady = (method === "mm" || method === "card") && !!fedapayKey;
-  const isStripeReady = method === "crypto" || method === "ali";
+  const isFedaPayReady = method === "mm" && !!fedapayKey;
+  const isStripeReady = method === "card" || method === "crypto" || method === "ali";
   const canRecharge = isFedaPayReady || isStripeReady;
 
   return (
