@@ -189,15 +189,24 @@ async function runGenerate(
     console.log(`[Generate] Chat response received, length: ${textContent.length}`);
 
     // Persist run + execution with text result and "succeeded" status.
-    const { runId, nodeExecutionId } = await persistRunWithTextResult({
-      userId,
-      model,
-      workflowId,
-      input: resolvedInput,
-      cost: cost ?? 0,
-      textResult: textContent,
-      taskId: responseId,
-    });
+    const { runId, nodeExecutionId } = workflowId != null
+      ? await persistRunWithTextResult({
+          userId,
+          model,
+          workflowId,
+          input: resolvedInput,
+          cost: cost ?? 0,
+          textResult: textContent,
+          taskId: responseId,
+        })
+      : await persistPlaygroundRunWithTextResult({
+          userId,
+          model,
+          input: resolvedInput,
+          cost: cost ?? 0,
+          textResult: textContent,
+          taskId: responseId,
+        });
 
     // Debit credits
     if (cost != null && cost > 0) {
@@ -235,14 +244,22 @@ async function runGenerate(
   console.log(`[Generate] Task submitted, taskId: ${taskId}`);
 
   // Persist run + execution rows so the webhook can find them.
-  const { runId, nodeExecutionId } = await persistRunWithExecution({
-    userId,
-    model,
-    workflowId,
-    input: resolvedInput,
-    cost: cost ?? 0,
-    taskId,
-  });
+  const { runId, nodeExecutionId } = workflowId != null
+    ? await persistRunWithExecution({
+        userId,
+        model,
+        workflowId,
+        input: resolvedInput,
+        cost: cost ?? 0,
+        taskId,
+      })
+    : await persistPlaygroundRun({
+        userId,
+        model,
+        input: resolvedInput,
+        cost: cost ?? 0,
+        taskId,
+      });
   console.log(`[Generate] Persisted run: ${runId}, execution: ${nodeExecutionId}`);
 
   // Debit credits now (for fixed-price units). LLM cost (1m-tokens-io)
@@ -400,6 +417,87 @@ async function persistRunWithExecution(opts: {
         (run_id, workflow_node_id, status, kie_task_id, input_params, started_at, cost_usd)
       VALUES
         (${run.id}, ${nodeId}, 'queued', ${opts.taskId}, ${JSON.stringify(opts.input)}::jsonb, NOW(), ${opts.cost})
+      RETURNING id
+    `) as { id: number }[]
+  )[0];
+
+  return { runId: run.id, nodeExecutionId: exec.id };
+}
+
+/**
+ * Persist a run for playground generations (no workflow context).
+ * Creates only runs + run_node_executions rows.
+ * Also creates a minimal workflow row for backward compatibility with history page.
+ */
+async function persistPlaygroundRun(opts: {
+  userId: number;
+  model: ModelRow;
+  input: Record<string, unknown>;
+  cost: number;
+  taskId: string;
+}): Promise<{ runId: number; nodeExecutionId: number }> {
+  const wfId = (
+    (await sql`
+      INSERT INTO workflows (user_id, name, status)
+      VALUES (${opts.userId}, ${`Playground · ${opts.model.name}`}, 'running')
+      RETURNING id
+    `) as { id: number }[]
+  )[0].id;
+
+  const run = (
+    (await sql`
+      INSERT INTO runs (workflow_id, user_id, status, total_cost_usd)
+      VALUES (${wfId}, ${opts.userId}, 'running', ${opts.cost})
+      RETURNING id
+    `) as { id: number }[]
+  )[0];
+
+  const exec = (
+    (await sql`
+      INSERT INTO run_node_executions
+        (run_id, status, kie_task_id, input_params, started_at, cost_usd)
+      VALUES
+        (${run.id}, 'queued', ${opts.taskId}, ${JSON.stringify(opts.input)}::jsonb, NOW(), ${opts.cost})
+      RETURNING id
+    `) as { id: number }[]
+  )[0];
+
+  return { runId: run.id, nodeExecutionId: exec.id };
+}
+
+/**
+ * Persist a run for playground chat models (no workflow context, text result).
+ */
+async function persistPlaygroundRunWithTextResult(opts: {
+  userId: number;
+  model: ModelRow;
+  input: Record<string, unknown>;
+  cost: number;
+  textResult: string;
+  taskId: string;
+}): Promise<{ runId: number; nodeExecutionId: number }> {
+  const wfId = (
+    (await sql`
+      INSERT INTO workflows (user_id, name, status)
+      VALUES (${opts.userId}, ${`Playground · ${opts.model.name}`}, 'succeeded')
+      RETURNING id
+    `) as { id: number }[]
+  )[0].id;
+
+  const run = (
+    (await sql`
+      INSERT INTO runs (workflow_id, user_id, status, total_cost_usd, completed_at)
+      VALUES (${wfId}, ${opts.userId}, 'succeeded', ${opts.cost}, NOW())
+      RETURNING id
+    `) as { id: number }[]
+  )[0];
+
+  const exec = (
+    (await sql`
+      INSERT INTO run_node_executions
+        (run_id, status, kie_task_id, input_params, text_result, started_at, completed_at, cost_usd)
+      VALUES
+        (${run.id}, 'succeeded', ${opts.taskId}, ${JSON.stringify(opts.input)}::jsonb, ${opts.textResult}, NOW(), NOW(), ${opts.cost})
       RETURNING id
     `) as { id: number }[]
   )[0];
