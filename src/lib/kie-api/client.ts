@@ -110,7 +110,7 @@ export async function createTask(opts: {
 }): Promise<{ taskId: string }> {
   const endpoint = "/api/v1/jobs/createTask";
   const body: Record<string, unknown> = {
-    model: opts.model,
+    model: opts.model.replace(/^\//, ""),
     input: opts.input,
   };
   if (opts.callBackUrl) body.callBackUrl = opts.callBackUrl;
