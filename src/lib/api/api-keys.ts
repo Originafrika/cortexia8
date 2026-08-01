@@ -43,8 +43,8 @@ export const createApiKey = createServerFn({ method: "POST" })
       const keyHash = await sha256Hex(rawKey);
 
       const rows = (await sql`
-        INSERT INTO api_keys (user_id, key_hash, name, key_prefix, prefix, permissions, status)
-        VALUES (${ctx.userId}, ${keyHash}, ${data.name}, ${prefix}, ${prefix}, ${JSON.stringify([data.scope])}::jsonb, 'active')
+        INSERT INTO api_keys (user_id, key_hash, name, prefix, permissions, status)
+        VALUES (${ctx.userId}, ${keyHash}, ${data.name}, ${prefix}, ${JSON.stringify([data.scope])}::jsonb, 'active')
         RETURNING id
       `) as { id: number }[];
 
@@ -88,14 +88,14 @@ export const listApiKeys = createServerFn({ method: "POST" })
       }
 
       const rows = (await sql`
-        SELECT id, name, key_prefix, permissions, status, last_used_at, created_at
+        SELECT id, name, prefix, permissions, status, last_used_at, created_at
         FROM api_keys
         WHERE user_id = ${ctx.userId}
         ORDER BY created_at DESC
       `) as {
         id: number;
         name: string;
-        key_prefix: string;
+        prefix: string;
         permissions: string;
         status: string;
         last_used_at: string | null;
@@ -106,7 +106,7 @@ export const listApiKeys = createServerFn({ method: "POST" })
       return rows.map((r) => ({
         id: r.id,
         name: r.name,
-        prefix: r.key_prefix,
+        prefix: r.prefix,
         permissions: r.permissions,
         status: r.status,
         lastUsed: r.last_used_at

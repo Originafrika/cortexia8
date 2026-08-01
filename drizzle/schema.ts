@@ -69,7 +69,7 @@ export const models = pgTable(
   },
   (table) => ({
     slugIdx: uniqueIndex("models_slug_idx").on(table.slug),
-    endpointIdx: uniqueIndex("models_endpoint_idx").on(table.kieEndpoint),
+    endpointIdx: index("models_endpoint_idx").on(table.kieEndpoint),
     categoryIdx: index("models_category_idx").on(table.category),
     activeIdx: index("models_active_idx").on(table.active),
   }),
