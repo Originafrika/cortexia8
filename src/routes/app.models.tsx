@@ -5,6 +5,7 @@ import { ModelCard } from "@/components/model-card";
 import { Search, ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
+import { isAdmin } from "@/lib/auth-store";
 
 export const Route = createFileRoute("/app/models")({
   head: () => ({
@@ -36,6 +37,12 @@ const CATS: { key: ModelCategory | "all"; labelKey: string }[] = [
   { key: "text", labelKey: "models.cat_text" },
 ];
 
+const visibleCats = useMemo(() => {
+  const admin = isAdmin();
+  if (admin) return CATS;
+  return CATS.filter((c) => c.key === "all" || c.key === "image" || c.key === "video");
+}, []);
+
 const PAGE_SIZE = 12;
 
 export function ModelsCatalog() {
@@ -47,9 +54,11 @@ export function ModelsCatalog() {
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
+    const admin = isAdmin();
     return MODELS.filter(
       (m) =>
         (cat === "all" || m.category === cat) &&
+        (admin || (m.category !== "text" && m.category !== "audio" && m.category !== "music")) &&
         (term === "" ||
           m.name.toLowerCase().includes(term) ||
           m.provider.toLowerCase().includes(term) ||
@@ -107,7 +116,7 @@ export function ModelsCatalog() {
       </div>
 
       <div className="mt-6 flex flex-wrap items-center gap-2">
-        {CATS.map((c) => {
+        {visibleCats.map((c) => {
           const active = cat === c.key;
           return (
             <button
