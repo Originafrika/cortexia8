@@ -19,6 +19,7 @@ import { ChevronDown, ArrowRight, Bot, Sliders } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   beforeLoad: () => {
+    if (typeof window === "undefined") return;
     if (!isWaitlist()) {
       throw redirect({ to: "/app-preview" });
     }
