@@ -287,7 +287,7 @@ export function ModelPlaygroundContent({
                 return next;
               });
 
-              if (statusRes.status === "success" || (node.status === "success" && node.asset)) {
+              if (statusRes.status === "success" || statusRes.status === "succeeded" || ((node.status === "success" || node.status === "succeeded") && node.asset)) {
                 const url = node.asset?.previewUrl || node.asset?.storageUrl || null;
                 setHistory((prev) =>
                   prev.map((r) =>
@@ -305,7 +305,7 @@ export function ModelPlaygroundContent({
                 return;
               }
 
-              if (statusRes.status === "error" || node.status === "error") {
+              if (statusRes.status === "error" || statusRes.status === "failed" || node.status === "error" || node.status === "failed") {
                 setActiveGens(prev => {
                   const next = new Map(prev);
                   const gen = next.get(genId);

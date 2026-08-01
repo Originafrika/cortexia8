@@ -85,13 +85,13 @@ export async function verifyActiveGens(): Promise<void> {
     if (gen.status !== "loading" || !gen.runId) continue;
     try {
       const status = await generationStatus({ data: { id: gen.runId, sessionToken: session.token } });
-      if (status.status === "success" || status.nodes?.[0]?.status === "success") {
+      if (status.status === "success" || status.status === "succeeded" || status.nodes?.[0]?.status === "success" || status.nodes?.[0]?.status === "succeeded") {
         const node = status.nodes?.[0];
         const url = node?.asset?.previewUrl || node?.asset?.storageUrl || null;
         updateGeneration(id, { status: "success", progress: 100, resultUrl: url });
         addToHistory({ id, prompt: gen.prompt, modelSlug: gen.modelSlug, modelName: gen.modelSlug, resultUrl: url, cost: 0, timestamp: gen.createdAt });
         removeGeneration(id);
-      } else if (status.status === "error" || status.nodes?.[0]?.status === "error") {
+      } else if (status.status === "error" || status.status === "failed" || status.nodes?.[0]?.status === "error" || status.nodes?.[0]?.status === "failed") {
         updateGeneration(id, { status: "error", error: "Generation failed" });
       }
     } catch { /* keep as loading */ }

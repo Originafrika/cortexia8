@@ -165,8 +165,14 @@ async function loadRun(
   // If the webhook hasn't fired but kie.ai says the task is done, we
   // process the result inline (safety net for failed callbacks).
   const nodes: NodeSummary[] = [];
+  let runStatusOverride: string | null = null;
   for (const row of nodeRows) {
     let liveState = row.status;
+    let liveAssetId = row.asset_id;
+    let liveAssetType = row.asset_type;
+    let liveAssetStorageUrl = row.asset_storage_url;
+    let liveAssetPreviewUrl = row.asset_preview_url;
+    let liveAssetCreatedAt = row.asset_created_at;
     if ((force || row.status === "queued" || row.status === "running") && row.kie_task_id) {
       try {
         const info = await getTaskDetail(row.kie_task_id);
@@ -181,14 +187,31 @@ async function loadRun(
           console.log(`[generation-status] Webhook fallback: taskId=${row.kie_task_id} is ${info.state} but DB says ${row.status} — processing inline`);
           try {
             await handleWebhook({ taskId: row.kie_task_id, state: info.state });
-            // Re-read the row to get updated status/asset
+            // Re-read the row to get updated status/asset (handleWebhook
+            // may have created an asset and finalized the run).
             const updated = (await sql`
               SELECT status, completed_at, output_asset_id FROM run_node_executions
               WHERE id = ${row.id} LIMIT 1
             `) as { status: string; completed_at: string | null; output_asset_id: number | null }[];
             if (updated.length > 0) {
               liveState = updated[0].status;
+              liveAssetId = updated[0].output_asset_id;
             }
+            // Re-read asset data if one was created.
+            if (liveAssetId) {
+              const assetRow = (await sql`
+                SELECT id, type, storage_url, preview_url, created_at FROM assets
+                WHERE id = ${liveAssetId} LIMIT 1
+              `) as { id: number; type: string; storage_url: string; preview_url: string | null; created_at: string }[];
+              if (assetRow.length > 0) {
+                liveAssetType = assetRow[0].type;
+                liveAssetStorageUrl = assetRow[0].storage_url;
+                liveAssetPreviewUrl = assetRow[0].preview_url;
+                liveAssetCreatedAt = assetRow[0].created_at;
+              }
+            }
+            // Signal that we need to re-read the run status too.
+            runStatusOverride = "refresh";
           } catch (hookErr) {
             console.error(`[generation-status] Webhook fallback failed for taskId=${row.kie_task_id}:`, hookErr);
           }
@@ -207,17 +230,29 @@ async function loadRun(
       startedAt: row.started_at,
       completedAt: row.completed_at,
       costUsd: Number(row.cost_usd ?? 0),
-      asset: row.asset_id
+      asset: liveAssetId
         ? {
-            id: row.asset_id,
-            type: row.asset_type ?? "unknown",
-            storageUrl: row.asset_storage_url ?? "",
-            previewUrl: row.asset_preview_url,
+            id: liveAssetId,
+            type: liveAssetType ?? "unknown",
+            storageUrl: liveAssetStorageUrl ?? "",
+            previewUrl: liveAssetPreviewUrl,
             modelSlug: row.model_slug,
-            createdAt: row.asset_created_at ?? "",
+            createdAt: liveAssetCreatedAt ?? "",
           }
         : null,
     });
+  }
+
+  // If any node triggered the fallback, re-read the run status since
+  // maybeFinalizeRun may have updated it.
+  let finalRunStatus = run.status;
+  if (runStatusOverride) {
+    const refreshedRun = (await sql`
+      SELECT status, completed_at FROM runs WHERE id = ${runId} LIMIT 1
+    `) as { status: string; completed_at: string | null }[];
+    if (refreshedRun.length > 0) {
+      finalRunStatus = refreshedRun[0].status;
+    }
   }
 
   const filtered = scopeExecutionId ? nodes.filter((n) => n.id === scopeExecutionId) : nodes;
@@ -226,7 +261,7 @@ async function loadRun(
     scope: scopeExecutionId ? "execution" : "run",
     runId: run.id,
     runNodeExecutionId: scopeExecutionId,
-    status: run.status,
+    status: finalRunStatus,
     startedAt: run.started_at,
     completedAt: run.completed_at,
     totalCostUsd: Number(run.total_cost_usd ?? 0),
