@@ -1,5 +1,6 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { isWaitlist } from "@/lib/launch";
+import { loadSession } from "@/lib/auth-store";
 import { AmbientBackground } from "@/components/ambient-background";
 import { SiteHeader } from "@/components/site-header";
 import { EditorialCountdown } from "@/components/editorial-countdown";
