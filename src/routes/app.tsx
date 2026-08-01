@@ -18,7 +18,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
 import { getUserBalance } from "@/lib/api/balance";
-import { loadSession } from "@/lib/auth-store";
+import { loadSession, isAdmin } from "@/lib/auth-store";
 import {
   Sheet,
   SheetContent,
@@ -85,12 +85,12 @@ function AppShell({
   setOpen: (v: boolean) => void;
 }) {
   const NAV = [
-    { to: "/app/workflows", label: t("app.nav.workflows") || "Workflows", icon: Workflow, exact: true },
+    { to: "/app/workflows", label: t("app.nav.workflows") || "Workflows", icon: Workflow, exact: true, adminOnly: true },
     { to: "/app/models", label: t("app.nav.models"), icon: LayoutGrid },
     { to: "/app/history", label: t("app.nav.history"), icon: History, exact: true },
-    { to: "/app/developers", label: t("app.nav.dev"), icon: Code2, exact: true },
+    { to: "/app/developers", label: t("app.nav.dev"), icon: Code2, exact: true, adminOnly: true },
     { to: "/app/account", label: t("app.nav.account"), icon: Wallet, exact: true },
-  ];
+  ].filter((item) => !item.adminOnly || isAdmin());
 
   const [mobileOpen, setMobileOpen] = useState(false);
 
