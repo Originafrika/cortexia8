@@ -170,6 +170,7 @@ async function loadRun(
   let runStatusOverride: string | null = null;
   for (const row of nodeRows) {
     let liveState = row.status;
+    let liveErrorMessage = row.error_message;
     let liveAssetId = row.asset_id;
     let liveAssetType = row.asset_type;
     let liveAssetStorageUrl = row.asset_storage_url;
@@ -187,17 +188,21 @@ async function loadRun(
           (row.status === "queued" || row.status === "running")
         ) {
           console.log(`[generation-status] Webhook fallback: taskId=${row.kie_task_id} is ${info.state} but DB says ${row.status} — processing inline`);
+          if (info.state === "fail") {
+            console.error(`[generation-status] kie.ai FAILED taskId=${row.kie_task_id}, model=${row.model_slug}, failMsg=${info.failMsg ?? "null"}, failCode=${info.failCode ?? "null"}`);
+          }
           try {
             await handleWebhook({ taskId: row.kie_task_id, state: info.state });
-            // Re-read the row to get updated status/asset (handleWebhook
-            // may have created an asset and finalized the run).
+            // Re-read the row to get updated status/asset/error (handleWebhook
+            // may have created an asset, set error_message, and finalized the run).
             const updated = (await sql`
-              SELECT status, completed_at, output_asset_id FROM run_node_executions
+              SELECT status, completed_at, output_asset_id, error_message FROM run_node_executions
               WHERE id = ${row.id} LIMIT 1
-            `) as { status: string; completed_at: string | null; output_asset_id: number | null }[];
+            `) as { status: string; completed_at: string | null; output_asset_id: number | null; error_message: string | null }[];
             if (updated.length > 0) {
               liveState = updated[0].status;
               liveAssetId = updated[0].output_asset_id;
+              liveErrorMessage = updated[0].error_message;
             }
             // Re-read asset data if one was created.
             if (liveAssetId) {
@@ -228,7 +233,7 @@ async function loadRun(
       modelSlug: row.model_slug,
       status: liveState,
       kieTaskId: row.kie_task_id,
-      errorMessage: row.error_message,
+      errorMessage: liveErrorMessage,
       textContent: row.text_result,
       startedAt: row.started_at,
       completedAt: row.completed_at,
