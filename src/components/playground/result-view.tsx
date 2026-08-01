@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { RefreshCw, Download, Settings2, Loader2, Copy, Check } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
 import { PriceDisplay } from "@/components/price-display";
-import { proxiedUrl } from "@/lib/storage/r2";
+import { fetchProxiedImage } from "@/lib/storage/r2";
 import type { Result } from "@/routes/app.models.$slug";
 
 type ResultViewProps = {
@@ -20,7 +20,15 @@ export function ResultView({ result, onRegenerate }: ResultViewProps) {
   const isVideo = result.model.category === "video";
   const isAudio = result.model.category === "audio";
   const isText = result.model.category === "text";
-  const displayUrl = proxiedUrl(result.resultUrl);
+  const [displayUrl, setDisplayUrl] = useState(result.resultUrl ?? "");
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchProxiedImage(result.resultUrl).then((url) => {
+      if (!cancelled) setDisplayUrl(url);
+    });
+    return () => { cancelled = true; };
+  }, [result.resultUrl]);
 
   function copyText() {
     if (result.textContent) {
