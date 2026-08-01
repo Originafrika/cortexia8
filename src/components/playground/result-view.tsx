@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
 import { PriceDisplay } from "@/components/price-display";
+import { proxiedUrl } from "@/lib/storage/r2";
 import type { Result } from "@/routes/app.models.$slug";
 
 type ResultViewProps = {
@@ -16,6 +17,7 @@ export function ResultView({ result, onRegenerate }: ResultViewProps) {
   const isImage = result.model.category === "image";
   const isVideo = result.model.category === "video";
   const isAudio = result.model.category === "audio";
+  const displayUrl = proxiedUrl(result.resultUrl);
 
   return (
     <motion.div
@@ -38,21 +40,21 @@ export function ResultView({ result, onRegenerate }: ResultViewProps) {
         >
           {hasResult && isImage && (
             <img
-              src={result.resultUrl!}
+              src={displayUrl}
               alt={result.prompt}
               className="w-full h-full object-contain"
             />
           )}
           {hasResult && isVideo && (
             <video
-              src={result.resultUrl!}
+              src={displayUrl}
               controls
               className="w-full h-full object-contain"
             />
           )}
           {hasResult && isAudio && (
             <div className="flex flex-col items-center justify-center h-full gap-3 p-4">
-              <audio src={result.resultUrl!} controls className="w-full max-w-xs" />
+              <audio src={displayUrl} controls className="w-full max-w-xs" />
             </div>
           )}
           {!hasResult && (
@@ -103,7 +105,7 @@ export function ResultView({ result, onRegenerate }: ResultViewProps) {
           </button>
           {hasResult && (
             <a
-              href={result.resultUrl!}
+              href={displayUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber text-primary-foreground px-3 py-2 text-xs font-medium hover:opacity-95 transition"

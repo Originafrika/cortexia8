@@ -2,6 +2,7 @@ import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
 import { PriceDisplay } from "@/components/price-display";
+import { proxiedUrl } from "@/lib/storage/r2";
 import type { Result } from "@/routes/app.models.$slug";
 
 type HistoryGridProps = {
@@ -34,7 +35,7 @@ export function HistoryGrid({ history, activeId, onSelect }: HistoryGridProps) {
         >
           {item.resultUrl && (
             <img
-              src={item.resultUrl}
+              src={proxiedUrl(item.resultUrl)}
               alt={item.prompt}
               loading="lazy"
               className="w-full h-full object-cover"

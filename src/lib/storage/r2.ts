@@ -261,3 +261,33 @@ async function s3PutObject(cfg: R2Config, opts: PutOptions): Promise<void> {
     throw new Error(`R2 PUT failed: HTTP ${res.status} ${text.slice(0, 300)}`);
   }
 }
+
+// ── Proxy helpers for browser-inaccessible URLs ────────────────────────
+
+/**
+ * Returns true when the URL points at a private R2 endpoint or a
+ * third-party host that the browser can't load directly (CORS / auth).
+ */
+export function needsProxy(url: string | null | undefined): boolean {
+  if (!url) return false;
+  try {
+    const u = new URL(url);
+    // Private R2 S3 endpoint (requires SigV4 auth)
+    if (u.hostname.endsWith(".r2.cloudflarestorage.com")) return true;
+    // kie.ai CDN URLs may require auth or have restrictive CORS
+    if (u.hostname.endsWith(".kie.ai")) return true;
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Wraps a URL with the server-side proxy endpoint so the browser can
+ * load it without CORS / auth issues. If the URL doesn't need proxying,
+ * it is returned as-is.
+ */
+export function proxiedUrl(url: string | null | undefined): string {
+  if (!url || !needsProxy(url)) return url ?? "";
+  return `/api/proxy-image?url=${encodeURIComponent(url)}`;
+}

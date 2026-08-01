@@ -9,6 +9,7 @@ import { getHistory, type HistoryItem } from "@/lib/api/history";
 import { useT } from "@/lib/i18n";
 import { loadSession } from "@/lib/auth-store";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { proxiedUrl } from "@/lib/storage/r2";
 
 export const Route = createFileRoute("/app/history")({
   head: () => ({
@@ -215,7 +216,7 @@ function HistoryPage() {
             >
               {it.previewUrl ? (
                 <img
-                  src={it.previewUrl}
+                  src={proxiedUrl(it.previewUrl)}
                   alt=""
                   className="absolute inset-0 h-full w-full object-cover"
                   loading="lazy"
@@ -275,7 +276,7 @@ function HistoryPage() {
               >
                 {selected.previewUrl && (
                   <img
-                    src={selected.previewUrl}
+                    src={proxiedUrl(selected.previewUrl)}
                     alt=""
                     loading="lazy"
                     className="h-full w-full object-cover"
