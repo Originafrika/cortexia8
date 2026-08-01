@@ -37,12 +37,6 @@ const CATS: { key: ModelCategory | "all"; labelKey: string }[] = [
   { key: "text", labelKey: "models.cat_text" },
 ];
 
-const visibleCats = useMemo(() => {
-  const admin = isAdmin();
-  if (admin) return CATS;
-  return CATS.filter((c) => c.key === "all" || c.key === "image" || c.key === "video");
-}, []);
-
 const PAGE_SIZE = 12;
 
 export function ModelsCatalog() {
@@ -51,6 +45,12 @@ export function ModelsCatalog() {
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
   const [sortBy, setSortBy] = useState<"newest" | "price_asc" | "price_desc" | "az">("newest");
+
+  const visibleCats = useMemo(() => {
+    const admin = isAdmin();
+    if (admin) return CATS;
+    return CATS.filter((c) => c.key === "all" || c.key === "image" || c.key === "video");
+  }, []);
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();

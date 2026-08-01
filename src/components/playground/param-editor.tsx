@@ -1,3 +1,5 @@
+"use client";
+
 import { useRef, useState } from "react";
 import { Upload, X } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";

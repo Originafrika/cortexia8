@@ -1,3 +1,5 @@
+"use client";
+
 // src/components/playground/chat-input.tsx
 import { ArrowUp, Loader2 } from "lucide-react";
 import { useT } from "@/lib/i18n";

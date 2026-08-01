@@ -1,3 +1,5 @@
+"use client";
+
 import { Settings2, ArrowUp, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
