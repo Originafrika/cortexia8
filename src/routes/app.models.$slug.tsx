@@ -29,6 +29,18 @@ import { ResultView } from "@/components/playground/result-view";
 import { HistoryGrid } from "@/components/playground/history-grid";
 import { SimilarModels } from "@/components/playground/similar-models";
 import { useAppStore } from "@/lib/app-store";
+import {
+  listSessions,
+  createSession,
+  appendMessage,
+  deleteSession,
+  getSession,
+  type ChatSession,
+  type ChatMessage,
+} from "@/lib/chat-sessions";
+import { ChatSessionSidebar } from "@/components/playground/chat-session-sidebar";
+import { ChatThread } from "@/components/playground/chat-thread";
+import { ChatInput } from "@/components/playground/chat-input";
 
 export const Route = createFileRoute("/app/models/$slug")({
   loader: ({ params }) => {
@@ -142,6 +154,25 @@ export function ModelPlaygroundContent({
 
   const [showAdvanced, setShowAdvanced] = useState(false);
 
+  // Chat session state (text models only)
+  const isTextModel = model.category === "text";
+  const [activeSession, setActiveSession] = useState<ChatSession | null>(null);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [sidebarRefreshKey, setSidebarRefreshKey] = useState(0);
+
+  // Load sessions on mount for text models
+  useEffect(() => {
+    if (!isTextModel) return;
+    const sessions = listSessions(model.slug);
+    if (sessions.length > 0) {
+      setActiveSession(sessions[0]);
+      setChatMessages(sessions[0].messages);
+    } else {
+      setActiveSession(null);
+      setChatMessages([]);
+    }
+  }, [model.slug, isTextModel]);
+
   // Global store for persistence
   const storeAddGen = useAppStore((s) => s.addGeneration);
   const storeUpdateGen = useAppStore((s) => s.updateGeneration);
@@ -192,6 +223,33 @@ export function ModelPlaygroundContent({
     timersRef.current.clear();
   }
 
+  function handleNewSession() {
+    const session = createSession(model.slug);
+    setActiveSession(session);
+    setChatMessages([]);
+    setSidebarRefreshKey((k) => k + 1);
+  }
+
+  function handleSelectSession(session: ChatSession) {
+    setActiveSession(session);
+    setChatMessages(session.messages);
+  }
+
+  function handleDeleteSession(sessionId: string) {
+    deleteSession(model.slug, sessionId);
+    setSidebarRefreshKey((k) => k + 1);
+    if (activeSession?.id === sessionId) {
+      const remaining = listSessions(model.slug);
+      if (remaining.length > 0) {
+        setActiveSession(remaining[0]);
+        setChatMessages(remaining[0].messages);
+      } else {
+        setActiveSession(null);
+        setChatMessages([]);
+      }
+    }
+  }
+
   function handleGenerate() {
     if (activeCount >= MAX_CONCURRENT) return;
     console.log(`[Generate] Starting generation for model: ${model.slug}`);
@@ -235,9 +293,37 @@ export function ModelPlaygroundContent({
     }));
 
     const input: Record<string, unknown> = { ...state };
-    const promptParam = model.params.find((p) => p.kind === "prompt" || p.kind === "longtext");
-    const promptKey = promptParam && "key" in promptParam ? (promptParam as any).key : "prompt";
-    if (prompt.trim()) input[promptKey] = prompt.trim();
+    // For text models in chat mode, build messages from conversation history
+    if (isTextModel) {
+      let session = activeSession;
+      if (!session) {
+        session = createSession(model.slug, prompt.trim());
+        setActiveSession(session);
+        setSidebarRefreshKey((k) => k + 1);
+      }
+
+      // Append user message to session
+      appendMessage(model.slug, session.id, {
+        role: "user",
+        content: prompt.trim(),
+      });
+
+      // Build messages array from conversation history
+      const updatedSession = getSession(model.slug, session.id);
+      const historyMessages = (updatedSession?.messages ?? []).map((m) => ({
+        role: m.role,
+        content: m.content,
+      }));
+
+      input.messages = historyMessages;
+      setChatMessages(updatedSession?.messages ?? []);
+      setSidebarRefreshKey((k) => k + 1);
+    } else {
+      // Non-text models: existing behavior
+      const promptParam = model.params.find((p) => p.kind === "prompt" || p.kind === "longtext");
+      const promptKey = promptParam && "key" in promptParam ? (promptParam as any).key : "prompt";
+      if (prompt.trim()) input[promptKey] = prompt.trim();
+    }
 
     generate({ data: { modelSlug: model.slug, input, sessionToken: loadSession()?.token } })
       .then((res) => {
@@ -255,6 +341,21 @@ export function ModelPlaygroundContent({
         };
         setHistory((prev) => [newResult, ...prev]);
         setActiveId(newResult.id);
+
+        // For text models: append assistant response to conversation
+        if (isTextModel && res.textContent && activeSession) {
+          appendMessage(model.slug, activeSession.id, {
+            role: "assistant",
+            content: res.textContent,
+            cost: res.estimatedCostUsd,
+            model: model.slug,
+          });
+          const updated = getSession(model.slug, activeSession.id);
+          if (updated) {
+            setChatMessages(updated.messages);
+            setSidebarRefreshKey((k) => k + 1);
+          }
+        }
 
         // Chat models return status "succeeded" with textContent — no polling needed.
         if (res.status === "succeeded" && res.textContent) {
@@ -394,114 +495,148 @@ export function ModelPlaygroundContent({
         </div>
       )}
 
-      {/* Gallery / result area */}
-      <div
-        ref={galleryRef}
-        className="flex-1 min-h-0 overflow-y-auto"
-      >
-        <div className="mx-auto max-w-6xl px-5 sm:px-8 py-6">
-          {/* Active result hero */}
-          {active && (
-            <div className="mb-6">
-              <ResultView
-                result={active}
-                onRegenerate={() => {
-                  setPrompt(active.prompt);
-                  setState(active.state);
-                  setActiveId(null);
-                  setTimeout(handleGenerate, 40);
-                }}
+      {/* Content area - conditional for text models vs others */}
+      {isTextModel ? (
+        <div className="flex flex-1 min-h-0">
+          {/* Session sidebar */}
+          <ChatSessionSidebar
+            modelSlug={model.slug}
+            activeSessionId={activeSession?.id ?? null}
+            onSelectSession={handleSelectSession}
+            onNewSession={handleNewSession}
+            refreshKey={sidebarRefreshKey}
+          />
+
+          {/* Chat thread + input */}
+          <div className="flex flex-col flex-1 min-h-0">
+            <ChatThread
+              messages={chatMessages}
+            />
+            <ChatInput
+              model={model}
+              iconParams={iconParams}
+              state={state}
+              setState={setState}
+              prompt={prompt}
+              setPrompt={setPrompt}
+              onSend={handleGenerate}
+              isGenerating={activeGens.size > 0}
+              currentPrice={currentPrice}
+            />
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* Gallery / result area for non-text models */}
+          <div
+            ref={galleryRef}
+            className="flex-1 min-h-0 overflow-y-auto"
+          >
+            <div className="mx-auto max-w-6xl px-5 sm:px-8 py-6">
+              {/* Active result hero */}
+              {active && (
+                <div className="mb-6">
+                  <ResultView
+                    result={active}
+                    onRegenerate={() => {
+                      setPrompt(active.prompt);
+                      setState(active.state);
+                      setActiveId(null);
+                      setTimeout(handleGenerate, 40);
+                    }}
+                  />
+                </div>
+              )}
+
+              {/* Loading cards for all active generations */}
+              {Array.from(activeGens.values()).map(gen => (
+                gen.status === "loading" && (
+                  <div key={gen.id} className="mb-6">
+                    <LoadingCard model={model} progress={gen.progress} />
+                  </div>
+                )
+              ))}
+
+              {/* Error messages from active generations */}
+              {Array.from(activeGens.values()).map(gen => (
+                gen.status === "error" && gen.error && (
+                  <div key={gen.id} className="mb-6 rounded-2xl border border-amber/40 bg-amber/5 p-4 flex items-start gap-3">
+                    <AlertTriangle className="size-4 text-amber shrink-0 mt-0.5" />
+                    <div className="text-sm text-foreground/80 flex-1">{gen.error}</div>
+                    <button
+                      onClick={() => {
+                        setActiveGens(prev => {
+                          const next = new Map(prev);
+                          next.delete(gen.id);
+                          return next;
+                        });
+                      }}
+                      aria-label="Dismiss error"
+                      className="text-muted-foreground hover:text-foreground cursor-pointer"
+                    >
+                      <X className="size-4" />
+                    </button>
+                  </div>
+                )
+              ))}
+
+              {/* History header */}
+              {history.length > 0 && (
+                <div className="mb-3 flex items-baseline justify-between">
+                  <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                    {t("playground.generations")} · {history.length}
+                  </div>
+                  <button
+                    onClick={() => {
+                      setHistory([]);
+                      setActiveId(null);
+                    }}
+                    aria-label="Clear history"
+                    className="text-[11px] text-muted-foreground hover:text-foreground cursor-pointer"
+                  >
+                    {t("playground.clear")}
+                  </button>
+                </div>
+              )}
+
+              {/* History grid */}
+              {history.length > 0 ? (
+                <HistoryGrid
+                  history={history}
+                  activeId={activeId}
+                  onSelect={setActiveId}
+                />
+              ) : (
+                activeCount === 0 && !active && <EmptyState model={model} />
+              )}
+
+              <SimilarModels model={model} />
+            </div>
+          </div>
+
+          {/* Fixed prompt bar for non-text models */}
+          <div className="shrink-0 border-t border-border/60 bg-surface-0/70 backdrop-blur">
+            <div className="mx-auto max-w-4xl px-4 sm:px-6 py-4">
+              <PromptBar
+                model={model}
+                iconParams={iconParams}
+                state={state}
+                setState={setState}
+                prompt={prompt}
+                setPrompt={setPrompt}
+                hasPrompt={hasPrompt}
+                onGenerate={handleGenerate}
+                activeCount={activeCount}
+                maxConcurrent={MAX_CONCURRENT}
+                currentPrice={currentPrice}
+                showAdvanced={showAdvanced}
+                onToggleAdvanced={() => setShowAdvanced((v) => !v)}
+                canGenerate={canGenerate}
               />
             </div>
-          )}
-
-          {/* Loading cards for all active generations */}
-          {Array.from(activeGens.values()).map(gen => (
-            gen.status === "loading" && (
-              <div key={gen.id} className="mb-6">
-                <LoadingCard model={model} progress={gen.progress} />
-              </div>
-            )
-          ))}
-
-          {/* Error messages from active generations */}
-          {Array.from(activeGens.values()).map(gen => (
-            gen.status === "error" && gen.error && (
-              <div key={gen.id} className="mb-6 rounded-2xl border border-amber/40 bg-amber/5 p-4 flex items-start gap-3">
-                <AlertTriangle className="size-4 text-amber shrink-0 mt-0.5" />
-                <div className="text-sm text-foreground/80 flex-1">{gen.error}</div>
-                <button
-                  onClick={() => {
-                    setActiveGens(prev => {
-                      const next = new Map(prev);
-                      next.delete(gen.id);
-                      return next;
-                    });
-                  }}
-                  aria-label="Dismiss error"
-                  className="text-muted-foreground hover:text-foreground cursor-pointer"
-                >
-                  <X className="size-4" />
-                </button>
-              </div>
-            )
-          ))}
-
-          {/* History header */}
-          {history.length > 0 && (
-            <div className="mb-3 flex items-baseline justify-between">
-              <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-                {t("playground.generations")} · {history.length}
-              </div>
-              <button
-                onClick={() => {
-                  setHistory([]);
-                  setActiveId(null);
-                }}
-                aria-label="Clear history"
-                className="text-[11px] text-muted-foreground hover:text-foreground cursor-pointer"
-              >
-                {t("playground.clear")}
-              </button>
-            </div>
-          )}
-
-          {/* History grid */}
-          {history.length > 0 ? (
-            <HistoryGrid
-              history={history}
-              activeId={activeId}
-              onSelect={setActiveId}
-            />
-          ) : (
-            activeCount === 0 && !active && <EmptyState model={model} />
-          )}
-
-          <SimilarModels model={model} />
-        </div>
-      </div>
-
-      {/* Fixed prompt bar */}
-      <div className="shrink-0 border-t border-border/60 bg-surface-0/70 backdrop-blur">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 py-4">
-          <PromptBar
-            model={model}
-            iconParams={iconParams}
-            state={state}
-            setState={setState}
-            prompt={prompt}
-            setPrompt={setPrompt}
-            hasPrompt={hasPrompt}
-            onGenerate={handleGenerate}
-            activeCount={activeCount}
-            maxConcurrent={MAX_CONCURRENT}
-            currentPrice={currentPrice}
-            showAdvanced={showAdvanced}
-            onToggleAdvanced={() => setShowAdvanced((v) => !v)}
-            canGenerate={canGenerate}
-          />
-        </div>
-      </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
