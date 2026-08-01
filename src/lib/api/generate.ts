@@ -9,6 +9,11 @@
  *   5. Persist a run + run_node_executions row with the kie_task_id so
  *      the webhook can pick it up.
  *
+ * For chat models (chat_openai, chat_anthropic, chat_google_native):
+ *   - Calls the chat endpoint synchronously
+ *   - Stores text result directly in run_node_executions.text_result
+ *   - Returns status "succeeded" immediately (no polling needed)
+ *
  * The endpoint is model-agnostic. The dispatch path never branches on
  * `category` or `slug`; everything it needs is read from `models.*`.
  */
@@ -57,12 +62,14 @@ export type GenerateResponse = {
   runId: number;
   runNodeExecutionId: number;
   taskId: string | null;
-  status: "queued" | "dry-run";
+  status: "queued" | "succeeded" | "dry-run";
   estimatedCostUsd: number;
   uploadedCount: number;
   modelSlug: string;
   modelName: string;
   category: string;
+  /** For chat models: the text response content. */
+  textContent?: string;
 };
 
 export const generate = createServerFn({ method: "POST" })
@@ -143,8 +150,6 @@ async function runGenerate(
   }
 
   if (data.dryRun) {
-    // Validate the model can accept the input (lightweight JSON Schema
-    // check) and return cost without actually submitting.
     return {
       runId: 0,
       runNodeExecutionId: 0,
@@ -158,18 +163,66 @@ async function runGenerate(
     };
   }
 
-  // 4. Submit to kie.ai — branch on api_family.
+  const apiFamily = model.api_family;
+  if (!apiFamily) {
+    throw new HttpError(500, `Model '${model.slug}' is misconfigured: api_family is NULL`);
+  }
+
+  // Chat models are synchronous — call the API, store text, return immediately.
+  const isChat = apiFamily === "chat_openai" || apiFamily === "chat_anthropic" || apiFamily === "chat_google_native";
+
+  if (isChat) {
+    console.log(`[Generate] Chat model detected (${apiFamily}), calling synchronously`);
+    const { textContent, responseId } = await callChatEndpoint(apiFamily, model, resolvedInput);
+    console.log(`[Generate] Chat response received, length: ${textContent.length}`);
+
+    // Persist run + execution with text result and "succeeded" status.
+    const { runId, nodeExecutionId } = await persistRunWithTextResult({
+      userId,
+      model,
+      workflowId,
+      input: resolvedInput,
+      cost: cost ?? 0,
+      textResult: textContent,
+      taskId: responseId,
+    });
+
+    // Debit credits
+    if (cost != null && cost > 0) {
+      await recordTransaction({
+        userId,
+        amount: -Math.abs(cost),
+        type: "usage",
+        reference: `run:${runId}/exec:${nodeExecutionId}`,
+      });
+    }
+
+    return {
+      runId,
+      runNodeExecutionId: nodeExecutionId,
+      taskId: responseId,
+      status: "succeeded",
+      estimatedCostUsd: cost ?? 0,
+      uploadedCount,
+      modelSlug: model.slug,
+      modelName: model.name,
+      category: model.category,
+      textContent,
+    };
+  }
+
+  // Media models are async — submit task and wait for webhook.
   const callback = tryBuildCallback();
-  console.log(`[Generate] Submitting task to kie.ai, model: ${model.slug}, apiFamily: ${model.api_family}`);
+  console.log(`[Generate] Submitting task to kie.ai, model: ${model.slug}, apiFamily: ${apiFamily}`);
   const taskId = await submitTask({
-    apiFamily: model.api_family,
+    apiFamily,
     model,
     input: resolvedInput,
     callback,
   });
   console.log(`[Generate] Task submitted, taskId: ${taskId}`);
 
-  // 5. Persist run + execution rows so the webhook can find them.
+  // Persist run + execution rows so the webhook can find them.
   const { runId, nodeExecutionId } = await persistRunWithExecution({
     userId,
     model,
@@ -180,8 +233,8 @@ async function runGenerate(
   });
   console.log(`[Generate] Persisted run: ${runId}, execution: ${nodeExecutionId}`);
 
-  // 6. Debit credits now (for fixed-price units). LLM cost (1m-tokens-io)
-  //    is settled after the run completes — we record a pending 0 debit.
+  // Debit credits now (for fixed-price units). LLM cost (1m-tokens-io)
+  // is settled after the run completes — we record a pending 0 debit.
   if (cost != null && cost > 0) {
     await recordTransaction({
       userId,
@@ -213,18 +266,70 @@ function tryBuildCallback(): string | undefined {
 }
 
 /**
- * Route a generation request to the correct kie.ai endpoint based on
+ * Call a chat endpoint synchronously and extract the text response.
+ */
+async function callChatEndpoint(
+  family: ApiFamily,
+  model: ModelRow,
+  input: Record<string, unknown>,
+): Promise<{ textContent: string; responseId: string }> {
+  switch (family) {
+    case "chat_openai": {
+      const { taskId, response } = await chatCompletion({
+        model: model.kie_endpoint,
+        messages: (input.messages as unknown[]) ?? [],
+        tools: input.tools as unknown[] | undefined,
+        reasoning_effort: input.reasoning_effort as string | undefined,
+        stream: false,
+      });
+      const resp = response as Record<string, unknown>;
+      const choices = resp.choices as { message?: { content?: string } }[] | undefined;
+      const text = choices?.[0]?.message?.content ?? "";
+      return { textContent: text, responseId: taskId };
+    }
+
+    case "chat_anthropic": {
+      const { taskId, response } = await chatAnthropic({
+        model: model.kie_endpoint,
+        messages: (input.messages as unknown[]) ?? [],
+        max_tokens: input.max_tokens as number | undefined,
+        thinking: input.thinking as boolean | undefined,
+        stream: false,
+      });
+      const resp = response as Record<string, unknown>;
+      const content = resp.content as { type?: string; text?: string }[] | undefined;
+      const text = content?.filter((c) => c.type === "text").map((c) => c.text ?? "").join("") ?? "";
+      return { textContent: text, responseId: taskId };
+    }
+
+    case "chat_google_native": {
+      const { taskId, response } = await chatGoogleNative({
+        model: model.kie_endpoint,
+        contents: (input.contents as unknown[]) ?? [],
+        tools: input.tools as unknown[] | undefined,
+        generationConfig: input.generationConfig as Record<string, unknown> | undefined,
+      });
+      const resp = response as Record<string, unknown>;
+      const candidates = resp.candidates as { content?: { parts?: { text?: string }[] } }[] | undefined;
+      const text = candidates?.[0]?.content?.parts?.map((p) => p.text ?? "").join("") ?? "";
+      return { textContent: text, responseId: taskId };
+    }
+
+    default:
+      throw new HttpError(500, `Unsupported chat family: ${family}`);
+  }
+}
+
+/**
+ * Route a media generation request to the correct kie.ai endpoint based on
  * the model's api_family. Returns a taskId that the webhook can track.
  */
 async function submitTask(opts: {
-  apiFamily: ApiFamily | null;
+  apiFamily: ApiFamily;
   model: ModelRow;
   input: Record<string, unknown>;
   callback?: string;
 }): Promise<string> {
-  if (!opts.apiFamily) {
-    throw new HttpError(500, `Model '${opts.model.slug}' is misconfigured: api_family is NULL`);
-  }
   const family = opts.apiFamily;
 
   switch (family) {
@@ -237,44 +342,7 @@ async function submitTask(opts: {
       return taskId;
     }
 
-    case "chat_openai": {
-      const { taskId } = await chatCompletion({
-        model: opts.model.kie_endpoint,
-        messages: (opts.input.messages as unknown[]) ?? [],
-        tools: opts.input.tools as unknown[] | undefined,
-        reasoning_effort: opts.input.reasoning_effort as string | undefined,
-        stream: false,
-      });
-      return taskId;
-    }
-
-    case "chat_anthropic": {
-      const { taskId } = await chatAnthropic({
-        model: opts.model.kie_endpoint,
-        messages: (opts.input.messages as unknown[]) ?? [],
-        max_tokens: opts.input.max_tokens as number | undefined,
-        thinking: opts.input.thinking as boolean | undefined,
-        stream: false,
-      });
-      return taskId;
-    }
-
-    case "chat_google_native": {
-      const { taskId } = await chatGoogleNative({
-        model: opts.model.kie_endpoint,
-        contents: (opts.input.contents as unknown[]) ?? [],
-        tools: opts.input.tools as unknown[] | undefined,
-        generationConfig: opts.input.generationConfig as Record<string, unknown> | undefined,
-      });
-      return taskId;
-    }
-
     case "dedicated": {
-      // Dedicated models (Runway, Veo, GPT Image 4o, Flux Kontext,
-      // Aleph, Luma, Suno/Voice) use createTask with a model-specific
-      // endpoint stored in kie_endpoint. The routing distinction here
-      // is that dedicated models don't support callback URLs — the
-      // client must poll for status.
       const { taskId } = await createTask({
         model: opts.model.kie_endpoint,
         input: opts.input,
@@ -283,7 +351,6 @@ async function submitTask(opts: {
     }
 
     default: {
-      // Unknown family — fall back to market_unified.
       const { taskId } = await createTask({
         model: opts.model.kie_endpoint,
         input: opts.input,
@@ -302,9 +369,6 @@ async function persistRunWithExecution(opts: {
   cost: number;
   taskId: string;
 }): Promise<{ runId: number; nodeExecutionId: number }> {
-  // If no workflow context, mint a synthetic one-off workflow so the
-  // runs/run_node_executions foreign keys still resolve. Keeps the
-  // schema uniform — every generation is part of a run.
   const wfId =
     opts.workflowId ??
     (
@@ -315,9 +379,6 @@ async function persistRunWithExecution(opts: {
       `) as { id: number }[]
     )[0].id;
 
-  // We need a workflow_node too (FK from run_node_executions). For
-  // ad-hoc POSTs (no workflowId) we mint a synthetic node so the FK
-  // resolves. The visual canvas-side route manages its own nodes.
   const nodeId = (
     (await sql`
       INSERT INTO workflow_nodes (workflow_id, type, model_slug, config, canvas_x, canvas_y)
@@ -347,6 +408,57 @@ async function persistRunWithExecution(opts: {
   return { runId: run.id, nodeExecutionId: exec.id };
 }
 
-// Re-export the cost helper so other API files can use it without
-// having to re-import the type-guard dance.
+/**
+ * Persist a run + execution for chat models with text result.
+ * The run is immediately marked as "succeeded" since chat is synchronous.
+ */
+async function persistRunWithTextResult(opts: {
+  userId: number;
+  model: ModelRow;
+  workflowId: number | null;
+  input: Record<string, unknown>;
+  cost: number;
+  textResult: string;
+  taskId: string;
+}): Promise<{ runId: number; nodeExecutionId: number }> {
+  const wfId =
+    opts.workflowId ??
+    (
+      (await sql`
+        INSERT INTO workflows (user_id, name, status)
+        VALUES (${opts.userId}, ${`Ad-hoc · ${opts.model.name}`}, 'succeeded')
+        RETURNING id
+      `) as { id: number }[]
+    )[0].id;
+
+  const nodeId = (
+    (await sql`
+      INSERT INTO workflow_nodes (workflow_id, type, model_slug, config, canvas_x, canvas_y)
+      VALUES (${wfId}, 'model', ${opts.model.slug}, ${JSON.stringify(opts.input)}::jsonb, '0', '0')
+      RETURNING id
+    `) as { id: number }[]
+  )[0].id;
+
+  const run = (
+    (await sql`
+      INSERT INTO runs (workflow_id, user_id, status, total_cost_usd, completed_at)
+      VALUES (${wfId}, ${opts.userId}, 'succeeded', ${opts.cost}, NOW())
+      RETURNING id
+    `) as { id: number }[]
+  )[0];
+
+  const exec = (
+    (await sql`
+      INSERT INTO run_node_executions
+        (run_id, workflow_node_id, status, kie_task_id, input_params, text_result, started_at, completed_at, cost_usd)
+      VALUES
+        (${run.id}, ${nodeId}, 'succeeded', ${opts.taskId}, ${JSON.stringify(opts.input)}::jsonb, ${opts.textResult}, NOW(), NOW(), ${opts.cost})
+      RETURNING id
+    `) as { id: number }[]
+  )[0];
+
+  return { runId: run.id, nodeExecutionId: exec.id };
+}
+
+// Re-export the cost helper so other API files can use without re-importing.
 export { toNumber };

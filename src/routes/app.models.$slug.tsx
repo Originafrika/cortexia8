@@ -84,6 +84,7 @@ export type Result = {
   prompt: string;
   cost: number;
   resultUrl: string | null;
+  textContent: string | null;
   runId: number | null;
   state: Record<string, unknown>;
   timestamp: Date;
@@ -247,12 +248,26 @@ export function ModelPlaygroundContent({
           prompt: prompt.trim() || t("playground.no_prompt"),
           cost: res.estimatedCostUsd || currentPrice,
           resultUrl: null,
+          textContent: res.textContent ?? null,
           runId: res.runId,
           state: { ...state },
           timestamp: new Date(),
         };
         setHistory((prev) => [newResult, ...prev]);
         setActiveId(newResult.id);
+
+        // Chat models return status "succeeded" with textContent — no polling needed.
+        if (res.status === "succeeded" && res.textContent) {
+          setActiveGens(prev => {
+            const next = new Map(prev);
+            next.delete(genId);
+            return next;
+          });
+          requestAnimationFrame(() => {
+            galleryRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+          });
+          return;
+        }
 
         setActiveGens(prev => {
           const next = new Map(prev);
@@ -278,7 +293,7 @@ export function ModelPlaygroundContent({
             .then((statusRes) => {
               const node = statusRes.nodes[0];
               if (!node) return;
-              const pct = statusRes.status === "success" ? 100 : Math.min(10 + pollCount, 95);
+              const pct = (statusRes.status === "success" || statusRes.status === "succeeded") ? 100 : Math.min(10 + pollCount, 95);
 
               setActiveGens(prev => {
                 const next = new Map(prev);
@@ -287,11 +302,11 @@ export function ModelPlaygroundContent({
                 return next;
               });
 
-              if (statusRes.status === "success" || statusRes.status === "succeeded" || ((node.status === "success" || node.status === "succeeded") && node.asset)) {
+              if (statusRes.status === "success" || statusRes.status === "succeeded" || ((node.status === "success" || node.status === "succeeded") && (node.asset || node.textContent))) {
                 const url = node.asset?.previewUrl || node.asset?.storageUrl || null;
                 setHistory((prev) =>
                   prev.map((r) =>
-                    r.id === newResult.id ? { ...r, resultUrl: url } : r,
+                    r.id === newResult.id ? { ...r, resultUrl: url, textContent: node.textContent ?? r.textContent } : r,
                   ),
                 );
                 setActiveGens(prev => {

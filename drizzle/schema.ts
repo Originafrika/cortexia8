@@ -174,6 +174,7 @@ export const runNodeExecutions = pgTable(
     inputParams: jsonb("input_params").notNull().default({}),
     outputAssetId: integer("output_asset_id"),
     errorMessage: text("error_message"),
+    textResult: text("text_result"),
     startedAt: timestamp("started_at"),
     completedAt: timestamp("completed_at"),
     costUsd: numeric("cost_usd", { precision: 12, scale: 6 })

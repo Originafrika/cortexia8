@@ -38,6 +38,7 @@ type NodeSummary = {
   status: string;
   kieTaskId: string | null;
   errorMessage: string | null;
+  textContent: string | null;
   startedAt: string | null;
   completedAt: string | null;
   costUsd: number;
@@ -134,7 +135,7 @@ async function loadRun(
   const nodeRows = (await sql`
     SELECT
       rne.id, rne.workflow_node_id, wn.model_slug, rne.status, rne.kie_task_id,
-      rne.error_message,
+      rne.error_message, rne.text_result,
       rne.started_at, rne.completed_at,
       rne.cost_usd::text AS cost_usd,
       a.id AS asset_id, a.storage_url AS asset_storage_url, a.preview_url AS asset_preview_url,
@@ -151,6 +152,7 @@ async function loadRun(
     status: string;
     kie_task_id: string | null;
     error_message: string | null;
+    text_result: string | null;
     started_at: string | null;
     completed_at: string | null;
     cost_usd: string;
@@ -227,6 +229,7 @@ async function loadRun(
       status: liveState,
       kieTaskId: row.kie_task_id,
       errorMessage: row.error_message,
+      textContent: row.text_result,
       startedAt: row.started_at,
       completedAt: row.completed_at,
       costUsd: Number(row.cost_usd ?? 0),

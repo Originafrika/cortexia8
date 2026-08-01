@@ -574,7 +574,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
       }
       await get().runNode(id);
       const updated = get().nodes.find((n) => n.id === id);
-      if (updated?.data.status === "error") {
+      if (updated?.data.status === "error" || updated?.data.status === "failed") {
         failedNodes.add(id);
       }
     }
@@ -856,6 +856,9 @@ function pollGenerationStatus(
             } else if (asset.type === "audio") {
               result = { kind: "audio", url };
             }
+          }
+          if (!result && nodeExec.textContent) {
+            result = { kind: "text", text: nodeExec.textContent };
           }
           set({
             nodes: get().nodes.map((n) =>

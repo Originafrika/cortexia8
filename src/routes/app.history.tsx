@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { MODELS, basePrice, type Model, type ModelCategory } from "@/lib/models";
 import { PriceDisplay } from "@/components/price-display";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, RefreshCw, Search, Copy, Check } from "lucide-react";
+import { X, RefreshCw, Search, Copy, Check, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getHistory, type HistoryItem } from "@/lib/api/history";
 import { useT } from "@/lib/i18n";
@@ -30,6 +30,7 @@ type DisplayItem = {
   ratio: string;
   tint: string;
   previewUrl: string | null;
+  textContent: string | null;
   status: string;
 };
 
@@ -80,9 +81,10 @@ function HistoryPage() {
             prompt: item.prompt,
             date: formatRelative(item.date, t),
             cost: item.cost || basePrice(model) * (model.unit === "second" ? 5 : 1),
-            ratio: item.modelCategory === "video" ? "aspect-[9/16]" : item.modelCategory === "audio" ? "aspect-[4/3]" : "aspect-square",
+            ratio: item.modelCategory === "video" ? "aspect-[9/16]" : item.modelCategory === "audio" ? "aspect-[4/3]" : item.modelCategory === "text" ? "aspect-square" : "aspect-square",
             tint: TINTS[i % TINTS.length],
             previewUrl: item.previewUrl,
+            textContent: item.textContent,
             status: item.status,
           };
         });
@@ -221,6 +223,13 @@ function HistoryPage() {
                   className="absolute inset-0 h-full w-full object-cover"
                   loading="lazy"
                 />
+              ) : it.textContent ? (
+                <div className="absolute inset-0 flex flex-col p-3 overflow-hidden">
+                  <MessageSquare className="size-3 text-muted-foreground mb-1 shrink-0" />
+                  <div className="text-[10px] font-mono text-muted-foreground leading-relaxed line-clamp-6 overflow-hidden">
+                    {it.textContent}
+                  </div>
+                </div>
               ) : null}
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
               <div className="absolute top-2 left-2 rounded-full bg-black/60 backdrop-blur px-2 py-0.5 text-[9px] font-mono uppercase tracking-wider text-foreground/80">
@@ -281,6 +290,11 @@ function HistoryPage() {
                     loading="lazy"
                     className="h-full w-full object-cover"
                   />
+                )}
+                {!selected.previewUrl && selected.textContent && (
+                  <div className="relative h-full min-h-[200px] overflow-auto p-5 font-mono text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap">
+                    {selected.textContent}
+                  </div>
                 )}
               </div>
               <div className="px-4 pb-6">

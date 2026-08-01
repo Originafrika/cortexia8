@@ -142,7 +142,7 @@ function WorkflowsPage() {
                   <div className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
                     {wf.status === "running"
                       ? t("workflows.status.active")
-                      : wf.status === "error"
+                      : wf.status === "error" || wf.status === "failed"
                         ? t("workflows.status.error")
                         : t("workflows.status.idle")}
                   </div>
@@ -152,14 +152,14 @@ function WorkflowsPage() {
                     "shrink-0 rounded-full px-2 py-0.5 text-[9px] font-mono uppercase tracking-wider",
                     wf.status === "running"
                       ? "bg-amber/20 text-amber-soft"
-                      : wf.status === "error"
+                      : wf.status === "error" || wf.status === "failed"
                         ? "bg-red-500/20 text-red-400"
                         : "bg-surface-3 text-muted-foreground",
                   )}
                 >
                   {wf.status === "running"
                     ? t("workflows.status.active")
-                    : wf.status === "error"
+                    : wf.status === "error" || wf.status === "failed"
                       ? t("workflows.status.error")
                       : t("workflows.status.idle")}
                 </span>
@@ -173,16 +173,16 @@ function WorkflowsPage() {
                   <span
                     className={cn(
                       "text-[9px] font-mono uppercase tracking-wider",
-                      wf.lastRunStatus === "success"
+                      wf.lastRunStatus === "success" || wf.lastRunStatus === "succeeded"
                         ? "text-emerald"
-                        : wf.lastRunStatus === "failed"
+                        : wf.lastRunStatus === "failed" || wf.lastRunStatus === "error"
                           ? "text-red-400"
                           : "text-muted-foreground",
                     )}
                   >
-                    {wf.lastRunStatus === "success"
+                    {wf.lastRunStatus === "success" || wf.lastRunStatus === "succeeded"
                       ? t("workflows.run_success")
-                      : wf.lastRunStatus === "failed"
+                      : wf.lastRunStatus === "failed" || wf.lastRunStatus === "error"
                         ? t("workflows.run_failed")
                         : wf.lastRunStatus}
                   </span>

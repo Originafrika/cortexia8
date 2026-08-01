@@ -104,11 +104,19 @@ async function handleSuccess(
   const { resultUrls, resultObject } = parseResultJson(info.resultJson);
 
   if (resultUrls.length === 0) {
-    // Some models (e.g. LLMs) return text in resultObject. We still
-    // record a successful run but no media asset.
+    // Some models (e.g. LLMs) return text in resultObject. Store it
+    // in text_result so the frontend can display the chat response.
+    const textContent = resultObject
+      ? (resultObject.content as string)
+        ?? (resultObject.text as string)
+        ?? (resultObject.choices as { message?: { content?: string } }[])?.[0]?.message?.content
+        ?? JSON.stringify(resultObject)
+      : null;
+
     await sql`
       UPDATE run_node_executions
       SET status = 'succeeded', completed_at = NOW(),
+          text_result = ${textContent},
           cost_usd = COALESCE(${info.creditsConsumed ?? 0}::numeric, 0)
       WHERE id = ${verification.runNodeExecutionId}
     `;
@@ -118,7 +126,7 @@ async function handleSuccess(
       taskId,
       action: "no-op",
       runNodeExecutionId: verification.runNodeExecutionId,
-      reason: "no media urls (text-only result)",
+      reason: "text-only result stored in text_result",
     };
   }
 

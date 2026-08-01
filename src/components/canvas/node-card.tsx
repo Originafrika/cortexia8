@@ -45,7 +45,7 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
 
   const running = data.status === "running";
   const done = data.status === "done";
-  const err = data.status === "error";
+  const err = data.status === "error" || data.status === "failed";
 
   const isNew = newNodeIds.has(id);
   const delay = cascadeDelays.get(id) ?? 0;
@@ -185,28 +185,35 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
           </div>
         </div>
 
-        {/* Collapsed: Status + Price */}
+        {/* Collapsed: Status + Price + Text preview */}
         {!expanded && (
-          <div className="px-3 py-2 flex items-center justify-between text-[11px] border-t border-border/40">
-            {running ? (
-              <span className="flex items-center gap-1.5 text-amber-soft">
-                <Loader2 className="size-3 animate-spin" />
-                {data.step || "..."}
-              </span>
-            ) : done ? (
-              <span className="flex items-center gap-1.5 text-emerald">
-                <Check className="size-3" /> {t("node.status.ready")}
-              </span>
-            ) : err ? (
-              <span className="flex items-center gap-1.5 text-amber-soft">
-                <AlertTriangle className="size-3" /> {t("node.status.error")}
-              </span>
-            ) : (
-              <span className="flex items-center gap-1.5 text-muted-foreground">
-                <Sparkles className="size-3" /> {t("node.status.idle")}
-              </span>
+          <div className="px-3 py-2 border-t border-border/40">
+            <div className="flex items-center justify-between text-[11px]">
+              {running ? (
+                <span className="flex items-center gap-1.5 text-amber-soft">
+                  <Loader2 className="size-3 animate-spin" />
+                  {data.step || "..."}
+                </span>
+              ) : done ? (
+                <span className="flex items-center gap-1.5 text-emerald">
+                  <Check className="size-3" /> {t("node.status.ready")}
+                </span>
+              ) : err ? (
+                <span className="flex items-center gap-1.5 text-amber-soft">
+                  <AlertTriangle className="size-3" /> {t("node.status.error")}
+                </span>
+              ) : (
+                <span className="flex items-center gap-1.5 text-muted-foreground">
+                  <Sparkles className="size-3" /> {t("node.status.idle")}
+                </span>
+              )}
+              <PriceDisplay usd={data.priceUSD} className="text-[10px]" />
+            </div>
+            {data.result?.kind === "text" && (
+              <div className="mt-1.5 max-h-[60px] overflow-hidden rounded bg-surface-2/60 p-2 text-[10px] font-mono text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                {data.result.text}
+              </div>
             )}
-            <PriceDisplay usd={data.priceUSD} className="text-[10px]" />
           </div>
         )}
 

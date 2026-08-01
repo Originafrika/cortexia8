@@ -34,7 +34,7 @@ lines.push("-- Seed data for models table — generated from src/lib/models-data
 lines.push("-- Run order: 0000_create_waitlist.sql, 0001_full_schema.sql, 0002_seed_models.sql");
 lines.push("");
 lines.push("INSERT INTO models (");
-lines.push("  slug, name, provider, category, kie_endpoint, input_schema,");
+lines.push("  slug, name, provider, category, kie_endpoint, api_family, input_schema,");
 lines.push("  output_type, pricing_unit,");
 lines.push("  provider_cost_usd, cortexia_price_usd,");
 lines.push("  fidelity_status, supports_reference_upload, active");
@@ -49,6 +49,7 @@ for (const m of CATALOGUE) {
     sqlValue(m.provider),
     sqlValue(m.category),
     sqlValue(m.kieEndpoint),
+    sqlValue(m.apiFamily ?? null),
     sqlValue(m.inputSchema),
     sqlValue(outputTypeFor(m.category)),
     sqlValue(pricingUnitFor(m.unit)),

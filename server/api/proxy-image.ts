@@ -9,7 +9,7 @@
  * kie.ai URLs that can't be loaded directly by the browser.
  */
 
-import { defineEventHandler, getQuery, setResponseStatus, setResponseHeader } from "h3";
+import { defineEventHandler, getQuery, setResponseStatus, setResponseHeader, sendStream } from "h3";
 
 const ALLOWED_HOSTS = [
   ".r2.cloudflarestorage.com",
@@ -62,14 +62,9 @@ export default defineEventHandler(async (event) => {
     setResponseHeader(event, "Cache-Control", cacheControl);
     setResponseHeader(event, "Access-Control-Allow-Origin", "*");
 
-    return new Response(upstream.body, {
-      status: 200,
-      headers: {
-        "Content-Type": contentType,
-        "Cache-Control": cacheControl,
-        "Access-Control-Allow-Origin": "*",
-      },
-    });
+    if (upstream.body) {
+      sendStream(event, upstream.body);
+    }
   } catch (err) {
     console.error(`[proxy-image] Failed to fetch ${url}:`, err);
     setResponseStatus(event, 502);

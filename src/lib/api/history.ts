@@ -25,6 +25,7 @@ export type HistoryItem = {
   date: string;
   cost: number;
   previewUrl: string | null;
+  textContent: string | null;
   status: string;
 };
 
@@ -57,6 +58,7 @@ async function loadHistory(userId: number, input: HistoryInput): Promise<History
       rne.status,
       rne.cost_usd::text AS cost_usd,
       rne.input_params,
+      rne.text_result,
       rne.started_at,
       wn.model_slug,
       a.storage_url AS preview_url
@@ -72,6 +74,7 @@ async function loadHistory(userId: number, input: HistoryInput): Promise<History
     status: string;
     cost_usd: string;
     input_params: Record<string, unknown> | null;
+    text_result: string | null;
     started_at: string | null;
     model_slug: string;
     preview_url: string | null;
@@ -91,6 +94,7 @@ async function loadHistory(userId: number, input: HistoryInput): Promise<History
       date: row.started_at ?? "",
       cost,
       previewUrl: row.preview_url,
+      textContent: row.text_result,
       status: row.status,
     };
   });
