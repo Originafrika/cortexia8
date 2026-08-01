@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { Copy, Check, Plus, KeyRound, X, AlertTriangle, Loader2 } from "lucide-react";
 import { ApiDocs } from "@/components/api-docs";
@@ -10,6 +10,16 @@ import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/app/developers")({
+  beforeLoad: ({ location }) => {
+    if (typeof window === "undefined") return;
+    const session = loadSession();
+    if (!session) {
+      throw redirect({ to: "/auth/$pathname" as "/auth/$pathname", params: { pathname: "sign-in" }, search: { redirect: location.href } });
+    }
+    if (session.user.role !== "admin") {
+      throw redirect({ to: "/app/models" });
+    }
+  },
   head: () => ({
     meta: [
       { title: "Cortexia — API Developers" },

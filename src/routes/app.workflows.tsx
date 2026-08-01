@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Plus, Workflow, Clock, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -8,6 +8,16 @@ import { useT } from "@/lib/i18n";
 import { loadSession } from "@/lib/auth-store";
 
 export const Route = createFileRoute("/app/workflows")({
+  beforeLoad: ({ location }) => {
+    if (typeof window === "undefined") return;
+    const session = loadSession();
+    if (!session) {
+      throw redirect({ to: "/auth/$pathname" as "/auth/$pathname", params: { pathname: "sign-in" }, search: { redirect: location.href } });
+    }
+    if (session.user.role !== "admin") {
+      throw redirect({ to: "/app/models" });
+    }
+  },
   head: () => ({
     meta: [
       { title: "Cortexia — Workflows" },
