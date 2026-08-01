@@ -54,7 +54,7 @@ export type CatalogueEntry = {
   provider: string;
   category: ModelCategory;
   kieEndpoint: string;
-  apiFamily?: "market_unified" | "dedicated" | "chat_openai" | "chat_anthropic" | "chat_google_native";
+  apiFamily?: "market_unified" | "dedicated" | "chat_openai" | "chat_anthropic";
   fidelityStatus: FidelityStatus;
   supportsReferenceUpload: boolean;
   providerCostUsd: number;
@@ -2515,7 +2515,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     provider: "Google",
     category: "text",
     kieEndpoint: "gemini-2.5-pro",
-    apiFamily: "chat_google_native",
+    apiFamily: "chat_openai",
     fidelityStatus: "generique",
     supportsReferenceUpload: false,
     providerCostUsd: 0.5,
@@ -2525,7 +2525,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Gemini 2.5 Pro — Google multimodal haut de gamme.",
     unit: "1m-tokens-io",
     io: { inputUSD: 0.5, outputUSD: 2.0 },
-    inputSchema: schemaGemini,
+    inputSchema: schemaGPT,
   },
   {
     slug: "gemini-3-pro",
@@ -2533,7 +2533,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     provider: "Google",
     category: "text",
     kieEndpoint: "gemini-3-pro",
-    apiFamily: "chat_google_native",
+    apiFamily: "chat_openai",
     fidelityStatus: "generique",
     supportsReferenceUpload: false,
     providerCostUsd: 0.8,
@@ -2543,7 +2543,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Gemini 3 Pro — génération 3 Google.",
     unit: "1m-tokens-io",
     io: { inputUSD: 0.8, outputUSD: 3.2 },
-    inputSchema: schemaGemini,
+    inputSchema: schemaGPT,
   },
   {
     slug: "gemini-31-pro",
@@ -2551,7 +2551,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     provider: "Google",
     category: "text",
     kieEndpoint: "gemini-3.1-pro",
-    apiFamily: "chat_google_native",
+    apiFamily: "chat_openai",
     fidelityStatus: "fidele",
     supportsReferenceUpload: false,
     providerCostUsd: 0.397,
@@ -2561,7 +2561,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Contexte long, multimodal natif, très performant.",
     unit: "1m-tokens-io",
     io: { inputUSD: 0.5, outputUSD: 0.5 },
-    inputSchema: schemaGemini,
+    inputSchema: schemaGPT,
   },
   {
     slug: "gemini-25-flash",
@@ -2569,7 +2569,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     provider: "Google",
     category: "text",
     kieEndpoint: "gemini-2.5-flash",
-    apiFamily: "chat_google_native",
+    apiFamily: "chat_openai",
     fidelityStatus: "generique",
     supportsReferenceUpload: false,
     providerCostUsd: 0.08,
@@ -2579,7 +2579,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Gemini 2.5 Flash — rapide et économique.",
     unit: "1m-tokens-io",
     io: { inputUSD: 0.08, outputUSD: 0.32 },
-    inputSchema: schemaGemini,
+    inputSchema: schemaGPT,
   },
   {
     slug: "gemini-3-flash",
@@ -2587,7 +2587,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     provider: "Google",
     category: "text",
     kieEndpoint: "gemini-3-flash",
-    apiFamily: "chat_google_native",
+    apiFamily: "chat_openai",
     fidelityStatus: "generique",
     supportsReferenceUpload: false,
     providerCostUsd: 0.1,
@@ -2597,7 +2597,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Gemini 3 Flash — nouvelle génération rapide.",
     unit: "1m-tokens-io",
     io: { inputUSD: 0.1, outputUSD: 0.4 },
-    inputSchema: schemaGemini,
+    inputSchema: schemaGPT,
   },
   {
     slug: "gemini-35-flash",
@@ -2605,7 +2605,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     provider: "Google",
     category: "text",
     kieEndpoint: "gemini-3.5-flash",
-    apiFamily: "chat_google_native",
+    apiFamily: "chat_openai",
     fidelityStatus: "generique",
     supportsReferenceUpload: false,
     providerCostUsd: 0.12,
@@ -2641,7 +2641,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     provider: "Google",
     category: "text",
     kieEndpoint: "gemini-3-flash-v1beta",
-    apiFamily: "chat_google_native",
+    apiFamily: "chat_openai",
     fidelityStatus: "generique",
     supportsReferenceUpload: false,
     providerCostUsd: 0.1,

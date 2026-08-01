@@ -181,8 +181,14 @@ export async function chatCompletion(opts: {
   tools?: unknown[];
   reasoning_effort?: string;
   stream?: boolean;
+  include_thoughts?: boolean;
 }): Promise<{ taskId: string; response?: unknown }> {
-  const endpoint = "/v1/chat/completions";
+  // Gemini models use model-specific paths: /{model}/v1/chat/completions
+  // Other models use the generic: /v1/chat/completions
+  const isGemini = opts.model.startsWith("gemini");
+  const endpoint = isGemini
+    ? `/${opts.model}/v1/chat/completions`
+    : "/v1/chat/completions";
   const body: Record<string, unknown> = {
     model: opts.model,
     messages: opts.messages,
@@ -190,6 +196,7 @@ export async function chatCompletion(opts: {
   };
   if (opts.tools) body.tools = opts.tools;
   if (opts.reasoning_effort) body.reasoning_effort = opts.reasoning_effort;
+  if (opts.include_thoughts) body.include_thoughts = opts.include_thoughts;
 
   const res = await fetch(`${kieApiBase()}${endpoint}`, {
     method: "POST",
@@ -220,37 +227,6 @@ export async function chatAnthropic(opts: {
     stream: opts.stream ?? false,
   };
   if (opts.thinking) body.thinking = { type: "enabled", budget_tokens: opts.max_tokens ?? 4096 };
-
-  const res = await fetch(`${kieApiBase()}${endpoint}`, {
-    method: "POST",
-    headers: {
-      ...authHeaders(),
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) await readError(res, endpoint);
-  const json = (await res.json()) as Record<string, unknown>;
-  return { taskId: String(json.id ?? ""), response: json };
-}
-
-/** Chat completion via Google native streaming endpoint. */
-export async function chatGoogleNative(opts: {
-  model: string;
-  contents: unknown[];
-  tools?: unknown[];
-  generationConfig?: Record<string, unknown>;
-}): Promise<{ taskId: string; response?: unknown }> {
-  // SECURITY NOTE: The Google API key is sent as a URL query parameter to kie.ai.
-  // This is the standard Google API authentication method. kie.ai proxies this request
-  // to Google's API. Ensure kie.ai properly strips API keys from access logs.
-  // If kie.ai supports header-based auth for Google models, migrate to that method.
-  const endpoint = `/streamGenerateContent?alt=sse&key=${encodeURIComponent(process.env.GOOGLE_API_KEY ?? "")}`;
-  const body: Record<string, unknown> = {
-    contents: opts.contents,
-  };
-  if (opts.tools) body.tools = opts.tools;
-  if (opts.generationConfig) body.generationConfig = opts.generationConfig;
 
   const res = await fetch(`${kieApiBase()}${endpoint}`, {
     method: "POST",

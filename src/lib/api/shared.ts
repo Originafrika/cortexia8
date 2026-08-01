@@ -15,8 +15,7 @@ export type ApiFamily =
   | "market_unified"
   | "dedicated"
   | "chat_openai"
-  | "chat_anthropic"
-  | "chat_google_native";
+  | "chat_anthropic";
 
 export type ModelRow = {
   id: number;

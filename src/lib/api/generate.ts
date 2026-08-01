@@ -9,7 +9,7 @@
  *   5. Persist a run + run_node_executions row with the kie_task_id so
  *      the webhook can pick it up.
  *
- * For chat models (chat_openai, chat_anthropic, chat_google_native):
+ * For chat models (chat_openai, chat_anthropic):
  *   - Calls the chat endpoint synchronously
  *   - Stores text result directly in run_node_executions.text_result
  *   - Returns status "succeeded" immediately (no polling needed)
@@ -25,7 +25,6 @@ import {
   createTask,
   chatCompletion,
   chatAnthropic,
-  chatGoogleNative,
 } from "@/lib/kie-api/client";
 import {
   ensureSufficientCredits,
@@ -169,7 +168,7 @@ async function runGenerate(
   }
 
   // Chat models are synchronous — call the API, store text, return immediately.
-  const isChat = apiFamily === "chat_openai" || apiFamily === "chat_anthropic" || apiFamily === "chat_google_native";
+  const isChat = apiFamily === "chat_openai" || apiFamily === "chat_anthropic";
 
   if (isChat) {
     console.log(`[Generate] Chat model detected (${apiFamily}), calling synchronously`);
@@ -299,19 +298,6 @@ async function callChatEndpoint(
       const resp = response as Record<string, unknown>;
       const content = resp.content as { type?: string; text?: string }[] | undefined;
       const text = content?.filter((c) => c.type === "text").map((c) => c.text ?? "").join("") ?? "";
-      return { textContent: text, responseId: taskId };
-    }
-
-    case "chat_google_native": {
-      const { taskId, response } = await chatGoogleNative({
-        model: model.kie_endpoint,
-        contents: (input.contents as unknown[]) ?? [],
-        tools: input.tools as unknown[] | undefined,
-        generationConfig: input.generationConfig as Record<string, unknown> | undefined,
-      });
-      const resp = response as Record<string, unknown>;
-      const candidates = resp.candidates as { content?: { parts?: { text?: string }[] } }[] | undefined;
-      const text = candidates?.[0]?.content?.parts?.map((p) => p.text ?? "").join("") ?? "";
       return { textContent: text, responseId: taskId };
     }
 
