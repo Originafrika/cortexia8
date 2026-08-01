@@ -94,6 +94,8 @@ export async function verifyActiveGens(): Promise<void> {
       } else if (status.status === "error" || status.status === "failed" || status.nodes?.[0]?.status === "error" || status.nodes?.[0]?.status === "failed") {
         updateGeneration(id, { status: "error", error: "Generation failed" });
       }
-    } catch { /* keep as loading */ }
+    } catch (err) {
+      console.error(`[app-store] verifyActiveGens poll failed: id=${id}, runId=${gen.runId}, model=${gen.modelSlug}`, err);
+    }
   }
 }

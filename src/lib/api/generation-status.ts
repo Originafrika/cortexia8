@@ -13,7 +13,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { sql } from "@/lib/db";
 import { getTaskDetail, parseResultJson } from "@/lib/kie-api/common";
 import { HttpError, getRequestContext, requireUserId } from "./auth";
-import { handleWebhook } from "./webhooks-kie";
+import { handleWebhook } from "./webhooks-kie-core";
 
 export type StatusInput = {
   id: number;

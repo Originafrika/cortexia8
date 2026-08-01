@@ -281,6 +281,7 @@ export function ModelPlaygroundContent({
         const poll = () => {
           pollCount++;
           if (pollCount > maxPolls) {
+            console.error(`[Generate] Timeout: genId=${genId}, runId=${res.runId}, model=${model.slug}, polls=${pollCount}`);
             setActiveGens(prev => {
               const next = new Map(prev);
               const gen = next.get(genId);
@@ -303,6 +304,7 @@ export function ModelPlaygroundContent({
               });
 
               if (statusRes.status === "success" || statusRes.status === "succeeded" || ((node.status === "success" || node.status === "succeeded") && (node.asset || node.textContent))) {
+                console.log(`[Generate] Success via poll: genId=${genId}, runId=${res.runId}, model=${model.slug}, status=${statusRes.status}, nodeStatus=${node.status}, hasAsset=${!!node.asset}, hasText=${!!node.textContent}`);
                 const url = node.asset?.previewUrl || node.asset?.storageUrl || null;
                 setHistory((prev) =>
                   prev.map((r) =>
@@ -321,6 +323,7 @@ export function ModelPlaygroundContent({
               }
 
               if (statusRes.status === "error" || statusRes.status === "failed" || node.status === "error" || node.status === "failed") {
+                console.error(`[Generate] Task failed: genId=${genId}, runId=${res.runId}, model=${model.slug}, status=${statusRes.status}, nodeStatus=${node.status}, error=${node.errorMessage || "unknown"}, kieTaskId=${node.kieTaskId}`);
                 setActiveGens(prev => {
                   const next = new Map(prev);
                   const gen = next.get(genId);
@@ -332,14 +335,17 @@ export function ModelPlaygroundContent({
 
               const genTimers = timersRef.current.get(genId) ?? []; genTimers.push(window.setTimeout(poll, 2000)); timersRef.current.set(genId, genTimers);
             })
-            .catch(() => {
+            .catch((pollErr) => {
+              console.error(`[Generate] Poll error: genId=${genId}, runId=${res.runId}, poll=${pollCount}, error=`, pollErr);
               const genTimers = timersRef.current.get(genId) ?? []; genTimers.push(window.setTimeout(poll, 2000)); timersRef.current.set(genId, genTimers);
             });
         };
         const genTimers = timersRef.current.get(genId) ?? []; genTimers.push(window.setTimeout(poll, 2000)); timersRef.current.set(genId, genTimers);
       })
       .catch((err) => {
-        console.error(`[Generate] Failed:`, err);
+        console.error(`[Generate] Failed: model=${model.slug}, prompt="${prompt.trim().slice(0, 80)}", error=`, err);
+        if (err?.message) console.error(`[Generate] Error message: ${err.message}`);
+        if (err?.stack) console.error(`[Generate] Stack: ${err.stack}`);
         setActiveGens(prev => {
           const next = new Map(prev);
           const gen = next.get(genId);

@@ -531,6 +531,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
       await pollGenerationStatus(set, get, id, runNodeExecId);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
+      console.error(`[canvas-store] runNode failed: nodeId=${id}, error=`, err);
       set({
         nodes: get().nodes.map((n) =>
           n.id === id
@@ -882,6 +883,7 @@ function pollGenerationStatus(
         }
 
         if (kieStatus === "failed" || kieStatus === "error") {
+          console.error(`[canvas-store] Node failed: nodeId=${nodeId}, model=${nodeExec.modelSlug}, status=${kieStatus}, error=${nodeExec.errorMessage || "unknown"}, kieTaskId=${nodeExec.kieTaskId}`);
           set({
             nodes: get().nodes.map((n) =>
               n.id === nodeId
@@ -902,6 +904,7 @@ function pollGenerationStatus(
         }
       } catch (err) {
         consecutiveErrors++;
+        console.error(`[canvas-store] Poll error: nodeId=${nodeId}, error=${consecutiveErrors}/${MAX_CONSECUTIVE_ERRORS}`, err);
         if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
           const message = err instanceof Error ? err.message : "Persistent polling error";
           set({
