@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils";
 import { generate } from "@/lib/api/generate";
 import { generationStatus } from "@/lib/api/generation-status";
 import { useT } from "@/lib/i18n";
-import { loadSession } from "@/lib/auth-store";
+import { loadSession, isAdmin } from "@/lib/auth-store";
 import { PromptBar } from "@/components/playground/prompt-bar";
 import { ResultView } from "@/components/playground/result-view";
 import { HistoryGrid } from "@/components/playground/history-grid";
@@ -132,6 +132,24 @@ export function ModelPlaygroundContent({
   isModal?: boolean;
 }) {
   const t = useT();
+
+  // Admin-only model categories
+  const adminOnly = model.category === "text" || model.category === "audio" || model.category === "music";
+  if (adminOnly && !isAdmin()) {
+    return (
+      <div className="grid place-items-center h-full">
+        <div className="text-center">
+          <AlertTriangle className="mx-auto size-8 text-amber" />
+          <h2 className="mt-4 font-display text-2xl">{t("playground.admin_only")}</h2>
+          <p className="mt-2 text-sm text-muted-foreground">{t("playground.admin_only_desc")}</p>
+          <Link to="/app/models" className="mt-4 inline-block text-amber-soft hover:underline text-sm">
+            {t("playground.back")}
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   const [prompt, setPrompt] = useState("");
   const [state, setState] = useState<Record<string, unknown>>(() => initState(model));
 

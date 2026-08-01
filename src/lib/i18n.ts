@@ -421,6 +421,8 @@ const fr: Dict = {
   "playground.seed_tooltip": "Seed aléatoire",
   "playground.ready": "Prêt à générer.",
   "playground.cancel": "Annuler",
+  "playground.admin_only": "Accès réservé aux administrateurs",
+  "playground.admin_only_desc": "Ce modèle n'est disponible que pour les comptes administrateurs.",
   "playground.new_chat": "Nouvelle session",
   "playground.no_sessions": "Aucune session",
   "playground.ready_desc": "Écris ton prompt en bas...",
@@ -982,6 +984,8 @@ const en: Dict = {
   "playground.render_image": "Image rendering",
   "playground.new_chat": "New chat",
   "playground.no_sessions": "No sessions yet",
+  "playground.admin_only": "Admin access required",
+  "playground.admin_only_desc": "This model is only available to admin accounts.",
 
   // Categories
   "cat.all": "All",
