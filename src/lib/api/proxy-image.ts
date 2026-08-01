@@ -21,7 +21,9 @@ function isAllowedUrl(raw: string): boolean {
   try {
     const u = new URL(raw);
     if (u.protocol !== "https:" && u.protocol !== "http:") return false;
-    return ALLOWED_HOSTS.some((h) => u.hostname.endsWith(h));
+    return ALLOWED_HOSTS.some((h) =>
+      h.startsWith(".") ? u.hostname.endsWith(h) : u.hostname === h,
+    );
   } catch {
     return false;
   }
