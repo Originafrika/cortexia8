@@ -1,5 +1,4 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
-import { loadSession } from "@/lib/auth-store";
 import { isWaitlist } from "@/lib/launch";
 import { AmbientBackground } from "@/components/ambient-background";
 import { SiteHeader } from "@/components/site-header";
@@ -21,10 +20,7 @@ export const Route = createFileRoute("/")({
   beforeLoad: () => {
     if (typeof window === "undefined") return;
     if (!isWaitlist()) {
-      const session = loadSession();
-      if (session) {
-        throw redirect({ to: "/app-preview" });
-      }
+      throw redirect({ to: "/app-preview" });
     }
   },
   head: () => ({
