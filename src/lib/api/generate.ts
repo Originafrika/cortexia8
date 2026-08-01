@@ -125,14 +125,15 @@ async function runGenerate(
 
   // 1b. Auto-wrap plain-text messages into OpenAI format for text models.
   //     Users type "hi" in the textarea; kie.ai expects [{role:"user",content:"hi"}].
-  if (model.category === "text" && typeof resolvedInput.messages === "string") {
-    const text = resolvedInput.messages.trim();
-    if (text) {
-      resolvedInput.messages = [{ role: "user", content: text }];
-    } else {
+  if (model.category === "text") {
+    const msgs = resolvedInput.messages;
+    if (typeof msgs === "string") {
+      const text = msgs.trim();
+      resolvedInput.messages = text ? [{ role: "user", content: text }] : [];
+      console.log(`[Generate] Auto-wrapped messages string into OpenAI format`);
+    } else if (!Array.isArray(msgs) || msgs.length === 0) {
       resolvedInput.messages = [];
     }
-    console.log(`[Generate] Auto-wrapped messages string into OpenAI format`);
   }
 
   // 2. Cost + credit check.
