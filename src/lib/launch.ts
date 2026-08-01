@@ -4,7 +4,7 @@
 
 export type LaunchMode = "waitlist" | "live";
 
-export const LAUNCH_MODE: LaunchMode = "waitlist";
+export const LAUNCH_MODE: LaunchMode = "live";
 
 // Next 1st August (UTC) — recomputed at build/import time.
 export const LAUNCH_DATE = (() => {
