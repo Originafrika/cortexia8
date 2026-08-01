@@ -308,10 +308,7 @@ export async function fetchProxiedImage(url: string | null | undefined): Promise
   try {
     const result = await proxyImage({ data: { url } });
     const binary = atob(result.data);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) {
-      bytes[i] = binary.charCodeAt(i);
-    }
+    const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
     const blob = new Blob([bytes], { type: result.contentType });
     return URL.createObjectURL(blob);
   } catch (err) {
