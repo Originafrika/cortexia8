@@ -515,6 +515,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
           modelSlug: node.data.modelSlug,
           input: node.data.params,
           sessionToken: loadSession()?.token,
+          workflowId: get().workflowId ?? undefined,
         },
       });
 
