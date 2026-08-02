@@ -55,7 +55,9 @@ function DevelopersPage() {
 
     getApiStats({ data: { sessionToken: token } })
       .then(setStats)
-      .catch(() => {});
+      .catch(() => {
+        // Stats are non-critical — silently ignore
+      });
   }, []);
 
   const snippets = {
