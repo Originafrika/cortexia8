@@ -72,7 +72,7 @@ while true; do
   sleep 2
 done
 
-echo $RESULT | jq '.url, .cost'`,
+echo $RESULT | jq -r '.url, .cost.amount'`,
     js: `const res = await fetch("https://cortexia.originafrika.online/v1/generate", {
   method: "POST",
   headers: {
@@ -98,7 +98,7 @@ do {
   result = await poll.json();
 } while (result.status === "processing");
 
-console.log(result.url, result.cost);`,
+console.log(result.url, result.cost?.amount);`,
     py: `import os, requests, time
 
 res = requests.post(
@@ -124,7 +124,7 @@ while True:
     if result["status"] != "processing":
         break
 
-print(result["url"], result["cost"])`,
+print(result["url"], result["cost"]["amount"] if result["cost"] else None)`,
   } as const;
 
   function copy() {
