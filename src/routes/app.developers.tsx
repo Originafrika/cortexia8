@@ -4,6 +4,7 @@ import { Copy, Check, Plus, KeyRound, X, AlertTriangle, Loader2 } from "lucide-r
 import { ApiDocs } from "@/components/api-docs";
 import { motion, AnimatePresence } from "framer-motion";
 import { createApiKey, listApiKeys, revokeApiKey, type ApiKeyRow } from "@/lib/api/api-keys";
+import { getApiStats, type ApiStats } from "@/lib/api/api-stats";
 import { useT } from "@/lib/i18n";
 import { loadSession } from "@/lib/auth-store";
 import { toast } from "sonner";
@@ -40,15 +41,21 @@ function DevelopersPage() {
   const [keys, setKeys] = useState<ApiKeyRow[]>([]);
   const [keysLoading, setKeysLoading] = useState(true);
   const [creatingKey, setCreatingKey] = useState(false);
+  const [stats, setStats] = useState<ApiStats | null>(null);
 
   useEffect(() => {
-    listApiKeys({ data: { sessionToken: loadSession()?.token } })
+    const token = loadSession()?.token;
+    listApiKeys({ data: { sessionToken: token } })
       .then((data) => setKeys(Array.isArray(data) ? (data as ApiKeyRow[]) : []))
       .catch(() => {
         setKeys([]);
         toast.error(t("dev.keys_load_error"));
       })
       .finally(() => setKeysLoading(false));
+
+    getApiStats({ data: { sessionToken: token } })
+      .then(setStats)
+      .catch(() => {});
   }, []);
 
   const snippets = {
@@ -174,9 +181,18 @@ print(result["url"], result["cost"]["amount"] if result["cost"] else None)`,
 
       {/* Usage */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard label={t("dev.stat_calls")} value="—" />
-        <StatCard label={t("dev.stat_cost")} value="—" />
-        <StatCard label={t("dev.stat_success")} value="—" />
+        <StatCard
+          label={t("dev.stat_calls")}
+          value={stats ? String(stats.callsThisMonth) : "—"}
+        />
+        <StatCard
+          label={t("dev.stat_cost")}
+          value={stats ? `$${stats.costThisMonth.toFixed(2)}` : "—"}
+        />
+        <StatCard
+          label={t("dev.stat_success")}
+          value={stats ? `${stats.successRate}%` : "—"}
+        />
       </div>
 
       {/* Quick Start */}
