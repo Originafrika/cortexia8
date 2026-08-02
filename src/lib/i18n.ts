@@ -591,6 +591,12 @@ const fr: Dict = {
   "api_docs.ratelimit_poll": "requêtes de statut par minute par clé API",
   "api_docs.ratelimit_other": "requêtes par minute par clé API (autres endpoints)",
   "api_docs.ratelimit_note": "Les headers X-RateLimit-Remaining et X-RateLimit-Reset sont inclus dans chaque réponse. Si dépassé, l'API renvoie 429 Too Many Requests.",
+  "api_docs.webhook_title": "Webhooks",
+  "api_docs.webhook_desc": "Cortexia peut envoyer des notifications POST à ton serveur quand une génération est terminée. Configure l'URL de callback dans les paramètres de ton compte.",
+  "api_docs.webhook_events_title": "Événements",
+  "api_docs.webhook_payload_title": "Payload",
+  "api_docs.webhook_verify_title": "Vérification",
+  "api_docs.webhook_verify_desc": "Chaque webhook inclut un header X-Cortexia-Signature contenant le SHA-256 HMAC du payload avec ton webhook secret. Vérifie toujours cette signature avant de traiter le payload.",
 };
 
 const en: Dict = {
@@ -1156,6 +1162,12 @@ const en: Dict = {
   "api_docs.ratelimit_poll": "status polls per minute per API key",
   "api_docs.ratelimit_other": "requests per minute per API key (all other endpoints)",
   "api_docs.ratelimit_note": "The X-RateLimit-Remaining and X-RateLimit-Reset headers are included in every response. When exceeded, the API returns a 429 Too Many Requests.",
+  "api_docs.webhook_title": "Webhooks",
+  "api_docs.webhook_desc": "Cortexia can send POST notifications to your server when a generation completes. Configure the callback URL in your account settings.",
+  "api_docs.webhook_events_title": "Events",
+  "api_docs.webhook_payload_title": "Payload",
+  "api_docs.webhook_verify_title": "Verification",
+  "api_docs.webhook_verify_desc": "Each webhook includes an X-Cortexia-Signature header containing the SHA-256 HMAC of the payload with your webhook secret. Always verify this signature before processing the payload.",
 };
 
 // Portuguese, Spanish, Indonesian , cover the core landing strings.
@@ -1688,6 +1700,12 @@ const pt: Dict = {
   "api_docs.ratelimit_poll": "requisições de status por minuto por chave API",
   "api_docs.ratelimit_other": "requisições por minuto por chave API (demais endpoints)",
   "api_docs.ratelimit_note": "Os headers X-RateLimit-Remaining e X-RateLimit-Reset são incluídos em cada resposta. Se excedido, a API retorna 429 Too Many Requests.",
+  "api_docs.webhook_title": "Webhooks",
+  "api_docs.webhook_desc": "Cortexia can send POST notifications to your server when a generation completes. Configure the callback URL in your account settings.",
+  "api_docs.webhook_events_title": "Events",
+  "api_docs.webhook_payload_title": "Payload",
+  "api_docs.webhook_verify_title": "Verification",
+  "api_docs.webhook_verify_desc": "Each webhook includes an X-Cortexia-Signature header containing the SHA-256 HMAC of the payload with your webhook secret. Always verify this signature before processing the payload.",
 };
 
 const es: Dict = {
@@ -2218,6 +2236,12 @@ const es: Dict = {
   "api_docs.ratelimit_poll": "peticiones de estado por minuto por clave API",
   "api_docs.ratelimit_other": "peticiones por minuto por clave API (demás endpoints)",
   "api_docs.ratelimit_note": "Los headers X-RateLimit-Remaining y X-RateLimit-Reset se incluyen en cada respuesta. Si se excede, la API devuelve 429 Too Many Requests.",
+  "api_docs.webhook_title": "Webhooks",
+  "api_docs.webhook_desc": "Cortexia can send POST notifications to your server when a generation completes. Configure the callback URL in your account settings.",
+  "api_docs.webhook_events_title": "Events",
+  "api_docs.webhook_payload_title": "Payload",
+  "api_docs.webhook_verify_title": "Verification",
+  "api_docs.webhook_verify_desc": "Each webhook includes an X-Cortexia-Signature header containing the SHA-256 HMAC of the payload with your webhook secret. Always verify this signature before processing the payload.",
 };
 
 const id: Dict = {
@@ -2748,6 +2772,12 @@ const id: Dict = {
   "api_docs.ratelimit_poll": "permintaan status per menit per kunci API",
   "api_docs.ratelimit_other": "permintaan per menit per kunci API (endpoint lainnya)",
   "api_docs.ratelimit_note": "Header X-RateLimit-Remaining dan X-RateLimit-Reset disertakan di setiap respons. Jika terlampaui, API mengembalikan 429 Too Many Requests.",
+  "api_docs.webhook_title": "Webhooks",
+  "api_docs.webhook_desc": "Cortexia can send POST notifications to your server when a generation completes. Configure the callback URL in your account settings.",
+  "api_docs.webhook_events_title": "Events",
+  "api_docs.webhook_payload_title": "Payload",
+  "api_docs.webhook_verify_title": "Verification",
+  "api_docs.webhook_verify_desc": "Each webhook includes an X-Cortexia-Signature header containing the SHA-256 HMAC of the payload with your webhook secret. Always verify this signature before processing the payload.",
 };
 
 const DICTS: Record<Lang, Dict> = { fr, en, pt, id, es };

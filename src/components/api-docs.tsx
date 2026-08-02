@@ -426,6 +426,57 @@ export function ApiDocs() {
           {t("api_docs.ratelimit_note")}
         </p>
       </div>
+
+      {/* Webhooks */}
+      <div className="surface-gradient-border rounded-2xl bg-surface-1/60 p-6 space-y-4">
+        <h3 className="font-display text-2xl tracking-[-0.02em]">{t("api_docs.webhook_title")}</h3>
+        <p className="text-sm text-muted-foreground max-w-2xl">
+          {t("api_docs.webhook_desc")}
+        </p>
+
+        <div>
+          <h4 className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">
+            {t("api_docs.webhook_events_title")}
+          </h4>
+          <div className="space-y-2">
+            <div className="flex items-center gap-3 text-xs">
+              <code className="rounded-md bg-emerald/10 text-emerald px-1.5 py-0.5 font-mono font-bold">
+                generation.completed
+              </code>
+              <span className="text-muted-foreground">Fired when a generation finishes successfully</span>
+            </div>
+            <div className="flex items-center gap-3 text-xs">
+              <code className="rounded-md bg-red/10 text-red px-1.5 py-0.5 font-mono font-bold">
+                generation.failed
+              </code>
+              <span className="text-muted-foreground">Fired when a generation fails</span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h4 className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">
+            {t("api_docs.webhook_payload_title")}
+          </h4>
+          <CodeBlock>{`{
+  "event": "generation.completed",
+  "data": {
+    "id": "gen_3x8kL2",
+    "object": "generation",
+    "status": "completed",
+    "model": "seedream-5-pro",
+    "url": "https://cortexia-assets.r2.dev/gen_3x8kL2.webp",
+    "cost": { "amount": 0.04, "currency": "USD" },
+    "created_at": "2026-07-24T10:30:00Z"
+  }
+}`}</CodeBlock>
+        </div>
+
+        <div className="rounded-xl border border-amber/30 bg-amber/5 p-3 flex items-start gap-2 text-xs text-amber-soft">
+          <span className="shrink-0 mt-0.5">⚠</span>
+          <span>{t("api_docs.webhook_verify_desc")}</span>
+        </div>
+      </div>
     </div>
   );
 }
