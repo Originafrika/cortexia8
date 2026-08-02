@@ -52,14 +52,27 @@ function DevelopersPage() {
   }, []);
 
   const snippets = {
-    curl: `curl https://cortexia.originafrika.online/v1/generate \\
+    curl: `# Step 1: Start generation
+RESPONSE=$(curl -s https://cortexia.originafrika.online/v1/generate \\
   -H "Authorization: Bearer $CORTEXIA_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
     "model": "seedream-5-pro",
     "prompt": "Un flacon ambré sur marbre travertin",
     "resolution": "1K"
-  }'`,
+  }')
+GEN_ID=$(echo $RESPONSE | jq -r '.id')
+
+# Step 2: Poll for result
+while true; do
+  RESULT=$(curl -s "https://cortexia.originafrika.online/v1/generations/$GEN_ID" \\
+    -H "Authorization: Bearer $CORTEXIA_KEY")
+  STATUS=$(echo $RESULT | jq -r '.status')
+  [ "$STATUS" != "processing" ] && break
+  sleep 2
+done
+
+echo $RESULT | jq '.url, .cost'`,
     js: `const res = await fetch("https://cortexia.originafrika.online/v1/generate", {
   method: "POST",
   headers: {
@@ -72,8 +85,21 @@ function DevelopersPage() {
     resolution: "1K",
   }),
 });
-const { url, cost } = await res.json();`,
-    py: `import os, requests
+const { id } = await res.json();
+
+// Poll until completed
+let result;
+do {
+  await new Promise((r) => setTimeout(r, 2000));
+  const poll = await fetch(
+    \`https://cortexia.originafrika.online/v1/generations/\${id}\`,
+    { headers: { Authorization: \`Bearer \${process.env.CORTEXIA_KEY}\` } }
+  );
+  result = await poll.json();
+} while (result.status === "processing");
+
+console.log(result.url, result.cost);`,
+    py: `import os, requests, time
 
 res = requests.post(
     "https://cortexia.originafrika.online/v1/generate",
@@ -84,8 +110,21 @@ res = requests.post(
         "resolution": "1K",
     },
 )
-url, cost = res.json()["url"], res.json()["cost"]
-print(url, cost)`,
+gen_id = res.json()["id"]
+
+# Poll until completed
+result = None
+while True:
+    time.sleep(2)
+    poll = requests.get(
+        f"https://cortexia.originafrika.online/v1/generations/{gen_id}",
+        headers={"Authorization": f"Bearer {os.environ['CORTEXIA_KEY']}"},
+    )
+    result = poll.json()
+    if result["status"] != "processing":
+        break
+
+print(result["url"], result["cost"])`,
   } as const;
 
   function copy() {
