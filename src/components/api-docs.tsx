@@ -6,7 +6,7 @@ const endpoints = [
     method: "POST",
     path: "/v1/generate",
     title: "Generate content",
-    description: "Starts an image, video, or audio generation based on the chosen model.",
+    description: "Starts an image, video, or audio generation based on the chosen model. Returns immediately with `status: \"processing\"`. Poll `GET /v1/generations/:id` to retrieve the result URL once complete.",
     headers: [
       { name: "Authorization", value: "Bearer cx_..." },
       { name: "Content-Type", value: "application/json" },
@@ -14,19 +14,13 @@ const endpoints = [
     requestBody: `{
   "model": "seedream-5-pro",
   "prompt": "Un flacon ambré sur marbre travertin",
-  "resolution": "1K",
-  "reference_files": []
+  "resolution": "1K"
 }`,
     responseExample: `{
   "id": "gen_3x8kL2",
   "object": "generation",
-  "status": "completed",
+  "status": "processing",
   "model": "seedream-5-pro",
-  "url": "https://cortexia-assets.r2.dev/gen_3x8kL2.webp",
-  "cost": {
-    "amount": 0.04,
-    "currency": "USD"
-  },
   "created_at": "2026-07-24T10:30:00Z"
 }`,
     errors: [
@@ -47,13 +41,11 @@ const endpoints = [
   "id": "gen_3x8kL2",
   "object": "generation",
   "status": "completed",
-  "model": "seedream-5-pro",
   "url": "https://cortexia-assets.r2.dev/gen_3x8kL2.webp",
   "cost": {
     "amount": 0.04,
     "currency": "USD"
-  },
-  "created_at": "2026-07-24T10:30:00Z"
+  }
 }`,
     errors: [
       { code: 404, message: "Generation not found" },
@@ -390,21 +382,21 @@ export function ApiDocs() {
         <div className="space-y-3 text-sm text-muted-foreground">
           <div className="flex items-center gap-3">
             <code className="rounded-md bg-surface-2 px-1.5 py-0.5 font-mono text-xs font-bold">
+              30
+            </code>
+            <span>generations per minute per API key</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <code className="rounded-md bg-surface-2 px-1.5 py-0.5 font-mono text-xs font-bold">
+              100
+            </code>
+            <span>status polls per minute per API key</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <code className="rounded-md bg-surface-2 px-1.5 py-0.5 font-mono text-xs font-bold">
               60
             </code>
-            <span>requests per minute per API key</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <code className="rounded-md bg-surface-2 px-1.5 py-0.5 font-mono text-xs font-bold">
-              10
-            </code>
-            <span>concurrent generations per account</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <code className="rounded-md bg-surface-2 px-1.5 py-0.5 font-mono text-xs font-bold">
-              100 MB
-            </code>
-            <span>maximum file size for reference files</span>
+            <span>requests per minute per API key (all other endpoints)</span>
           </div>
         </div>
         <p className="text-xs text-muted-foreground">
