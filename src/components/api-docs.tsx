@@ -68,6 +68,29 @@ const endpoints = [
     errors: [{ code: 401, message: "Invalid API key" }],
   },
   {
+    method: "GET",
+    path: "/v1/models",
+    title: "List models",
+    description: "Returns all active models. Optionally filter by category.",
+    headers: [{ name: "Authorization", value: "Bearer cx_..." }],
+    requestBody: null,
+    responseExample: `{
+  "data": [
+    {
+      "slug": "seedream-5-pro",
+      "name": "Seedream 5 Pro",
+      "provider": "kie.ai",
+      "category": "image",
+      "price_usd": 0.04,
+      "supports_reference_upload": true,
+      "fidelity_status": "fidele"
+    }
+  ],
+  "total": 213
+}`,
+    errors: [{ code: 401, message: "Invalid API key" }],
+  },
+  {
     method: "POST",
     path: "/v1/workflows",
     title: "Create workflow",
