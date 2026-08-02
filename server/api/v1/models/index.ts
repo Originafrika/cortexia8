@@ -57,41 +57,29 @@ export default defineEventHandler(async (event) => {
     const query = getQuery(event);
     const category = query.category as string | undefined;
 
-    // 3. Query models
-    let rows;
-    if (category && ["image", "video", "audio", "text", "music"].includes(category)) {
-      rows = (await sql`
-        SELECT slug, name, provider, category, cortexia_price_usd::text AS price_usd,
-               supports_reference_upload, fidelity_status
-        FROM models
-        WHERE active = TRUE AND category = ${category}
-        ORDER BY name
-      `) as {
-        slug: string;
-        name: string;
-        provider: string;
-        category: string;
-        price_usd: string;
-        supports_reference_upload: boolean;
-        fidelity_status: string;
-      }[];
-    } else {
-      rows = (await sql`
-        SELECT slug, name, provider, category, cortexia_price_usd::text AS price_usd,
-               supports_reference_upload, fidelity_status
-        FROM models
-        WHERE active = TRUE
-        ORDER BY category, name
-      `) as {
-        slug: string;
-        name: string;
-        provider: string;
-        category: string;
-        price_usd: string;
-        supports_reference_upload: boolean;
-        fidelity_status: string;
-      }[];
+    // Validate category if provided
+    if (category && !["image", "video", "audio", "text", "music"].includes(category)) {
+      setResponseStatus(event, 400);
+      return { error: `Invalid category '${category}'. Valid: image, video, audio, text, music` };
     }
+
+    // 3. Query models
+    const rows = (await sql`
+      SELECT slug, name, provider, category, cortexia_price_usd::text AS price_usd,
+             supports_reference_upload, fidelity_status
+      FROM models
+      WHERE active = TRUE
+        ${category ? sql`AND category = ${category}` : sql``}
+      ORDER BY category, name
+    `) as {
+      slug: string;
+      name: string;
+      provider: string;
+      category: string;
+      price_usd: string;
+      supports_reference_upload: boolean;
+      fidelity_status: string;
+    }[];
 
     // 4. Return response
     return {

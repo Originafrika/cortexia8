@@ -88,7 +88,10 @@ const endpoints = [
   ],
   "total": 213
 }`,
-    errors: [{ code: 401, message: "Invalid API key" }],
+    errors: [
+      { code: 401, message: "Invalid API key" },
+      { code: 429, message: "Rate limit exceeded" },
+    ],
   },
   {
     method: "POST",
