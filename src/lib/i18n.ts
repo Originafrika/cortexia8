@@ -231,6 +231,11 @@ const fr: Dict = {
   "dev.key_create_error": "Échec de la création de la clé API.",
   "dev.key_revoke_error": "Échec de la révocation de la clé API.",
   "dev.keys_load_error": "Échec du chargement des clés API.",
+  "dev.examples_title": "Exemples par type",
+  "dev.example_image": "Image",
+  "dev.example_video": "Vidéo",
+  "dev.example_audio": "Audio",
+  "dev.example_text": "Texte (LLM)",
 
   // Canvas keys
   "canvas.back": "Retour",
@@ -803,6 +808,11 @@ const en: Dict = {
   "dev.key_create_error": "Failed to create API key.",
   "dev.key_revoke_error": "Failed to revoke API key.",
   "dev.keys_load_error": "Failed to load API keys.",
+  "dev.examples_title": "Examples by type",
+  "dev.example_image": "Image",
+  "dev.example_video": "Video",
+  "dev.example_audio": "Audio",
+  "dev.example_text": "Text (LLM)",
 
   // Canvas keys
   "canvas.back": "Back",
@@ -1348,6 +1358,11 @@ const pt: Dict = {
   "dev.key_create_error": "Falha ao criar chave API.",
   "dev.key_revoke_error": "Falha ao revogar chave API.",
   "dev.keys_load_error": "Falha ao carregar chaves API.",
+  "dev.examples_title": "Examples by type",
+  "dev.example_image": "Image",
+  "dev.example_video": "Video",
+  "dev.example_audio": "Audio",
+  "dev.example_text": "Text (LLM)",
 
   // Canvas keys
   "canvas.back": "Voltar",
@@ -1884,6 +1899,11 @@ const es: Dict = {
   "dev.key_create_error": "Error al crear clave API.",
   "dev.key_revoke_error": "Error al revocar clave API.",
   "dev.keys_load_error": "Error al cargar claves API.",
+  "dev.examples_title": "Examples by type",
+  "dev.example_image": "Image",
+  "dev.example_video": "Video",
+  "dev.example_audio": "Audio",
+  "dev.example_text": "Text (LLM)",
 
   // Canvas keys
   "canvas.back": "Volver",
@@ -2420,6 +2440,11 @@ const id: Dict = {
   "dev.key_create_error": "Gagal membuat kunci API.",
   "dev.key_revoke_error": "Gagal mencabut kunci API.",
   "dev.keys_load_error": "Gagal memuat kunci API.",
+  "dev.examples_title": "Examples by type",
+  "dev.example_image": "Image",
+  "dev.example_video": "Video",
+  "dev.example_audio": "Audio",
+  "dev.example_text": "Text (LLM)",
 
   // Canvas keys
   "canvas.back": "Kembali",

@@ -136,6 +136,146 @@ while True:
 print(result["url"], result["cost"]["amount"] if result["cost"] else None)`,
   } as const;
 
+  const examples = {
+    image: {
+      label: t("dev.example_image"),
+      curl: `curl https://cortexia.originafrika.online/v1/generate \\
+  -H "Authorization: Bearer $CORTEXIA_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "model": "seedream-5-pro",
+    "prompt": "A golden retriever wearing sunglasses on a beach",
+    "resolution": "1K"
+  }'`,
+      js: `const res = await fetch("https://cortexia.originafrika.online/v1/generate", {
+  method: "POST",
+  headers: {
+    "Authorization": \`Bearer \${process.env.CORTEXIA_KEY}\`,
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    model: "seedream-5-pro",
+    prompt: "A golden retriever wearing sunglasses on a beach",
+    resolution: "1K",
+  }),
+});
+const { id } = await res.json();
+// Poll /v1/generations/{id} until status !== "processing"`,
+      py: `import os, requests, time
+
+res = requests.post(
+    "https://cortexia.originafrika.online/v1/generate",
+    headers={"Authorization": f"Bearer {os.environ['CORTEXIA_KEY']}"},
+    json={
+        "model": "seedream-5-pro",
+        "prompt": "A golden retriever wearing sunglasses on a beach",
+        "resolution": "1K",
+    },
+)
+gen_id = res.json()["id"]
+# Poll /v1/generations/{gen_id} until status != "processing"`,
+    },
+    video: {
+      label: t("dev.example_video"),
+      curl: `curl https://cortexia.originafrika.online/v1/generate \\
+  -H "Authorization: Bearer $CORTEXIA_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "model": "kling-2-master",
+    "prompt": "A timelapse of clouds moving over mountains"
+  }'`,
+      js: `const res = await fetch("https://cortexia.originafrika.online/v1/generate", {
+  method: "POST",
+  headers: {
+    "Authorization": \`Bearer \${process.env.CORTEXIA_KEY}\`,
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    model: "kling-2-master",
+    prompt: "A timelapse of clouds moving over mountains",
+  }),
+});
+const { id } = await res.json();`,
+      py: `import os, requests
+
+res = requests.post(
+    "https://cortexia.originafrika.online/v1/generate",
+    headers={"Authorization": f"Bearer {os.environ['CORTEXIA_KEY']}"},
+    json={
+        "model": "kling-2-master",
+        "prompt": "A timelapse of clouds moving over mountains",
+    },
+)
+gen_id = res.json()["id"]`,
+    },
+    audio: {
+      label: t("dev.example_audio"),
+      curl: `curl https://cortexia.originafrika.online/v1/generate \\
+  -H "Authorization: Bearer $CORTEXIA_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "model": "elevenlabs",
+    "prompt": "Hello world, this is a test of the Cortexia API."
+  }'`,
+      js: `const res = await fetch("https://cortexia.originafrika.online/v1/generate", {
+  method: "POST",
+  headers: {
+    "Authorization": \`Bearer \${process.env.CORTEXIA_KEY}\`,
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    model: "elevenlabs",
+    prompt: "Hello world, this is a test of the Cortexia API.",
+  }),
+});
+const { id } = await res.json();`,
+      py: `import os, requests
+
+res = requests.post(
+    "https://cortexia.originafrika.online/v1/generate",
+    headers={"Authorization": f"Bearer {os.environ['CORTEXIA_KEY']}"},
+    json={
+        "model": "elevenlabs",
+        "prompt": "Hello world, this is a test of the Cortexia API.",
+    },
+)
+gen_id = res.json()["id"]`,
+    },
+    text: {
+      label: t("dev.example_text"),
+      curl: `curl https://cortexia.originafrika.online/v1/generate \\
+  -H "Authorization: Bearer $CORTEXIA_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "model": "claude-sonnet-4-20250514",
+    "prompt": "Explain quantum computing in 3 sentences."
+  }'`,
+      js: `const res = await fetch("https://cortexia.originafrika.online/v1/generate", {
+  method: "POST",
+  headers: {
+    "Authorization": \`Bearer \${process.env.CORTEXIA_KEY}\`,
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    model: "claude-sonnet-4-20250514",
+    prompt: "Explain quantum computing in 3 sentences.",
+  }),
+});
+const { id } = await res.json();`,
+      py: `import os, requests
+
+res = requests.post(
+    "https://cortexia.originafrika.online/v1/generate",
+    headers={"Authorization": f"Bearer {os.environ['CORTEXIA_KEY']}"},
+    json={
+        "model": "claude-sonnet-4-20250514",
+        "prompt": "Explain quantum computing in 3 sentences.",
+    },
+)
+gen_id = res.json()["id"]`,
+    },
+  } as const;
+
   function copy() {
     navigator.clipboard.writeText(snippets[tab]);
     setCopied(true);
@@ -236,6 +376,25 @@ print(result["url"], result["cost"]["amount"] if result["cost"] else None)`,
           <pre className="overflow-x-auto p-5 font-mono text-xs leading-relaxed text-foreground/90 whitespace-pre">
             {snippets[tab]}
           </pre>
+        </div>
+      </div>
+
+      {/* Expanded Examples */}
+      <div>
+        <h2 className="font-display text-2xl tracking-[-0.02em] mb-4">{t("dev.examples_title")}</h2>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {(["image", "video", "audio", "text"] as const).map((type) => (
+            <div key={type} className="surface-gradient-border rounded-2xl bg-surface-1/60 overflow-hidden">
+              <div className="border-b border-border px-4 py-2">
+                <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                  {examples[type].label}
+                </span>
+              </div>
+              <pre className="overflow-x-auto p-4 font-mono text-xs leading-relaxed text-foreground/80 whitespace-pre max-h-48">
+                {examples[type].curl}
+              </pre>
+            </div>
+          ))}
         </div>
       </div>
 
