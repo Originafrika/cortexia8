@@ -576,6 +576,21 @@ const fr: Dict = {
   "models.sort_price_desc": "Prix : décroissant",
   "models.sort_az": "A → Z",
   "models.search_placeholder": "Kling, Claude, ElevenLabs…",
+
+  // API docs
+  "api_docs.auth_title": "Authentification",
+  "api_docs.auth_desc": "Toutes les requêtes API doivent inclure une clé API dans le header Authorization. Utilise le format Bearer cx_.... Tu peux créer et gérer tes clés dans la section ci-dessus.",
+  "api_docs.auth_warning": "N'expose jamais ta clé API côté client. Utilise des variables d'environnement et appelle l'API depuis un serveur sécurisé.",
+  "api_docs.endpoints_title": "Référence des endpoints",
+  "api_docs.req_headers": "Headers requis",
+  "api_docs.req_body": "Corps de la requête",
+  "api_docs.res_example": "Réponse",
+  "api_docs.error_codes": "Codes d'erreur",
+  "api_docs.ratelimit_title": "Limites de débit",
+  "api_docs.ratelimit_gen": "générations par minute par clé API",
+  "api_docs.ratelimit_poll": "requêtes de statut par minute par clé API",
+  "api_docs.ratelimit_other": "requêtes par minute par clé API (autres endpoints)",
+  "api_docs.ratelimit_note": "Les headers X-RateLimit-Remaining et X-RateLimit-Reset sont inclus dans chaque réponse. Si dépassé, l'API renvoie 429 Too Many Requests.",
 };
 
 const en: Dict = {
@@ -1126,6 +1141,21 @@ const en: Dict = {
   "models.sort_price_desc": "Price: High → Low",
   "models.sort_az": "A → Z",
   "models.search_placeholder": "Kling, Claude, ElevenLabs…",
+
+  // API docs
+  "api_docs.auth_title": "Authentication",
+  "api_docs.auth_desc": "All API requests must include an API key in the Authorization header. Use the format Bearer cx_.... You can create and manage your keys in the section above.",
+  "api_docs.auth_warning": "Never expose your API key on the client side. Use environment variables and call the API from a secure server.",
+  "api_docs.endpoints_title": "Endpoint Reference",
+  "api_docs.req_headers": "Required Headers",
+  "api_docs.req_body": "Request Body",
+  "api_docs.res_example": "Response",
+  "api_docs.error_codes": "Error Codes",
+  "api_docs.ratelimit_title": "Rate Limits",
+  "api_docs.ratelimit_gen": "generations per minute per API key",
+  "api_docs.ratelimit_poll": "status polls per minute per API key",
+  "api_docs.ratelimit_other": "requests per minute per API key (all other endpoints)",
+  "api_docs.ratelimit_note": "The X-RateLimit-Remaining and X-RateLimit-Reset headers are included in every response. When exceeded, the API returns a 429 Too Many Requests.",
 };
 
 // Portuguese, Spanish, Indonesian , cover the core landing strings.
@@ -1643,6 +1673,21 @@ const pt: Dict = {
   "models.sort_price_desc": "Preço: decrescente",
   "models.sort_az": "A → Z",
   "models.search_placeholder": "Kling, Claude, ElevenLabs…",
+
+  // API docs
+  "api_docs.auth_title": "Autenticação",
+  "api_docs.auth_desc": "Todas as requisições API devem incluir uma chave API no header Authorization. Use o formato Bearer cx_.... Você pode criar e gerenciar suas chaves na seção acima.",
+  "api_docs.auth_warning": "Nunca exponha sua chave API do lado do cliente. Use variáveis de ambiente e faça a chamada a partir de um servidor seguro.",
+  "api_docs.endpoints_title": "Referência dos endpoints",
+  "api_docs.req_headers": "Headers obrigatórios",
+  "api_docs.req_body": "Corpo da requisição",
+  "api_docs.res_example": "Resposta",
+  "api_docs.error_codes": "Códigos de erro",
+  "api_docs.ratelimit_title": "Limites de taxa",
+  "api_docs.ratelimit_gen": "gerações por minuto por chave API",
+  "api_docs.ratelimit_poll": "requisições de status por minuto por chave API",
+  "api_docs.ratelimit_other": "requisições por minuto por chave API (demais endpoints)",
+  "api_docs.ratelimit_note": "Os headers X-RateLimit-Remaining e X-RateLimit-Reset são incluídos em cada resposta. Se excedido, a API retorna 429 Too Many Requests.",
 };
 
 const es: Dict = {
@@ -2158,6 +2203,21 @@ const es: Dict = {
   "models.sort_price_desc": "Precio: mayor → menor",
   "models.sort_az": "A → Z",
   "models.search_placeholder": "Kling, Claude, ElevenLabs…",
+
+  // API docs
+  "api_docs.auth_title": "Autenticación",
+  "api_docs.auth_desc": "Todas las peticiones API deben incluir una clave API en el header Authorization. Usa el formato Bearer cx_.... Puedes crear y gestionar tus claves en la sección de arriba.",
+  "api_docs.auth_warning": "Nunca expongas tu clave API del lado del cliente. Usa variables de entorno y llama a la API desde un servidor seguro.",
+  "api_docs.endpoints_title": "Referencia de endpoints",
+  "api_docs.req_headers": "Headers requeridos",
+  "api_docs.req_body": "Cuerpo de la petición",
+  "api_docs.res_example": "Respuesta",
+  "api_docs.error_codes": "Códigos de error",
+  "api_docs.ratelimit_title": "Límites de velocidad",
+  "api_docs.ratelimit_gen": "generaciones por minuto por clave API",
+  "api_docs.ratelimit_poll": "peticiones de estado por minuto por clave API",
+  "api_docs.ratelimit_other": "peticiones por minuto por clave API (demás endpoints)",
+  "api_docs.ratelimit_note": "Los headers X-RateLimit-Remaining y X-RateLimit-Reset se incluyen en cada respuesta. Si se excede, la API devuelve 429 Too Many Requests.",
 };
 
 const id: Dict = {
@@ -2673,6 +2733,21 @@ const id: Dict = {
   "models.sort_price_desc": "Harga: tinggi → rendah",
   "models.sort_az": "A → Z",
   "models.search_placeholder": "Kling, Claude, ElevenLabs…",
+
+  // API docs
+  "api_docs.auth_title": "Autentikasi",
+  "api_docs.auth_desc": "Semua permintaan API harus menyertakan kunci API di header Authorization. Gunakan format Bearer cx_.... Kamu bisa membuat dan mengelola kuncimu di bagian di atas.",
+  "api_docs.auth_warning": "Jangan pernah mengekspos kunci API-mu di sisi klien. Gunakan variabel lingkungan dan panggil API dari server yang aman.",
+  "api_docs.endpoints_title": "Referensi endpoint",
+  "api_docs.req_headers": "Header yang diperlukan",
+  "api_docs.req_body": "Badan permintaan",
+  "api_docs.res_example": "Respons",
+  "api_docs.error_codes": "Kode kesalahan",
+  "api_docs.ratelimit_title": "Batas laju",
+  "api_docs.ratelimit_gen": "generasi per menit per kunci API",
+  "api_docs.ratelimit_poll": "permintaan status per menit per kunci API",
+  "api_docs.ratelimit_other": "permintaan per menit per kunci API (endpoint lainnya)",
+  "api_docs.ratelimit_note": "Header X-RateLimit-Remaining dan X-RateLimit-Reset disertakan di setiap respons. Jika terlampaui, API mengembalikan 429 Too Many Requests.",
 };
 
 const DICTS: Record<Lang, Dict> = { fr, en, pt, id, es };

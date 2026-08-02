@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Copy, Check, ChevronDown } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
 const endpoints = [
   {
@@ -298,6 +299,7 @@ function CodeBlock({ children }: { children: string }) {
 
 function EndpointCard({ ep }: { ep: (typeof endpoints)[number] }) {
   const [open, setOpen] = useState(false);
+  const t = useT();
 
   return (
     <div className="surface-gradient-border rounded-xl bg-surface-1/60 overflow-hidden">
@@ -323,7 +325,7 @@ function EndpointCard({ ep }: { ep: (typeof endpoints)[number] }) {
 
           <div>
             <h4 className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">
-              Required Headers
+              {t("api_docs.req_headers")}
             </h4>
             <CodeBlock>
               {ep.headers.map((h) => `${h.name}: ${h.value}`).join("\n")}
@@ -333,7 +335,7 @@ function EndpointCard({ ep }: { ep: (typeof endpoints)[number] }) {
           {ep.requestBody && (
             <div>
               <h4 className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">
-                Request Body
+                {t("api_docs.req_body")}
               </h4>
               <CodeBlock>{ep.requestBody}</CodeBlock>
             </div>
@@ -341,14 +343,14 @@ function EndpointCard({ ep }: { ep: (typeof endpoints)[number] }) {
 
           <div>
             <h4 className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">
-              Response
+              {t("api_docs.res_example")}
             </h4>
             <CodeBlock>{ep.responseExample}</CodeBlock>
           </div>
 
           <div>
             <h4 className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">
-              Error Codes
+              {t("api_docs.error_codes")}
             </h4>
             <div className="space-y-1">
               {ep.errors.map((e) => (
@@ -368,33 +370,28 @@ function EndpointCard({ ep }: { ep: (typeof endpoints)[number] }) {
 }
 
 export function ApiDocs() {
+  const t = useT();
+
   return (
     <div className="space-y-8">
       {/* Authentication */}
       <div className="surface-gradient-border rounded-2xl bg-surface-1/60 p-6 space-y-4">
-        <h3 className="font-display text-2xl tracking-[-0.02em]">Authentication</h3>
+        <h3 className="font-display text-2xl tracking-[-0.02em]">{t("api_docs.auth_title")}</h3>
         <p className="text-sm text-muted-foreground max-w-2xl">
-          All API requests must include an API key in the{" "}
-          <code className="rounded-md bg-surface-2 px-1.5 py-0.5 font-mono text-xs">Authorization</code>{" "}
-          header. Use the format{" "}
-          <code className="rounded-md bg-surface-2 px-1.5 py-0.5 font-mono text-xs">
-            Bearer cx_...
-          </code>
-          . You can create and manage your keys in the section above.
+          {t("api_docs.auth_desc")}
         </p>
         <CodeBlock>{`Authorization: Bearer cx_tes_cle_api_ici`}</CodeBlock>
         <div className="rounded-xl border border-amber/30 bg-amber/5 p-3 flex items-start gap-2 text-xs text-amber-soft">
           <span className="shrink-0 mt-0.5">⚠</span>
           <span>
-            Never expose your API key on the client side. Use environment variables and
-            call the API from a secure server.
+            {t("api_docs.auth_warning")}
           </span>
         </div>
       </div>
 
       {/* Endpoints */}
       <div className="space-y-4">
-        <h3 className="font-display text-2xl tracking-[-0.02em]">Endpoint Reference</h3>
+        <h3 className="font-display text-2xl tracking-[-0.02em]">{t("api_docs.endpoints_title")}</h3>
         <div className="space-y-3">
           {endpoints.map((ep) => (
             <EndpointCard key={ep.method + ep.path} ep={ep} />
@@ -404,32 +401,29 @@ export function ApiDocs() {
 
       {/* Rate limits */}
       <div className="surface-gradient-border rounded-2xl bg-surface-1/60 p-6 space-y-4">
-        <h3 className="font-display text-2xl tracking-[-0.02em]">Rate Limits</h3>
+        <h3 className="font-display text-2xl tracking-[-0.02em]">{t("api_docs.ratelimit_title")}</h3>
         <div className="space-y-3 text-sm text-muted-foreground">
           <div className="flex items-center gap-3">
             <code className="rounded-md bg-surface-2 px-1.5 py-0.5 font-mono text-xs font-bold">
               30
             </code>
-            <span>generations per minute per API key</span>
+            <span>{t("api_docs.ratelimit_gen")}</span>
           </div>
           <div className="flex items-center gap-3">
             <code className="rounded-md bg-surface-2 px-1.5 py-0.5 font-mono text-xs font-bold">
               100
             </code>
-            <span>status polls per minute per API key</span>
+            <span>{t("api_docs.ratelimit_poll")}</span>
           </div>
           <div className="flex items-center gap-3">
             <code className="rounded-md bg-surface-2 px-1.5 py-0.5 font-mono text-xs font-bold">
               60
             </code>
-            <span>requests per minute per API key (all other endpoints)</span>
+            <span>{t("api_docs.ratelimit_other")}</span>
           </div>
         </div>
         <p className="text-xs text-muted-foreground">
-          The <code className="font-mono">X-RateLimit-Remaining</code> and{" "}
-          <code className="font-mono">X-RateLimit-Reset</code> headers are included in every response.
-          When exceeded, the API returns a{" "}
-          <code className="font-mono text-red">429 Too Many Requests</code>.
+          {t("api_docs.ratelimit_note")}
         </p>
       </div>
     </div>
