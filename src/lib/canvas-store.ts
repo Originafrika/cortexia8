@@ -98,6 +98,7 @@ type CanvasState = {
 
   // Persistence
   loadWorkflow: (id: number) => Promise<void>;
+  renameWorkflow: (name: string) => Promise<void>;
   saveWorkflow: () => void;
 
   // Run
@@ -116,7 +117,7 @@ type CanvasState = {
 
   // Drag state
   setDraggingFromPort: (port: PortType | null) => void;
-}
+};
 
 export const useCanvasStore = create<CanvasState>((set, get) => ({
   nodes: [],
@@ -180,14 +181,16 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
       if (srcDbId != null && tgtDbId != null) {
         graphOps({
           data: {
-            ops: [{
-              op: "createEdge",
-              workflowId: Number(wid),
-              sourceNodeId: srcDbId,
-              targetNodeId: tgtDbId,
-              sourceOutputKey: connection.sourceHandle ?? undefined,
-              targetInputKey: connection.targetHandle ?? undefined,
-            }],
+            ops: [
+              {
+                op: "createEdge",
+                workflowId: Number(wid),
+                sourceNodeId: srcDbId,
+                targetNodeId: tgtDbId,
+                sourceOutputKey: connection.sourceHandle ?? undefined,
+                targetInputKey: connection.targetHandle ?? undefined,
+              },
+            ],
             sessionToken: loadSession()?.token,
           },
         }).catch((err) => {
@@ -236,28 +239,30 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
     if (wid) {
       graphOps({
         data: {
-          ops: [{
-            op: "createNode",
-            workflowId: Number(wid),
-            modelSlug: m.slug,
-            x: pos.x,
-            y: pos.y,
-            config: initStateForModel(m),
-          }],
+          ops: [
+            {
+              op: "createNode",
+              workflowId: Number(wid),
+              modelSlug: m.slug,
+              x: pos.x,
+              y: pos.y,
+              config: initStateForModel(m),
+            },
+          ],
           sessionToken: loadSession()?.token,
         },
-      }).then((res) => {
-        const ok = res.results[0];
-        const dbId = ok && ok.status === "ok" ? ok.result?.nodeId : undefined;
-        if (dbId == null) return;
-        set({
-          nodes: get().nodes.map((n) =>
-            n.id === id ? { ...n, id: dbNodeId(dbId) } : n,
-          ),
+      })
+        .then((res) => {
+          const ok = res.results[0];
+          const dbId = ok && ok.status === "ok" ? ok.result?.nodeId : undefined;
+          if (dbId == null) return;
+          set({
+            nodes: get().nodes.map((n) => (n.id === id ? { ...n, id: dbNodeId(dbId) } : n)),
+          });
+        })
+        .catch((err) => {
+          console.error("[canvas-store] createNode graphOps failed", err);
         });
-      }).catch((err) => {
-        console.error("[canvas-store] createNode graphOps failed", err);
-      });
     }
 
     return id;
@@ -314,7 +319,9 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
 
     const dbId = parseDbNodeId(id);
     if (dbId != null) {
-      const ops: Array<{ op: "deleteEdge"; edgeId: number } | { op: "deleteNode"; nodeId: number }> = [];
+      const ops: Array<
+        { op: "deleteEdge"; edgeId: number } | { op: "deleteNode"; nodeId: number }
+      > = [];
       for (const e of removedEdges) {
         const edgeDbId = e.id.startsWith("e_db_") ? Number(e.id.slice(5)) : NaN;
         if (!isNaN(edgeDbId)) ops.push({ op: "deleteEdge", edgeId: edgeDbId });
@@ -405,7 +412,9 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
 
   loadWorkflow: async (id) => {
     try {
-      const res = await getWorkflow({ data: { workflowId: id, sessionToken: loadSession()?.token } });
+      const res = await getWorkflow({
+        data: { workflowId: id, sessionToken: loadSession()?.token },
+      });
       const dbNodeIds = new Map<number, string>();
 
       const nodes: CanvasNode[] = (res?.nodes ?? []).map((n) => {
@@ -444,7 +453,13 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
         animated: true,
       }));
 
-      set({ workflowId: String(id), workflowName: res?.name ?? "", nodes, edges, selectedNodeId: null });
+      set({
+        workflowId: String(id),
+        workflowName: res?.name ?? "",
+        nodes,
+        edges,
+        selectedNodeId: null,
+      });
     } catch (err) {
       console.error("[canvas-store] loadWorkflow failed", err);
       set({ nodes: [], edges: [], workflowId: null, workflowName: "" });
@@ -456,7 +471,9 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
     if (!wid) return;
     set({ workflowName: name });
     try {
-      await renameWorkflow({ data: { workflowId: Number(wid), name, sessionToken: loadSession()?.token } });
+      await renameWorkflow({
+        data: { workflowId: Number(wid), name, sessionToken: loadSession()?.token },
+      });
     } catch (err) {
       console.error("[canvas-store] renameWorkflow failed", err);
     }
@@ -515,7 +532,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
           modelSlug: node.data.modelSlug,
           input: node.data.params,
           sessionToken: loadSession()?.token,
-          workflowId: get().workflowId ?? undefined,
+          workflowId: get().workflowId ? Number(get().workflowId) : undefined,
         },
       });
 
@@ -523,9 +540,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
 
       set({
         nodes: get().nodes.map((n) =>
-          n.id === id
-            ? { ...n, data: { ...n.data, step: "queued", progress: 10 } }
-            : n,
+          n.id === id ? { ...n, data: { ...n.data, step: "queued", progress: 10 } } : n,
         ),
       });
 
@@ -551,9 +566,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
     for (const id of order) {
       const node = get().nodes.find((n) => n.id === id);
       if (!node || node.data.status === "running") continue;
-      const upstreamFailed = get().edges.some(
-        (e) => e.target === id && failedNodes.has(e.source),
-      );
+      const upstreamFailed = get().edges.some((e) => e.target === id && failedNodes.has(e.source));
       if (upstreamFailed) {
         set({
           nodes: get().nodes.map((n) =>
@@ -648,11 +661,13 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
       // Poll status for each descendant that was re-run
       // First find the node execution IDs from the run
       const affectedNodeIds = [id, ...descendantIds];
-      const runStatus = await generationStatus({ data: { id: res.runId, sessionToken: loadSession()?.token } });
+      const runStatus = await generationStatus({
+        data: { id: res.runId, sessionToken: loadSession()?.token },
+      });
       for (const nodeId of affectedNodeIds) {
         const nodeDbId = parseDbNodeId(nodeId);
         if (nodeDbId == null) continue;
-        
+
         const nodeExec = runStatus.nodes.find((n) => n.workflowNodeId === nodeDbId);
         if (nodeExec) {
           await pollGenerationStatus(set, get, nodeId, nodeExec.id);
@@ -733,7 +748,9 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
       });
 
       const affectedNodeIds = [id, ...downstreamIds];
-      const runStatus = await generationStatus({ data: { id: res.runId, sessionToken: loadSession()?.token } });
+      const runStatus = await generationStatus({
+        data: { id: res.runId, sessionToken: loadSession()?.token },
+      });
       for (const nodeId of affectedNodeIds) {
         const nodeDbId = parseDbNodeId(nodeId);
         if (nodeDbId == null) continue;
@@ -766,7 +783,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
     const sorted = [...nodeIds]
       .map((id) => nodes.find((n) => n.id === id))
       .filter(Boolean)
-      .sort((a, b) => (a!.position.y - b!.position.y) || (a!.position.x - b!.position.x));
+      .sort((a, b) => a!.position.y - b!.position.y || a!.position.x - b!.position.x);
     const delays = new Map<string, number>();
     sorted.forEach((n, i) => delays.set(n!.id, i * STAGGER_MS));
     set({ newNodeIds: new Set(nodeIds), newEdgeIds: new Set(edgeIds), cascadeDelays: delays });
@@ -820,7 +837,9 @@ function pollGenerationStatus(
       await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
 
       try {
-        const status = await generationStatus({ data: { id: runNodeExecId, sessionToken: loadSession()?.token } });
+        const status = await generationStatus({
+          data: { id: runNodeExecId, sessionToken: loadSession()?.token },
+        });
         consecutiveErrors = 0;
 
         const nodeExec = status.nodes.find((n) => n.id === runNodeExecId);
@@ -829,18 +848,12 @@ function pollGenerationStatus(
         const kieStatus = nodeExec.status;
         const progress = kieStatus === "running" ? 60 : kieStatus === "queued" ? 30 : 0;
         const stepLabel =
-          kieStatus === "running"
-            ? "generating"
-            : kieStatus === "queued"
-              ? "queued"
-              : "";
+          kieStatus === "running" ? "generating" : kieStatus === "queued" ? "queued" : "";
 
         if (kieStatus === "running" || kieStatus === "queued") {
           set({
             nodes: get().nodes.map((n) =>
-              n.id === nodeId
-                ? { ...n, data: { ...n.data, progress, step: stepLabel } }
-                : n,
+              n.id === nodeId ? { ...n, data: { ...n.data, progress, step: stepLabel } } : n,
             ),
           });
           continue;
@@ -884,7 +897,9 @@ function pollGenerationStatus(
         }
 
         if (kieStatus === "failed" || kieStatus === "error") {
-          console.error(`[canvas-store] Node failed: nodeId=${nodeId}, model=${nodeExec.modelSlug}, status=${kieStatus}, error=${nodeExec.errorMessage || "unknown"}, kieTaskId=${nodeExec.kieTaskId}`);
+          console.error(
+            `[canvas-store] Node failed: nodeId=${nodeId}, model=${nodeExec.modelSlug}, status=${kieStatus}, error=${nodeExec.errorMessage || "unknown"}, kieTaskId=${nodeExec.kieTaskId}`,
+          );
           set({
             nodes: get().nodes.map((n) =>
               n.id === nodeId
@@ -905,7 +920,10 @@ function pollGenerationStatus(
         }
       } catch (err) {
         consecutiveErrors++;
-        console.error(`[canvas-store] Poll error: nodeId=${nodeId}, error=${consecutiveErrors}/${MAX_CONSECUTIVE_ERRORS}`, err);
+        console.error(
+          `[canvas-store] Poll error: nodeId=${nodeId}, error=${consecutiveErrors}/${MAX_CONSECUTIVE_ERRORS}`,
+          err,
+        );
         if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
           const message = err instanceof Error ? err.message : "Persistent polling error";
           set({
@@ -969,8 +987,8 @@ function topoSort(nodes: CanvasNode[], edges: CanvasEdge[]): string[] {
     const id = q.shift()!;
     out.push(id);
     for (const next of adj.get(id) ?? []) {
-    const d = (indeg.get(next) ?? 0) - 1;
-    indeg.set(next, d);
+      const d = (indeg.get(next) ?? 0) - 1;
+      indeg.set(next, d);
       if (d === 0) q.push(next);
     }
   }

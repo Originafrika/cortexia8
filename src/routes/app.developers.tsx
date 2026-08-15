@@ -8,14 +8,24 @@ import { getApiStats, type ApiStats } from "@/lib/api/api-stats";
 import { useT } from "@/lib/i18n";
 import { loadSession } from "@/lib/auth-store";
 import { toast } from "sonner";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export const Route = createFileRoute("/app/developers")({
   beforeLoad: ({ location }) => {
     if (typeof window === "undefined") return;
     const session = loadSession();
     if (!session) {
-      throw redirect({ to: "/auth/$pathname" as "/auth/$pathname", params: { pathname: "sign-in" }, search: { redirect: location.href } });
+      throw redirect({
+        to: "/auth/$pathname" as "/auth/$pathname",
+        params: { pathname: "sign-in" },
+        search: { redirect: location.href },
+      });
     }
     if (session.user.role !== "admin") {
       throw redirect({ to: "/app/models" });
@@ -24,12 +34,15 @@ export const Route = createFileRoute("/app/developers")({
   head: () => ({
     meta: [
       { title: "Cortexia — API Developers" },
-      { name: "description", content: "Cortexia API documentation, code snippets, and API key management for developers integrating AI generation." },
+      {
+        name: "description",
+        content:
+          "Cortexia API documentation, code snippets, and API key management for developers integrating AI generation.",
+      },
     ],
   }),
   component: DevelopersPage,
 });
-
 
 function DevelopersPage() {
   const t = useT();
@@ -286,7 +299,9 @@ gen_id = res.json()["id"]`,
     if (!keyName.trim() || creatingKey) return;
     setCreatingKey(true);
     try {
-      const result = await createApiKey({ data: { name: keyName.trim(), scope: keyScope, sessionToken: loadSession()?.token } });
+      const result = await createApiKey({
+        data: { name: keyName.trim(), scope: keyScope, sessionToken: loadSession()?.token },
+      });
       setShowNewKey(result.rawKey);
       setKeyName("");
       const updated = await listApiKeys({ data: { sessionToken: loadSession()?.token } });
@@ -301,9 +316,7 @@ gen_id = res.json()["id"]`,
   async function handleRevokeKey(keyId: number) {
     try {
       await revokeApiKey({ data: { keyId, sessionToken: loadSession()?.token } });
-      setKeys((prev) =>
-        prev.map((k) => (k.id === keyId ? { ...k, status: "revoked" } : k))
-      );
+      setKeys((prev) => prev.map((k) => (k.id === keyId ? { ...k, status: "revoked" } : k)));
     } catch (err) {
       toast.error(t("dev.key_revoke_error"));
     }
@@ -316,25 +329,17 @@ gen_id = res.json()["id"]`,
           {t("dev.title")}
         </div>
         <h1 className="mt-2 font-display text-4xl tracking-[-0.03em]">API Cortexia.</h1>
-        <p className="mt-2 text-muted-foreground max-w-2xl">
-          {t("dev.subtitle")}
-        </p>
+        <p className="mt-2 text-muted-foreground max-w-2xl">{t("dev.subtitle")}</p>
       </div>
 
       {/* Usage */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard
-          label={t("dev.stat_calls")}
-          value={stats ? String(stats.callsThisMonth) : "—"}
-        />
+        <StatCard label={t("dev.stat_calls")} value={stats ? String(stats.callsThisMonth) : "—"} />
         <StatCard
           label={t("dev.stat_cost")}
           value={stats ? `$${stats.costThisMonth.toFixed(2)}` : "—"}
         />
-        <StatCard
-          label={t("dev.stat_success")}
-          value={stats ? `${stats.successRate}%` : "—"}
-        />
+        <StatCard label={t("dev.stat_success")} value={stats ? `${stats.successRate}%` : "—"} />
       </div>
 
       {/* Quick Start */}
@@ -384,7 +389,10 @@ gen_id = res.json()["id"]`,
         <h2 className="font-display text-2xl tracking-[-0.02em] mb-4">{t("dev.examples_title")}</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           {(["image", "video", "audio", "text"] as const).map((type) => (
-            <div key={type} className="surface-gradient-border rounded-2xl bg-surface-1/60 overflow-hidden">
+            <div
+              key={type}
+              className="surface-gradient-border rounded-2xl bg-surface-1/60 overflow-hidden"
+            >
               <div className="border-b border-border px-4 py-2">
                 <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
                   {examples[type].label}
@@ -421,10 +429,18 @@ gen_id = res.json()["id"]`,
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="generate:*" className="text-sm">generate:* (all)</SelectItem>
-                <SelectItem value="generate:image" className="text-sm">generate:image</SelectItem>
-                <SelectItem value="generate:video" className="text-sm">generate:video</SelectItem>
-                <SelectItem value="generate:audio" className="text-sm">generate:audio</SelectItem>
+                <SelectItem value="generate:*" className="text-sm">
+                  generate:* (all)
+                </SelectItem>
+                <SelectItem value="generate:image" className="text-sm">
+                  generate:image
+                </SelectItem>
+                <SelectItem value="generate:video" className="text-sm">
+                  generate:video
+                </SelectItem>
+                <SelectItem value="generate:audio" className="text-sm">
+                  generate:audio
+                </SelectItem>
               </SelectContent>
             </Select>
             <button
@@ -433,7 +449,11 @@ gen_id = res.json()["id"]`,
               aria-label="Create API key"
               className="inline-flex items-center gap-1.5 rounded-full bg-amber text-primary-foreground px-4 py-2 text-sm font-medium hover:opacity-95 transition disabled:opacity-50"
             >
-              {creatingKey ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" />}
+              {creatingKey ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Plus className="size-4" />
+              )}
               {t("dev.key_new")}
             </button>
           </div>
@@ -473,7 +493,11 @@ gen_id = res.json()["id"]`,
                       <KeyRound className="size-3.5 text-muted-foreground" /> {k.name}
                     </td>
                     <td className="p-4 font-mono text-xs">{k.prefix}••••••••</td>
-                    <td className="p-4 font-mono text-xs text-muted-foreground">{k.permissions}</td>
+                    <td className="p-4 font-mono text-xs text-muted-foreground">
+                      {Array.isArray(k.permissions)
+                        ? k.permissions.join(", ")
+                        : String(k.permissions ?? "")}
+                    </td>
                     <td className="p-4 text-muted-foreground">{k.lastUsed}</td>
                     <td className="p-4">
                       <span
@@ -541,9 +565,7 @@ gen_id = res.json()["id"]`,
               </div>
               <div className="mt-4 rounded-xl border border-amber/30 bg-amber/5 p-3 flex items-start gap-2 text-xs text-amber-soft">
                 <AlertTriangle className="size-4 shrink-0 mt-0.5" />
-                <span>
-                  {t("dev.key_secret_warning")}
-                </span>
+                <span>{t("dev.key_secret_warning")}</span>
               </div>
               <div className="mt-4 flex items-center gap-2">
                 <code className="flex-1 truncate rounded-lg bg-surface-2 px-3 py-2 font-mono text-xs">
@@ -564,21 +586,13 @@ gen_id = res.json()["id"]`,
   );
 }
 
-function StatCard({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
+function StatCard({ label, value }: { label: string; value: string }) {
   return (
     <div className="surface-gradient-border rounded-2xl bg-surface-1/60 p-5">
       <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
         {label}
       </div>
-      <div className="mt-2 font-display text-3xl tracking-[-0.02em]">
-        {value}
-      </div>
+      <div className="mt-2 font-display text-3xl tracking-[-0.02em]">{value}</div>
     </div>
   );
 }

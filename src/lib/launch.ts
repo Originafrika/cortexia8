@@ -4,7 +4,8 @@
 
 export type LaunchMode = "waitlist" | "live";
 
-export const LAUNCH_MODE: LaunchMode = "live";
+const configuredLaunchMode = import.meta.env.VITE_LAUNCH_MODE as string | undefined;
+export const LAUNCH_MODE: LaunchMode = configuredLaunchMode === "waitlist" ? "waitlist" : "live";
 
 // Next 1st August (UTC) — recomputed at build/import time.
 export const LAUNCH_DATE = (() => {

@@ -49,25 +49,25 @@ export async function recordTransaction(opts: {
   reference?: string;
 }): Promise<{ balance: number; entry: LedgerEntry }> {
   // For debits (negative amount), ensure balance doesn't go below zero
-  const balanceGuard = opts.amount < 0
-    ? sql` AND credits_balance + ${opts.amount} >= 0`
-    : sql``;
+  const balanceGuard = opts.amount < 0 ? sql` AND credits_balance + ${opts.amount} >= 0` : sql``;
 
   const rows = (await sql`
     WITH updated AS (
       UPDATE users
       SET credits_balance = credits_balance + ${opts.amount}
       WHERE id = ${opts.userId}${balanceGuard}
-      RETURNING credits_balance
+      RETURNING id, credits_balance
     ),
     inserted AS (
       INSERT INTO credits_ledger (user_id, amount, type, reference)
-      VALUES (${opts.userId}, ${opts.amount}, ${opts.type}, ${opts.reference ?? null})
+      SELECT ${opts.userId}, ${opts.amount}, ${opts.type}, ${opts.reference ?? null}
+      FROM updated
       RETURNING id, user_id, amount, type, reference, created_at
     )
     SELECT i.id, i.user_id, i.amount::text AS amount, i.type, i.reference, i.created_at::text AS created_at,
            u.credits_balance::text AS credits_balance
-    FROM inserted i LEFT JOIN updated u ON true
+    FROM inserted i
+    JOIN updated u ON u.id = i.user_id
   `) as LedgerEntry[];
   if (rows.length === 0) {
     // Could be user not found OR insufficient balance
@@ -131,8 +131,8 @@ export async function refundGeneration(opts: {
     amount: Math.abs(opts.amount),
     type: "refund",
     reference: opts.nodeExecutionId
-      ? `run:${opts.runId}/exec:${opts.nodeExecutionId}`
-      : `run:${opts.runId}`,
+      ? `run:${opts.runId}/exec:${opts.nodeExecutionId}/refund`
+      : `run:${opts.runId}/refund`,
   });
   return result.balance;
 }

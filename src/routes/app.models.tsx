@@ -11,7 +11,11 @@ export const Route = createFileRoute("/app/models")({
   head: () => ({
     meta: [
       { title: "Cortexia — Models Catalog" },
-      { name: "description", content: "Browse the full catalog of AI models available on Cortexia — image, video, audio, music, and text generation." },
+      {
+        name: "description",
+        content:
+          "Browse the full catalog of AI models available on Cortexia — image, video, audio, music, and text generation.",
+      },
     ],
   }),
   component: ModelsLayout,
@@ -72,9 +76,12 @@ export function ModelsCatalog() {
       case "newest":
         return result.sort((a, b) => b.order - a.order);
       case "price_asc":
-        return result.sort((a, b) => a.priceUSD - b.priceUSD);
+        return result.sort(
+          (a, b) =>
+            (a.priceUSD ?? Number.POSITIVE_INFINITY) - (b.priceUSD ?? Number.POSITIVE_INFINITY),
+        );
       case "price_desc":
-        return result.sort((a, b) => b.priceUSD - a.priceUSD);
+        return result.sort((a, b) => (b.priceUSD ?? 0) - (a.priceUSD ?? 0));
       case "az":
         return result.sort((a, b) => a.name.localeCompare(b.name));
       default:
@@ -99,9 +106,7 @@ export function ModelsCatalog() {
           <h1 className="mt-2 font-display text-4xl sm:text-5xl tracking-[-0.03em]">
             {t("models.title")}
           </h1>
-          <p className="mt-2 text-muted-foreground">
-            {t("models.subtitle")}
-          </p>
+          <p className="mt-2 text-muted-foreground">{t("models.subtitle")}</p>
         </div>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
@@ -136,7 +141,9 @@ export function ModelsCatalog() {
           );
         })}
         <div className="ml-auto text-xs text-muted-foreground font-mono">
-          {sorted.length === 1 ? t("models.count_one") : t("models.count_many").replace("{n}", String(sorted.length))}
+          {sorted.length === 1
+            ? t("models.count_one")
+            : t("models.count_many").replace("{n}", String(sorted.length))}
         </div>
       </div>
 
@@ -196,7 +203,12 @@ export function ModelsCatalog() {
                   }
                   return pageNumbers.map((pageNum, idx) =>
                     pageNum === "ellipsis" ? (
-                      <span key={`e${idx}`} className="px-1 text-xs text-muted-foreground font-mono">…</span>
+                      <span
+                        key={`e${idx}`}
+                        className="px-1 text-xs text-muted-foreground font-mono"
+                      >
+                        …
+                      </span>
                     ) : (
                       <button
                         key={pageNum}
@@ -211,7 +223,7 @@ export function ModelsCatalog() {
                       >
                         {pageNum}
                       </button>
-                    )
+                    ),
                   );
                 })()}
               </div>

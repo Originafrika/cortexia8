@@ -24,12 +24,19 @@ export function extractTaskId(body: unknown): string | null {
   if (o.data && typeof o.data === "object") {
     const d = o.data as Record<string, unknown>;
     if (typeof d.taskId === "string") return d.taskId;
+    if (typeof d.task_id === "string") return d.task_id;
   }
   return null;
 }
 
 export type WebhookVerification =
-  | { ok: true; runNodeExecutionId: number; userId: number | null; modelSlug: string; category: string }
+  | {
+      ok: true;
+      runNodeExecutionId: number;
+      userId: number | null;
+      modelSlug: string;
+      category: string;
+    }
   | { ok: false; reason: string };
 
 /**

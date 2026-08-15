@@ -8,7 +8,13 @@ import { BetterAuthReactAdapter } from "@neondatabase/neon-js/auth/react";
 const originalFetch = globalThis.fetch;
 globalThis.fetch = async (...args) => {
   const response = await originalFetch(...args);
-  const url = typeof args[0] === "string" ? args[0] : args[0]?.url ?? "";
+  const request = args[0];
+  const url =
+    typeof request === "string"
+      ? request
+      : request instanceof URL
+        ? request.toString()
+        : (request?.url ?? "");
   if (url.includes("neon.tech") && response.status === 401) {
     // Return the 401 silently — Neon Auth client handles this internally
     return new Response(response.body, {
@@ -20,13 +26,10 @@ globalThis.fetch = async (...args) => {
   return response;
 };
 
-export const authClient = createAuthClient(
-  import.meta.env.VITE_NEON_AUTH_URL,
-  {
-    adapter: BetterAuthReactAdapter({
-      fetchOptions: {
-        credentials: "include",
-      },
-    }),
-  },
-);
+export const authClient = createAuthClient(import.meta.env.VITE_NEON_AUTH_URL, {
+  adapter: BetterAuthReactAdapter({
+    fetchOptions: {
+      credentials: "include",
+    },
+  }),
+});

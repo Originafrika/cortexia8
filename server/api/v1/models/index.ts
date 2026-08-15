@@ -12,8 +12,13 @@
 
 import { defineEventHandler, getHeader, getQuery, setResponseStatus } from "h3";
 import { sql } from "@/lib/db";
-import { sha256Hex } from "../../../src/lib/utils/crypto";
-import { checkRateLimit, getRemainingRequests, getResetTime, RATE_LIMITS } from "../../../src/lib/rate-limit";
+import { sha256Hex } from "../../../../src/lib/utils/crypto";
+import {
+  checkRateLimit,
+  getRemainingRequests,
+  getResetTime,
+  RATE_LIMITS,
+} from "../../../../src/lib/rate-limit";
 
 export default defineEventHandler(async (event) => {
   try {
@@ -49,9 +54,9 @@ export default defineEventHandler(async (event) => {
     // Set rate limit headers
     const remaining = getRemainingRequests(rlKey, RATE_LIMITS.general);
     const resetMs = getResetTime(rlKey);
-    event.node.res.setHeader("X-RateLimit-Limit", String(RATE_LIMITS.general.limit));
-    event.node.res.setHeader("X-RateLimit-Remaining", String(remaining));
-    event.node.res.setHeader("X-RateLimit-Reset", String(Math.ceil(resetMs / 1000)));
+    event.node?.res?.setHeader("X-RateLimit-Limit", String(RATE_LIMITS.general.limit));
+    event.node?.res?.setHeader("X-RateLimit-Remaining", String(remaining));
+    event.node?.res?.setHeader("X-RateLimit-Reset", String(Math.ceil(resetMs / 1000)));
 
     // 2. Parse optional category filter
     const query = getQuery(event);

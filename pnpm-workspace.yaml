@@ -1,0 +1,5 @@
+allowBuilds:
+  core-js: true
+patchedDependencies:
+  "@daveyplate/better-auth-ui@3.3.9": patches/@daveyplate__better-auth-ui@3.3.9.patch
+  "@neondatabase/auth-ui@0.2.1-beta": patches/@neondatabase__auth-ui@0.2.1-beta.patch

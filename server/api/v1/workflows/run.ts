@@ -1,142 +1,183 @@
 /**
  * POST /v1/workflows/run — Run a workflow.
  *
- * Authentication: Bearer API key (cx_...) in Authorization header
- *
- * Request body:
- *   workflow_id: string (required) — workflow ID (e.g., "wf_123")
- *   inputs: Record<string, string> (optional) — template variables
- *
- * Response:
- *   id: string — run ID
- *   object: "workflow_run"
- *   workflow_id: string
- *   status: "running"
- *   created_at: string
+ * Authentication: Bearer API key (cx_...) in Authorization header.
  */
 
 import { defineEventHandler, getHeader, readBody, setResponseStatus } from "h3";
 import { sql } from "@/lib/db";
-import { sha256Hex } from "../../../src/lib/utils/crypto";
-import { createTask } from "@/lib/kie-api/client";
+import { createTask, buildCallbackUrl } from "@/lib/kie-api/client";
+import { ensureSufficientCredits, recordTransaction, refundGeneration } from "@/lib/credits";
+import { sha256Hex } from "../../../../src/lib/utils/crypto";
+
+type WorkflowInput = Record<string, string>;
+
+type NodeRow = {
+  id: number;
+  model_slug: string;
+  config: Record<string, unknown>;
+};
+
+type ModelRow = {
+  slug: string;
+  name: string;
+  kie_endpoint: string;
+  cortexia_price_usd: string;
+};
 
 export default defineEventHandler(async (event) => {
+  const charged: { userId: number; runId: number; executionId: number; amount: number }[] = [];
   try {
-    // 1. Authenticate via Bearer API key
     const auth = getHeader(event, "authorization");
     if (!auth?.startsWith("Bearer cx_")) {
       setResponseStatus(event, 401);
       return { error: "Invalid API key format. Use: Authorization: Bearer cx_..." };
     }
-    const token = auth.slice(7);
-    const keyHash = await sha256Hex(token);
-
+    const keyHash = await sha256Hex(auth.slice(7));
     const keyRows = (await sql`
       SELECT id, user_id FROM api_keys
       WHERE key_hash = ${keyHash} AND status = 'active'
       LIMIT 1
     `) as { id: number; user_id: number }[];
-
     if (keyRows.length === 0) {
       setResponseStatus(event, 401);
       return { error: "Invalid or inactive API key" };
     }
-
     const userId = keyRows[0].user_id;
+    await sql`UPDATE api_keys SET last_used_at = NOW() WHERE id = ${keyRows[0].id}`.catch(
+      () => undefined,
+    );
 
-    // 2. Parse request body
-    const body = await readBody(event);
-    const { workflow_id, inputs } = body;
-
-    if (!workflow_id || typeof workflow_id !== "string") {
+    const body = (await readBody(event)) as { workflow_id?: unknown; inputs?: unknown } | undefined;
+    const workflowId = typeof body?.workflow_id === "string" ? body.workflow_id : "";
+    const match = /^wf_(\d+)$/.exec(workflowId);
+    if (!match) {
       setResponseStatus(event, 400);
-      return { error: "workflow_id is required" };
+      return { error: "workflow_id must use the wf_<id> format" };
     }
+    const numericId = Number(match[1]);
+    const inputs =
+      body?.inputs && typeof body.inputs === "object" ? (body.inputs as WorkflowInput) : {};
 
-    const numericId = parseInt(workflow_id.replace("wf_", ""));
-    if (isNaN(numericId)) {
-      setResponseStatus(event, 400);
-      return { error: "Invalid workflow_id format" };
-    }
-
-    // 3. Check if workflow exists and belongs to user
     const workflowRows = (await sql`
       SELECT id, name FROM workflows
       WHERE id = ${numericId} AND user_id = ${userId}
       LIMIT 1
     `) as { id: number; name: string }[];
-
     if (workflowRows.length === 0) {
       setResponseStatus(event, 404);
       return { error: "Workflow not found" };
     }
 
-    // 4. Get workflow nodes
     const nodeRows = (await sql`
-      SELECT id, model_slug, prompt
+      SELECT id, model_slug, config
       FROM workflow_nodes
       WHERE workflow_id = ${numericId}
-      ORDER BY position_x ASC
-    `) as { id: number; model_slug: string; prompt: string }[];
-
+      ORDER BY canvas_x::numeric ASC, id ASC
+    `) as NodeRow[];
     if (nodeRows.length === 0) {
       setResponseStatus(event, 400);
       return { error: "Workflow has no steps" };
     }
 
-    // 5. Check credits (estimate cost for all steps)
-    const modelSlugs = nodeRows.map((n) => n.model_slug);
+    const modelSlugs = nodeRows.map((node) => node.model_slug);
     const modelRows = (await sql`
-      SELECT slug, cortexia_price_usd FROM models
-      WHERE slug = ANY(${modelSlugs}) AND status = 'active'
-    `) as { slug: string; cortexia_price_usd: number }[];
-
-    const modelCosts = new Map(modelRows.map((m) => [m.slug, Number(m.cortexia_price_usd)]));
-    const totalCost = nodeRows.reduce((sum, n) => sum + (modelCosts.get(n.model_slug) ?? 0), 0);
-
-    const balanceRows = (await sql`
-      SELECT credits_balance FROM users WHERE id = ${userId} LIMIT 1
-    `) as { credits_balance: number }[];
-
-    const balance = Number(balanceRows[0]?.credits_balance ?? 0);
-
-    if (balance < totalCost) {
-      setResponseStatus(event, 402);
-      return { error: "Insufficient credits", balance, required: totalCost };
+      SELECT slug, name, kie_endpoint, cortexia_price_usd::text AS cortexia_price_usd
+      FROM models
+      WHERE slug = ANY(${modelSlugs}) AND active = TRUE
+    `) as ModelRow[];
+    const modelsBySlug = new Map(modelRows.map((model) => [model.slug, model]));
+    if (modelRows.length !== new Set(modelSlugs).size) {
+      setResponseStatus(event, 400);
+      return { error: "Workflow contains an inactive or missing model" };
     }
 
-    // 6. Create run
-    const runRows = (await sql`
-      INSERT INTO runs (user_id, workflow_id, status)
-      VALUES (${userId}, ${numericId}, 'running')
-      RETURNING id, created_at
-    `) as { id: number; created_at: string }[];
+    const totalCost = nodeRows.reduce(
+      (sum, node) => sum + Number(modelsBySlug.get(node.model_slug)?.cortexia_price_usd ?? 0),
+      0,
+    );
+    if (!Number.isFinite(totalCost) || totalCost <= 0) {
+      setResponseStatus(event, 503);
+      return { error: "Workflow pricing is unavailable" };
+    }
+    const balance = await ensureSufficientCredits(userId, totalCost);
+    if (!balance.ok) {
+      setResponseStatus(event, 402);
+      return {
+        error: "Insufficient credits",
+        balance: balance.balance,
+        required: balance.required,
+      };
+    }
 
+    const runRows = (await sql`
+      INSERT INTO runs (user_id, workflow_id, status, total_cost_usd)
+      VALUES (${userId}, ${numericId}, 'running', ${totalCost})
+      RETURNING id, started_at
+    `) as { id: number; started_at: string }[];
     const runId = runRows[0].id;
 
-    // 7. Create tasks for each node (simplified — in production you'd queue these)
     for (const node of nodeRows) {
-      let prompt = node.prompt;
-      // Replace template variables
-      if (inputs && typeof inputs === "object") {
-        for (const [key, value] of Object.entries(inputs)) {
-          prompt = prompt.replace(new RegExp(`\\{\\{${key}\\}\\}`, "g"), String(value));
-        }
+      const model = modelsBySlug.get(node.model_slug)!;
+      const config = { ...node.config } as Record<string, unknown>;
+      let prompt = typeof config.prompt === "string" ? config.prompt : "";
+      for (const [key, value] of Object.entries(inputs)) {
+        prompt = prompt.replace(new RegExp(`\\{\\{${key}\\}\\}`, "g"), value);
       }
+      const input = { ...config, prompt };
+      const amount = Number(model.cortexia_price_usd);
+      const executionRows = (await sql`
+        INSERT INTO run_node_executions
+          (run_id, workflow_node_id, status, input_params, started_at, cost_usd)
+        VALUES
+          (${runId}, ${node.id}, 'submitting', ${JSON.stringify(input)}::jsonb, NOW(), ${amount})
+        RETURNING id
+      `) as { id: number }[];
+      const executionId = executionRows[0].id;
 
-      await sql`
-        INSERT INTO run_node_executions (run_id, workflow_node_id, status, prompt_snapshot)
-        VALUES (${runId}, ${node.id}, 'pending', ${prompt})
-      `;
+      await recordTransaction({
+        userId,
+        amount: -amount,
+        type: "usage",
+        reference: `run:${runId}/exec:${executionId}`,
+      });
+      charged.push({ userId, runId, executionId, amount });
+
+      try {
+        const callback = (() => {
+          try {
+            return buildCallbackUrl();
+          } catch {
+            return undefined;
+          }
+        })();
+        const task = await createTask({
+          model: model.kie_endpoint,
+          input,
+          ...(callback ? { callBackUrl: callback } : {}),
+        });
+        await sql`
+          UPDATE run_node_executions
+          SET status = 'queued', kie_task_id = ${task.taskId}
+          WHERE id = ${executionId} AND status = 'submitting'
+        `;
+      } catch (error) {
+        await refundGeneration({ userId, amount, runId, nodeExecutionId: executionId });
+        await sql`
+          UPDATE run_node_executions
+          SET status = 'failed', completed_at = NOW(), error_message = ${error instanceof Error ? error.message.slice(0, 2000) : "Provider submission failed"}
+          WHERE id = ${executionId} AND status IN ('submitting', 'queued')
+        `;
+        throw error;
+      }
     }
 
-    // 8. Return response
     return {
       id: `run_${runId}`,
       object: "workflow_run",
-      workflow_id: workflow_id,
+      workflow_id: workflowId,
       status: "running",
-      created_at: new Date(runRows[0].created_at).toISOString(),
+      created_at: new Date(runRows[0].started_at).toISOString(),
     };
   } catch (err) {
     console.error("[api/v1/workflows/run]", err);

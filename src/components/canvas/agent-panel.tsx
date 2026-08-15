@@ -1,10 +1,25 @@
 import { useState, useEffect, useRef } from "react";
 import { useCanvasStore } from "@/lib/canvas-store";
-import { Sparkles, Send, Check, Loader2, Wand2, ChevronDown, ChevronUp, AlertTriangle } from "lucide-react";
+import {
+  Sparkles,
+  Send,
+  Check,
+  Loader2,
+  Wand2,
+  ChevronDown,
+  ChevronUp,
+  AlertTriangle,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -14,18 +29,17 @@ import {
   AlertDialogFooter,
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
-import {
-  runAgent,
-  AGENT_MODELS,
-  type AgentModel,
-  type AgentResponse,
-} from "@/lib/agent";
+import { runAgent, AGENT_MODELS, type AgentModel, type AgentResponse } from "@/lib/agent";
 import {
   createConversation,
   saveMessage,
   getConversationByWorkflow,
 } from "@/lib/api/agent-conversations";
-import { applyAgentPlan, COST_CONFIRM_THRESHOLD, type AgentApplyResponse } from "@/lib/api/agent-apply";
+import {
+  applyAgentPlan,
+  COST_CONFIRM_THRESHOLD,
+  type AgentApplyResponse,
+} from "@/lib/api/agent-apply";
 import { agentRun } from "@/lib/api/agent-run";
 import { loadSession } from "@/lib/auth-store";
 import { useT } from "@/lib/i18n";
@@ -47,7 +61,15 @@ type ConversationMessage = {
   proposedPlan?: any;
 };
 
-export function AgentPanel({ className, initialPrompt, workflowId }: { className?: string; initialPrompt?: string; workflowId?: number | null }) {
+export function AgentPanel({
+  className,
+  initialPrompt,
+  workflowId,
+}: {
+  className?: string;
+  initialPrompt?: string;
+  workflowId?: number | null;
+}) {
   const t = useT();
   const [prompt, setPrompt] = useState(initialPrompt ?? "");
   const [busy, setBusy] = useState(false);
@@ -83,7 +105,10 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
   // Load saved permission mode from localStorage
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY_PERMISSION_MODE);
-    if (saved && (saved === "approve_each" || saved === "auto_run" || saved === "auto_under_threshold")) {
+    if (
+      saved &&
+      (saved === "approve_each" || saved === "auto_run" || saved === "auto_under_threshold")
+    ) {
       setPermissionMode(saved as PermissionMode);
     }
   }, []);
@@ -145,13 +170,13 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
       }
     });
 
-    try {      // Dry-run: get server-side cost estimate and confirmation flag
+    try {
+      // Dry-run: get server-side cost estimate and confirmation flag
       const dryResult = (await applyAgentPlan({
         data: {
           workflowId: Number(workflowId),
           operations: serverOps,
           dryRun: true,
-          sessionToken: loadSession()?.token,
         },
       })) as AgentApplyResponse;
 
@@ -162,7 +187,7 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
         setShowConfirmDialog(true);
         pushLog(
           `⚠ Coût estimé: $${dryResult.estimatedTotalCostUsd.toFixed(4)} (seuil: $${COST_CONFIRM_THRESHOLD})`,
-          "warn"
+          "warn",
         );
         return;
       }
@@ -207,7 +232,6 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
           workflowId: Number(workflowId),
           operations: serverOps,
           launch,
-          sessionToken: loadSession()?.token,
         },
       })) as AgentApplyResponse;
 
@@ -254,7 +278,9 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
     try {
       // Create conversation on first message if needed
       if (conversationIdRef.current == null && workflowId != null) {
-        const conv = await createConversation({ data: { workflowId, sessionToken: loadSession()?.token } });
+        const conv = await createConversation({
+          data: { workflowId, sessionToken: loadSession()?.token },
+        });
         conversationIdRef.current = conv.id;
       }
 
@@ -318,7 +344,7 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
 
       pushLog(
         `${response.operations.length} opération(s) proposée(s) · ~$${response.estimatedCost.toFixed(4)}`,
-        "info"
+        "info",
       );
 
       await executeWithConfirmation(response);
@@ -372,10 +398,17 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
           <div className="px-4 py-3 space-y-2">
             {/* Model Selector */}
             <div className="flex items-center gap-2">
-              <label htmlFor="agent-model" className="text-xs text-muted-foreground whitespace-nowrap">
+              <label
+                htmlFor="agent-model"
+                className="text-xs text-muted-foreground whitespace-nowrap"
+              >
                 {t("agent.model")}
               </label>
-              <Select value={selectedModel} onValueChange={(v) => setSelectedModel(v as AgentModel)} disabled={busy}>
+              <Select
+                value={selectedModel}
+                onValueChange={(v) => setSelectedModel(v as AgentModel)}
+                disabled={busy}
+              >
                 <SelectTrigger id="agent-model" className="flex-1 h-8 text-xs">
                   <SelectValue />
                 </SelectTrigger>
@@ -391,17 +424,30 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
 
             {/* Permission Mode Selector */}
             <div className="flex items-center gap-2">
-              <label htmlFor="permission-mode" className="text-xs text-muted-foreground whitespace-nowrap">
+              <label
+                htmlFor="permission-mode"
+                className="text-xs text-muted-foreground whitespace-nowrap"
+              >
                 {t("agent.permissions")}
               </label>
-              <Select value={permissionMode} onValueChange={(v) => setPermissionMode(v as PermissionMode)} disabled={busy}>
+              <Select
+                value={permissionMode}
+                onValueChange={(v) => setPermissionMode(v as PermissionMode)}
+                disabled={busy}
+              >
                 <SelectTrigger id="permission-mode" className="flex-1 h-8 text-xs">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="approve_each" className="text-xs">{t("agent.approve_each")}</SelectItem>
-                  <SelectItem value="auto_run" className="text-xs">{t("agent.auto_run")}</SelectItem>
-                  <SelectItem value="auto_under_threshold" className="text-xs">{t("agent.auto_under_threshold")}</SelectItem>
+                  <SelectItem value="approve_each" className="text-xs">
+                    {t("agent.approve_each")}
+                  </SelectItem>
+                  <SelectItem value="auto_run" className="text-xs">
+                    {t("agent.auto_run")}
+                  </SelectItem>
+                  <SelectItem value="auto_under_threshold" className="text-xs">
+                    {t("agent.auto_under_threshold")}
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -454,7 +500,12 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
           </div>
 
           {/* Confirmation Dialog */}
-          <AlertDialog open={showConfirmDialog && !!pendingOperations} onOpenChange={(open) => { if (!open) handleCancel(); }}>
+          <AlertDialog
+            open={showConfirmDialog && !!pendingOperations}
+            onOpenChange={(open) => {
+              if (!open) handleCancel();
+            }}
+          >
             <AlertDialogContent className="sm:max-w-md">
               <AlertDialogHeader>
                 <AlertDialogTitle className="flex items-center gap-2">
@@ -462,7 +513,10 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
                   {t("agent.confirm.title")}
                 </AlertDialogTitle>
                 <AlertDialogDescription>
-                  {t("agent.confirm.cost")} <span className="font-medium text-amber">${pendingOperations?.estimatedCost?.toFixed(4) ?? "0"}</span>
+                  {t("agent.confirm.cost")}{" "}
+                  <span className="font-medium text-amber">
+                    ${pendingOperations?.estimatedCost?.toFixed(4) ?? "0"}
+                  </span>
                   <br />
                   {t("agent.confirm.threshold")} ${COST_CONFIRM_THRESHOLD}
                   <br />
@@ -506,7 +560,7 @@ export function AgentPanel({ className, initialPrompt, workflowId }: { className
                     l.tone === "ok" && "text-emerald",
                     l.tone === "muted" && "text-muted-foreground",
                     l.tone === "info" && "text-foreground/85",
-                    l.tone === "warn" && "text-amber"
+                    l.tone === "warn" && "text-amber",
                   )}
                 >
                   {l.tone === "ok" ? (

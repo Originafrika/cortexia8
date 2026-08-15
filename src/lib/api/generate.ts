@@ -20,16 +20,12 @@
 
 import { createServerFn } from "@tanstack/react-start";
 import { sql } from "@/lib/db";
-import {
-  buildCallbackUrl,
-  createTask,
-  chatCompletion,
-  chatAnthropic,
-} from "@/lib/kie-api/client";
+import { buildCallbackUrl, createTask, chatCompletion, chatAnthropic } from "@/lib/kie-api/client";
 import {
   ensureSufficientCredits,
   InsufficientCreditsError,
   recordTransaction,
+  refundGeneration,
 } from "@/lib/credits";
 import {
   getActiveModelBySlug,
@@ -39,12 +35,7 @@ import {
   type ApiFamily,
   type ModelRow,
 } from "./shared";
-import {
-  getRequestContext,
-  HttpError,
-  requireUserId,
-  validateOrigin,
-} from "./auth";
+import { getRequestContext, HttpError, requireUserId, validateOrigin } from "./auth";
 import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 
 export type GenerateInput = {
@@ -108,7 +99,7 @@ async function runGenerate(
   _apiKeyId: number | null,
 ): Promise<GenerateResponse> {
   console.log(`[Generate] Starting generation for user ${userId}, model: ${data.modelSlug}`);
-  
+
   const model = await getActiveModelBySlug(data.modelSlug);
   if (!model) {
     throw new HttpError(404, `Model '${data.modelSlug}' not found or inactive`);
@@ -139,10 +130,15 @@ async function runGenerate(
   // 2. Cost + credit check.
   const cost = nodeCostUsd(model, resolvedInput);
   console.log(`[Generate] Cost: ${cost}, model: ${model.slug}`);
-  if (cost != null && cost > 0) {
+  if (cost == null || !Number.isFinite(cost) || cost <= 0) {
+    throw new HttpError(503, `Model '${model.slug}' does not have a valid launch price`);
+  }
+  if (cost > 0) {
     const check = await ensureSufficientCredits(userId, cost);
     if (!check.ok) {
-      console.log(`[Generate] Insufficient credits: balance=${check.balance}, required=${check.required}`);
+      console.log(
+        `[Generate] Insufficient credits: balance=${check.balance}, required=${check.required}`,
+      );
       throw new InsufficientCreditsError(check.balance, check.required);
     }
   }
@@ -156,7 +152,7 @@ async function runGenerate(
     if (rows.length === 0) {
       throw new HttpError(404, `Workflow ${workflowId} not found`);
     }
-    if (rows[0].user_id != null && rows[0].user_id !== userId) {
+    if (rows[0].user_id !== userId) {
       throw new HttpError(403, "Workflow belongs to a different user");
     }
   }
@@ -180,110 +176,92 @@ async function runGenerate(
     throw new HttpError(500, `Model '${model.slug}' is misconfigured: api_family is NULL`);
   }
 
-  // Chat models are synchronous — call the API, store text, return immediately.
-  const isChat = apiFamily === "chat_openai" || apiFamily === "chat_anthropic";
+  // Persist a durable operation before calling KIE. This gives the debit and
+  // every provider attempt a stable idempotency reference.
+  const { runId, nodeExecutionId } = await persistPendingRun({
+    userId,
+    model,
+    workflowId,
+    input: resolvedInput,
+    cost: cost ?? 0,
+  });
 
-  if (isChat) {
-    console.log(`[Generate] Chat model detected (${apiFamily}), calling synchronously`);
-    const { textContent, responseId } = await callChatEndpoint(apiFamily, model, resolvedInput);
-    console.log(`[Generate] Chat response received, length: ${textContent.length}`);
-
-    // Persist run + execution with text result and "succeeded" status.
-    const { runId, nodeExecutionId } = workflowId != null
-      ? await persistRunWithTextResult({
-          userId,
-          model,
-          workflowId,
-          input: resolvedInput,
-          cost: cost ?? 0,
-          textResult: textContent,
-          taskId: responseId,
-        })
-      : await persistPlaygroundRunWithTextResult({
-          userId,
-          model,
-          input: resolvedInput,
-          cost: cost ?? 0,
-          textResult: textContent,
-          taskId: responseId,
-        });
-
-    // Debit credits
-    if (cost != null && cost > 0) {
+  if (cost != null && cost > 0) {
+    try {
       await recordTransaction({
         userId,
         amount: -Math.abs(cost),
         type: "usage",
         reference: `run:${runId}/exec:${nodeExecutionId}`,
       });
+    } catch (error) {
+      await markSubmissionFailed(runId, nodeExecutionId, "Credit reservation failed");
+      throw error;
+    }
+  }
+
+  const isChat = apiFamily === "chat_openai" || apiFamily === "chat_anthropic";
+  try {
+    if (isChat) {
+      const { textContent, responseId } = await callChatEndpoint(apiFamily, model, resolvedInput);
+      await sql`
+        UPDATE run_node_executions
+        SET status = 'succeeded', kie_task_id = ${responseId}, text_result = ${textContent},
+            completed_at = NOW()
+        WHERE id = ${nodeExecutionId} AND status = 'submitting'
+      `;
+      await sql`
+        UPDATE runs SET status = 'succeeded', completed_at = NOW()
+        WHERE id = ${runId} AND status = 'running'
+      `;
+      return {
+        runId,
+        runNodeExecutionId: nodeExecutionId,
+        taskId: responseId,
+        status: "succeeded",
+        estimatedCostUsd: cost ?? 0,
+        uploadedCount,
+        modelSlug: model.slug,
+        modelName: model.name,
+        category: model.category,
+        textContent,
+      };
     }
 
+    const callback = tryBuildCallback();
+    const taskId = await submitTask({
+      apiFamily,
+      model,
+      input: resolvedInput,
+      callback,
+    });
+    await sql`
+      UPDATE run_node_executions
+      SET status = 'queued', kie_task_id = ${taskId}
+      WHERE id = ${nodeExecutionId} AND status = 'submitting'
+    `;
     return {
       runId,
       runNodeExecutionId: nodeExecutionId,
-      taskId: responseId,
-      status: "succeeded",
+      taskId,
+      status: "queued",
       estimatedCostUsd: cost ?? 0,
       uploadedCount,
       modelSlug: model.slug,
       modelName: model.name,
       category: model.category,
-      textContent,
     };
+  } catch (error) {
+    if (cost != null && cost > 0) {
+      await refundGenerationForSubmissionFailure(userId, runId, nodeExecutionId, cost);
+    }
+    await markSubmissionFailed(
+      runId,
+      nodeExecutionId,
+      error instanceof Error ? error.message : "Provider submission failed",
+    );
+    throw error;
   }
-
-  // Media models are async — submit task and wait for webhook.
-  const callback = tryBuildCallback();
-  console.log(`[Generate] Submitting task to kie.ai, model: ${model.slug}, apiFamily: ${apiFamily}`);
-  const taskId = await submitTask({
-    apiFamily,
-    model,
-    input: resolvedInput,
-    callback,
-  });
-  console.log(`[Generate] Task submitted, taskId: ${taskId}`);
-
-  // Persist run + execution rows so the webhook can find them.
-  const { runId, nodeExecutionId } = workflowId != null
-    ? await persistRunWithExecution({
-        userId,
-        model,
-        workflowId,
-        input: resolvedInput,
-        cost: cost ?? 0,
-        taskId,
-      })
-    : await persistPlaygroundRun({
-        userId,
-        model,
-        input: resolvedInput,
-        cost: cost ?? 0,
-        taskId,
-      });
-  console.log(`[Generate] Persisted run: ${runId}, execution: ${nodeExecutionId}`);
-
-  // Debit credits now (for fixed-price units). LLM cost (1m-tokens-io)
-  // is settled after the run completes — we record a pending 0 debit.
-  if (cost != null && cost > 0) {
-    await recordTransaction({
-      userId,
-      amount: -Math.abs(cost),
-      type: "usage",
-      reference: `run:${runId}/exec:${nodeExecutionId}`,
-    });
-  }
-
-  return {
-    runId,
-    runNodeExecutionId: nodeExecutionId,
-    taskId,
-    status: "queued",
-    estimatedCostUsd: cost ?? 0,
-    uploadedCount,
-    modelSlug: model.slug,
-    modelName: model.name,
-    category: model.category,
-  };
 }
 
 function tryBuildCallback(): string | undefined {
@@ -327,7 +305,11 @@ async function callChatEndpoint(
       });
       const resp = response as Record<string, unknown>;
       const content = resp.content as { type?: string; text?: string }[] | undefined;
-      const text = content?.filter((c) => c.type === "text").map((c) => c.text ?? "").join("") ?? "";
+      const text =
+        content
+          ?.filter((c) => c.type === "text")
+          .map((c) => c.text ?? "")
+          .join("") ?? "";
       return { textContent: text, responseId: taskId };
     }
 
@@ -374,6 +356,83 @@ async function submitTask(opts: {
       });
       return taskId;
     }
+  }
+}
+
+async function persistPendingRun(opts: {
+  userId: number;
+  model: ModelRow;
+  workflowId: number | null;
+  input: Record<string, unknown>;
+  cost: number;
+}): Promise<{ runId: number; nodeExecutionId: number }> {
+  const wfId =
+    opts.workflowId ??
+    (
+      (await sql`
+      INSERT INTO workflows (user_id, name, status)
+      VALUES (${opts.userId}, ${`Playground · ${opts.model.name}`}, 'running')
+      RETURNING id
+    `) as { id: number }[]
+    )[0].id;
+
+  const nodeId = (
+    (await sql`
+      INSERT INTO workflow_nodes (workflow_id, type, model_slug, config, canvas_x, canvas_y)
+      VALUES (${wfId}, 'model', ${opts.model.slug}, ${JSON.stringify(opts.input)}::jsonb, '0', '0')
+      RETURNING id
+    `) as { id: number }[]
+  )[0].id;
+
+  const run = (
+    (await sql`
+      INSERT INTO runs (workflow_id, user_id, status, total_cost_usd)
+      VALUES (${wfId}, ${opts.userId}, 'running', ${opts.cost})
+      RETURNING id
+    `) as { id: number }[]
+  )[0];
+
+  const exec = (
+    (await sql`
+      INSERT INTO run_node_executions
+        (run_id, workflow_node_id, status, input_params, started_at, cost_usd)
+      VALUES
+        (${run.id}, ${nodeId}, 'submitting', ${JSON.stringify(opts.input)}::jsonb, NOW(), ${opts.cost})
+      RETURNING id
+    `) as { id: number }[]
+  )[0];
+
+  return { runId: run.id, nodeExecutionId: exec.id };
+}
+
+async function markSubmissionFailed(runId: number, nodeExecutionId: number, message: string) {
+  const safeMessage = message.slice(0, 2000);
+  await sql`
+    UPDATE run_node_executions
+    SET status = 'failed', error_message = ${safeMessage}, completed_at = NOW()
+    WHERE id = ${nodeExecutionId} AND status IN ('submitting', 'queued')
+  `;
+  await sql`
+    UPDATE runs SET status = 'failed', completed_at = NOW()
+    WHERE id = ${runId} AND status = 'running'
+  `;
+}
+
+async function refundGenerationForSubmissionFailure(
+  userId: number,
+  runId: number,
+  nodeExecutionId: number,
+  amount: number,
+) {
+  try {
+    await refundGeneration({ userId, amount, runId, nodeExecutionId });
+  } catch (refundError) {
+    console.error("[Generate] Failed to refund submission charge", {
+      userId,
+      runId,
+      nodeExecutionId,
+      error: refundError instanceof Error ? refundError.message : String(refundError),
+    });
   }
 }
 

@@ -5,11 +5,15 @@
 import { H3Event, getHeader, setResponseStatus } from "h3";
 import { sql } from "@/lib/db";
 import { sha256Hex } from "../../src/lib/utils/crypto";
-import { checkRateLimit, getRemainingRequests, getResetTime, RATE_LIMITS } from "../../src/lib/rate-limit";
+import {
+  checkRateLimit,
+  getRemainingRequests,
+  getResetTime,
+  RATE_LIMITS,
+} from "../../src/lib/rate-limit";
 
 export type ApiAuthResult =
-  | { ok: true; userId: number }
-  | { ok: false; error: string; status: number };
+  { ok: true; userId: number } | { ok: false; error: string; status: number };
 
 /**
  * Authenticate API request via Bearer API key and apply rate limiting.
@@ -22,7 +26,11 @@ export async function authenticateApiRequest(
   const auth = getHeader(event, "authorization");
   if (!auth?.startsWith("Bearer cx_")) {
     setResponseStatus(event, 401);
-    return { ok: false, error: "Invalid API key format. Use: Authorization: Bearer cx_...", status: 401 };
+    return {
+      ok: false,
+      error: "Invalid API key format. Use: Authorization: Bearer cx_...",
+      status: 401,
+    };
   }
 
   const token = auth.slice(7);
@@ -55,9 +63,9 @@ export async function authenticateApiRequest(
   const resetSeconds = Math.ceil(resetMs / 1000);
 
   setResponseStatus(event, 200);
-  event.node.res.setHeader("X-RateLimit-Limit", String(RATE_LIMITS.general.limit));
-  event.node.res.setHeader("X-RateLimit-Remaining", String(remaining));
-  event.node.res.setHeader("X-RateLimit-Reset", String(resetSeconds));
+  event.node?.res?.setHeader("X-RateLimit-Limit", String(RATE_LIMITS.general.limit));
+  event.node?.res?.setHeader("X-RateLimit-Remaining", String(remaining));
+  event.node?.res?.setHeader("X-RateLimit-Reset", String(resetSeconds));
 
   return { ok: true, userId };
 }

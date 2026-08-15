@@ -59,25 +59,40 @@ export async function handleWebhook(body: WebhookInput): Promise<WebhookResponse
 async function handleSuccess(
   taskId: string,
   info: Awaited<ReturnType<typeof getTaskDetail>>,
-  verification: { ok: true; runNodeExecutionId: number; userId: number | null; modelSlug: string; category: string },
+  verification: {
+    ok: true;
+    runNodeExecutionId: number;
+    userId: number | null;
+    modelSlug: string;
+    category: string;
+  },
 ): Promise<WebhookResponse> {
   const { resultUrls, resultObject } = parseResultJson(info.resultJson);
 
   if (resultUrls.length === 0) {
     const textContent = resultObject
-      ? (resultObject.content as string)
-        ?? (resultObject.text as string)
-        ?? (resultObject.choices as { message?: { content?: string } }[])?.[0]?.message?.content
-        ?? JSON.stringify(resultObject)
+      ? ((resultObject.content as string) ??
+        (resultObject.text as string) ??
+        (resultObject.choices as { message?: { content?: string } }[])?.[0]?.message?.content ??
+        JSON.stringify(resultObject))
       : null;
 
-    await sql`
+    const updated = (await sql`
       UPDATE run_node_executions
-      SET status = 'succeeded', completed_at = NOW(),
-          text_result = ${textContent},
-          cost_usd = COALESCE(${info.creditsConsumed ?? 0}::numeric, 0)
+      SET status = 'succeeded', completed_at = NOW(), text_result = ${textContent}
       WHERE id = ${verification.runNodeExecutionId}
-    `;
+        AND status NOT IN ('succeeded', 'failed')
+      RETURNING id
+    `) as { id: number }[];
+    if (updated.length === 0) {
+      return {
+        ok: true,
+        taskId,
+        action: "no-op",
+        runNodeExecutionId: verification.runNodeExecutionId,
+        reason: "execution already terminal",
+      };
+    }
     await maybeFinalizeRun(verification.runNodeExecutionId);
     return {
       ok: true,
@@ -85,6 +100,21 @@ async function handleSuccess(
       action: "no-op",
       runNodeExecutionId: verification.runNodeExecutionId,
       reason: "text-only result stored in text_result",
+    };
+  }
+
+  const current = (await sql`
+    SELECT status, output_asset_id FROM run_node_executions
+    WHERE id = ${verification.runNodeExecutionId}
+    LIMIT 1
+  `) as { status: string; output_asset_id: number | null }[];
+  if (current[0]?.status === "succeeded" || current[0]?.status === "failed") {
+    return {
+      ok: true,
+      taskId,
+      action: "no-op",
+      runNodeExecutionId: verification.runNodeExecutionId,
+      reason: "execution already terminal",
     };
   }
 
@@ -129,13 +159,23 @@ async function handleSuccess(
     RETURNING id
   `) as { id: number }[];
 
-  await sql`
+  const updatedExec = (await sql`
     UPDATE run_node_executions
-    SET status = 'succeeded', completed_at = NOW(),
-        output_asset_id = ${asset[0].id},
-        cost_usd = COALESCE(${info.creditsConsumed ?? 0}::numeric, 0)
+    SET status = 'succeeded', completed_at = NOW(), output_asset_id = ${asset[0].id}
     WHERE id = ${verification.runNodeExecutionId}
-  `;
+      AND status NOT IN ('succeeded', 'failed')
+    RETURNING id
+  `) as { id: number }[];
+  if (updatedExec.length === 0) {
+    await sql`DELETE FROM assets WHERE id = ${asset[0].id}`;
+    return {
+      ok: true,
+      taskId,
+      action: "no-op",
+      runNodeExecutionId: verification.runNodeExecutionId,
+      reason: "execution already terminal",
+    };
+  }
 
   await maybeFinalizeRun(verification.runNodeExecutionId);
 
@@ -151,30 +191,42 @@ async function handleSuccess(
 async function handleFailure(
   taskId: string,
   info: Awaited<ReturnType<typeof getTaskDetail>>,
-  verification: { ok: true; runNodeExecutionId: number; userId: number | null; modelSlug: string; category: string },
+  verification: {
+    ok: true;
+    runNodeExecutionId: number;
+    userId: number | null;
+    modelSlug: string;
+    category: string;
+  },
 ): Promise<WebhookResponse> {
-  if (verification.userId != null) {
-    const exec = (await sql`
-      SELECT run_id, cost_usd::text AS cost_usd FROM run_node_executions
-      WHERE id = ${verification.runNodeExecutionId} LIMIT 1
-    `) as { run_id: number; cost_usd: string }[];
-    const cost = Number(exec[0]?.cost_usd ?? 0);
-    if (cost > 0) {
-      await refundGeneration({
-        userId: verification.userId,
-        amount: cost,
-        runId: exec[0].run_id,
-        nodeExecutionId: verification.runNodeExecutionId,
-      });
-    }
+  const errorMessage = (info.failMsg ?? info.failCode ?? "kie.ai reported failure").slice(0, 2000);
+  const claimed = (await sql`
+    UPDATE run_node_executions
+    SET status = 'failed', completed_at = NOW(), error_message = ${errorMessage}
+    WHERE id = ${verification.runNodeExecutionId}
+      AND status NOT IN ('succeeded', 'failed')
+    RETURNING run_id, cost_usd::text AS cost_usd
+  `) as { run_id: number; cost_usd: string }[];
+  if (claimed.length === 0) {
+    return {
+      ok: true,
+      taskId,
+      action: "no-op",
+      runNodeExecutionId: verification.runNodeExecutionId,
+      reason: "execution already terminal",
+    };
   }
 
-  await sql`
-    UPDATE run_node_executions
-    SET status = 'failed', completed_at = NOW(),
-        error_message = ${(info.failMsg ?? info.failCode ?? "kie.ai reported failure").slice(0, 2000)}
-    WHERE id = ${verification.runNodeExecutionId}
-  `;
+  const cost = Number(claimed[0].cost_usd ?? 0);
+  if (verification.userId != null && cost > 0) {
+    await refundGeneration({
+      userId: verification.userId,
+      amount: cost,
+      runId: claimed[0].run_id,
+      nodeExecutionId: verification.runNodeExecutionId,
+    });
+  }
+
   await maybeFinalizeRun(verification.runNodeExecutionId);
 
   return {

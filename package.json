@@ -8,6 +8,7 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
+    "test": "vitest run",
     "lint": "eslint .",
     "format": "prettier --write ."
   },
@@ -54,8 +55,10 @@
     "date-fns": "^4.1.0",
     "drizzle-orm": "^0.43.0",
     "embla-carousel-react": "^8.6.0",
+    "fedapay": "1.2.5",
     "fedapay-reactjs": "^1.1.2",
     "framer-motion": "^12.42.2",
+    "h3": "2.0.1-rc.25",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.575.0",
     "react": "^19.2.0",
@@ -90,12 +93,7 @@
     "prettier": "^3.7.3",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.56.1",
-    "vite": "8.1.4"
-  },
-  "pnpm": {
-    "patchedDependencies": {
-      "@daveyplate/better-auth-ui@3.3.9": "patches/@daveyplate__better-auth-ui@3.3.9.patch",
-      "@neondatabase/auth-ui@0.2.1-beta": "patches/@neondatabase__auth-ui@0.2.1-beta.patch"
-    }
+    "vite": "8.1.4",
+    "vitest": "4.1.10"
   }
 }

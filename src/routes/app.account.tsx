@@ -3,10 +3,14 @@ import { useEffect, useState } from "react";
 import { PriceDisplay } from "@/components/price-display";
 import { CurrencyPicker } from "@/components/currency-picker";
 import { CreditCard, Smartphone, Bitcoin, Wallet, Check, Loader2, LogOut } from "lucide-react";
-import { useCurrency, formatMoney, CURRENCIES } from "@/lib/currency";
+import { useCurrency, formatMoney, CURRENCIES, type Currency } from "@/lib/currency";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { verifyFedaPayTransaction, createStripeCheckout } from "@/lib/api/payments";
+import {
+  createFedaPayTransaction,
+  verifyFedaPayTransaction,
+  createStripeCheckout,
+} from "@/lib/api/payments";
 import { getUserBalance, getTransactionHistory, type TxRow } from "@/lib/api/balance";
 import { useT } from "@/lib/i18n";
 import { loadSession } from "@/lib/auth-store";
@@ -17,7 +21,11 @@ export const Route = createFileRoute("/app/account")({
   head: () => ({
     meta: [
       { title: "Cortexia — Account & Recharge" },
-      { name: "description", content: "Manage your Cortexia account balance, recharge credits via Mobile Money, card, or crypto, and view transaction history." },
+      {
+        name: "description",
+        content:
+          "Manage your Cortexia account balance, recharge credits via Mobile Money, card, or crypto, and view transaction history.",
+      },
     ],
   }),
   component: AccountPage,
@@ -25,7 +33,12 @@ export const Route = createFileRoute("/app/account")({
 
 const ALL_METHODS = [
   { key: "mm", nameKey: "Mobile Money", desc: "Orange · MTN · Wave · M-Pesa", icon: Smartphone },
-  { key: "card", nameKey: "account.method_card", desc: "Visa · Mastercard · Amex", icon: CreditCard },
+  {
+    key: "card",
+    nameKey: "account.method_card",
+    desc: "Visa · Mastercard · Amex",
+    icon: CreditCard,
+  },
   { key: "crypto", nameKey: "Crypto", desc: "USDT · USDC · BTC · ETH", icon: Bitcoin },
   { key: "ali", nameKey: "Alipay", descKey: "account.method_ali_desc", icon: Wallet },
 ];
@@ -85,6 +98,7 @@ function AccountPage() {
             amount,
             currency: c.code.toLowerCase(),
             method: method === "ali" ? "alipay" : method,
+            idempotencyKey: globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`,
             sessionToken: loadSession()?.token,
           },
         });
@@ -108,7 +122,7 @@ function AccountPage() {
   async function handleFedaPayComplete(transactionId: string) {
     try {
       const result = await verifyFedaPayTransaction({
-        data: { transactionId, amount: Math.round(amount * CURRENCIES.XOF.rate), sessionToken: loadSession()?.token },
+        data: { transactionId, sessionToken: loadSession()?.token },
       });
       if (result.ok) {
         if (result.balance != null) {
@@ -175,7 +189,9 @@ function AccountPage() {
           <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
             {t("account.recharge_section")}
           </div>
-          <h2 className="mt-2 font-display text-2xl tracking-[-0.02em]">{t("account.add_credits")}</h2>
+          <h2 className="mt-2 font-display text-2xl tracking-[-0.02em]">
+            {t("account.add_credits")}
+          </h2>
           <div className="mt-5 grid gap-2 sm:grid-cols-2">
             {METHODS.map((m) => {
               const active = method === m.key;
@@ -202,8 +218,12 @@ function AccountPage() {
                     <Icon className="size-4" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium">{m.nameKey?.startsWith("account.") ? t(m.nameKey) : m.nameKey}</div>
-                    <div className="text-[11px] text-muted-foreground">{m.descKey ? t(m.descKey) : m.desc}</div>
+                    <div className="text-sm font-medium">
+                      {m.nameKey?.startsWith("account.") ? t(m.nameKey) : m.nameKey}
+                    </div>
+                    <div className="text-[11px] text-muted-foreground">
+                      {m.descKey ? t(m.descKey) : m.desc}
+                    </div>
                   </div>
                   {active && <Check className="size-4 text-amber" />}
                 </button>
@@ -213,7 +233,9 @@ function AccountPage() {
 
           <div className="mt-5">
             <div className="flex items-baseline justify-between mb-2">
-              <span className="text-xs text-muted-foreground">{t("account.amount_to_recharge")}</span>
+              <span className="text-xs text-muted-foreground">
+                {t("account.amount_to_recharge")}
+              </span>
               <span className="text-xs text-muted-foreground">= {formatMoney(amount, c)}</span>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -236,7 +258,9 @@ function AccountPage() {
             </div>
 
             <div className="mt-3">
-              <label className="text-xs text-muted-foreground mb-1 block">{t("account.custom_amount")}</label>
+              <label className="text-xs text-muted-foreground mb-1 block">
+                {t("account.custom_amount")}
+              </label>
               <input
                 type="number"
                 min={1}
@@ -308,7 +332,10 @@ function AccountPage() {
                 const d = date.toLocaleDateString(undefined, { day: "numeric", month: "short" });
                 const label = tx.reference ?? tx.type;
                 return (
-                  <tr key={tx.id} className="border-b border-border last:border-0 hover:bg-surface-2/40">
+                  <tr
+                    key={tx.id}
+                    className="border-b border-border last:border-0 hover:bg-surface-2/40"
+                  >
                     <td className="p-4 text-muted-foreground font-mono text-xs">{d}</td>
                     <td className="p-4">{label}</td>
                     <td
@@ -348,7 +375,10 @@ function AccountPage() {
                   // Ignore sign-out errors
                 }
                 clearSession();
-                navigate({ to: "/auth/$pathname" as "/auth/$pathname", params: { pathname: "sign-in" } });
+                navigate({
+                  to: "/auth/$pathname" as "/auth/$pathname",
+                  params: { pathname: "sign-in" },
+                });
               }}
               className="inline-flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm text-red-400 hover:bg-red-500/20 transition cursor-pointer"
             >
@@ -374,13 +404,40 @@ function FedaPayWidget({
   onCancel,
 }: {
   amount: number;
-  currency: { code: string; rate: number; symbol: string };
+  currency: Currency;
   public_key: string;
   onComplete: (transactionId: string) => void;
   onCancel?: () => void;
 }) {
   const t = useT();
   const [FedaCheckoutButton, setFedaCheckoutButton] = useState<any>(null);
+  const [transactionId, setTransactionId] = useState<string | null>(null);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    setTransactionId(null);
+    setPaymentError(null);
+    const idempotencyKey = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`;
+    createFedaPayTransaction({
+      data: { amountUsd: amount, idempotencyKey, sessionToken: loadSession()?.token },
+    })
+      .then((result) => {
+        if (!active) return;
+        if (result.ok && result.transactionId) {
+          setTransactionId(result.transactionId);
+        } else {
+          setPaymentError("Unable to prepare payment");
+        }
+      })
+      .catch((error) => {
+        if (active)
+          setPaymentError(error instanceof Error ? error.message : "Unable to prepare payment");
+      });
+    return () => {
+      active = false;
+    };
+  }, [amount]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -395,9 +452,9 @@ function FedaPayWidget({
         });
       };
       document.body.appendChild(script);
-    script.onerror = (e) => {
-      console.error("[Browser] Failed to load FedaPay SDK:", e);
-    };
+      script.onerror = (e) => {
+        console.error("[Browser] Failed to load FedaPay SDK:", e);
+      };
     } else {
       import("fedapay-reactjs").then((mod) => {
         setFedaCheckoutButton(() => mod.FedaCheckoutButton);
@@ -405,11 +462,20 @@ function FedaPayWidget({
     }
   }, []);
 
-  if (!FedaCheckoutButton || typeof window === "undefined" || !(window as any).FedaPay) {
+  if (
+    !FedaCheckoutButton ||
+    typeof window === "undefined" ||
+    !(window as any).FedaPay ||
+    !transactionId ||
+    paymentError
+  ) {
     return (
-      <button disabled className="mt-5 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber px-5 py-3 text-sm font-medium text-primary-foreground opacity-60 cursor-wait">
+      <button
+        disabled
+        className="mt-5 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber px-5 py-3 text-sm font-medium text-primary-foreground opacity-60 cursor-wait"
+      >
         <Loader2 className="size-4 animate-spin" />
-        {t("account.loading_fedapay")}
+        {paymentError ?? t("account.loading_fedapay")}
       </button>
     );
   }
@@ -417,14 +483,16 @@ function FedaPayWidget({
   const options = {
     public_key,
     transaction: {
-      amount: Math.round(amount * CURRENCIES.XOF.rate), // Convert USD to XOF (CFA Franc), must be integer
+      id: Number(transactionId),
+      amount: Math.round(amount * CURRENCIES.XOF.rate),
       description: t("account.fedapay_description"),
     },
     currency: {
       iso: "XOF" as const,
     },
     button: {
-      class: "mt-5 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber px-5 py-3 text-sm font-medium text-primary-foreground hover:opacity-95 transition",
+      class:
+        "mt-5 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber px-5 py-3 text-sm font-medium text-primary-foreground hover:opacity-95 transition",
       text: t("account.recharge_btn").replace("{amount}", formatMoney(amount, currency)),
     },
   };
@@ -436,12 +504,12 @@ function FedaPayWidget({
       onCancel?.();
       return;
     }
-    if (resp.transaction?.id) {
+    if (transactionId) {
       if (processed) return;
       processed = true;
-      onComplete(String(resp.transaction.id));
+      onComplete(transactionId);
     }
   };
 
-  return <FedaCheckoutButton options={{...options, onComplete: handleComplete} as any} />;
+  return <FedaCheckoutButton options={{ ...options, onComplete: handleComplete } as any} />;
 }

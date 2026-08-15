@@ -14,7 +14,7 @@
  *   4. Credit user account
  */
 
-import { defineEventHandler, readRawBody, setResponseStatus } from "h3";
+import { defineEventHandler, getHeader, readRawBody, setResponseStatus } from "h3";
 import { sql } from "@/lib/db";
 import { recordTransaction } from "@/lib/credits";
 
@@ -27,14 +27,16 @@ export default defineEventHandler(async (event) => {
   }
 
   // 1. Read raw body (must be string for signature verification).
-  const rawBody = await readRawBody(event, "utf-8");
+  const rawValue = await readRawBody(event, "utf8");
+  const rawBody =
+    typeof rawValue === "string" ? rawValue : rawValue ? new TextDecoder().decode(rawValue) : "";
   if (!rawBody) {
     setResponseStatus(event, 400);
     return { ok: false, error: "Missing request body" };
   }
 
   // 2. Verify Stripe signature.
-  const signature = event.node.req.headers["stripe-signature"];
+  const signature = getHeader(event, "stripe-signature");
   if (!signature || typeof signature !== "string") {
     setResponseStatus(event, 400);
     return { ok: false, error: "Missing stripe-signature header" };
@@ -76,47 +78,83 @@ export default defineEventHandler(async (event) => {
   }
 
   const session = dataObj.object;
-  const userId = Number(session.metadata?.userId ?? session.userId);
-  const sessionId = session.id as string;
-
-  // Use session.amount_total (what Stripe actually charged) instead of metadata.amount
-  // amount_total is in cents, so divide by 100
+  const metadata = session.metadata as Record<string, unknown> | undefined;
+  const sessionId = typeof session.id === "string" ? session.id : "";
+  const paymentReference =
+    typeof metadata?.paymentReference === "string" ? metadata.paymentReference : "";
+  const eventId = typeof body.id === "string" ? body.id : "";
   const amountTotal = Number(session.amount_total ?? 0);
-  const amount = amountTotal / 100;
+  const currency = typeof session.currency === "string" ? session.currency.toUpperCase() : "USD";
+  const paymentStatus = typeof session.payment_status === "string" ? session.payment_status : "";
 
-  if (!userId || amount <= 0) {
+  if (!sessionId || amountTotal <= 0) {
     setResponseStatus(event, 400);
-    return { ok: false, error: "Missing userId or invalid amount" };
+    return { ok: false, error: "Invalid checkout session" };
+  }
+  if (paymentStatus && paymentStatus !== "paid") {
+    await sql`
+      UPDATE payment_transactions SET provider_status = ${paymentStatus}, updated_at = NOW()
+      WHERE provider = 'stripe' AND provider_transaction_id = ${sessionId}
+    `;
+    return { ok: true, action: "payment-not-paid" };
   }
 
-  // 4. Atomic credit: INSERT ledger + UPDATE balance in single CTE
-  const reference = `stripe:${sessionId}`;
-  
-  // Check for duplicate first (fast path)
+  const paymentRows = (await sql`
+    SELECT id, user_id, amount_usd_credited::text AS amount_usd_credited, currency, status
+    FROM payment_transactions
+    WHERE provider = 'stripe'
+      AND (provider_transaction_id = ${sessionId} OR external_reference = ${paymentReference})
+    LIMIT 1
+  `) as {
+    id: number;
+    user_id: number;
+    amount_usd_credited: string;
+    currency: string;
+    status: string;
+  }[];
+  if (paymentRows.length === 0) {
+    setResponseStatus(event, 400);
+    return { ok: false, error: "Unknown Stripe payment order" };
+  }
+  const payment = paymentRows[0];
+  const expectedCents = Math.round(Number(payment.amount_usd_credited) * 100);
+  if (currency !== "USD" || amountTotal !== expectedCents) {
+    await sql`
+      UPDATE payment_transactions SET status = 'needs_review', provider_status = 'amount_mismatch', updated_at = NOW()
+      WHERE id = ${payment.id} AND status <> 'completed'
+    `;
+    return { ok: true, action: "needs-review" };
+  }
+
+  const ledgerReference = `payment:${payment.id}`;
   const existing = (await sql`
-    SELECT id FROM credits_ledger WHERE reference = ${reference} LIMIT 1
+    SELECT id FROM credits_ledger WHERE reference = ${ledgerReference} LIMIT 1
   `) as { id: number }[];
-  
-  if (existing.length > 0) {
-    return { ok: true, action: "already-processed" };
-  }
-
-  // Atomic: insert ledger + update balance in single CTE
-  try {
-    await recordTransaction({
-      userId,
-      amount,
-      type: "purchase",
-      reference,
-    });
-  } catch (recordErr: any) {
-    // Handle unique_violation (race condition)
-    if (recordErr?.code === "23505") {
-      return { ok: true, action: "already-processed" };
+  if (existing.length === 0) {
+    try {
+      await recordTransaction({
+        userId: payment.user_id,
+        amount: Number(payment.amount_usd_credited),
+        type: "purchase",
+        reference: ledgerReference,
+      });
+    } catch (recordErr: unknown) {
+      if (
+        !recordErr ||
+        typeof recordErr !== "object" ||
+        (recordErr as { code?: string }).code !== "23505"
+      )
+        throw recordErr;
     }
-    throw recordErr;
   }
 
+  await sql`
+    UPDATE payment_transactions
+    SET provider_transaction_id = COALESCE(provider_transaction_id, ${sessionId}),
+        provider_event_id = ${eventId || null},
+        provider_status = 'paid', status = 'completed', updated_at = NOW()
+    WHERE id = ${payment.id}
+  `;
   return { ok: true, action: "credited" };
 });
 

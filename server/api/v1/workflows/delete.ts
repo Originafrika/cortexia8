@@ -11,7 +11,7 @@
 
 import { defineEventHandler, getHeader, getRouterParam, setResponseStatus } from "h3";
 import { sql } from "@/lib/db";
-import { sha256Hex } from "../../../src/lib/utils/crypto";
+import { sha256Hex } from "../../../../src/lib/utils/crypto";
 
 export default defineEventHandler(async (event) => {
   try {

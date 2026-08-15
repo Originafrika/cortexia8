@@ -10,7 +10,11 @@ export const Route = createFileRoute("/auth/$pathname")({
   head: () => ({
     meta: [
       { title: "Cortexia — Sign in / Sign up" },
-      { name: "description", content: "Sign in or create a Cortexia account to access AI generation models, manage your balance, and start creating." },
+      {
+        name: "description",
+        content:
+          "Sign in or create a Cortexia account to access AI generation models, manage your balance, and start creating.",
+      },
     ],
   }),
   component: Auth,
@@ -84,12 +88,20 @@ function Auth() {
     setLoading(true);
     try {
       const result = await authClient.signIn.email({ email, password });
-      console.log("[AUTH_DEBUG] signIn result:", { hasData: !!result.data, hasUser: !!result.data?.user, token: result.data?.token ? result.data.token.slice(0, 12) + "..." : "UNDEFINED", dataKeys: result.data ? Object.keys(result.data) : [] });
+      console.log("[AUTH_DEBUG] signIn result:", {
+        hasData: !!result.data,
+        hasUser: !!result.data?.user,
+        token: result.data?.token ? result.data.token.slice(0, 12) + "..." : "UNDEFINED",
+        dataKeys: result.data ? Object.keys(result.data) : [],
+      });
       if (result.error) throw result.error;
       if (result.data?.user) {
         const role = (result.data.user as any).role ?? "user";
         const token = result.data.token ?? (result.data as any).session?.token ?? "";
-        console.log("[AUTH_DEBUG] saving session with token:", token ? token.slice(0, 12) + "..." : "EMPTY");
+        console.log(
+          "[AUTH_DEBUG] saving session with token:",
+          token ? token.slice(0, 12) + "..." : "EMPTY",
+        );
         saveSession({
           token,
           user: {
@@ -156,7 +168,13 @@ function Auth() {
       } else {
       }
       // Fallback: if no password was stored, try to extract user info from verify response.
-      const anyData = data as { session?: { user?: { id: string; name: string; email: string; role?: string } }; token?: string } | null;
+      const anyData = data as {
+        session?: {
+          token?: string;
+          user?: { id: string; name: string; email: string; role?: string };
+        };
+        token?: string;
+      } | null;
       if (anyData?.session?.user) {
         const u = anyData.session.user;
         saveSession({
@@ -279,7 +297,11 @@ function Auth() {
                     disabled={loading || !email || !password}
                     className="group mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-amber px-5 py-3 text-sm font-medium text-primary-foreground disabled:opacity-40 hover:opacity-95 transition"
                   >
-                    {loading ? "…" : mode === "sign-up" ? t("auth.create_my_account") : t("auth.sign_in")}
+                    {loading
+                      ? "…"
+                      : mode === "sign-up"
+                        ? t("auth.create_my_account")
+                        : t("auth.sign_in")}
                     {!loading && (
                       <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
                     )}

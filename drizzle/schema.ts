@@ -17,9 +17,7 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   displayName: text("display_name"),
   role: text("role").notNull().default("user"),
-  creditsBalance: numeric("credits_balance", { precision: 12, scale: 6 })
-    .notNull()
-    .default("0"),
+  creditsBalance: numeric("credits_balance", { precision: 12, scale: 6 }).notNull().default("0"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -60,9 +58,7 @@ export const models = pgTable(
       .notNull()
       .default("0"),
     fidelityStatus: text("fidelity_status").notNull().default("generique"),
-    supportsReferenceUpload: boolean("supports_reference_upload")
-      .notNull()
-      .default(false),
+    supportsReferenceUpload: boolean("supports_reference_upload").notNull().default(false),
     active: boolean("active").notNull().default(true),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow(),
@@ -149,9 +145,7 @@ export const runs = pgTable(
     status: text("status").notNull().default("pending"),
     startedAt: timestamp("started_at").defaultNow().notNull(),
     completedAt: timestamp("completed_at"),
-    totalCostUsd: numeric("total_cost_usd", { precision: 12, scale: 6 })
-      .notNull()
-      .default("0"),
+    totalCostUsd: numeric("total_cost_usd", { precision: 12, scale: 6 }).notNull().default("0"),
   },
   (table) => ({
     workflowIdx: index("runs_workflow_idx").on(table.workflowId),
@@ -177,9 +171,7 @@ export const runNodeExecutions = pgTable(
     textResult: text("text_result"),
     startedAt: timestamp("started_at"),
     completedAt: timestamp("completed_at"),
-    costUsd: numeric("cost_usd", { precision: 12, scale: 6 })
-      .notNull()
-      .default("0"),
+    costUsd: numeric("cost_usd", { precision: 12, scale: 6 }).notNull().default("0"),
   },
   (table) => ({
     runIdx: index("rne_run_idx").on(table.runId),
@@ -195,10 +187,9 @@ export const assets = pgTable(
     userId: serial("user_id").references(() => users.id, {
       onDelete: "set null",
     }),
-    runNodeExecutionId: serial("run_node_execution_id").references(
-      () => runNodeExecutions.id,
-      { onDelete: "set null" },
-    ),
+    runNodeExecutionId: serial("run_node_execution_id").references(() => runNodeExecutions.id, {
+      onDelete: "set null",
+    }),
     modelSlug: text("model_slug").references(() => models.slug),
     type: text("type").notNull(),
     storageUrl: text("storage_url").notNull(),
@@ -257,11 +248,14 @@ export const paymentTransactions = pgTable(
   "payment_transactions",
   {
     id: serial("id").primaryKey(),
-    userId: serial("user_id")
+    userId: integer("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     provider: text("provider").notNull(),
     providerTransactionId: text("provider_transaction_id"),
+    externalReference: text("external_reference").notNull(),
+    providerEventId: text("provider_event_id"),
+    providerStatus: text("provider_status"),
     amountLocal: numeric("amount_local", { precision: 12, scale: 6 }).notNull(),
     currency: text("currency").notNull(),
     amountUsdCredited: numeric("amount_usd_credited", {
@@ -269,12 +263,24 @@ export const paymentTransactions = pgTable(
       scale: 6,
     }).notNull(),
     status: text("status").notNull().default("pending"),
+    metadata: jsonb("metadata"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
   (table) => ({
     userIdx: index("payment_transactions_user_idx").on(table.userId),
     providerIdx: index("payment_transactions_provider_idx").on(table.provider),
     statusIdx: index("payment_transactions_status_idx").on(table.status),
+    externalReferenceIdx: uniqueIndex("payment_transactions_external_reference_uidx").on(
+      table.externalReference,
+    ),
+    providerTransactionIdx: uniqueIndex("payment_transactions_provider_transaction_uidx").on(
+      table.provider,
+      table.providerTransactionId,
+    ),
+    providerEventIdx: uniqueIndex("payment_transactions_provider_event_uidx").on(
+      table.providerEventId,
+    ),
   }),
 );
 

@@ -14,10 +14,9 @@ import { getWaitlistCount } from "@/lib/waitlist";
 import { useQuery } from "@tanstack/react-query";
 import { LAUNCH_DATE } from "@/lib/launch";
 import { useEffect, useState, useRef } from "react";
+import { AppPreview } from "@/components/app-preview";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, ArrowRight, Bot, Sliders } from "lucide-react";
-
-const LiveLanding = () => import("./app-preview").then((m) => ({ default: m.AppPreview }));
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -30,7 +29,7 @@ export const Route = createFileRoute("/")({
       },
     ],
   }),
-  component: isWaitlist() ? WaitlistLanding : LiveLanding,
+  component: isWaitlist() ? WaitlistLanding : AppPreview,
 });
 
 function WaitlistLanding() {
@@ -163,9 +162,7 @@ function ModesSection() {
             </div>
             <h3 className="font-display text-xl tracking-[-0.02em]">{t("modes.agent.title")}</h3>
           </div>
-          <p className="text-foreground/80 leading-relaxed text-sm">
-            {t("modes.agent.body")}
-          </p>
+          <p className="text-foreground/80 leading-relaxed text-sm">{t("modes.agent.body")}</p>
         </div>
 
         {/* Playground mode */}
@@ -174,11 +171,11 @@ function ModesSection() {
             <div className="grid place-items-center size-10 rounded-xl bg-amber/10 text-amber">
               <Sliders className="size-5" />
             </div>
-            <h3 className="font-display text-xl tracking-[-0.02em]">{t("modes.playground.title")}</h3>
+            <h3 className="font-display text-xl tracking-[-0.02em]">
+              {t("modes.playground.title")}
+            </h3>
           </div>
-          <p className="text-foreground/80 leading-relaxed text-sm">
-            {t("modes.playground.body")}
-          </p>
+          <p className="text-foreground/80 leading-relaxed text-sm">{t("modes.playground.body")}</p>
         </div>
       </div>
 
@@ -200,9 +197,7 @@ function CatalogSection() {
         <h2 className="mt-3 font-display text-3xl sm:text-4xl tracking-[-0.03em]">
           {t("catalog.title")}
         </h2>
-        <p className="mt-4 text-foreground/75 max-w-2xl leading-relaxed">
-          {t("catalog.body")}
-        </p>
+        <p className="mt-4 text-foreground/75 max-w-2xl leading-relaxed">{t("catalog.body")}</p>
       </div>
       <ModelsMarquee />
     </section>
@@ -494,7 +489,10 @@ function FooterSection() {
           <a href="/privacy" className="hover:text-foreground transition">
             {t("footer.policy")}
           </a>
-          <a href="mailto:contact@cortexia.originafrika.online" className="hover:text-foreground transition">
+          <a
+            href="mailto:contact@cortexia.originafrika.online"
+            className="hover:text-foreground transition"
+          >
             {t("footer.contact")}
           </a>
           <a

@@ -12,7 +12,15 @@ type HistoryGridProps = {
   onSelect: (id: string) => void;
 };
 
-function HistoryItem({ item, isActive, onSelect }: { item: Result; isActive: boolean; onSelect: () => void }) {
+function HistoryItem({
+  item,
+  isActive,
+  onSelect,
+}: {
+  item: Result;
+  isActive: boolean;
+  onSelect: (id: string) => void;
+}) {
   const t = useT();
   const [imgUrl, setImgUrl] = useState(item.resultUrl ?? "");
 
@@ -22,7 +30,9 @@ function HistoryItem({ item, isActive, onSelect }: { item: Result; isActive: boo
     fetchProxiedImage(item.resultUrl).then((url) => {
       if (!cancelled) setImgUrl(url);
     });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [item.resultUrl]);
 
   const hasMedia = !!item.resultUrl;
@@ -34,9 +44,7 @@ function HistoryItem({ item, isActive, onSelect }: { item: Result; isActive: boo
       className={cn(
         "group relative rounded-xl overflow-hidden border text-left transition",
         "aspect-square",
-        isActive
-          ? "border-amber ring-2 ring-amber/30"
-          : "border-border hover:border-amber/40",
+        isActive ? "border-amber ring-2 ring-amber/30" : "border-border hover:border-amber/40",
       )}
       style={
         hasMedia
@@ -45,12 +53,7 @@ function HistoryItem({ item, isActive, onSelect }: { item: Result; isActive: boo
       }
     >
       {hasMedia && (
-        <img
-          src={imgUrl}
-          alt={item.prompt}
-          loading="lazy"
-          className="w-full h-full object-cover"
-        />
+        <img src={imgUrl} alt={item.prompt} loading="lazy" className="w-full h-full object-cover" />
       )}
       {!hasMedia && hasText && (
         <div className="absolute inset-0 flex flex-col p-3 overflow-hidden">
