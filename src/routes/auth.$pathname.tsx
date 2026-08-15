@@ -143,7 +143,18 @@ function Auth() {
     reset();
     setLoading(true);
     try {
-      const { data, error } = await authClient.emailOtp.verifyEmail({ email, otp: code });
+      const emailOtpClient = authClient as typeof authClient & {
+        emailOtp?: {
+          verifyEmail: (input: { email: string; otp: string }) => Promise<{
+            data: unknown;
+            error: unknown;
+          }>;
+        };
+      };
+      if (!emailOtpClient.emailOtp?.verifyEmail) {
+        throw new Error("Email verification is not available");
+      }
+      const { data, error } = await emailOtpClient.emailOtp.verifyEmail({ email, otp: code });
       if (error) throw error;
 
       // Always re-sign in after OTP verification to get a proper session token.

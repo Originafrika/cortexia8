@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PriceDisplay } from "@/components/price-display";
 import { CurrencyPicker } from "@/components/currency-picker";
 import { CreditCard, Smartphone, Bitcoin, Wallet, Check, Loader2, LogOut } from "lucide-react";
@@ -393,8 +393,19 @@ function AccountPage() {
 }
 
 // ---------------------------------------------------------------------------
-// FedaPay wrapper (lazy-loads the button to avoid SSR issues)
+// FedaPay Checkout.js button
 // ---------------------------------------------------------------------------
+
+type FedaPayCheckout = {
+  DIALOG_DISMISSED?: string;
+  init: (element: HTMLButtonElement, options: Record<string, unknown>) => void;
+};
+
+declare global {
+  interface Window {
+    FedaPay?: FedaPayCheckout;
+  }
+}
 
 function FedaPayWidget({
   amount,
@@ -410,7 +421,8 @@ function FedaPayWidget({
   onCancel?: () => void;
 }) {
   const t = useT();
-  const [FedaCheckoutButton, setFedaCheckoutButton] = useState<any>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [checkoutReady, setCheckoutReady] = useState(false);
   const [transactionId, setTransactionId] = useState<string | null>(null);
   const [paymentError, setPaymentError] = useState<string | null>(null);
 
@@ -441,34 +453,23 @@ function FedaPayWidget({
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-
-    if (!document.querySelector('script[src*="cdn.fedapay.com/checkout.js"]')) {
-      const script = document.createElement("script");
-      script.src = "https://cdn.fedapay.com/checkout.js?v=1.1.7";
-      script.async = true;
-      script.onload = () => {
-        import("fedapay-reactjs").then((mod) => {
-          setFedaCheckoutButton(() => mod.FedaCheckoutButton);
-        });
-      };
-      document.body.appendChild(script);
-      script.onerror = (e) => {
-        console.error("[Browser] Failed to load FedaPay SDK:", e);
-      };
-    } else {
-      import("fedapay-reactjs").then((mod) => {
-        setFedaCheckoutButton(() => mod.FedaCheckoutButton);
-      });
+    const markReady = () => {
+      if (window.FedaPay) setCheckoutReady(true);
+    };
+    const existingScript = document.querySelector('script[src*="cdn.fedapay.com/checkout.js"]');
+    if (existingScript) {
+      markReady();
+      return;
     }
+    const script = document.createElement("script");
+    script.src = "https://cdn.fedapay.com/checkout.js?v=1.1.7";
+    script.async = true;
+    script.onload = markReady;
+    script.onerror = () => setPaymentError("Unable to load FedaPay Checkout");
+    document.body.appendChild(script);
   }, []);
 
-  if (
-    !FedaCheckoutButton ||
-    typeof window === "undefined" ||
-    !(window as any).FedaPay ||
-    !transactionId ||
-    paymentError
-  ) {
+  if (!checkoutReady || !window.FedaPay || !transactionId || paymentError) {
     return (
       <button
         disabled
@@ -480,36 +481,38 @@ function FedaPayWidget({
     );
   }
 
-  const options = {
-    public_key,
-    transaction: {
-      id: Number(transactionId),
-      amount: Math.round(amount * CURRENCIES.XOF.rate),
-      description: t("account.fedapay_description"),
-    },
-    currency: {
-      iso: "XOF" as const,
-    },
-    button: {
-      class:
-        "mt-5 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber px-5 py-3 text-sm font-medium text-primary-foreground hover:opacity-95 transition",
-      text: t("account.recharge_btn").replace("{amount}", formatMoney(amount, currency)),
-    },
+  const handleCheckout = () => {
+    if (!buttonRef.current || !window.FedaPay || !transactionId) return;
+    let processed = false;
+    window.FedaPay.init(buttonRef.current, {
+      public_key,
+      transaction: {
+        id: Number(transactionId),
+        amount: Math.round(amount * CURRENCIES.XOF.rate),
+        description: t("account.fedapay_description"),
+      },
+      currency: { iso: "XOF" },
+      onComplete: (resp: { reason?: string }) => {
+        if (resp.reason === window.FedaPay?.DIALOG_DISMISSED) {
+          onCancel?.();
+          return;
+        }
+        if (!processed) {
+          processed = true;
+          onComplete(transactionId);
+        }
+      },
+    });
   };
 
-  let processed = false;
-  const handleComplete = (resp: { reason?: string; transaction?: { id?: number } }) => {
-    const FedaPay = (window as any).FedaPay;
-    if (FedaPay && resp.reason === FedaPay.DIALOG_DISMISSED) {
-      onCancel?.();
-      return;
-    }
-    if (transactionId) {
-      if (processed) return;
-      processed = true;
-      onComplete(transactionId);
-    }
-  };
-
-  return <FedaCheckoutButton options={{ ...options, onComplete: handleComplete } as any} />;
+  return (
+    <button
+      ref={buttonRef}
+      type="button"
+      onClick={handleCheckout}
+      className="mt-5 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber px-5 py-3 text-sm font-medium text-primary-foreground hover:opacity-95 transition"
+    >
+      {t("account.recharge_btn").replace("{amount}", formatMoney(amount, currency))}
+    </button>
+  );
 }

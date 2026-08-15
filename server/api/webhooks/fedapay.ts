@@ -1,4 +1,4 @@
-import { Webhook } from "fedapay";
+import { verifyFedaPayWebhookSignature } from "@/lib/fedapay-webhook";
 import { defineEventHandler, getHeader, readRawBody, setResponseStatus } from "h3";
 import { sql } from "@/lib/db";
 import { getBalance, recordTransaction } from "@/lib/credits";
@@ -20,14 +20,16 @@ export default defineEventHandler(async (event) => {
     return { received: false };
   }
 
+  if (!verifyFedaPayWebhookSignature(rawBody, signature, secret)) {
+    console.error("[FedaPay webhook] signature verification failed");
+    setResponseStatus(event, 400);
+    return { received: false };
+  }
+
   let webhookEvent: Record<string, unknown>;
   try {
-    webhookEvent = Webhook.constructEvent(rawBody, signature, secret) as Record<string, unknown>;
-  } catch (error) {
-    console.error(
-      "[FedaPay webhook] signature verification failed",
-      error instanceof Error ? error.message : String(error),
-    );
+    webhookEvent = JSON.parse(rawBody) as Record<string, unknown>;
+  } catch {
     setResponseStatus(event, 400);
     return { received: false };
   }
