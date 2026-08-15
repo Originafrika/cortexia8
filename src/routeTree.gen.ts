@@ -9,36 +9,26 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as RunMigrationRouteImport } from './routes/run-migration'
-import { Route as AppPreviewRouteImport } from './routes/app-preview'
-import { Route as AppRouteImport } from './routes/app'
-import { Route as AccessDeniedRouteImport } from './routes/access-denied'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as CanvasIndexRouteImport } from './routes/canvas/index'
-import { Route as AppIndexRouteImport } from './routes/app.index'
-import { Route as RCodeRouteImport } from './routes/r.$code'
-import { Route as AuthPathnameRouteImport } from './routes/auth.$pathname'
-import { Route as AppWorkflowsRouteImport } from './routes/app.workflows'
-import { Route as AppModelsRouteImport } from './routes/app.models'
-import { Route as AppHistoryRouteImport } from './routes/app.history'
-import { Route as AppDevelopersRouteImport } from './routes/app.developers'
-import { Route as AppAccountRouteImport } from './routes/app.account'
+import { Route as AccessDeniedRouteImport } from './routes/access-denied'
+import { Route as AppRouteImport } from './routes/app'
+import { Route as AppPreviewRouteImport } from './routes/app-preview'
+import { Route as RunMigrationRouteImport } from './routes/run-migration'
 import { Route as AccountPathnameRouteImport } from './routes/account.$pathname'
+import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppAccountRouteImport } from './routes/app.account'
+import { Route as AppDevelopersRouteImport } from './routes/app.developers'
+import { Route as AppHistoryRouteImport } from './routes/app.history'
+import { Route as AppModelsRouteImport } from './routes/app.models'
+import { Route as AppWorkflowsRouteImport } from './routes/app.workflows'
+import { Route as AuthPathnameRouteImport } from './routes/auth.$pathname'
+import { Route as CanvasIndexRouteImport } from './routes/canvas/index'
+import { Route as RCodeRouteImport } from './routes/r.$code'
 import { Route as AppModelsSlugRouteImport } from './routes/app.models.$slug'
 
-const RunMigrationRoute = RunMigrationRouteImport.update({
-  id: '/run-migration',
-  path: '/run-migration',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppPreviewRoute = AppPreviewRouteImport.update({
-  id: '/app-preview',
-  path: '/app-preview',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppRoute = AppRouteImport.update({
-  id: '/app',
-  path: '/app',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AccessDeniedRoute = AccessDeniedRouteImport.update({
@@ -46,14 +36,24 @@ const AccessDeniedRoute = AccessDeniedRouteImport.update({
   path: '/access-denied',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CanvasIndexRoute = CanvasIndexRouteImport.update({
-  id: '/canvas/',
-  path: '/canvas/',
+const AppPreviewRoute = AppPreviewRouteImport.update({
+  id: '/app-preview',
+  path: '/app-preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RunMigrationRoute = RunMigrationRouteImport.update({
+  id: '/run-migration',
+  path: '/run-migration',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountPathnameRoute = AccountPathnameRouteImport.update({
+  id: '/account/$pathname',
+  path: '/account/$pathname',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppIndexRoute = AppIndexRouteImport.update({
@@ -61,29 +61,9 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
-const RCodeRoute = RCodeRouteImport.update({
-  id: '/r/$code',
-  path: '/r/$code',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthPathnameRoute = AuthPathnameRouteImport.update({
-  id: '/auth/$pathname',
-  path: '/auth/$pathname',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppWorkflowsRoute = AppWorkflowsRouteImport.update({
-  id: '/workflows',
-  path: '/workflows',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppModelsRoute = AppModelsRouteImport.update({
-  id: '/models',
-  path: '/models',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppHistoryRoute = AppHistoryRouteImport.update({
-  id: '/history',
-  path: '/history',
+const AppAccountRoute = AppAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
   getParentRoute: () => AppRoute,
 } as any)
 const AppDevelopersRoute = AppDevelopersRouteImport.update({
@@ -91,14 +71,34 @@ const AppDevelopersRoute = AppDevelopersRouteImport.update({
   path: '/developers',
   getParentRoute: () => AppRoute,
 } as any)
-const AppAccountRoute = AppAccountRouteImport.update({
-  id: '/account',
-  path: '/account',
+const AppHistoryRoute = AppHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
   getParentRoute: () => AppRoute,
 } as any)
-const AccountPathnameRoute = AccountPathnameRouteImport.update({
-  id: '/account/$pathname',
-  path: '/account/$pathname',
+const AppModelsRoute = AppModelsRouteImport.update({
+  id: '/models',
+  path: '/models',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppWorkflowsRoute = AppWorkflowsRouteImport.update({
+  id: '/workflows',
+  path: '/workflows',
+  getParentRoute: () => AppRoute,
+} as any)
+const AuthPathnameRoute = AuthPathnameRouteImport.update({
+  id: '/auth/$pathname',
+  path: '/auth/$pathname',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CanvasIndexRoute = CanvasIndexRouteImport.update({
+  id: '/canvas/',
+  path: '/canvas/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RCodeRoute = RCodeRouteImport.update({
+  id: '/r/$code',
+  path: '/r/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppModelsSlugRoute = AppModelsSlugRouteImport.update({
@@ -231,25 +231,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/run-migration': {
-      id: '/run-migration'
-      path: '/run-migration'
-      fullPath: '/run-migration'
-      preLoaderRoute: typeof RunMigrationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/app-preview': {
-      id: '/app-preview'
-      path: '/app-preview'
-      fullPath: '/app-preview'
-      preLoaderRoute: typeof AppPreviewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/app': {
-      id: '/app'
-      path: '/app'
-      fullPath: '/app'
-      preLoaderRoute: typeof AppRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/access-denied': {
@@ -259,18 +245,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccessDeniedRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/canvas/': {
-      id: '/canvas/'
-      path: '/canvas'
-      fullPath: '/canvas/'
-      preLoaderRoute: typeof CanvasIndexRouteImport
+    '/app-preview': {
+      id: '/app-preview'
+      path: '/app-preview'
+      fullPath: '/app-preview'
+      preLoaderRoute: typeof AppPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/run-migration': {
+      id: '/run-migration'
+      path: '/run-migration'
+      fullPath: '/run-migration'
+      preLoaderRoute: typeof RunMigrationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account/$pathname': {
+      id: '/account/$pathname'
+      path: '/account/$pathname'
+      fullPath: '/account/$pathname'
+      preLoaderRoute: typeof AccountPathnameRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/': {
@@ -280,39 +280,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
-    '/r/$code': {
-      id: '/r/$code'
-      path: '/r/$code'
-      fullPath: '/r/$code'
-      preLoaderRoute: typeof RCodeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/$pathname': {
-      id: '/auth/$pathname'
-      path: '/auth/$pathname'
-      fullPath: '/auth/$pathname'
-      preLoaderRoute: typeof AuthPathnameRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/app/workflows': {
-      id: '/app/workflows'
-      path: '/workflows'
-      fullPath: '/app/workflows'
-      preLoaderRoute: typeof AppWorkflowsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/models': {
-      id: '/app/models'
-      path: '/models'
-      fullPath: '/app/models'
-      preLoaderRoute: typeof AppModelsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/history': {
-      id: '/app/history'
-      path: '/history'
-      fullPath: '/app/history'
-      preLoaderRoute: typeof AppHistoryRouteImport
+    '/app/account': {
+      id: '/app/account'
+      path: '/account'
+      fullPath: '/app/account'
+      preLoaderRoute: typeof AppAccountRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/developers': {
@@ -322,18 +294,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDevelopersRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/account': {
-      id: '/app/account'
-      path: '/account'
-      fullPath: '/app/account'
-      preLoaderRoute: typeof AppAccountRouteImport
+    '/app/history': {
+      id: '/app/history'
+      path: '/history'
+      fullPath: '/app/history'
+      preLoaderRoute: typeof AppHistoryRouteImport
       parentRoute: typeof AppRoute
     }
-    '/account/$pathname': {
-      id: '/account/$pathname'
-      path: '/account/$pathname'
-      fullPath: '/account/$pathname'
-      preLoaderRoute: typeof AccountPathnameRouteImport
+    '/app/models': {
+      id: '/app/models'
+      path: '/models'
+      fullPath: '/app/models'
+      preLoaderRoute: typeof AppModelsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/workflows': {
+      id: '/app/workflows'
+      path: '/workflows'
+      fullPath: '/app/workflows'
+      preLoaderRoute: typeof AppWorkflowsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/auth/$pathname': {
+      id: '/auth/$pathname'
+      path: '/auth/$pathname'
+      fullPath: '/auth/$pathname'
+      preLoaderRoute: typeof AuthPathnameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/canvas/': {
+      id: '/canvas/'
+      path: '/canvas'
+      fullPath: '/canvas/'
+      preLoaderRoute: typeof CanvasIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/r/$code': {
+      id: '/r/$code'
+      path: '/r/$code'
+      fullPath: '/r/$code'
+      preLoaderRoute: typeof RCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/models/$slug': {
