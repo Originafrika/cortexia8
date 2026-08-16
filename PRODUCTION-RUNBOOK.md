@@ -28,16 +28,19 @@ The repository’s full ESLint command currently includes a pre-existing formatt
 | `VITE_FEDAPAY_PUBLIC_KEY` | Yes for mobile money UI | Browser Checkout.js public key |
 | `STRIPE_SECRET_KEY` | Yes for card checkout | Server-side Stripe API credential |
 | `STRIPE_WEBHOOK_SECRET` | Yes for card checkout | Stripe endpoint signing secret |
-| `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`, `R2_PUBLIC_BASE_URL` | Yes for durable assets | Cloudflare R2 storage configuration |
+| `R2_ENDPOINT`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_REGION`, `R2_PUBLIC_BASE_URL` | Yes for durable assets | Cloudflare R2 S3-compatible storage configuration; these names match `src/lib/storage/r2.ts` |
 | `RESEND_API_KEY` | Optional | Transactional email delivery for launch-day flows |
+| `VITE_LAUNCH_MODE` | Optional | Set to `live` or omit for live behavior; set to `waitlist` only for an intentional waitlist deployment |
 
 Do not commit any value for these variables. Store them in the production deployment provider and keep sandbox and live provider credentials separate.
 
 ## Database migration order
 
-Apply migrations through `0019` in their existing order, then apply `0020_harden_payment_transactions.sql`. The new migration backfills `external_reference` for existing payment rows, adds provider event and status fields, and creates uniqueness constraints for payment reconciliation. Take a database backup and run the migration against staging before production.
+Do not use the public `/run-migration` route: it is a legacy GET server function that mutates the database and is not the production migration mechanism. Confirm the production database is already at migration `0019`, take a backup or Neon branch, run the preflight duplicate checks, and apply `0020_harden_payment_transactions.sql` atomically with `psql --single-transaction --set ON_ERROR_STOP=1 --file drizzle/0020_harden_payment_transactions.sql` or the Neon SQL Editor. Run the same process against staging first. The migration backfills `external_reference`, adds provider event/status and metadata fields, and creates unique reconciliation indexes. The complete operator sequence is in `LIVE-CUTOVER-CHECKLIST.md`.
 
 ## Provider callback endpoints
+
+Register only the HTTPS endpoints below in the live provider dashboards. KIE.ai and FedaPay callbacks must use their live signing secrets; Stripe must use the live endpoint signing secret. Unsigned callbacks must never credit accounts.
 
 Configure the following HTTPS endpoints in the provider dashboards:
 
