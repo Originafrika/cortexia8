@@ -4,7 +4,7 @@
 
 This checklist applies to the production Cortexia8 repository at commit `d4a95f8267e8ecf4c18246755a33e8ee6282c15f` on `main`. The deployment is a Vercel-targeted TanStack Start build using `vite build` and the Nitro Vercel preset.
 
-Do not use `/run-migration` for production. It is a public GET server function that mutates schema and predates the checked-in migration chain. Database changes must be executed by an authenticated operator through the database provider or a controlled migration runner.
+The public `/run-migration` route and its schema-mutating server function have been removed from the production route tree. Do not reintroduce it or any application GET endpoint that mutates schema. Database changes must be executed by an authenticated operator through the database provider or a controlled migration runner.
 
 ## 1. Preflight and backup
 
@@ -93,28 +93,28 @@ Expected result: all five columns exist, `missing_external_references` is zero, 
 
 Configure these in the Vercel **Production** environment. Set the same names in staging with sandbox/test values where applicable. Never expose server secrets through `VITE_*` variables and never commit values in `.env` files.
 
-| Variable | Required for | Exact source usage and value |
-| --- | --- | --- |
-| `APP_URL` | All production callbacks and redirects | Canonical HTTPS origin, for example `https://cortexia.originafrika.online`; used to build KIE callback URLs and payment return URLs. |
-| `DATABASE_URL` | All server/database operations | Neon Postgres connection string for the production database. |
-| `VITE_NEON_AUTH_URL` | Browser authentication | Neon Auth endpoint URL; safe to expose because it is a public client endpoint, not a secret. |
-| `KIE_API_KEY` | AI generation, agent, upload, and model calls | Live KIE.ai API key; server-only. |
-| `KIE_API_BASE` | Optional KIE endpoint override | Use only if the live provider base differs from the code default `https://api.kie.ai`. |
-| `KIE_WEBHOOK_HMAC_KEY` | KIE callbacks | Live KIE webhook HMAC key from the provider settings; server-only. |
-| `FEDAPAY_SECRET_KEY` | Mobile-money payments | Live FedaPay API secret; server-only. |
-| `FEDAPAY_WEBHOOK_SECRET` | FedaPay callbacks | Live endpoint secret for `/api/webhooks/fedapay`; unique to the live endpoint. |
-| `FEDAPAY_XOF_PER_USD` | Mobile-money pricing | Deliberately approved server-side XOF-per-USD rate. Do not rely on the code default without product/finance approval. |
-| `VITE_FEDAPAY_PUBLIC_KEY` | FedaPay browser Checkout.js | Live FedaPay public key; browser-visible by design, but it must match the live account/mode. |
-| `STRIPE_SECRET_KEY` | Card checkout | Live Stripe secret key; server-only. |
-| `STRIPE_WEBHOOK_SECRET` | Stripe callbacks | Live Stripe endpoint signing secret for `/api/webhooks/stripe`; server-only. |
-| `R2_ENDPOINT` | Durable asset storage | Cloudflare R2 S3-compatible endpoint. |
-| `R2_ACCESS_KEY_ID` | Durable asset storage | R2 access key ID; server-only. |
-| `R2_SECRET_ACCESS_KEY` | Durable asset storage | R2 secret access key; server-only. |
-| `R2_BUCKET` | Durable asset storage | Exact R2 bucket name. |
-| `R2_REGION` | Durable asset storage | Usually `auto` for Cloudflare R2 unless the account requires another region. |
-| `R2_PUBLIC_BASE_URL` | Durable asset serving | Public HTTPS base URL for stored assets. |
-| `RESEND_API_KEY` | Optional launch/transactional email | Server-only key; required only if launch-day email flows are enabled. |
-| `VITE_LAUNCH_MODE` | Optional launch gating | Set to `live` or omit for live behavior. Set to `waitlist` only for a deliberate waitlist deployment. |
+| Variable                  | Required for                                  | Exact source usage and value                                                                                                         |
+| ------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `APP_URL`                 | All production callbacks and redirects        | Canonical HTTPS origin, for example `https://cortexia.originafrika.online`; used to build KIE callback URLs and payment return URLs. |
+| `DATABASE_URL`            | All server/database operations                | Neon Postgres connection string for the production database.                                                                         |
+| `VITE_NEON_AUTH_URL`      | Browser authentication                        | Neon Auth endpoint URL; safe to expose because it is a public client endpoint, not a secret.                                         |
+| `KIE_API_KEY`             | AI generation, agent, upload, and model calls | Live KIE.ai API key; server-only.                                                                                                    |
+| `KIE_API_BASE`            | Optional KIE endpoint override                | Use only if the live provider base differs from the code default `https://api.kie.ai`.                                               |
+| `KIE_WEBHOOK_HMAC_KEY`    | KIE callbacks                                 | Live KIE webhook HMAC key from the provider settings; server-only.                                                                   |
+| `FEDAPAY_SECRET_KEY`      | Mobile-money payments                         | Live FedaPay API secret; server-only.                                                                                                |
+| `FEDAPAY_WEBHOOK_SECRET`  | FedaPay callbacks                             | Live endpoint secret for `/api/webhooks/fedapay`; unique to the live endpoint.                                                       |
+| `FEDAPAY_XOF_PER_USD`     | Mobile-money pricing                          | Deliberately approved server-side XOF-per-USD rate. Do not rely on the code default without product/finance approval.                |
+| `VITE_FEDAPAY_PUBLIC_KEY` | FedaPay browser Checkout.js                   | Live FedaPay public key; browser-visible by design, but it must match the live account/mode.                                         |
+| `STRIPE_SECRET_KEY`       | Card checkout                                 | Live Stripe secret key; server-only.                                                                                                 |
+| `STRIPE_WEBHOOK_SECRET`   | Stripe callbacks                              | Live Stripe endpoint signing secret for `/api/webhooks/stripe`; server-only.                                                         |
+| `R2_ENDPOINT`             | Durable asset storage                         | Cloudflare R2 S3-compatible endpoint.                                                                                                |
+| `R2_ACCESS_KEY_ID`        | Durable asset storage                         | R2 access key ID; server-only.                                                                                                       |
+| `R2_SECRET_ACCESS_KEY`    | Durable asset storage                         | R2 secret access key; server-only.                                                                                                   |
+| `R2_BUCKET`               | Durable asset storage                         | Exact R2 bucket name.                                                                                                                |
+| `R2_REGION`               | Durable asset storage                         | Usually `auto` for Cloudflare R2 unless the account requires another region.                                                         |
+| `R2_PUBLIC_BASE_URL`      | Durable asset serving                         | Public HTTPS base URL for stored assets.                                                                                             |
+| `RESEND_API_KEY`          | Optional launch/transactional email           | Server-only key; required only if launch-day email flows are enabled.                                                                |
+| `VITE_LAUNCH_MODE`        | Optional launch gating                        | Set to `live` or omit for live behavior. Set to `waitlist` only for a deliberate waitlist deployment.                                |
 
 `VERCEL_URL` and `NODE_ENV` are platform/runtime values and should not be manually supplied unless the deployment platform requires them. `CORTEXIA_KEY` appears only inside displayed developer-code examples and is not required as a server deployment secret; real users should create API keys through the developer portal.
 
@@ -122,11 +122,11 @@ Configure these in the Vercel **Production** environment. Set the same names in 
 
 Register these exact HTTPS URLs in the live provider dashboards:
 
-| Provider | Live callback URL | Required event/verification setup |
-| --- | --- | --- |
-| KIE.ai | `https://cortexia.originafrika.online/api/webhooks/kie` | Enable the provider webhook HMAC key; configure `X-Webhook-Timestamp` and `X-Webhook-Signature` verification. |
-| FedaPay | `https://cortexia.originafrika.online/api/webhooks/fedapay` | Use the live endpoint secret and `X-FEDAPAY-SIGNATURE`; enable transaction approval, decline, cancellation, refund, and update events needed for reconciliation. |
-| Stripe | `https://cortexia.originafrika.online/api/webhooks/stripe` | Use the live `Stripe-Signature` endpoint secret; subscribe at minimum to the checkout completion event used by the handler. |
+| Provider | Live callback URL                                           | Required event/verification setup                                                                                                                                |
+| -------- | ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| KIE.ai   | `https://cortexia.originafrika.online/api/webhooks/kie`     | Enable the provider webhook HMAC key; configure `X-Webhook-Timestamp` and `X-Webhook-Signature` verification.                                                    |
+| FedaPay  | `https://cortexia.originafrika.online/api/webhooks/fedapay` | Use the live endpoint secret and `X-FEDAPAY-SIGNATURE`; enable transaction approval, decline, cancellation, refund, and update events needed for reconciliation. |
+| Stripe   | `https://cortexia.originafrika.online/api/webhooks/stripe`  | Use the live `Stripe-Signature` endpoint secret; subscribe at minimum to the checkout completion event used by the handler.                                      |
 
 Provider documentation recommends HTTPS endpoints, raw-body signature verification, idempotent duplicate handling, and fast 2xx responses. See the official references in `cortexia-cutover-provider-findings.md`.
 
