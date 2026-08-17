@@ -14,29 +14,31 @@ export const Route = createFileRoute("/access-denied")({
       { name: "robots", content: "noindex" },
     ],
   }),
-  component: () => {
-    const navigate = useNavigate();
-    const t = useT();
-    return (
-      <div className="min-h-screen grid place-items-center">
-        <div className="text-center max-w-md">
-          <h1 className="text-3xl font-semibold">{t("access_denied.title")}</h1>
-          <p className="text-muted-foreground mt-3">{t("access_denied.body")}</p>
-          <button
-            onClick={async () => {
-              await authClient.signOut();
-              clearSession();
-              navigate({
-                to: "/auth/$pathname" as const,
-                params: { pathname: "sign-in" },
-              });
-            }}
-            className="mt-6 underline text-sm"
-          >
-            {t("access_denied.signout")}
-          </button>
-        </div>
-      </div>
-    );
-  },
+  component: AccessDenied,
 });
+
+function AccessDenied() {
+  const navigate = useNavigate();
+  const t = useT();
+  return (
+    <div className="min-h-screen grid place-items-center">
+      <div className="text-center max-w-md">
+        <h1 className="text-3xl font-semibold">{t("access_denied.title")}</h1>
+        <p className="text-muted-foreground mt-3">{t("access_denied.body")}</p>
+        <button
+          onClick={async () => {
+            await authClient.signOut();
+            clearSession();
+            navigate({
+              to: "/auth/$pathname" as const,
+              params: { pathname: "sign-in" },
+            });
+          }}
+          className="mt-6 underline text-sm"
+        >
+          {t("access_denied.signout")}
+        </button>
+      </div>
+    </div>
+  );
+}

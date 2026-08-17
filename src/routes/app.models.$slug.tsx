@@ -153,6 +153,11 @@ export function ModelPlaygroundContent({
     );
   }
 
+  return <ModelPlaygroundStateful model={model} isModal={isModal} />;
+}
+
+function ModelPlaygroundStateful({ model, isModal = false }: { model: Model; isModal?: boolean }) {
+  const t = useT();
   const [prompt, setPrompt] = useState("");
   const [state, setState] = useState<Record<string, unknown>>(() => initState(model));
 
@@ -226,7 +231,7 @@ export function ModelPlaygroundContent({
       }
     }
     return true;
-  }, [model.params, prompt, state]);
+  }, [model.params, model.category, prompt, state]);
 
   const iconParams = model.params.filter((p) => {
     // Exclude main prompt (goes in textarea)
@@ -354,7 +359,7 @@ export function ModelPlaygroundContent({
     } else {
       // Non-text models: existing behavior
       const promptParam = model.params.find((p) => p.kind === "prompt" || p.kind === "longtext");
-      const promptKey = promptParam && "key" in promptParam ? (promptParam as any).key : "prompt";
+      const promptKey = promptParam?.key ?? "prompt";
       if (prompt.trim()) input[promptKey] = prompt.trim();
     }
 
