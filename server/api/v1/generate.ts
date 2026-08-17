@@ -7,10 +7,11 @@
 import { defineEventHandler, getHeader, readBody, setResponseStatus } from "h3";
 import { sql } from "@/lib/db";
 import { createTask, buildCallbackUrl } from "@/lib/kie-api/client";
-import { getActiveModelBySlug } from "@/lib/api/shared";
+import { getActiveModelBySlug, nodeCostUsd, resolveUploads } from "../../../src/lib/api/shared";
 import { ensureSufficientCredits, recordTransaction, refundGeneration } from "@/lib/credits";
 import { sha256Hex } from "../../../src/lib/utils/crypto";
 import { errorContext, logger } from "../../../src/lib/logger";
+import { capabilityForCategory, isCapabilityEnabled } from "../../../src/lib/capabilities";
 import {
   checkRateLimit,
   getRemainingRequests,
@@ -42,6 +43,10 @@ export default defineEventHandler(async (event) => {
       return { error: "Invalid or inactive API key" };
     }
     userId = keyRows[0].user_id;
+    if (!isCapabilityEnabled("developers")) {
+      setResponseStatus(event, 503);
+      return { error: "Developer API is not enabled" };
+    }
 
     const rlKey = `api:generate:${userId}`;
     if (!checkRateLimit(rlKey, RATE_LIMITS.generation)) {
@@ -76,8 +81,26 @@ export default defineEventHandler(async (event) => {
       setResponseStatus(event, 404);
       return { error: `Model '${modelSlug}' not found or inactive` };
     }
-    const cost = Number(model.cortexia_price_usd ?? 0);
-    if (!Number.isFinite(cost) || cost <= 0) {
+    const requiredCapability = capabilityForCategory(model.category);
+    if (requiredCapability && !isCapabilityEnabled(requiredCapability)) {
+      setResponseStatus(event, 503);
+      return { error: `${model.category} generation is not enabled` };
+    }
+
+    const suppliedInput =
+      body?.input && typeof body.input === "object"
+        ? { ...(body.input as Record<string, unknown>) }
+        : {};
+    suppliedInput.prompt = prompt;
+    if (resolution) suppliedInput.resolution = resolution;
+    if (typeof body?.duration === "number") suppliedInput.duration = body.duration;
+    if (typeof body?.max_tokens === "number") suppliedInput.max_tokens = body.max_tokens;
+    if (model.pricing_unit === "1k-chars" && typeof suppliedInput.text !== "string") {
+      suppliedInput.text = prompt;
+    }
+    const { resolved: input } = await resolveUploads(suppliedInput);
+    const cost = nodeCostUsd(model, input);
+    if (cost == null || !Number.isFinite(cost) || cost <= 0) {
       setResponseStatus(event, 503);
       return { error: "Model pricing is unavailable" };
     }
@@ -92,9 +115,6 @@ export default defineEventHandler(async (event) => {
         required: balance.required,
       };
     }
-
-    const input: Record<string, unknown> = { prompt };
-    if (resolution) input.resolution = resolution;
 
     const workflow = (await sql`
       INSERT INTO workflows (user_id, name, status)

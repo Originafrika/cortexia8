@@ -198,9 +198,17 @@ export function nodeCostUsd(model: ModelRow, input: Record<string, unknown>): nu
       const ks = Math.max(1, Math.ceil(text.length / 1000));
       return price * ks;
     }
-    case "1m-tokens-io":
-      // Cost depends on actual token usage, not known yet.
-      return null;
+    case "1m-tokens-io": {
+      // Reserve against the requested output budget. The chat response may use
+      // fewer tokens, but a bounded reservation prevents free text generation
+      // while keeping the estimate aligned with the catalogue's per-million rate.
+      const requested = Number(input.max_tokens ?? 4096);
+      const maxTokens =
+        Number.isFinite(requested) && requested > 0
+          ? Math.min(Math.ceil(requested), 1_000_000)
+          : 4096;
+      return price * (maxTokens / 1_000_000);
+    }
     default:
       return price;
   }
