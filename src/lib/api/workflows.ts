@@ -30,7 +30,7 @@ export const createWorkflow = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     try {
-      const ctx = await getRequestContext((data as any).sessionToken);
+      const ctx = await getRequestContext(data.sessionToken);
       const userId = await requireUserId(ctx);
       // CSRF: validate origin for state-changing endpoint.
       // NOTE: TanStack Start server functions do not expose raw request headers.
@@ -116,11 +116,14 @@ export const listWorkflows = createServerFn({ method: "GET" })
 // getWorkflow
 // ---------------------------------------------------------------------------
 
+export type JsonValue = string | number | boolean | null | JsonObject | JsonValue[];
+export type JsonObject = { [key: string]: JsonValue };
+
 export type WorkflowNode = {
   id: number;
   type: string;
   modelSlug: string;
-  config: Record<string, unknown>;
+  config: JsonObject;
   x: number;
   y: number;
   width: number;

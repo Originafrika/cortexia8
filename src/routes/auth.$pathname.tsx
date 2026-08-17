@@ -62,12 +62,11 @@ function Auth() {
         setStep("verify");
       } else if (data?.user) {
         saveSession({
-          token: (data as any).token ?? (data as any).session?.token ?? "",
           user: {
             id: data.user.id,
             name: data.user.name,
             email: data.user.email,
-            role: (data.user as any).role ?? "user",
+            role: "user",
             emailVerified: true,
           },
         });
@@ -96,19 +95,12 @@ function Auth() {
       });
       if (result.error) throw result.error;
       if (result.data?.user) {
-        const role = (result.data.user as any).role ?? "user";
-        const token = result.data.token ?? (result.data as any).session?.token ?? "";
-        console.log(
-          "[AUTH_DEBUG] saving session with token:",
-          token ? token.slice(0, 12) + "..." : "EMPTY",
-        );
         saveSession({
-          token,
           user: {
             id: result.data.user.id,
             name: result.data.user.name,
             email: result.data.user.email,
-            role,
+            role: "user",
             emailVerified: result.data.user.emailVerified ?? false,
           },
         });
@@ -162,21 +154,18 @@ function Auth() {
       if (password) {
         const signResult = await authClient.signIn.email({ email, password });
         if (!signResult.error && signResult.data?.user) {
-          const role = (signResult.data.user as any).role ?? "user";
           saveSession({
-            token: signResult.data.token,
             user: {
               id: signResult.data.user.id,
               name: signResult.data.user.name,
               email: signResult.data.user.email,
-              role,
+              role: "user",
               emailVerified: true,
             },
           });
           navigate({ to: "/app-preview" });
           return;
         }
-      } else {
       }
       // Fallback: if no password was stored, try to extract user info from verify response.
       const anyData = data as {

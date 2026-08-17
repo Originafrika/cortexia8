@@ -8,7 +8,9 @@
  */
 
 import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 import { sql } from "@/lib/db";
+import type { AgentResponse } from "@/lib/agent";
 import { getRequestContext, HttpError, requireUserId } from "./auth";
 
 // ---------------------------------------------------------------------------
@@ -52,11 +54,40 @@ export const createConversation = createServerFn({ method: "POST" })
 // saveMessage
 // ---------------------------------------------------------------------------
 
+const graphOperationSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("ADD_NODE"),
+    modelSlug: z.string(),
+    position: z.object({ x: z.number(), y: z.number() }).optional(),
+  }),
+  z.object({
+    type: z.literal("CONNECT_NODES"),
+    source: z.string(),
+    target: z.string(),
+  }),
+  z.object({
+    type: z.literal("UPDATE_NODE"),
+    nodeId: z.string(),
+    params: z.record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.null()])),
+  }),
+  z.object({
+    type: z.literal("REMOVE_NODE"),
+    nodeId: z.string(),
+  }),
+]);
+
+const agentResponseSchema: z.ZodType<AgentResponse> = z.object({
+  text: z.string(),
+  operations: z.array(graphOperationSchema),
+  estimatedCost: z.number(),
+  language: z.string(),
+});
+
 export type SaveMessageInput = {
   conversationId: number;
   role: "user" | "assistant";
   content: string;
-  proposedPlan?: any;
+  proposedPlan?: AgentResponse;
   sessionToken?: string;
 };
 
@@ -73,7 +104,10 @@ export const saveMessage = createServerFn({ method: "POST" })
       throw new HttpError(400, "role must be user or assistant");
     if (typeof data.content !== "string" || !data.content.trim())
       throw new HttpError(400, "content is required");
-    return data;
+    return {
+      ...data,
+      proposedPlan: data.proposedPlan ? agentResponseSchema.parse(data.proposedPlan) : undefined,
+    };
   })
   .handler(async ({ data }) => {
     try {
@@ -104,9 +138,9 @@ export type GetConversationInput = {
 
 export type AgentMessageRow = {
   id: number;
-  role: string;
+  role: "user" | "assistant";
   content: string;
-  proposedPlan: any;
+  proposedPlan: AgentResponse | null;
   createdAt: string;
 };
 

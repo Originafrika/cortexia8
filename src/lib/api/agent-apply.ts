@@ -75,7 +75,7 @@ export const applyAgentPlan = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     try {
       const result = await applyPlanImpl(data);
-      return result as any;
+      return result;
     } catch (err) {
       if (err instanceof HttpError) throw err;
       throw new HttpError(500, "Internal server error");

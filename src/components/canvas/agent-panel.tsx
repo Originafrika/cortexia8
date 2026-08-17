@@ -58,7 +58,7 @@ const STARTERS = [
 type ConversationMessage = {
   role: "user" | "assistant";
   content: string;
-  proposedPlan?: any;
+  proposedPlan?: AgentResponse;
 };
 
 export function AgentPanel({
@@ -124,13 +124,13 @@ export function AgentPanel({
     conversationLoadedRef.current = true;
 
     getConversationByWorkflow({ data: { workflowId, sessionToken: loadSession()?.token } })
-      .then((conv: any) => {
+      .then((conv) => {
         if (conv && conv.id) {
           conversationIdRef.current = conv.id;
-          conversationHistoryRef.current = conv.messages.map((m: any) => ({
-            role: m.role as "user" | "assistant",
+          conversationHistoryRef.current = conv.messages.map((m) => ({
+            role: m.role,
             content: m.content,
-            proposedPlan: m.proposedPlan,
+            proposedPlan: m.proposedPlan ?? undefined,
           }));
         }
       })
@@ -322,14 +322,14 @@ export function AgentPanel({
             conversationId: conversationIdRef.current,
             role: "assistant",
             content: response.text,
-            proposedPlan: response.operations.length > 0 ? (response as any) : undefined,
+            proposedPlan: response.operations.length > 0 ? response : undefined,
             sessionToken: loadSession()?.token,
           },
         });
         conversationHistoryRef.current.push({
           role: "assistant",
           content: response.text,
-          proposedPlan: response.operations.length > 0 ? (response as any) : undefined,
+          proposedPlan: response.operations.length > 0 ? response : undefined,
         });
       }
 

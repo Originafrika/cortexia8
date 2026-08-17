@@ -273,7 +273,7 @@ export function ParamEditor({ p, state, setState }: ParamEditorProps) {
         value={val}
         onChange={(e) => setState((s) => ({ ...s, [p.key]: e.target.value }))}
         rows={4}
-        placeholder={("placeholder" in p ? (p as any).placeholder : undefined) || ""}
+        placeholder={p.placeholder || ""}
         className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-xs font-mono outline-none focus-visible:ring-2 focus-visible:ring-amber/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background resize-none"
       />
     );
