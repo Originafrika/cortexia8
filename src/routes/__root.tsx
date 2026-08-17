@@ -18,7 +18,6 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { verifyActiveGens } from "../lib/app-store";
 
-
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -161,7 +160,9 @@ function HydrateStores() {
 }
 
 function RootShell({ children }: { children: ReactNode }) {
-  useEffect(() => { initTheme(); }, []);
+  useEffect(() => {
+    initTheme();
+  }, []);
   const lang = useLang();
 
   return (

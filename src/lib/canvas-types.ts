@@ -3,14 +3,7 @@ import type { Edge, Node } from "@xyflow/react";
 import { Image as ImageIcon, Film, Music2, MessageSquare } from "lucide-react";
 
 export type NodeStatus =
-  | "unconfigured"
-  | "idle"
-  | "ready"
-  | "running"
-  | "completed"
-  | "done"
-  | "error"
-  | "failed";
+  "unconfigured" | "idle" | "ready" | "running" | "completed" | "done" | "error" | "failed";
 
 export type PortType = "image" | "video" | "audio" | "text";
 

@@ -106,7 +106,7 @@ export function iconForParam(key: string, kind: ParamSpec["kind"]) {
   // Secondary text params (not the main prompt)
   if (key === "negative_prompt") return Ban;
   if (key === "lyrics" || key === "script" || key === "description") return MessageSquare;
-  
+
   // Other param types
   if (kind === "upload") return Upload;
   if (kind === "seed") return Dice5;
@@ -117,7 +117,6 @@ export function iconForParam(key: string, kind: ParamSpec["kind"]) {
   if (key === "audio" || key === "voice" || key === "lang") return Volume2;
   return SlidersHorizontal;
 }
-
 
 function ModelPlayground() {
   const { model } = Route.useLoaderData();
@@ -134,7 +133,8 @@ export function ModelPlaygroundContent({
   const t = useT();
 
   // Admin-only model categories
-  const adminOnly = model.category === "text" || model.category === "audio" || model.category === "music";
+  const adminOnly =
+    model.category === "text" || model.category === "audio" || model.category === "music";
   if (adminOnly && !isAdmin()) {
     return (
       <div className="grid place-items-center h-full">
@@ -142,7 +142,10 @@ export function ModelPlaygroundContent({
           <AlertTriangle className="mx-auto size-8 text-amber" />
           <h2 className="mt-4 font-display text-2xl">{t("playground.admin_only")}</h2>
           <p className="mt-2 text-sm text-muted-foreground">{t("playground.admin_only_desc")}</p>
-          <Link to="/app/models" className="mt-4 inline-block text-amber-soft hover:underline text-sm">
+          <Link
+            to="/app/models"
+            className="mt-4 inline-block text-amber-soft hover:underline text-sm"
+          >
             {t("playground.back")}
           </Link>
         </div>
@@ -199,15 +202,20 @@ export function ModelPlaygroundContent({
   const storeSetBalance = useAppStore((s) => s.setBalance);
 
   const currentPrice = useMemo(() => estimatePrice(model, state), [model, state]);
-  const hasPrompt = model.params.some((p) => 
-    (p.kind === "prompt") || (p.kind === "longtext" && (p.key === "prompt" || model.category === "text"))
+  const hasPrompt = model.params.some(
+    (p) =>
+      p.kind === "prompt" ||
+      (p.kind === "longtext" && (p.key === "prompt" || model.category === "text")),
   );
   const active = history.find((h) => h.id === activeId) ?? null;
 
   const canGenerate = useMemo(() => {
     for (const p of model.params) {
       if (!p.required) continue;
-      if (p.kind === "prompt" || (p.kind === "longtext" && (p.key === "prompt" || model.category === "text"))) {
+      if (
+        p.kind === "prompt" ||
+        (p.kind === "longtext" && (p.key === "prompt" || model.category === "text"))
+      ) {
         if (prompt.trim().length < 3) return false;
       } else if (p.kind === "upload") {
         const val = state[p.key ?? ""] ?? [];
@@ -275,7 +283,10 @@ export function ModelPlaygroundContent({
     const missingFields: string[] = [];
     for (const p of model.params) {
       if (!p.required) continue;
-      if (p.kind === "prompt" || (p.kind === "longtext" && (p.key === "prompt" || model.category === "text"))) {
+      if (
+        p.kind === "prompt" ||
+        (p.kind === "longtext" && (p.key === "prompt" || model.category === "text"))
+      ) {
         if (prompt.trim().length < 3) missingFields.push(p.label);
       } else if (p.kind === "upload") {
         const val = state[p.key ?? ""] ?? [];
@@ -287,28 +298,32 @@ export function ModelPlaygroundContent({
     }
     if (missingFields.length > 0) {
       const errGenId = `err_${crypto.randomUUID()}`;
-      setActiveGens(prev => new Map(prev).set(errGenId, {
-        id: errGenId,
-        status: "error",
-        progress: 0,
-        error: `${t("playground.missing_fields")} ${missingFields.join(", ")}`,
-        runId: null,
-        prompt: prompt.trim(),
-      }));
+      setActiveGens((prev) =>
+        new Map(prev).set(errGenId, {
+          id: errGenId,
+          status: "error",
+          progress: 0,
+          error: `${t("playground.missing_fields")} ${missingFields.join(", ")}`,
+          runId: null,
+          prompt: prompt.trim(),
+        }),
+      );
       return;
     }
 
     clearAllTimers();
 
     const genId = `gen_${crypto.randomUUID()}`;
-    setActiveGens(prev => new Map(prev).set(genId, {
-      id: genId,
-      status: "loading",
-      progress: 0,
-      error: null,
-      runId: null,
-      prompt: prompt.trim(),
-    }));
+    setActiveGens((prev) =>
+      new Map(prev).set(genId, {
+        id: genId,
+        status: "loading",
+        progress: 0,
+        error: null,
+        runId: null,
+        prompt: prompt.trim(),
+      }),
+    );
 
     const input: Record<string, unknown> = { ...state };
     // For text models in chat mode, build messages from conversation history
@@ -377,7 +392,7 @@ export function ModelPlaygroundContent({
 
         // Chat models return status "succeeded" with textContent — no polling needed.
         if (res.status === "succeeded" && res.textContent) {
-          setActiveGens(prev => {
+          setActiveGens((prev) => {
             const next = new Map(prev);
             next.delete(genId);
             return next;
@@ -388,7 +403,7 @@ export function ModelPlaygroundContent({
           return;
         }
 
-        setActiveGens(prev => {
+        setActiveGens((prev) => {
           const next = new Map(prev);
           const gen = next.get(genId);
           if (gen) next.set(genId, { ...gen, runId: res.runId, progress: 10 });
@@ -400,8 +415,10 @@ export function ModelPlaygroundContent({
         const poll = () => {
           pollCount++;
           if (pollCount > maxPolls) {
-            console.error(`[Generate] Timeout: genId=${genId}, runId=${res.runId}, model=${model.slug}, polls=${pollCount}`);
-            setActiveGens(prev => {
+            console.error(
+              `[Generate] Timeout: genId=${genId}, runId=${res.runId}, model=${model.slug}, polls=${pollCount}`,
+            );
+            setActiveGens((prev) => {
               const next = new Map(prev);
               const gen = next.get(genId);
               if (gen) next.set(genId, { ...gen, status: "error", error: t("playground.timeout") });
@@ -413,24 +430,36 @@ export function ModelPlaygroundContent({
             .then((statusRes) => {
               const node = statusRes.nodes[0];
               if (!node) return;
-              const pct = (statusRes.status === "success" || statusRes.status === "succeeded") ? 100 : Math.min(10 + pollCount, 95);
+              const pct =
+                statusRes.status === "success" || statusRes.status === "succeeded"
+                  ? 100
+                  : Math.min(10 + pollCount, 95);
 
-              setActiveGens(prev => {
+              setActiveGens((prev) => {
                 const next = new Map(prev);
                 const gen = next.get(genId);
                 if (gen) next.set(genId, { ...gen, progress: pct });
                 return next;
               });
 
-              if (statusRes.status === "success" || statusRes.status === "succeeded" || ((node.status === "success" || node.status === "succeeded") && (node.asset || node.textContent))) {
-                console.log(`[Generate] Success via poll: genId=${genId}, runId=${res.runId}, model=${model.slug}, status=${statusRes.status}, nodeStatus=${node.status}, hasAsset=${!!node.asset}, hasText=${!!node.textContent}`);
+              if (
+                statusRes.status === "success" ||
+                statusRes.status === "succeeded" ||
+                ((node.status === "success" || node.status === "succeeded") &&
+                  (node.asset || node.textContent))
+              ) {
+                console.log(
+                  `[Generate] Success via poll: genId=${genId}, runId=${res.runId}, model=${model.slug}, status=${statusRes.status}, nodeStatus=${node.status}, hasAsset=${!!node.asset}, hasText=${!!node.textContent}`,
+                );
                 const url = node.asset?.previewUrl || node.asset?.storageUrl || null;
                 setHistory((prev) =>
                   prev.map((r) =>
-                    r.id === newResult.id ? { ...r, resultUrl: url, textContent: node.textContent ?? r.textContent } : r,
+                    r.id === newResult.id
+                      ? { ...r, resultUrl: url, textContent: node.textContent ?? r.textContent }
+                      : r,
                   ),
                 );
-                setActiveGens(prev => {
+                setActiveGens((prev) => {
                   const next = new Map(prev);
                   next.delete(genId);
                   return next;
@@ -441,34 +470,63 @@ export function ModelPlaygroundContent({
                 return;
               }
 
-              if (statusRes.status === "error" || statusRes.status === "failed" || node.status === "error" || node.status === "failed") {
-                console.error(`[Generate] Task failed: genId=${genId}, runId=${res.runId}, model=${model.slug}, status=${statusRes.status}, nodeStatus=${node.status}, error=${node.errorMessage || "unknown"}, kieTaskId=${node.kieTaskId}`);
-                setActiveGens(prev => {
+              if (
+                statusRes.status === "error" ||
+                statusRes.status === "failed" ||
+                node.status === "error" ||
+                node.status === "failed"
+              ) {
+                console.error(
+                  `[Generate] Task failed: genId=${genId}, runId=${res.runId}, model=${model.slug}, status=${statusRes.status}, nodeStatus=${node.status}, error=${node.errorMessage || "unknown"}, kieTaskId=${node.kieTaskId}`,
+                );
+                setActiveGens((prev) => {
                   const next = new Map(prev);
                   const gen = next.get(genId);
-                  if (gen) next.set(genId, { ...gen, status: "error", error: node.errorMessage || t("playground.gen_error") });
+                  if (gen)
+                    next.set(genId, {
+                      ...gen,
+                      status: "error",
+                      error: node.errorMessage || t("playground.gen_error"),
+                    });
                   return next;
                 });
                 return;
               }
 
-              const genTimers = timersRef.current.get(genId) ?? []; genTimers.push(window.setTimeout(poll, 2000)); timersRef.current.set(genId, genTimers);
+              const genTimers = timersRef.current.get(genId) ?? [];
+              genTimers.push(window.setTimeout(poll, 2000));
+              timersRef.current.set(genId, genTimers);
             })
             .catch((pollErr) => {
-              console.error(`[Generate] Poll error: genId=${genId}, runId=${res.runId}, poll=${pollCount}, error=`, pollErr);
-              const genTimers = timersRef.current.get(genId) ?? []; genTimers.push(window.setTimeout(poll, 2000)); timersRef.current.set(genId, genTimers);
+              console.error(
+                `[Generate] Poll error: genId=${genId}, runId=${res.runId}, poll=${pollCount}, error=`,
+                pollErr,
+              );
+              const genTimers = timersRef.current.get(genId) ?? [];
+              genTimers.push(window.setTimeout(poll, 2000));
+              timersRef.current.set(genId, genTimers);
             });
         };
-        const genTimers = timersRef.current.get(genId) ?? []; genTimers.push(window.setTimeout(poll, 2000)); timersRef.current.set(genId, genTimers);
+        const genTimers = timersRef.current.get(genId) ?? [];
+        genTimers.push(window.setTimeout(poll, 2000));
+        timersRef.current.set(genId, genTimers);
       })
       .catch((err) => {
-        console.error(`[Generate] Failed: model=${model.slug}, prompt="${prompt.trim().slice(0, 80)}", error=`, err);
+        console.error(
+          `[Generate] Failed: model=${model.slug}, prompt="${prompt.trim().slice(0, 80)}", error=`,
+          err,
+        );
         if (err?.message) console.error(`[Generate] Error message: ${err.message}`);
         if (err?.stack) console.error(`[Generate] Stack: ${err.stack}`);
-        setActiveGens(prev => {
+        setActiveGens((prev) => {
           const next = new Map(prev);
           const gen = next.get(genId);
-          if (gen) next.set(genId, { ...gen, status: "error", error: err?.message || t("playground.gen_impossible") });
+          if (gen)
+            next.set(genId, {
+              ...gen,
+              status: "error",
+              error: err?.message || t("playground.gen_impossible"),
+            });
           return next;
         });
       });
@@ -478,10 +536,7 @@ export function ModelPlaygroundContent({
 
   return (
     <div
-      className={cn(
-        "flex flex-col",
-        isModal ? "h-[min(80dvh,720px)]" : "h-[calc(100dvh-3.5rem)]",
-      )}
+      className={cn("flex flex-col", isModal ? "h-[min(80dvh,720px)]" : "h-[calc(100dvh-3.5rem)]")}
     >
       {/* Top bar */}
       {!isModal && (
@@ -527,9 +582,7 @@ export function ModelPlaygroundContent({
 
           {/* Chat thread + input */}
           <div className="flex flex-col flex-1 min-h-0">
-            <ChatThread
-              messages={chatMessages}
-            />
+            <ChatThread messages={chatMessages} />
             <ChatInput
               model={model}
               iconParams={iconParams}
@@ -546,10 +599,7 @@ export function ModelPlaygroundContent({
       ) : (
         <>
           {/* Gallery / result area for non-text models */}
-          <div
-            ref={galleryRef}
-            className="flex-1 min-h-0 overflow-y-auto"
-          >
+          <div ref={galleryRef} className="flex-1 min-h-0 overflow-y-auto">
             <div className="mx-auto max-w-6xl px-5 sm:px-8 py-6">
               {/* Active result hero */}
               {active && (
@@ -567,36 +617,42 @@ export function ModelPlaygroundContent({
               )}
 
               {/* Loading cards for all active generations */}
-              {Array.from(activeGens.values()).map(gen => (
-                gen.status === "loading" && (
-                  <div key={gen.id} className="mb-6">
-                    <LoadingCard model={model} progress={gen.progress} />
-                  </div>
-                )
-              ))}
+              {Array.from(activeGens.values()).map(
+                (gen) =>
+                  gen.status === "loading" && (
+                    <div key={gen.id} className="mb-6">
+                      <LoadingCard model={model} progress={gen.progress} />
+                    </div>
+                  ),
+              )}
 
               {/* Error messages from active generations */}
-              {Array.from(activeGens.values()).map(gen => (
-                gen.status === "error" && gen.error && (
-                  <div key={gen.id} className="mb-6 rounded-2xl border border-amber/40 bg-amber/5 p-4 flex items-start gap-3">
-                    <AlertTriangle className="size-4 text-amber shrink-0 mt-0.5" />
-                    <div className="text-sm text-foreground/80 flex-1">{gen.error}</div>
-                    <button
-                      onClick={() => {
-                        setActiveGens(prev => {
-                          const next = new Map(prev);
-                          next.delete(gen.id);
-                          return next;
-                        });
-                      }}
-                      aria-label="Dismiss error"
-                      className="text-muted-foreground hover:text-foreground cursor-pointer"
+              {Array.from(activeGens.values()).map(
+                (gen) =>
+                  gen.status === "error" &&
+                  gen.error && (
+                    <div
+                      key={gen.id}
+                      className="mb-6 rounded-2xl border border-amber/40 bg-amber/5 p-4 flex items-start gap-3"
                     >
-                      <X className="size-4" />
-                    </button>
-                  </div>
-                )
-              ))}
+                      <AlertTriangle className="size-4 text-amber shrink-0 mt-0.5" />
+                      <div className="text-sm text-foreground/80 flex-1">{gen.error}</div>
+                      <button
+                        onClick={() => {
+                          setActiveGens((prev) => {
+                            const next = new Map(prev);
+                            next.delete(gen.id);
+                            return next;
+                          });
+                        }}
+                        aria-label="Dismiss error"
+                        className="text-muted-foreground hover:text-foreground cursor-pointer"
+                      >
+                        <X className="size-4" />
+                      </button>
+                    </div>
+                  ),
+              )}
 
               {/* History header */}
               {history.length > 0 && (
@@ -619,11 +675,7 @@ export function ModelPlaygroundContent({
 
               {/* History grid */}
               {history.length > 0 ? (
-                <HistoryGrid
-                  history={history}
-                  activeId={activeId}
-                  onSelect={setActiveId}
-                />
+                <HistoryGrid history={history} activeId={activeId} onSelect={setActiveId} />
               ) : (
                 activeCount === 0 && !active && <EmptyState model={model} />
               )}
@@ -673,9 +725,15 @@ function initState(model: Model): Record<string, unknown> {
   return init;
 }
 
-
-
-function LoadingCard({ model, progress, onCancel }: { model: Model; progress: number; onCancel?: () => void }) {
+function LoadingCard({
+  model,
+  progress,
+  onCancel,
+}: {
+  model: Model;
+  progress: number;
+  onCancel?: () => void;
+}) {
   const t = useT();
   return (
     <div className="surface-gradient-border rounded-2xl bg-surface-1/60 overflow-hidden">
@@ -705,8 +763,6 @@ function LoadingCard({ model, progress, onCancel }: { model: Model; progress: nu
   );
 }
 
-
-
 function EmptyState({ model }: { model: Model }) {
   const t = useT();
   return (
@@ -715,9 +771,7 @@ function EmptyState({ model }: { model: Model }) {
         <Sparkles className="size-6 text-amber" />
       </div>
       <div className="font-display text-2xl tracking-[-0.02em]">{t("playground.ready")}</div>
-      <p className="mt-2 max-w-md text-sm text-muted-foreground">
-        {model.blurb}
-      </p>
+      <p className="mt-2 max-w-md text-sm text-muted-foreground">{model.blurb}</p>
       <div className="mt-4 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
         {t("playground.ready_desc")}
       </div>

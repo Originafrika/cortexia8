@@ -6,8 +6,8 @@ export const getRouter = () => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 30_000,       // 30s — data is fresh for 30s
-        gcTime: 5 * 60_000,      // 5min — garbage collect after 5min
+        staleTime: 30_000, // 30s — data is fresh for 30s
+        gcTime: 5 * 60_000, // 5min — garbage collect after 5min
         refetchOnWindowFocus: false,
         retry: 1,
       },

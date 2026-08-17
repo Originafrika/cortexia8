@@ -27,7 +27,9 @@ export function ResultView({ result, onRegenerate }: ResultViewProps) {
     fetchProxiedImage(result.resultUrl).then((url) => {
       if (!cancelled) setDisplayUrl(url);
     });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [result.resultUrl]);
 
   function copyText() {
@@ -44,10 +46,7 @@ export function ResultView({ result, onRegenerate }: ResultViewProps) {
       animate={{ opacity: 1, y: 0 }}
       className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]"
     >
-      <div className={cn(
-        "flex items-center justify-center min-w-0",
-        isText && "items-stretch",
-      )}>
+      <div className={cn("flex items-center justify-center min-w-0", isText && "items-stretch")}>
         <div
           className={cn(
             "surface-gradient-border rounded-2xl overflow-hidden relative",
@@ -61,18 +60,10 @@ export function ResultView({ result, onRegenerate }: ResultViewProps) {
           }
         >
           {hasResult && isImage && (
-            <img
-              src={displayUrl}
-              alt={result.prompt}
-              className="w-full h-full object-contain"
-            />
+            <img src={displayUrl} alt={result.prompt} className="w-full h-full object-contain" />
           )}
           {hasResult && isVideo && (
-            <video
-              src={displayUrl}
-              controls
-              className="w-full h-full object-contain"
-            />
+            <video src={displayUrl} controls className="w-full h-full object-contain" />
           )}
           {hasResult && isAudio && (
             <div className="flex flex-col items-center justify-center h-full gap-3 p-4">
@@ -87,7 +78,11 @@ export function ResultView({ result, onRegenerate }: ResultViewProps) {
                 aria-label="Copy response"
                 className="absolute top-3 right-3 rounded-lg p-1.5 bg-surface-2/80 hover:bg-surface-2 transition"
               >
-                {copied ? <Check className="size-3.5 text-emerald" /> : <Copy className="size-3.5" />}
+                {copied ? (
+                  <Check className="size-3.5 text-emerald" />
+                ) : (
+                  <Copy className="size-3.5" />
+                )}
               </button>
             </div>
           )}

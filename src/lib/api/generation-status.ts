@@ -187,9 +187,13 @@ async function loadRun(
           (info.state === "success" || info.state === "fail") &&
           (row.status === "queued" || row.status === "running")
         ) {
-          console.log(`[generation-status] Webhook fallback: taskId=${row.kie_task_id} is ${info.state} but DB says ${row.status} — processing inline`);
+          console.log(
+            `[generation-status] Webhook fallback: taskId=${row.kie_task_id} is ${info.state} but DB says ${row.status} — processing inline`,
+          );
           if (info.state === "fail") {
-            console.error(`[generation-status] kie.ai FAILED taskId=${row.kie_task_id}, model=${row.model_slug}, failMsg=${info.failMsg ?? "null"}, failCode=${info.failCode ?? "null"}`);
+            console.error(
+              `[generation-status] kie.ai FAILED taskId=${row.kie_task_id}, model=${row.model_slug}, failMsg=${info.failMsg ?? "null"}, failCode=${info.failCode ?? "null"}`,
+            );
           }
           try {
             await handleWebhook({ taskId: row.kie_task_id, state: info.state });
@@ -198,7 +202,12 @@ async function loadRun(
             const updated = (await sql`
               SELECT status, completed_at, output_asset_id, error_message FROM run_node_executions
               WHERE id = ${row.id} LIMIT 1
-            `) as { status: string; completed_at: string | null; output_asset_id: number | null; error_message: string | null }[];
+            `) as {
+              status: string;
+              completed_at: string | null;
+              output_asset_id: number | null;
+              error_message: string | null;
+            }[];
             if (updated.length > 0) {
               liveState = updated[0].status;
               liveAssetId = updated[0].output_asset_id;
@@ -209,7 +218,13 @@ async function loadRun(
               const assetRow = (await sql`
                 SELECT id, type, storage_url, preview_url, created_at FROM assets
                 WHERE id = ${liveAssetId} LIMIT 1
-              `) as { id: number; type: string; storage_url: string; preview_url: string | null; created_at: string }[];
+              `) as {
+                id: number;
+                type: string;
+                storage_url: string;
+                preview_url: string | null;
+                created_at: string;
+              }[];
               if (assetRow.length > 0) {
                 liveAssetType = assetRow[0].type;
                 liveAssetStorageUrl = assetRow[0].storage_url;
@@ -220,7 +235,10 @@ async function loadRun(
             // Signal that we need to re-read the run status too.
             runStatusOverride = "refresh";
           } catch (hookErr) {
-            console.error(`[generation-status] Webhook fallback failed for taskId=${row.kie_task_id}:`, hookErr);
+            console.error(
+              `[generation-status] Webhook fallback failed for taskId=${row.kie_task_id}:`,
+              hookErr,
+            );
           }
         }
       } catch {

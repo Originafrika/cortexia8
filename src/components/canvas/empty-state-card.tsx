@@ -2,7 +2,16 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Wand2, Plus, Sparkles, ArrowRight, LayoutGrid, Image as ImageIcon, Film, Music2 } from "lucide-react";
+import {
+  Wand2,
+  Plus,
+  Sparkles,
+  ArrowRight,
+  LayoutGrid,
+  Image as ImageIcon,
+  Film,
+  Music2,
+} from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { CANVAS_TEMPLATES, type CanvasTemplate } from "@/lib/canvas-templates";
 import { useCanvasStore } from "@/lib/canvas-store";
@@ -76,9 +85,7 @@ export function EmptyStateCard({ onOpenAgent, onHighlightNodeAdd }: Props) {
           <h2 className="font-display text-xl tracking-[-0.02em] text-foreground">
             {t("canvas.empty.title")}
           </h2>
-          <p className="text-sm text-muted-foreground mt-1.5">
-            {t("canvas.empty.desc")}
-          </p>
+          <p className="text-sm text-muted-foreground mt-1.5">{t("canvas.empty.desc")}</p>
         </div>
 
         <div className="relative mb-4">
@@ -117,7 +124,9 @@ export function EmptyStateCard({ onOpenAgent, onHighlightNodeAdd }: Props) {
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-3">
             <LayoutGrid className="size-3.5 text-muted-foreground" />
-            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Templates</span>
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              Templates
+            </span>
           </div>
           <div className="grid grid-cols-2 gap-2">
             {CANVAS_TEMPLATES.map((tpl) => {
@@ -134,12 +143,19 @@ export function EmptyStateCard({ onOpenAgent, onHighlightNodeAdd }: Props) {
                   )}
                 >
                   <div className="flex items-start gap-2.5">
-                    <div className={cn("size-7 rounded-lg flex items-center justify-center shrink-0 border", CATEGORY_COLORS[tpl.category])}>
+                    <div
+                      className={cn(
+                        "size-7 rounded-lg flex items-center justify-center shrink-0 border",
+                        CATEGORY_COLORS[tpl.category],
+                      )}
+                    >
                       <Icon className="size-3.5" />
                     </div>
                     <div className="min-w-0">
                       <div className="text-xs font-medium text-foreground truncate">{tpl.name}</div>
-                      <div className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2">{tpl.description}</div>
+                      <div className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2">
+                        {tpl.description}
+                      </div>
                     </div>
                   </div>
                 </button>
@@ -159,12 +175,7 @@ export function EmptyStateCard({ onOpenAgent, onHighlightNodeAdd }: Props) {
             {t("canvas.empty.agent")}
             <ArrowRight className="size-3.5 ml-auto" />
           </Button>
-          <Button
-            type="button"
-            onClick={handleManual}
-            variant="outline"
-            className="h-10"
-          >
+          <Button type="button" onClick={handleManual} variant="outline" className="h-10">
             <Plus className="size-4" />
             {t("canvas.empty.manual")}
           </Button>

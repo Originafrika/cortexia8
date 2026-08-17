@@ -60,7 +60,11 @@ export const runCanvas = createServerFn({ method: "POST" })
     if (!Number.isInteger(data.workflowId)) {
       throw new HttpError(400, "workflowId is required");
     }
-    return { workflowId: data.workflowId, rerunNodeId: data.rerunNodeId, sessionToken: data.sessionToken };
+    return {
+      workflowId: data.workflowId,
+      rerunNodeId: data.rerunNodeId,
+      sessionToken: data.sessionToken,
+    };
   })
   .handler(async ({ data }) => {
     try {

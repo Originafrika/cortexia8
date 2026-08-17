@@ -3,7 +3,12 @@ import { useEffect, useState } from "react";
 import { Plus, Workflow, Clock, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { listWorkflows, createWorkflow, renameWorkflow, type WorkflowListItem } from "@/lib/api/workflows";
+import {
+  listWorkflows,
+  createWorkflow,
+  renameWorkflow,
+  type WorkflowListItem,
+} from "@/lib/api/workflows";
 import { useT } from "@/lib/i18n";
 import { loadSession } from "@/lib/auth-store";
 
@@ -12,7 +17,11 @@ export const Route = createFileRoute("/app/workflows")({
     if (typeof window === "undefined") return;
     const session = loadSession();
     if (!session) {
-      throw redirect({ to: "/auth/$pathname" as "/auth/$pathname", params: { pathname: "sign-in" }, search: { redirect: location.href } });
+      throw redirect({
+        to: "/auth/$pathname" as const,
+        params: { pathname: "sign-in" },
+        search: { redirect: location.href },
+      });
     }
     if (session.user.role !== "admin") {
       throw redirect({ to: "/app/models" });
@@ -21,7 +30,10 @@ export const Route = createFileRoute("/app/workflows")({
   head: () => ({
     meta: [
       { title: "Cortexia — Workflows" },
-      { name: "description", content: "Create, run, and manage multi-step AI generation workflows on Cortexia." },
+      {
+        name: "description",
+        content: "Create, run, and manage multi-step AI generation workflows on Cortexia.",
+      },
     ],
   }),
   component: WorkflowsPage,
@@ -81,9 +93,7 @@ function WorkflowsPage() {
           <h1 className="mt-2 font-display text-4xl sm:text-5xl tracking-[-0.03em]">
             {t("workflows.subtitle")}
           </h1>
-          <p className="mt-2 text-muted-foreground">
-            {t("workflows.desc")}
-          </p>
+          <p className="mt-2 text-muted-foreground">{t("workflows.desc")}</p>
         </div>
         <button
           onClick={handleCreate}
@@ -93,11 +103,7 @@ function WorkflowsPage() {
             "hover:bg-amber/25 disabled:opacity-50",
           )}
         >
-          {creating ? (
-            <Loader2 className="size-4 animate-spin" />
-          ) : (
-            <Plus className="size-4" />
-          )}
+          {creating ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" />}
           {t("workflows.new")}
         </button>
       </div>
@@ -113,9 +119,7 @@ function WorkflowsPage() {
             <Workflow className="size-7 text-muted-foreground/60" />
           </div>
           <div className="font-display text-2xl mb-2">{t("workflows.empty")}</div>
-          <div className="text-sm">
-            {t("workflows.empty_desc")}
-          </div>
+          <div className="text-sm">{t("workflows.empty_desc")}</div>
         </div>
       ) : (
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -135,7 +139,13 @@ function WorkflowsPage() {
                       onBlur={(e) => {
                         const newName = e.target.value.trim();
                         if (newName && newName !== wf.name) {
-                          renameWorkflow({ data: { workflowId: wf.id, name: newName, sessionToken: loadSession()?.token } });
+                          renameWorkflow({
+                            data: {
+                              workflowId: wf.id,
+                              name: newName,
+                              sessionToken: loadSession()?.token,
+                            },
+                          });
                         }
                       }}
                       onKeyDown={(e) => {

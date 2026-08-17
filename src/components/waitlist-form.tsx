@@ -29,7 +29,9 @@ export function WaitlistForm() {
     setStatus("loading");
     setErrorMsg("");
     try {
-      const result = await waitlistSignup({ data: { email, profession: profession ?? "Autre", referred_by: referredBy } });
+      const result = await waitlistSignup({
+        data: { email, profession: profession ?? "Autre", referred_by: referredBy },
+      });
       setReferralCode(result.referral_code);
       setRank(result.id);
       setStatus("done");
@@ -55,9 +57,7 @@ export function WaitlistForm() {
             <div className="font-mono text-xs uppercase tracking-[0.22em] text-muted-foreground">
               {t("waitlist.title")}
             </div>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {t("waitlist.subtitle")}
-            </p>
+            <p className="mt-2 text-sm text-muted-foreground">{t("waitlist.subtitle")}</p>
 
             <div className="mt-4">
               <div className="text-xs text-muted-foreground mb-2">{t("waitlist.i_create")}</div>
@@ -110,10 +110,11 @@ export function WaitlistForm() {
               </button>
             </div>
 
-
             <p className="mt-5 text-xs text-muted-foreground">{t("waitlist.no_spam")}</p>
             {status !== "loading" && !email && (
-              <p className="mt-2 text-xs text-muted-foreground/70 italic">{t("waitlist.helper_email")}</p>
+              <p className="mt-2 text-xs text-muted-foreground/70 italic">
+                {t("waitlist.helper_email")}
+              </p>
             )}
           </motion.form>
         ) : status === "error" ? (
@@ -138,7 +139,13 @@ export function WaitlistForm() {
             </div>
           </motion.div>
         ) : (
-          <ConfirmationCard key="done" rank={rank} email={email} profession={profession ?? "Autre"} referralCode={referralCode} />
+          <ConfirmationCard
+            key="done"
+            rank={rank}
+            email={email}
+            profession={profession ?? "Autre"}
+            referralCode={referralCode}
+          />
         )}
       </AnimatePresence>
     </div>
@@ -159,7 +166,8 @@ function ConfirmationCard({
   const t = useT();
   const displayRank = useCountUp(rank, 800);
   const [copied, setCopied] = useState(false);
-  const origin = typeof window !== "undefined" ? window.location.origin : "https://cortexia.originafrika.online";
+  const origin =
+    typeof window !== "undefined" ? window.location.origin : "https://cortexia.originafrika.online";
   const link = `${origin}/r/${referralCode}`;
 
   const recapKey = `waitlist.confirm.recap.${profession.toLowerCase()}`;
@@ -229,19 +237,35 @@ function ConfirmationCard({
           {[
             {
               network: "X",
-              onClick: () => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(t("waitlist.done"))}&url=${encodeURIComponent(link)}`, "_blank"),
+              onClick: () =>
+                window.open(
+                  `https://twitter.com/intent/tweet?text=${encodeURIComponent(t("waitlist.done"))}&url=${encodeURIComponent(link)}`,
+                  "_blank",
+                ),
             },
             {
               network: "WhatsApp",
-              onClick: () => window.open(`https://wa.me/?text=${encodeURIComponent(t("waitlist.done") + " " + link)}`, "_blank"),
+              onClick: () =>
+                window.open(
+                  `https://wa.me/?text=${encodeURIComponent(t("waitlist.done") + " " + link)}`,
+                  "_blank",
+                ),
             },
             {
               network: "Telegram",
-              onClick: () => window.open(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(t("waitlist.done"))}`, "_blank"),
+              onClick: () =>
+                window.open(
+                  `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(t("waitlist.done"))}`,
+                  "_blank",
+                ),
             },
             {
               network: "LinkedIn",
-              onClick: () => window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(link)}`, "_blank"),
+              onClick: () =>
+                window.open(
+                  `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(link)}`,
+                  "_blank",
+                ),
             },
           ].map(({ network, onClick }) => (
             <button

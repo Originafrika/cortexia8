@@ -37,18 +37,14 @@ const R = {
     "https://v3b.fal.media/files/b/0a948161/E43snBsqtEWRB2KGM6723_8b2971637e504a00b4bcf2cec7d544b6.jpg",
   nanobanana2lite:
     "https://v3b.fal.media/files/b/panda/-oMlZo9Yyj_Nzoza_tgds_GmLF86r5bOt50eMMKCszy_eacc949b3933443c9915a83c98fbe85e.png",
-  gptimage2_a: "https://images.ctfassets.net/kftzwdyauwt9/I1fZJDVIImc76rO9pBrFj/3f941d5b06447057164bb08c2ae0b94a/ChatGPT_Image_Apr_14__2026__09_42_30_PM.png?w=1920&q=90&fm=webp",
-  gptimage2_b:
-    "https://v3b.fal.media/files/b/0a9486b9/Iti-a7lTmHZW6KlSZ80rU_output_1.png",
+  gptimage2_a:
+    "https://images.ctfassets.net/kftzwdyauwt9/I1fZJDVIImc76rO9pBrFj/3f941d5b06447057164bb08c2ae0b94a/ChatGPT_Image_Apr_14__2026__09_42_30_PM.png?w=1920&q=90&fm=webp",
+  gptimage2_b: "https://v3b.fal.media/files/b/0a9486b9/Iti-a7lTmHZW6KlSZ80rU_output_1.png",
   qwenimage_a: "https://v3.fal.media/files/rabbit/KoIbq6nhDBDPxDQrivW-m.png",
-  qwenimage_b:
-    "https://v3b.fal.media/files/b/0a8f0995/slF9l2eNL_YSD7SqU7tUz_i35fsR92.jpg",
-  wan27image_a:
-    "https://v3b.fal.media/files/b/0a9413bb/qH6QY4JRzWxHOFKtCe70S_uPDJyzKZ.png",
-  wan27imagepro:
-    "https://v3.fal.media/files/elephant/rkH-9qoXtXu3rAYTsx9V5_image.webp",
-  wan27image_poster:
-    "https://v3.fal.media/files/lion/_I_io6Gtk83c72d-afXf8_image.webp",
+  qwenimage_b: "https://v3b.fal.media/files/b/0a8f0995/slF9l2eNL_YSD7SqU7tUz_i35fsR92.jpg",
+  wan27image_a: "https://v3b.fal.media/files/b/0a9413bb/qH6QY4JRzWxHOFKtCe70S_uPDJyzKZ.png",
+  wan27imagepro: "https://v3.fal.media/files/elephant/rkH-9qoXtXu3rAYTsx9V5_image.webp",
+  wan27image_poster: "https://v3.fal.media/files/lion/_I_io6Gtk83c72d-afXf8_image.webp",
 
   // ── Videos ──
   kling3pro_a: "https://v3b.fal.media/files/b/0a9270c0/M0OE5-o3n7Pj85CWWpGt2_output.mp4",
@@ -72,7 +68,8 @@ const R = {
   volclipsync:
     "https://v3b.fal.media/files/b/elephant/9Ofgiju3Peb3b5hriTuBH_wan_animate_output.mp4",
   dubbedvideo: "https://v3.fal.media/files/monkey/O-ekVTtYqeDblD1oSf2uv_dubbed_video.mp4",
-  extraclip: "https://v3.fal.media/files/panda/f7tXRCjvwEcVlmxHuw8kO_2c7ab2540af44eceaf5ffde4e8d094ed.mp4",
+  extraclip:
+    "https://v3.fal.media/files/panda/f7tXRCjvwEcVlmxHuw8kO_2c7ab2540af44eceaf5ffde4e8d094ed.mp4",
   extraclip2: "https://v3.fal.media/files/lion/Fbuh3lO_HMT-pS0DATbio_tmp08c3v477.mp4",
   extraclip3: "https://v3b.fal.media/files/b/monkey/xjJYzO0jqMi7MxufJe5tx_wan_animate_output.mp4",
   extraclip4: "https://v3.fal.media/files/penguin/ln3x7H1p1jL0Pwo7675NI_output.mp4",
@@ -117,7 +114,8 @@ export const WALL_ITEMS: WallItem[] = [
     useCase: "ugc",
     model: "Seedream 5.0 Lite",
     modelSlug: "seedream-5-lite",
-    prompt: "Realistic DSLR photograph of anthropomorphic dog enjoying ramen on the Great Wall of China.",
+    prompt:
+      "Realistic DSLR photograph of anthropomorphic dog enjoying ramen on the Great Wall of China.",
     image: R.seedream5lite_a,
     span: "md",
   },
@@ -157,7 +155,8 @@ export const WALL_ITEMS: WallItem[] = [
     useCase: "ugc",
     model: "Nano Banana 2 Lite",
     modelSlug: "nano-banana-2-lite",
-    prompt: "Product hero d'un tube de crème hydratante, fond pastel, ombres douces, style e-commerce.",
+    prompt:
+      "Product hero d'un tube de crème hydratante, fond pastel, ombres douces, style e-commerce.",
     image: R.nanobanana2lite,
     span: "sm",
   },
@@ -208,7 +207,8 @@ export const WALL_ITEMS: WallItem[] = [
     useCase: "show",
     model: "Wan 2.7 Image",
     modelSlug: "wan-27-image",
-    prompt: "Titre d'émission « Nuits de Dakar » en typographie art déco dorée sur fond noir texturé.",
+    prompt:
+      "Titre d'émission « Nuits de Dakar » en typographie art déco dorée sur fond noir texturé.",
     image: R.wan27image_a,
     span: "md",
   },
@@ -228,7 +228,8 @@ export const WALL_ITEMS: WallItem[] = [
     useCase: "ad",
     model: "Wan 2.7 Image Pro",
     modelSlug: "wan-27-image-pro",
-    prompt: "Flacon de parfum ambré sur marbre travertin, lumière rasante d'aube, contre-jour doux.",
+    prompt:
+      "Flacon de parfum ambré sur marbre travertin, lumière rasante d'aube, contre-jour doux.",
     image: R.wan27imagepro,
     span: "md",
   },
@@ -263,7 +264,8 @@ export const WALL_ITEMS: WallItem[] = [
     useCase: "ad",
     model: "Kling 3.0",
     modelSlug: "kling-3",
-    prompt: "Ultra slow-motion of ink dropping into clear water, blooming tendrils, macro cinematic.",
+    prompt:
+      "Ultra slow-motion of ink dropping into clear water, blooming tendrils, macro cinematic.",
     image: R.kling3pro_c,
     video: R.kling3pro_c,
     span: "md",
@@ -308,7 +310,8 @@ export const WALL_ITEMS: WallItem[] = [
     useCase: "film",
     model: "Kling 3.0 4K",
     modelSlug: "kling-3-4k",
-    prompt: "Plan aérien d'un désert au coucher du soleil, dunes ondulantes, mouvement de caméra lent.",
+    prompt:
+      "Plan aérien d'un désert au coucher du soleil, dunes ondulantes, mouvement de caméra lent.",
     image: R.kling34k,
     video: R.kling34k,
     span: "lg",
@@ -342,7 +345,8 @@ export const WALL_ITEMS: WallItem[] = [
     useCase: "ugc",
     model: "Seedance 2.0 Mini",
     modelSlug: "seedance-2-mini",
-    prompt: "Créatrice UGC déballe une paire de sneakers en unboxing, plan serré, lumière naturelle.",
+    prompt:
+      "Créatrice UGC déballe une paire de sneakers en unboxing, plan serré, lumière naturelle.",
     image: R.seedance2mini,
     video: R.seedance2mini,
     span: "sm",
@@ -353,7 +357,8 @@ export const WALL_ITEMS: WallItem[] = [
     useCase: "film",
     model: "Wan 2.7 Video",
     modelSlug: "wan-27-video",
-    prompt: "Extreme close-up of dark chocolate poured over a layered cake, glossy sheen, cocoa dust.",
+    prompt:
+      "Extreme close-up of dark chocolate poured over a layered cake, glossy sheen, cocoa dust.",
     image: R.wan27video_a,
     video: R.wan27video_a,
     span: "lg",
@@ -364,7 +369,8 @@ export const WALL_ITEMS: WallItem[] = [
     useCase: "ad",
     model: "Wan 2.7 Video",
     modelSlug: "wan-27-video",
-    prompt: "Voiture électrique traverse une ville de nuit sous la pluie, reflets néons, travelling.",
+    prompt:
+      "Voiture électrique traverse une ville de nuit sous la pluie, reflets néons, travelling.",
     image: R.wan27video_b,
     video: R.wan27video_b,
     span: "md",
@@ -398,7 +404,8 @@ export const WALL_ITEMS: WallItem[] = [
     useCase: "ugc",
     model: "Grok Video 1.5",
     modelSlug: "grok-video-15",
-    prompt: "Medium shot, elle parle chaleureusement en présentant un produit, push-in cinématique.",
+    prompt:
+      "Medium shot, elle parle chaleureusement en présentant un produit, push-in cinématique.",
     image: R.grokvideo,
     video: R.grokvideo,
     span: "md",
@@ -453,7 +460,8 @@ export const WALL_ITEMS: WallItem[] = [
     useCase: "ad",
     model: "Seedance 2.0 Fast",
     modelSlug: "seedance-2-fast",
-    prompt: "Sneaker qui tourne en lévitation sur fond dégradé, éclairage studio, style pub premium.",
+    prompt:
+      "Sneaker qui tourne en lévitation sur fond dégradé, éclairage studio, style pub premium.",
     image: R.extraclip,
     video: R.extraclip,
     span: "sm",

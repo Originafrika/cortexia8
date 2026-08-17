@@ -81,11 +81,7 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
       <motion.div
         initial={isNew ? { opacity: 0, scale: 0.8 } : false}
         animate={isNew ? { opacity: 1, scale: 1 } : undefined}
-        transition={
-          isNew
-            ? { duration: 0.35, delay, ease: [0.22, 1, 0.36, 1] }
-            : undefined
-        }
+        transition={isNew ? { duration: 0.35, delay, ease: [0.22, 1, 0.36, 1] } : undefined}
         onClick={(e) => {
           e.stopPropagation();
           setSelected(id);
@@ -96,9 +92,7 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
           selected
             ? "border-border-strong ring-1 ring-border-strong shadow-lg"
             : "border-border hover:border-border-strong",
-          isDragSource &&
-            !isCompatible &&
-            "opacity-30 scale-[0.97]",
+          isDragSource && !isCompatible && "opacity-30 scale-[0.97]",
           isDragSource &&
             isCompatible &&
             "ring-1 ring-emerald/50 shadow-[0_0_12px_2px_rgba(16,185,129,0.15)]",
@@ -117,12 +111,8 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
             "!z-20",
             "hover:!border-border-strong hover:!bg-surface-3",
             "transition-all duration-200",
-            isDragSource &&
-              isCompatible &&
-              "!border-emerald !bg-emerald/10 !scale-110",
-            isDragSource &&
-              !isCompatible &&
-              "!opacity-30",
+            isDragSource && isCompatible && "!border-emerald !bg-emerald/10 !scale-110",
+            isDragSource && !isCompatible && "!opacity-30",
           )}
           title={portLabel(ports.in[0])}
         >
@@ -142,9 +132,7 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
             "!z-20",
             "hover:!border-border-strong hover:!bg-surface-3",
             "transition-all duration-200",
-            isDragSource &&
-              !isCompatible &&
-              "!opacity-30",
+            isDragSource && !isCompatible && "!opacity-30",
           )}
           title={portLabel(ports.out)}
         >
@@ -157,9 +145,7 @@ export function NodeCard({ id, data, selected }: NodeProps<CanvasNode>) {
           onClick={handleExpandToggle}
         >
           <div className="min-w-0 flex-1">
-            <div className="text-[13px] font-medium truncate leading-tight">
-              {data.modelName}
-            </div>
+            <div className="text-[13px] font-medium truncate leading-tight">{data.modelName}</div>
             <div className="font-mono text-[9px] uppercase tracking-[0.22em] text-muted-foreground truncate">
               {data.provider} · {data.category}
             </div>

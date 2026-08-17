@@ -30,66 +30,319 @@ type SimModel = {
 };
 
 const IMAGE_MODELS: SimModel[] = [
-  { key: "seedream-5-pro", name: "Seedream 5.0 Pro", category: "image", icon: ImageIcon, unit: "images", unitPriceUSD: 0.08505, suffix: "images / mois", max: 500, step: 5, defaultValue: 40 },
-  { key: "seedream-5-lite", name: "Seedream 5.0 Lite", category: "image", icon: ImageIcon, unit: "images", unitPriceUSD: 0.0441, suffix: "images / mois", max: 500, step: 5, defaultValue: 0 },
-  { key: "nano-banana-2", name: "Nano Banana 2", category: "image", icon: ImageIcon, unit: "images", unitPriceUSD: 0.0504, suffix: "images / mois", max: 500, step: 5, defaultValue: 0 },
-  { key: "nano-banana-2-lite", name: "Nano Banana 2 Lite", category: "image", icon: ImageIcon, unit: "images", unitPriceUSD: 0.0315, suffix: "images / mois", max: 500, step: 5, defaultValue: 0 },
-  { key: "gpt-image-2", name: "GPT Image 2", category: "image", icon: ImageIcon, unit: "images", unitPriceUSD: 0.0378, suffix: "images / mois", max: 500, step: 5, defaultValue: 0 },
-  { key: "qwen-image-20", name: "Qwen Image 2.0", category: "image", icon: ImageIcon, unit: "images", unitPriceUSD: 0.0252, suffix: "images / mois", max: 500, step: 5, defaultValue: 0 },
-  { key: "wan-27-image", name: "Wan 2.7 Image", category: "image", icon: ImageIcon, unit: "images", unitPriceUSD: 0.0378, suffix: "images / mois", max: 500, step: 5, defaultValue: 0 },
-  { key: "wan-27-image-pro", name: "Wan 2.7 Image Pro", category: "image", icon: ImageIcon, unit: "images", unitPriceUSD: 0.1008, suffix: "images / mois", max: 500, step: 5, defaultValue: 0 },
+  {
+    key: "seedream-5-pro",
+    name: "Seedream 5.0 Pro",
+    category: "image",
+    icon: ImageIcon,
+    unit: "images",
+    unitPriceUSD: 0.08505,
+    suffix: "images / mois",
+    max: 500,
+    step: 5,
+    defaultValue: 40,
+  },
+  {
+    key: "seedream-5-lite",
+    name: "Seedream 5.0 Lite",
+    category: "image",
+    icon: ImageIcon,
+    unit: "images",
+    unitPriceUSD: 0.0441,
+    suffix: "images / mois",
+    max: 500,
+    step: 5,
+    defaultValue: 0,
+  },
+  {
+    key: "nano-banana-2",
+    name: "Nano Banana 2",
+    category: "image",
+    icon: ImageIcon,
+    unit: "images",
+    unitPriceUSD: 0.0504,
+    suffix: "images / mois",
+    max: 500,
+    step: 5,
+    defaultValue: 0,
+  },
+  {
+    key: "nano-banana-2-lite",
+    name: "Nano Banana 2 Lite",
+    category: "image",
+    icon: ImageIcon,
+    unit: "images",
+    unitPriceUSD: 0.0315,
+    suffix: "images / mois",
+    max: 500,
+    step: 5,
+    defaultValue: 0,
+  },
+  {
+    key: "gpt-image-2",
+    name: "GPT Image 2",
+    category: "image",
+    icon: ImageIcon,
+    unit: "images",
+    unitPriceUSD: 0.0378,
+    suffix: "images / mois",
+    max: 500,
+    step: 5,
+    defaultValue: 0,
+  },
+  {
+    key: "qwen-image-20",
+    name: "Qwen Image 2.0",
+    category: "image",
+    icon: ImageIcon,
+    unit: "images",
+    unitPriceUSD: 0.0252,
+    suffix: "images / mois",
+    max: 500,
+    step: 5,
+    defaultValue: 0,
+  },
+  {
+    key: "wan-27-image",
+    name: "Wan 2.7 Image",
+    category: "image",
+    icon: ImageIcon,
+    unit: "images",
+    unitPriceUSD: 0.0378,
+    suffix: "images / mois",
+    max: 500,
+    step: 5,
+    defaultValue: 0,
+  },
+  {
+    key: "wan-27-image-pro",
+    name: "Wan 2.7 Image Pro",
+    category: "image",
+    icon: ImageIcon,
+    unit: "images",
+    unitPriceUSD: 0.1008,
+    suffix: "images / mois",
+    max: 500,
+    step: 5,
+    defaultValue: 0,
+  },
 ];
 
 const VIDEO_MODELS: SimModel[] = [
-  { key: "seedance-2", name: "Seedance 2.0", category: "video", icon: Film, unit: "secondes", unitPriceUSD: 0.07182, suffix: "secondes / mois", max: 300, step: 5, defaultValue: 0 },
-  { key: "seedance-2-fast", name: "Seedance 2.0 Fast", category: "video", icon: Film, unit: "secondes", unitPriceUSD: 0.0504, suffix: "secondes / mois", max: 300, step: 5, defaultValue: 0 },
-  { key: "seedance-2-mini", name: "Seedance 2.0 Mini", category: "video", icon: Film, unit: "secondes", unitPriceUSD: 0.02394, suffix: "secondes / mois", max: 300, step: 5, defaultValue: 0 },
-  { key: "kling-3", name: "Kling 3.0", category: "video", icon: Film, unit: "secondes", unitPriceUSD: 0.0882, suffix: "secondes / mois", max: 300, step: 5, defaultValue: 0 },
-  { key: "kling-3-turbo", name: "Kling 3.0 Turbo", category: "video", icon: Film, unit: "secondes", unitPriceUSD: 0.07056, suffix: "secondes / mois", max: 300, step: 5, defaultValue: 25 },
-  { key: "kling-3-standard", name: "Kling 3.0 Standard", category: "video", icon: Film, unit: "secondes", unitPriceUSD: 0.07938, suffix: "secondes / mois", max: 300, step: 5, defaultValue: 0 },
-  { key: "kling-3-4k", name: "Kling 3.0 4K", category: "video", icon: Film, unit: "secondes", unitPriceUSD: 0.2646, suffix: "secondes / mois", max: 300, step: 5, defaultValue: 0 },
-  { key: "kling-3-motion", name: "Kling 3.0 Motion Control", category: "video", icon: Film, unit: "secondes", unitPriceUSD: 0.07938, suffix: "secondes / mois", max: 300, step: 5, defaultValue: 0 },
-  { key: "wan-27-video", name: "Wan 2.7 Video", category: "video", icon: Film, unit: "secondes", unitPriceUSD: 0.063, suffix: "secondes / mois", max: 300, step: 5, defaultValue: 0 },
-  { key: "happyhorse-11", name: "HappyHorse 1.1", category: "video", icon: Film, unit: "secondes", unitPriceUSD: 0.1134, suffix: "secondes / mois", max: 300, step: 5, defaultValue: 0 },
-  { key: "grok-video-15", name: "Grok Video 1.5", category: "video", icon: Film, unit: "secondes", unitPriceUSD: 0.0189, suffix: "secondes / mois", max: 300, step: 5, defaultValue: 0 },
-  { key: "gemini-omni-video", name: "Gemini Omni Video", category: "video", icon: Film, unit: "secondes", unitPriceUSD: 0.8316, suffix: "secondes / mois", max: 300, step: 5, defaultValue: 0 },
-  { key: "omnihuman-15", name: "OmniHuman 1.5", category: "video", icon: Film, unit: "secondes", unitPriceUSD: 0.1071, suffix: "secondes / mois", max: 300, step: 5, defaultValue: 0 },
-  { key: "volcengine-lip-sync", name: "Volcengine Lip Sync", category: "video", icon: Film, unit: "secondes", unitPriceUSD: 0.0315, suffix: "secondes / mois", max: 300, step: 5, defaultValue: 0 },
+  {
+    key: "seedance-2",
+    name: "Seedance 2.0",
+    category: "video",
+    icon: Film,
+    unit: "secondes",
+    unitPriceUSD: 0.07182,
+    suffix: "secondes / mois",
+    max: 300,
+    step: 5,
+    defaultValue: 0,
+  },
+  {
+    key: "seedance-2-fast",
+    name: "Seedance 2.0 Fast",
+    category: "video",
+    icon: Film,
+    unit: "secondes",
+    unitPriceUSD: 0.0504,
+    suffix: "secondes / mois",
+    max: 300,
+    step: 5,
+    defaultValue: 0,
+  },
+  {
+    key: "seedance-2-mini",
+    name: "Seedance 2.0 Mini",
+    category: "video",
+    icon: Film,
+    unit: "secondes",
+    unitPriceUSD: 0.02394,
+    suffix: "secondes / mois",
+    max: 300,
+    step: 5,
+    defaultValue: 0,
+  },
+  {
+    key: "kling-3",
+    name: "Kling 3.0",
+    category: "video",
+    icon: Film,
+    unit: "secondes",
+    unitPriceUSD: 0.0882,
+    suffix: "secondes / mois",
+    max: 300,
+    step: 5,
+    defaultValue: 0,
+  },
+  {
+    key: "kling-3-turbo",
+    name: "Kling 3.0 Turbo",
+    category: "video",
+    icon: Film,
+    unit: "secondes",
+    unitPriceUSD: 0.07056,
+    suffix: "secondes / mois",
+    max: 300,
+    step: 5,
+    defaultValue: 25,
+  },
+  {
+    key: "kling-3-standard",
+    name: "Kling 3.0 Standard",
+    category: "video",
+    icon: Film,
+    unit: "secondes",
+    unitPriceUSD: 0.07938,
+    suffix: "secondes / mois",
+    max: 300,
+    step: 5,
+    defaultValue: 0,
+  },
+  {
+    key: "kling-3-4k",
+    name: "Kling 3.0 4K",
+    category: "video",
+    icon: Film,
+    unit: "secondes",
+    unitPriceUSD: 0.2646,
+    suffix: "secondes / mois",
+    max: 300,
+    step: 5,
+    defaultValue: 0,
+  },
+  {
+    key: "kling-3-motion",
+    name: "Kling 3.0 Motion Control",
+    category: "video",
+    icon: Film,
+    unit: "secondes",
+    unitPriceUSD: 0.07938,
+    suffix: "secondes / mois",
+    max: 300,
+    step: 5,
+    defaultValue: 0,
+  },
+  {
+    key: "wan-27-video",
+    name: "Wan 2.7 Video",
+    category: "video",
+    icon: Film,
+    unit: "secondes",
+    unitPriceUSD: 0.063,
+    suffix: "secondes / mois",
+    max: 300,
+    step: 5,
+    defaultValue: 0,
+  },
+  {
+    key: "happyhorse-11",
+    name: "HappyHorse 1.1",
+    category: "video",
+    icon: Film,
+    unit: "secondes",
+    unitPriceUSD: 0.1134,
+    suffix: "secondes / mois",
+    max: 300,
+    step: 5,
+    defaultValue: 0,
+  },
+  {
+    key: "grok-video-15",
+    name: "Grok Video 1.5",
+    category: "video",
+    icon: Film,
+    unit: "secondes",
+    unitPriceUSD: 0.0189,
+    suffix: "secondes / mois",
+    max: 300,
+    step: 5,
+    defaultValue: 0,
+  },
+  {
+    key: "gemini-omni-video",
+    name: "Gemini Omni Video",
+    category: "video",
+    icon: Film,
+    unit: "secondes",
+    unitPriceUSD: 0.8316,
+    suffix: "secondes / mois",
+    max: 300,
+    step: 5,
+    defaultValue: 0,
+  },
+  {
+    key: "omnihuman-15",
+    name: "OmniHuman 1.5",
+    category: "video",
+    icon: Film,
+    unit: "secondes",
+    unitPriceUSD: 0.1071,
+    suffix: "secondes / mois",
+    max: 300,
+    step: 5,
+    defaultValue: 0,
+  },
+  {
+    key: "volcengine-lip-sync",
+    name: "Volcengine Lip Sync",
+    category: "video",
+    icon: Film,
+    unit: "secondes",
+    unitPriceUSD: 0.0315,
+    suffix: "secondes / mois",
+    max: 300,
+    step: 5,
+    defaultValue: 0,
+  },
 ];
 
 const VOICE_MODELS: SimModel[] = [
-  { key: "eleven-v3", name: "ElevenLabs Text-to-Dialogue V3", category: "voice", icon: Mic, unit: "1k caractères", unitPriceUSD: 0.0882, suffix: "×1k car. / mois", max: 200, step: 2, defaultValue: 6 },
+  {
+    key: "eleven-v3",
+    name: "ElevenLabs Text-to-Dialogue V3",
+    category: "voice",
+    icon: Mic,
+    unit: "1k caractères",
+    unitPriceUSD: 0.0882,
+    suffix: "×1k car. / mois",
+    max: 200,
+    step: 2,
+    defaultValue: 6,
+  },
 ];
 
-const CATALOGUE_TEXT_MODELS: SimModel[] = CATALOGUE
-  .filter((e) => e.category === "text" && e.active)
-  .map((e) => ({
-    key: e.slug,
-    name: e.name,
-    category: "text" as const,
-    icon: MessageSquare,
-    unit: "M tokens",
-    unitPriceUSD: e.cortexiaPriceUsd,
-    suffix: "M tokens / mois",
-    max: 50,
-    step: 0.5,
-    defaultValue: 0,
-  }));
+const CATALOGUE_TEXT_MODELS: SimModel[] = CATALOGUE.filter(
+  (e) => e.category === "text" && e.active,
+).map((e) => ({
+  key: e.slug,
+  name: e.name,
+  category: "text" as const,
+  icon: MessageSquare,
+  unit: "M tokens",
+  unitPriceUSD: e.cortexiaPriceUsd,
+  suffix: "M tokens / mois",
+  max: 50,
+  step: 0.5,
+  defaultValue: 0,
+}));
 
-const CATALOGUE_MUSIC_MODELS: SimModel[] = CATALOGUE
-  .filter((e) => e.category === "music" && e.active)
-  .map((e) => ({
-    key: e.slug,
-    name: e.name,
-    category: "music" as const,
-    icon: Music2,
-    unit: "pistes",
-    unitPriceUSD: e.cortexiaPriceUsd,
-    suffix: "pistes / mois",
-    max: 100,
-    step: 1,
-    defaultValue: 0,
-  }));
+const CATALOGUE_MUSIC_MODELS: SimModel[] = CATALOGUE.filter(
+  (e) => e.category === "music" && e.active,
+).map((e) => ({
+  key: e.slug,
+  name: e.name,
+  category: "music" as const,
+  icon: Music2,
+  unit: "pistes",
+  unitPriceUSD: e.cortexiaPriceUsd,
+  suffix: "pistes / mois",
+  max: 100,
+  step: 1,
+  defaultValue: 0,
+}));
 
 const ALL_MODELS: SimModel[] = [
   ...IMAGE_MODELS,
@@ -99,7 +352,10 @@ const ALL_MODELS: SimModel[] = [
   ...CATALOGUE_MUSIC_MODELS,
 ];
 
-const CATEGORY_META: Record<string, { label: string; icon: React.ElementType; refSub: { name: string; usd: number } }> = {
+const CATEGORY_META: Record<
+  string,
+  { label: string; icon: React.ElementType; refSub: { name: string; usd: number } }
+> = {
   image: { label: "Image", icon: ImageIcon, refSub: { name: "Midjourney Standard", usd: 30 } },
   video: { label: "Vidéo", icon: Film, refSub: { name: "Higgsfield Pro", usd: 39 } },
   voice: { label: "Voix", icon: Mic, refSub: { name: "ElevenLabs Starter", usd: 22 } },
@@ -111,7 +367,15 @@ const DEFAULT_VALUES: Record<string, number> = Object.fromEntries(
   ALL_MODELS.map((m) => [m.key, m.defaultValue]),
 );
 
-function ModelSlider({ model, value, onChange }: { model: SimModel; value: number; onChange: (v: number) => void }) {
+function ModelSlider({
+  model,
+  value,
+  onChange,
+}: {
+  model: SimModel;
+  value: number;
+  onChange: (v: number) => void;
+}) {
   const c = useCurrency();
   const cost = value * model.unitPriceUSD;
   return (
@@ -197,7 +461,10 @@ export function CreditSimulator({ compact }: { compact?: boolean }) {
           {Object.entries(categories).map(([catKey, models]) => {
             const meta = CATEGORY_META[catKey];
             if (!meta) return null;
-            const catTotal = models.reduce((sum, m) => sum + (values[m.key] || 0) * m.unitPriceUSD, 0);
+            const catTotal = models.reduce(
+              (sum, m) => sum + (values[m.key] || 0) * m.unitPriceUSD,
+              0,
+            );
             const activeModels = models.filter((m) => (values[m.key] || 0) > 0);
             const inactiveModels = models.filter((m) => (values[m.key] || 0) === 0);
             const isExpanded = expanded[catKey] ?? false;
@@ -209,7 +476,7 @@ export function CreditSimulator({ compact }: { compact?: boolean }) {
                   onClick={() => hasInactive && toggleCat(catKey)}
                   className={cn(
                     "flex items-center gap-2 w-full mb-3 group",
-                    hasInactive && "cursor-pointer"
+                    hasInactive && "cursor-pointer",
                   )}
                 >
                   <span className="grid place-items-center size-6 rounded-md bg-surface-2 border border-border">
@@ -230,7 +497,7 @@ export function CreditSimulator({ compact }: { compact?: boolean }) {
                     <ChevronDown
                       className={cn(
                         "size-4 text-muted-foreground/60 transition-transform",
-                        isExpanded && "rotate-180"
+                        isExpanded && "rotate-180",
                       )}
                     />
                   )}
@@ -261,11 +528,7 @@ export function CreditSimulator({ compact }: { compact?: boolean }) {
               </div>
             );
           })}
-          {!hasUsage && (
-            <p className="text-sm text-muted-foreground italic">
-              {t("sim.compose")}
-            </p>
-          )}
+          {!hasUsage && <p className="text-sm text-muted-foreground italic">{t("sim.compose")}</p>}
         </div>
       </div>
 
@@ -322,7 +585,11 @@ export function CreditSimulator({ compact }: { compact?: boolean }) {
           </div>
         </div>
         <div className="text-[11px] font-mono text-muted-foreground/80">
-          Bas sur un panier de reference : {Object.values(CATEGORY_META).map((c) => c.refSub.name).join(" . ")}.
+          Bas sur un panier de reference :{" "}
+          {Object.values(CATEGORY_META)
+            .map((c) => c.refSub.name)
+            .join(" . ")}
+          .
         </div>
       </div>
     </div>

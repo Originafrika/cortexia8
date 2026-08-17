@@ -35,7 +35,7 @@ export const agentRun = createServerFn({ method: "POST" })
       const userId = await requireUserId(ctx);
 
       const config: AgentConfig = data.config ?? { model: "gpt-5-2" };
-      return await runAgent(data.message, config, data.graphState) as AgentResponse;
+      return (await runAgent(data.message, config, data.graphState)) as AgentResponse;
     } catch (err) {
       if (err instanceof HttpError) throw err;
       throw new HttpError(500, "Internal server error");

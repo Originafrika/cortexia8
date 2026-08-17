@@ -90,7 +90,10 @@ export const createFedaPayTransaction = createServerFn({ method: "POST" })
           externalReference,
         };
       }
-      throw new HttpError(409, "Payment order is already being prepared; retry with the same idempotency key shortly");
+      throw new HttpError(
+        409,
+        "Payment order is already being prepared; retry with the same idempotency key shortly",
+      );
     }
 
     const xofPerUsd = Number(process.env.FEDAPAY_XOF_PER_USD ?? 605);

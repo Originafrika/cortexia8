@@ -30,11 +30,11 @@ export function ParamIconButton({
 
   let preview: string | null = null;
   if (p.kind === "select") preview = String(state[p.key] ?? "");
-  else if (p.kind === "slider")
-    preview = `${state[p.key] ?? p.default}${p.suffix ?? ""}`;
+  else if (p.kind === "slider") preview = `${state[p.key] ?? p.default}${p.suffix ?? ""}`;
   else if (p.kind === "toggle") preview = state[p.key] ? t("playground.toggle_on") : null;
 
-  const uploadCount = p.kind === "upload" && "multiple" in p ? ((state[p.key] as File[]) ?? []).length : 0;
+  const uploadCount =
+    p.kind === "upload" && "multiple" in p ? ((state[p.key] as File[]) ?? []).length : 0;
 
   const isActive =
     (p.kind === "toggle" && !!state[p.key]) ||
@@ -162,10 +162,16 @@ function UploadParamEditor({
       {files.length > 0 && (
         <div className="mt-2 space-y-1">
           {files.map((f, i) => (
-            <div key={i} className="flex items-center justify-between rounded-lg bg-surface-2/40 px-2.5 py-1.5 text-[11px]">
+            <div
+              key={i}
+              className="flex items-center justify-between rounded-lg bg-surface-2/40 px-2.5 py-1.5 text-[11px]"
+            >
               <span className="truncate text-foreground">{f.name}</span>
               <button
-                onClick={(e) => { e.stopPropagation(); removeFile(i); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removeFile(i);
+                }}
                 className="ml-2 text-muted-foreground hover:text-foreground cursor-pointer"
               >
                 <X className="size-3" />
@@ -178,11 +184,7 @@ function UploadParamEditor({
   );
 }
 
-export function ParamEditor({
-  p,
-  state,
-  setState,
-}: ParamEditorProps) {
+export function ParamEditor({ p, state, setState }: ParamEditorProps) {
   const t = useT();
   if (p.kind === "upload") {
     return <UploadParamEditor p={p} state={state} setState={setState} />;
@@ -253,7 +255,9 @@ export function ParamEditor({
         />
         <button
           type="button"
-          onClick={() => setState((s) => ({ ...s, [p.key]: Math.floor(Math.random() * 0xffffffff) }))}
+          onClick={() =>
+            setState((s) => ({ ...s, [p.key]: Math.floor(Math.random() * 0xffffffff) }))
+          }
           className="shrink-0 rounded-xl border border-border bg-surface-0/60 px-3 py-2 text-xs hover:border-amber/50 hover:bg-amber/5 transition"
           title={t("playground.seed_tooltip")}
         >

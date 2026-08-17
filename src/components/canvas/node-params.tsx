@@ -33,7 +33,9 @@ export function getPrimaryParams(model: Model): ParamSpec[] {
     case "image":
       // Style select + seed
       if (result.length < 3) {
-        const styleParam = params.find((p) => p.kind === "select" && p.key !== "model" && Array.isArray(p.options));
+        const styleParam = params.find(
+          (p) => p.kind === "select" && p.key !== "model" && Array.isArray(p.options),
+        );
         if (styleParam && !result.includes(styleParam)) result.push(styleParam);
       }
       if (result.length < 3) {
@@ -142,7 +144,13 @@ export function ParamField({
           )}
         >
           {p.multiple ? t("inspector.drag_multi") : t("inspector.drag_single")}
-          <input type="file" className="hidden" accept={p.accepts} multiple={p.multiple} disabled={disabled} />
+          <input
+            type="file"
+            className="hidden"
+            accept={p.accepts}
+            multiple={p.multiple}
+            disabled={disabled}
+          />
         </label>
       </div>
     );
@@ -176,7 +184,8 @@ export function ParamField({
         <div className="flex items-center justify-between mb-1.5">
           <Label className="text-xs text-muted-foreground">{p.label}</Label>
           <span className="font-mono text-[11px] tabular text-foreground">
-            {v}{p.suffix ?? ""}
+            {v}
+            {p.suffix ?? ""}
           </span>
         </div>
         <Slider
@@ -248,11 +257,7 @@ export function NodeParams({
   compact?: boolean;
 }) {
   if ((model.params ?? []).length === 0) {
-    return (
-      <div className="text-xs text-muted-foreground py-2">
-        No configurable parameters
-      </div>
-    );
+    return <div className="text-xs text-muted-foreground py-2">No configurable parameters</div>;
   }
 
   return (

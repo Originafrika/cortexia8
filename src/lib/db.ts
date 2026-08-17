@@ -7,7 +7,9 @@ if (typeof process !== "undefined" && process.env.NODE_ENV !== "production") {
 function getConnectionString(): string {
   const cs = process.env.DATABASE_URL;
   if (!cs) {
-    throw new Error("DATABASE_URL is not set in environment variables. Add it in Vercel Dashboard → Settings → Environment Variables.");
+    throw new Error(
+      "DATABASE_URL is not set in environment variables. Add it in Vercel Dashboard → Settings → Environment Variables.",
+    );
   }
   return cs;
 }

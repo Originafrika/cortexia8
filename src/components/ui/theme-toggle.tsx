@@ -38,7 +38,11 @@ export function ThemeToggle() {
       className="inline-flex items-center justify-center size-8 rounded-full border border-border hover:border-border-strong transition-colors text-muted-foreground hover:text-foreground"
       aria-label={theme === "dark" ? "Passer au mode clair" : "Passer au mode sombre"}
     >
-      {!mounted ? null : theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
+      {!mounted ? null : theme === "dark" ? (
+        <Sun className="size-4" />
+      ) : (
+        <Moon className="size-4" />
+      )}
     </button>
   );
 }

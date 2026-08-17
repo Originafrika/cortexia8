@@ -7,7 +7,11 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { getWorkflowRuns, type WorkflowRun, type WorkflowRunNodeExec } from "@/lib/api/workflow-runs";
+import {
+  getWorkflowRuns,
+  type WorkflowRun,
+  type WorkflowRunNodeExec,
+} from "@/lib/api/workflow-runs";
 import { cn } from "@/lib/utils";
 import { loadSession } from "@/lib/auth-store";
 import {
@@ -38,7 +42,9 @@ export function RunHistoryPanel({ open, onOpenChange, workflowId }: Props) {
     if (workflowId == null || !open) return;
     setLoading(true);
     try {
-      const res = await getWorkflowRuns({ data: { workflowId: Number(workflowId), sessionToken: loadSession()?.token } });
+      const res = await getWorkflowRuns({
+        data: { workflowId: Number(workflowId), sessionToken: loadSession()?.token },
+      });
       setRuns(res.runs);
     } catch (err) {
       console.error("[run-history] fetch failed", err);
@@ -70,7 +76,9 @@ export function RunHistoryPanel({ open, onOpenChange, workflowId }: Props) {
               >
                 <ArrowLeft className="size-4" />
               </button>
-              <SheetTitle className="text-base">{t("run_history.run")}#{selectedRun.id}</SheetTitle>
+              <SheetTitle className="text-base">
+                {t("run_history.run")}#{selectedRun.id}
+              </SheetTitle>
             </div>
           ) : (
             <>
@@ -86,11 +94,7 @@ export function RunHistoryPanel({ open, onOpenChange, workflowId }: Props) {
           {selectedRun ? (
             <RunDetail run={selectedRun} />
           ) : (
-            <RunList
-              runs={runs}
-              loading={loading}
-              onSelect={setSelectedRun}
-            />
+            <RunList runs={runs} loading={loading} onSelect={setSelectedRun} />
           )}
         </ScrollArea>
       </SheetContent>
@@ -121,9 +125,7 @@ function RunList({
       <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
         <Clock className="size-8 text-muted-foreground/50 mb-3" />
         <p className="text-sm text-muted-foreground">{t("run_history.empty")}</p>
-        <p className="text-xs text-muted-foreground/70 mt-1">
-          {t("run_history.empty_desc")}
-        </p>
+        <p className="text-xs text-muted-foreground/70 mt-1">{t("run_history.empty_desc")}</p>
       </div>
     );
   }
@@ -153,8 +155,7 @@ function RunList({
               </span>
               {run.totalCostUsd > 0 && (
                 <span className="text-[11px] text-muted-foreground flex items-center gap-1">
-                  <DollarSign className="size-2.5" />
-                  ${run.totalCostUsd.toFixed(4)}
+                  <DollarSign className="size-2.5" />${run.totalCostUsd.toFixed(4)}
                 </span>
               )}
             </div>
@@ -196,7 +197,8 @@ function RunDetail({ run }: { run: WorkflowRun }) {
       {failed > 0 && (
         <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber/10 border border-amber/20 text-xs text-amber-soft">
           <AlertTriangle className="size-3.5 shrink-0" />
-          {failed} {failed > 1 ? t("run_history.failed_nodes_plural") : t("run_history.failed_nodes")}
+          {failed}{" "}
+          {failed > 1 ? t("run_history.failed_nodes_plural") : t("run_history.failed_nodes")}
         </div>
       )}
 
@@ -237,9 +239,7 @@ function NodeExecRow({ node }: { node: WorkflowRunNodeExec }) {
           {node.status}
         </span>
         {node.startedAt && (
-          <span className="text-[10px] text-muted-foreground/60">
-            {formatDate(node.startedAt)}
-          </span>
+          <span className="text-[10px] text-muted-foreground/60">{formatDate(node.startedAt)}</span>
         )}
         {node.errorMessage && (
           <span className="text-[10px] text-amber-soft truncate max-w-[200px]">
@@ -314,7 +314,12 @@ function StatusBadge({ status }: { status: string }) {
           ? "bg-red-500/20 text-red-400"
           : "bg-surface-2 text-muted-foreground";
   return (
-    <span className={cn("inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-mono uppercase tracking-wider", cls)}>
+    <span
+      className={cn(
+        "inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-mono uppercase tracking-wider",
+        cls,
+      )}
+    >
       {status}
     </span>
   );

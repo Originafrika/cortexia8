@@ -17,18 +17,27 @@ import {
 // ── Public types ─────────────────────────────────────────────────────────
 
 export type { CatalogueEntry, FidelityStatus, InputSchemaField, ModelCategory };
-export type Unit =
-  | "image"
-  | "second"
-  | "1k-chars"
-  | "1m-tokens-io"
-  | "track";
+export type Unit = "image" | "second" | "1k-chars" | "1m-tokens-io" | "track";
 
 export type ParamSpec =
   | { kind: "prompt"; label: string; key: string; placeholder?: string; required?: boolean }
   | { kind: "longtext"; label: string; key: string; placeholder?: string; required?: boolean }
-  | { kind: "upload"; label: string; key: string; multiple?: boolean; accepts?: string; required?: boolean }
-  | { kind: "select"; label: string; key: string; options: string[]; advanced?: boolean; required?: boolean }
+  | {
+      kind: "upload";
+      label: string;
+      key: string;
+      multiple?: boolean;
+      accepts?: string;
+      required?: boolean;
+    }
+  | {
+      kind: "select";
+      label: string;
+      key: string;
+      options: string[];
+      advanced?: boolean;
+      required?: boolean;
+    }
   | {
       kind: "slider";
       label: string;
@@ -42,7 +51,14 @@ export type ParamSpec =
       required?: boolean;
     }
   | { kind: "seed"; label: string; key: string; advanced?: boolean; required?: boolean }
-  | { kind: "toggle"; label: string; key: string; default?: boolean; advanced?: boolean; required?: boolean };
+  | {
+      kind: "toggle";
+      label: string;
+      key: string;
+      default?: boolean;
+      advanced?: boolean;
+      required?: boolean;
+    };
 
 export type PriceTier = _PriceTier;
 

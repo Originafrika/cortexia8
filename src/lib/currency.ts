@@ -27,14 +27,63 @@ const DEFAULT_RATES: Record<CurrencyCode, number> = {
 };
 
 export const CURRENCIES: Record<CurrencyCode, Currency> = {
-  USD: { code: "USD", symbol: "$", name: "US Dollar", flag: "🇺🇸", rate: DEFAULT_RATES.USD, decimals: 2 },
+  USD: {
+    code: "USD",
+    symbol: "$",
+    name: "US Dollar",
+    flag: "🇺🇸",
+    rate: DEFAULT_RATES.USD,
+    decimals: 2,
+  },
   EUR: { code: "EUR", symbol: "€", name: "Euro", flag: "🇪🇺", rate: DEFAULT_RATES.EUR, decimals: 2 },
-  GBP: { code: "GBP", symbol: "£", name: "Pound Sterling", flag: "🇬🇧", rate: DEFAULT_RATES.GBP, decimals: 2 },
-  XOF: { code: "XOF", symbol: "FCFA", name: "Franc CFA", flag: "🇸🇳", rate: DEFAULT_RATES.XOF, decimals: 0 },
-  NGN: { code: "NGN", symbol: "₦", name: "Naira", flag: "🇳🇬", rate: DEFAULT_RATES.NGN, decimals: 0 },
-  IDR: { code: "IDR", symbol: "Rp", name: "Rupiah", flag: "🇮🇩", rate: DEFAULT_RATES.IDR, decimals: 0 },
-  BRL: { code: "BRL", symbol: "R$", name: "Real", flag: "🇧🇷", rate: DEFAULT_RATES.BRL, decimals: 2 },
-  INR: { code: "INR", symbol: "₹", name: "Rupee", flag: "🇮🇳", rate: DEFAULT_RATES.INR, decimals: 2 },
+  GBP: {
+    code: "GBP",
+    symbol: "£",
+    name: "Pound Sterling",
+    flag: "🇬🇧",
+    rate: DEFAULT_RATES.GBP,
+    decimals: 2,
+  },
+  XOF: {
+    code: "XOF",
+    symbol: "FCFA",
+    name: "Franc CFA",
+    flag: "🇸🇳",
+    rate: DEFAULT_RATES.XOF,
+    decimals: 0,
+  },
+  NGN: {
+    code: "NGN",
+    symbol: "₦",
+    name: "Naira",
+    flag: "🇳🇬",
+    rate: DEFAULT_RATES.NGN,
+    decimals: 0,
+  },
+  IDR: {
+    code: "IDR",
+    symbol: "Rp",
+    name: "Rupiah",
+    flag: "🇮🇩",
+    rate: DEFAULT_RATES.IDR,
+    decimals: 0,
+  },
+  BRL: {
+    code: "BRL",
+    symbol: "R$",
+    name: "Real",
+    flag: "🇧🇷",
+    rate: DEFAULT_RATES.BRL,
+    decimals: 2,
+  },
+  INR: {
+    code: "INR",
+    symbol: "₹",
+    name: "Rupee",
+    flag: "🇮🇳",
+    rate: DEFAULT_RATES.INR,
+    decimals: 2,
+  },
 };
 
 // In-memory cache for live rates
@@ -55,7 +104,7 @@ export async function fetchLiveRates(): Promise<Record<CurrencyCode, number>> {
   try {
     const res = await fetch("https://open.er-api.com/v6/latest/USD");
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json() as { rates?: Record<string, number> };
+    const data = (await res.json()) as { rates?: Record<string, number> };
 
     if (data.rates) {
       const rates: Record<CurrencyCode, number> = {

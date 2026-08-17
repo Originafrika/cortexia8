@@ -2,10 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { sql } from "./db";
 
 function generateReferralCode(email: string): string {
-  const hash = Array.from(email.trim().toLowerCase()).reduce(
-    (acc, c) => acc + c.charCodeAt(0),
-    0,
-  );
+  const hash = Array.from(email.trim().toLowerCase()).reduce((acc, c) => acc + c.charCodeAt(0), 0);
   return `CX${hash.toString(36).slice(0, 6).toUpperCase()}${Date.now().toString(36).slice(-3).toUpperCase()}`;
 }
 
@@ -37,11 +34,10 @@ export const waitlistSignup = createServerFn({ method: "POST" })
     return result[0] as { id: number; referral_code: string; created_at: string };
   });
 
-export const getWaitlistCount = createServerFn({ method: "GET" })
-  .handler(async () => {
-    const result = (await sql`SELECT COUNT(*) as count FROM waitlist`) as { count: number }[];
-    return Number(result[0].count);
-  });
+export const getWaitlistCount = createServerFn({ method: "GET" }).handler(async () => {
+  const result = (await sql`SELECT COUNT(*) as count FROM waitlist`) as { count: number }[];
+  return Number(result[0].count);
+});
 
 export const getRank = createServerFn({ method: "GET" })
   .validator((d: { email: string }) => d)

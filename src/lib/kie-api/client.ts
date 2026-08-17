@@ -119,7 +119,7 @@ export async function createTask(opts: {
   const KIE_RATE_KEY = "kie:global";
   while (!checkRateLimit(KIE_RATE_KEY, RATE_LIMITS.kie)) {
     const waitMs = getResetTime(KIE_RATE_KEY);
-    if (waitMs > 0) await new Promise(r => setTimeout(r, Math.min(waitMs + 100, 5000)));
+    if (waitMs > 0) await new Promise((r) => setTimeout(r, Math.min(waitMs + 100, 5000)));
   }
 
   const res = await fetch(`${kieApiBase()}${endpoint}`, {
@@ -186,9 +186,7 @@ export async function chatCompletion(opts: {
   // Gemini models use model-specific paths: /{model}/v1/chat/completions
   // Other models use the generic: /v1/chat/completions
   const isGemini = opts.model.startsWith("gemini");
-  const endpoint = isGemini
-    ? `/${opts.model}/v1/chat/completions`
-    : "/v1/chat/completions";
+  const endpoint = isGemini ? `/${opts.model}/v1/chat/completions` : "/v1/chat/completions";
   const body: Record<string, unknown> = {
     model: opts.model,
     messages: opts.messages,

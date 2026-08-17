@@ -376,7 +376,7 @@ function AccountPage() {
                 }
                 clearSession();
                 navigate({
-                  to: "/auth/$pathname" as "/auth/$pathname",
+                  to: "/auth/$pathname" as const,
                   params: { pathname: "sign-in" },
                 });
               }}

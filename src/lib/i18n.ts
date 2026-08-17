@@ -35,15 +35,15 @@ const fr: Dict = {
   "hero.title": "Un accès. Tous les modèles. Un agent qui sait lequel choisir.",
   "hero.subtitle":
     "Cortexia te donne le catalogue complet , Kling, Seedream, Nano Banana, Claude, ElevenLabs et le reste , en accès direct, playground par playground. Besoin d'aller vite ? L'agent choisit et orchestre à ta place. Facturé à l'usage, jamais à l'abonnement.",
-  "hero.micro_cta": "30+ modèles. Un seul compte. Payable par carte, Mobile Money, crypto ou Alipay.",
+  "hero.micro_cta":
+    "30+ modèles. Un seul compte. Payable par carte, Mobile Money, crypto ou Alipay.",
 
   "stat.models": "modèles",
   "stat.currencies": "devises",
   "stat.no_sub": "sans abo",
 
   "modes.eyebrow": "Deux façons de créer",
-  "modes.title":
-    "Toi aux commandes, ou l'agent aux commandes. Ton choix, à chaque génération.",
+  "modes.title": "Toi aux commandes, ou l'agent aux commandes. Ton choix, à chaque génération.",
   "modes.agent.title": "Mode Agent",
   "modes.agent.body":
     "Décris ce que tu veux. L'agent lit ton prompt, choisit le modèle le plus adapté dans tout le catalogue, et génère. Tu vois pourquoi il a choisi ce modèle, et tu peux en changer en un clic si tu préfères autre chose.",
@@ -64,11 +64,13 @@ const fr: Dict = {
   "waitlist.email_placeholder": "ton@email.com",
   "waitlist.cta": "Je réserve ma place",
   "waitlist.i_create": "Je crée surtout :",
-  "waitlist.no_spam": "Aucune carte requise. Aucun engagement. Juste une notification le jour du lancement.",
+  "waitlist.no_spam":
+    "Aucune carte requise. Aucun engagement. Juste une notification le jour du lancement.",
   "waitlist.done": "Tu es dedans.",
   "waitlist.your_seat": "Ta place",
   "waitlist.referral": "Ton lien de parrainage",
-  "waitlist.referral_copy": "Chaque ami inscrit via ton lien te fait gagner 3 places et des crédits bonus pour vous deux au lancement.",
+  "waitlist.referral_copy":
+    "Chaque ami inscrit via ton lien te fait gagner 3 places et des crédits bonus pour vous deux au lancement.",
   "waitlist.copy": "Copier",
   "waitlist.copied": "Copié",
   "waitlist.friends_invited": "amis invités",
@@ -93,7 +95,8 @@ const fr: Dict = {
   "sim.threshold_marker": "seuil abonnement",
 
   "compare.eyebrow": "Le vrai calcul",
-  "compare.title": "Higgsfield. Midjourney. ElevenLabs. Claude. Un seul compte, un seul prix, tout le catalogue.",
+  "compare.title":
+    "Higgsfield. Midjourney. ElevenLabs. Claude. Un seul compte, un seul prix, tout le catalogue.",
   "compare.subtitle": "L'ancien modèle vs Cortexia.",
   "compare.old.subtitle": "L'ancien modèle",
   "compare.old.title": "Abonnements empilés",
@@ -142,17 +145,22 @@ const fr: Dict = {
   "faq.eyebrow": "Ce qu'on nous demande",
   "faq.title": "Questions honnêtes.",
   "faq.q1": "Je peux choisir moi-même le modèle, ou c'est toujours l'agent qui décide ?",
-  "faq.a1": "Les deux. Chaque modèle a son propre playground accessible directement , tu peux aussi laisser l'agent choisir et orchestrer pour toi.",
+  "faq.a1":
+    "Les deux. Chaque modèle a son propre playground accessible directement , tu peux aussi laisser l'agent choisir et orchestrer pour toi.",
   "faq.q2": "Combien de modèles seront disponibles au lancement ?",
-  "faq.a2": "Plus de 30, couvrant image, vidéo, voix, musique et texte , le catalogue complet visible plus haut sur cette page.",
+  "faq.a2":
+    "Plus de 30, couvrant image, vidéo, voix, musique et texte , le catalogue complet visible plus haut sur cette page.",
   "faq.q3": "Combien ça coûte vraiment ?",
-  "faq.a3": "Tu payes uniquement ce que tu génères, au prix affiché sur chaque modèle , pas de palier caché, pas de minimum mensuel.",
+  "faq.a3":
+    "Tu payes uniquement ce que tu génères, au prix affiché sur chaque modèle , pas de palier caché, pas de minimum mensuel.",
   "faq.q4": "Je peux payer avec Mobile Money, crypto ou Alipay ?",
   "faq.a4": "Oui, en plus de la carte bancaire classique, partout où c'est disponible.",
   "faq.q5": "Pourquoi c'est moins cher qu'un abonnement ?",
-  "faq.a5": "Parce que tu ne payes jamais pour une capacité que tu n'utilises pas. Le simulateur plus haut le montre avec de vrais chiffres.",
+  "faq.a5":
+    "Parce que tu ne payes jamais pour une capacité que tu n'utilises pas. Le simulateur plus haut le montre avec de vrais chiffres.",
   "faq.q6": "Vous avez une API ?",
-  "faq.a6": "Oui, dès le lancement. Endpoints REST, clés self-service, même moteur de facturation à l'usage, sans minimum mensuel.",
+  "faq.a6":
+    "Oui, dès le lancement. Endpoints REST, clés self-service, même moteur de facturation à l'usage, sans minimum mensuel.",
 
   "footer.copy": "© 2026. Construit pour les créateurs, partout.",
   "footer.policy": "Politique",
@@ -201,18 +209,24 @@ const fr: Dict = {
   "waitlist.confirm.recap_label": "Profil enregistré : {profession}",
   "waitlist.confirm.share": "Partager sur {network}",
   "waitlist.confirm.referral_hint": "Parraine pour avancer plus vite.",
-  "waitlist.confirm.recap.pub": "Parfait pour les créatifs pub — Kling, Seedance et GPT Image seront dans ta boîte à outils dès l'ouverture.",
-  "waitlist.confirm.recap.ugc": "Parfait pour les créateurs UGC — on te prévient dès que Cortexia ouvre, avec un accès prioritaire au playground vidéo.",
-  "waitlist.confirm.recap.émission": "Parfait pour les équipes d'émission — voix, montage IA et musiques seront disponibles dès le lancement.",
-  "waitlist.confirm.recap.film": "Parfait pour la production audiovisuelle — Kling 4K et modèles cinéma prêts dès l'ouverture.",
-  "waitlist.confirm.recap.autre": "On te met de côté un accès dès l'ouverture, avec un mot d'accueil personnel.",
+  "waitlist.confirm.recap.pub":
+    "Parfait pour les créatifs pub — Kling, Seedance et GPT Image seront dans ta boîte à outils dès l'ouverture.",
+  "waitlist.confirm.recap.ugc":
+    "Parfait pour les créateurs UGC — on te prévient dès que Cortexia ouvre, avec un accès prioritaire au playground vidéo.",
+  "waitlist.confirm.recap.émission":
+    "Parfait pour les équipes d'émission — voix, montage IA et musiques seront disponibles dès le lancement.",
+  "waitlist.confirm.recap.film":
+    "Parfait pour la production audiovisuelle — Kling 4K et modèles cinéma prêts dès l'ouverture.",
+  "waitlist.confirm.recap.autre":
+    "On te met de côté un accès dès l'ouverture, avec un mot d'accueil personnel.",
 
   "waitlist.helper_email": "Tu seras le premier informé à l'ouverture.",
   "waitlist.error_signup": "Erreur d'inscription",
 
   // Developer page
   "dev.title": "Développeur",
-  "dev.subtitle": "Une seule facturation à l'usage pour tous les modèles. Pas de plan mensuel obligatoire, pas de minimum.",
+  "dev.subtitle":
+    "Une seule facturation à l'usage pour tous les modèles. Pas de plan mensuel obligatoire, pas de minimum.",
   "dev.quick_start": "Démarrer en 30 secondes",
   "dev.api_ref": "Référence API",
   "dev.keys_title": "Clés API",
@@ -224,7 +238,8 @@ const fr: Dict = {
   "dev.key_active": "Active",
   "dev.key_created": "Clé créée",
   "dev.key_copy_now": "Copie-la maintenant.",
-  "dev.key_secret_warning": "C'est la seule fois où tu verras ce secret en clair. Après cette fenêtre, il ne pourra plus être récupéré — seulement révoqué.",
+  "dev.key_secret_warning":
+    "C'est la seule fois où tu verras ce secret en clair. Après cette fenêtre, il ne pourra plus être récupéré — seulement révoqué.",
   "dev.stat_calls": "Appels ce mois",
   "dev.stat_cost": "Coût ce mois",
   "dev.stat_success": "Taux de réussite",
@@ -352,11 +367,13 @@ const fr: Dict = {
   "canvas.empty.suggestion.film": "Film",
   "canvas.empty.suggestion.teaser": "Teaser",
   "canvas.empty.suggestion.podcast": "Podcast",
-  "canvas.empty.suggestion.pub.text": "Créer une publicité visuelle percutante avec image et voix off",
+  "canvas.empty.suggestion.pub.text":
+    "Créer une publicité visuelle percutante avec image et voix off",
   "canvas.empty.suggestion.ugc.text": "Générer un contenu UGC authentique pour les réseaux sociaux",
   "canvas.empty.suggestion.show.text": "Concevoir un plan éditorial complet pour une émission",
   "canvas.empty.suggestion.film.text": "Créer un storyboard visuel pour un court-métrage",
-  "canvas.empty.suggestion.teaser.text": "Produire un teaser vidéo court avec transitions et musique",
+  "canvas.empty.suggestion.teaser.text":
+    "Produire un teaser vidéo court avec transitions et musique",
   "canvas.empty.suggestion.podcast.text": "Assembler un podcast avec intro musicale et narration",
 
   // Run history panel
@@ -486,8 +503,7 @@ const fr: Dict = {
   "preview.cta.catalog": "Voir le catalogue",
   "preview.models_title": "Modèles disponibles",
   "preview.sim_title": "Simule ton usage.",
-  "preview.sim_body":
-    "Aucune surprise en fin de mois — la facture est le simulateur.",
+  "preview.sim_body": "Aucune surprise en fin de mois — la facture est le simulateur.",
   "preview.footer_copy": "© 2026 Cortexia — construit pour les créateurs, partout.",
   "preview.footer_open": "Ouvrir l'app",
 
@@ -517,7 +533,8 @@ const fr: Dict = {
   "auth.verification_code_sent": "Un code de vérification vient de t'être envoyé par email.",
   "auth.error_generic": "Une erreur est survenue.",
   "auth.invalid_credentials": "Identifiants invalides.",
-  "auth.email_not_verified_resend": "Ton email n'est pas encore vérifié. On vient de t'envoyer un nouveau code.",
+  "auth.email_not_verified_resend":
+    "Ton email n'est pas encore vérifié. On vient de t'envoyer un nouveau code.",
   "auth.email_verified_signin": "Email vérifié. Tu peux maintenant te connecter.",
   "auth.invalid_code": "Code invalide ou expiré.",
   "auth.code_resent": "Nouveau code envoyé. Vérifie ta boîte de réception.",
@@ -584,8 +601,10 @@ const fr: Dict = {
 
   // API docs
   "api_docs.auth_title": "Authentification",
-  "api_docs.auth_desc": "Toutes les requêtes API doivent inclure une clé API dans le header Authorization. Utilise le format Bearer cx_.... Tu peux créer et gérer tes clés dans la section ci-dessus.",
-  "api_docs.auth_warning": "N'expose jamais ta clé API côté client. Utilise des variables d'environnement et appelle l'API depuis un serveur sécurisé.",
+  "api_docs.auth_desc":
+    "Toutes les requêtes API doivent inclure une clé API dans le header Authorization. Utilise le format Bearer cx_.... Tu peux créer et gérer tes clés dans la section ci-dessus.",
+  "api_docs.auth_warning":
+    "N'expose jamais ta clé API côté client. Utilise des variables d'environnement et appelle l'API depuis un serveur sécurisé.",
   "api_docs.endpoints_title": "Référence des endpoints",
   "api_docs.req_headers": "Headers requis",
   "api_docs.req_body": "Corps de la requête",
@@ -595,13 +614,16 @@ const fr: Dict = {
   "api_docs.ratelimit_gen": "générations par minute par clé API",
   "api_docs.ratelimit_poll": "requêtes de statut par minute par clé API",
   "api_docs.ratelimit_other": "requêtes par minute par clé API (autres endpoints)",
-  "api_docs.ratelimit_note": "Les headers X-RateLimit-Remaining et X-RateLimit-Reset sont inclus dans chaque réponse. Si dépassé, l'API renvoie 429 Too Many Requests.",
+  "api_docs.ratelimit_note":
+    "Les headers X-RateLimit-Remaining et X-RateLimit-Reset sont inclus dans chaque réponse. Si dépassé, l'API renvoie 429 Too Many Requests.",
   "api_docs.webhook_title": "Webhooks",
-  "api_docs.webhook_desc": "Cortexia peut envoyer des notifications POST à ton serveur quand une génération est terminée. Configure l'URL de callback dans les paramètres de ton compte.",
+  "api_docs.webhook_desc":
+    "Cortexia peut envoyer des notifications POST à ton serveur quand une génération est terminée. Configure l'URL de callback dans les paramètres de ton compte.",
   "api_docs.webhook_events_title": "Événements",
   "api_docs.webhook_payload_title": "Payload",
   "api_docs.webhook_verify_title": "Vérification",
-  "api_docs.webhook_verify_desc": "Chaque webhook inclut un header X-Cortexia-Signature contenant le SHA-256 HMAC du payload avec ton webhook secret. Vérifie toujours cette signature avant de traiter le payload.",
+  "api_docs.webhook_verify_desc":
+    "Chaque webhook inclut un header X-Cortexia-Signature contenant le SHA-256 HMAC du payload avec ton webhook secret. Vérifie toujours cette signature avant de traiter le payload.",
 };
 
 const en: Dict = {
@@ -620,8 +642,7 @@ const en: Dict = {
   "stat.no_sub": "no sub",
 
   "modes.eyebrow": "Two ways to create",
-  "modes.title":
-    "You in control, or the agent in control. Your choice, every generation.",
+  "modes.title": "You in control, or the agent in control. Your choice, every generation.",
   "modes.agent.title": "Agent mode",
   "modes.agent.body":
     "Describe what you want. The agent reads your prompt, picks the best model in the entire catalog, and generates. You see why it chose that model, and you can switch in one click if you'd rather pick yourself.",
@@ -646,7 +667,8 @@ const en: Dict = {
   "waitlist.done": "You're in.",
   "waitlist.your_seat": "Your spot",
   "waitlist.referral": "Your referral link",
-  "waitlist.referral_copy": "Every friend who signs up through your link earns you 3 spots and bonus credits for both of you at launch.",
+  "waitlist.referral_copy":
+    "Every friend who signs up through your link earns you 3 spots and bonus credits for both of you at launch.",
   "waitlist.copy": "Copy",
   "waitlist.copied": "Copied",
   "waitlist.friends_invited": "friends invited",
@@ -671,7 +693,8 @@ const en: Dict = {
   "sim.threshold_marker": "subscription break-even",
 
   "compare.eyebrow": "The real math",
-  "compare.title": "Higgsfield. Midjourney. ElevenLabs. Claude. One account, one price, the full catalog.",
+  "compare.title":
+    "Higgsfield. Midjourney. ElevenLabs. Claude. One account, one price, the full catalog.",
   "compare.subtitle": "The old model vs Cortexia.",
   "compare.old.subtitle": "The old model",
   "compare.old.title": "Stacked subscriptions",
@@ -720,17 +743,22 @@ const en: Dict = {
   "faq.eyebrow": "What you keep asking",
   "faq.title": "Straight answers.",
   "faq.q1": "Can I choose the model myself, or does the agent always decide?",
-  "faq.a1": "Both. Every model has its own playground accessible directly , you can also let the agent pick and orchestrate for you.",
+  "faq.a1":
+    "Both. Every model has its own playground accessible directly , you can also let the agent pick and orchestrate for you.",
   "faq.q2": "How many models at launch?",
-  "faq.a2": "Over 30, covering image, video, voice, music and text , the full catalog visible higher up on this page.",
+  "faq.a2":
+    "Over 30, covering image, video, voice, music and text , the full catalog visible higher up on this page.",
   "faq.q3": "How much does it actually cost?",
-  "faq.a3": "You only pay for what you generate, at the price shown on each model , no hidden tiers, no monthly minimum.",
+  "faq.a3":
+    "You only pay for what you generate, at the price shown on each model , no hidden tiers, no monthly minimum.",
   "faq.q4": "Can I pay with Mobile Money, crypto or Alipay?",
   "faq.a4": "Yes, alongside standard credit card, wherever it's available.",
   "faq.q5": "Why is it cheaper than a subscription?",
-  "faq.a5": "Because you never pay for capacity you don't use. The simulator above shows it with real numbers.",
+  "faq.a5":
+    "Because you never pay for capacity you don't use. The simulator above shows it with real numbers.",
   "faq.q6": "Do you have an API?",
-  "faq.a6": "Yes, from day one. REST endpoints, self-service keys, same pay-as-you-go pricing, no monthly minimum.",
+  "faq.a6":
+    "Yes, from day one. REST endpoints, self-service keys, same pay-as-you-go pricing, no monthly minimum.",
 
   "footer.copy": "© 2026. Built for creators, everywhere.",
   "footer.policy": "Privacy",
@@ -778,18 +806,24 @@ const en: Dict = {
   "waitlist.confirm.recap_label": "Profile registered: {profession}",
   "waitlist.confirm.share": "Share on {network}",
   "waitlist.confirm.referral_hint": "Refer to move up faster.",
-  "waitlist.confirm.recap.pub": "Perfect for ad creatives — Kling, Seedance and GPT Image will be in your toolkit from launch.",
-  "waitlist.confirm.recap.ugc": "Perfect for UGC creators — we'll notify you when Cortexia opens, with priority access to the video playground.",
-  "waitlist.confirm.recap.émission": "Perfect for show teams — voice, AI editing and music will be available from launch.",
-  "waitlist.confirm.recap.film": "Perfect for audiovisual production — Kling 4K and cinema models ready from launch.",
-  "waitlist.confirm.recap.autre": "We're saving you a spot from launch, with a personal welcome message.",
+  "waitlist.confirm.recap.pub":
+    "Perfect for ad creatives — Kling, Seedance and GPT Image will be in your toolkit from launch.",
+  "waitlist.confirm.recap.ugc":
+    "Perfect for UGC creators — we'll notify you when Cortexia opens, with priority access to the video playground.",
+  "waitlist.confirm.recap.émission":
+    "Perfect for show teams — voice, AI editing and music will be available from launch.",
+  "waitlist.confirm.recap.film":
+    "Perfect for audiovisual production — Kling 4K and cinema models ready from launch.",
+  "waitlist.confirm.recap.autre":
+    "We're saving you a spot from launch, with a personal welcome message.",
 
   "waitlist.helper_email": "You'll be the first to know at launch.",
   "waitlist.error_signup": "Signup error",
 
   // Developer page
   "dev.title": "Developer",
-  "dev.subtitle": "One pay-as-you-go pricing for all models. No mandatory monthly plan, no minimum.",
+  "dev.subtitle":
+    "One pay-as-you-go pricing for all models. No mandatory monthly plan, no minimum.",
   "dev.quick_start": "Get started in 30 seconds",
   "dev.api_ref": "API Reference",
   "dev.keys_title": "API Keys",
@@ -801,7 +835,8 @@ const en: Dict = {
   "dev.key_active": "Active",
   "dev.key_created": "Key created",
   "dev.key_copy_now": "Copy it now.",
-  "dev.key_secret_warning": "This is the only time you'll see this secret in plain text. After closing this, it can never be recovered — only revoked.",
+  "dev.key_secret_warning":
+    "This is the only time you'll see this secret in plain text. After closing this, it can never be recovered — only revoked.",
   "dev.stat_calls": "Calls this month",
   "dev.stat_cost": "Cost this month",
   "dev.stat_success": "Success rate",
@@ -1062,8 +1097,7 @@ const en: Dict = {
   "preview.cta.catalog": "Browse catalog",
   "preview.models_title": "Available models",
   "preview.sim_title": "Simulate your usage.",
-  "preview.sim_body":
-    "No end-of-month surprises — the bill is the simulator.",
+  "preview.sim_body": "No end-of-month surprises — the bill is the simulator.",
   "preview.footer_copy": "© 2026 Cortexia — built for creators, everywhere.",
   "preview.footer_open": "Open app",
 
@@ -1160,8 +1194,10 @@ const en: Dict = {
 
   // API docs
   "api_docs.auth_title": "Authentication",
-  "api_docs.auth_desc": "All API requests must include an API key in the Authorization header. Use the format Bearer cx_.... You can create and manage your keys in the section above.",
-  "api_docs.auth_warning": "Never expose your API key on the client side. Use environment variables and call the API from a secure server.",
+  "api_docs.auth_desc":
+    "All API requests must include an API key in the Authorization header. Use the format Bearer cx_.... You can create and manage your keys in the section above.",
+  "api_docs.auth_warning":
+    "Never expose your API key on the client side. Use environment variables and call the API from a secure server.",
   "api_docs.endpoints_title": "Endpoint Reference",
   "api_docs.req_headers": "Required Headers",
   "api_docs.req_body": "Request Body",
@@ -1171,13 +1207,16 @@ const en: Dict = {
   "api_docs.ratelimit_gen": "generations per minute per API key",
   "api_docs.ratelimit_poll": "status polls per minute per API key",
   "api_docs.ratelimit_other": "requests per minute per API key (all other endpoints)",
-  "api_docs.ratelimit_note": "The X-RateLimit-Remaining and X-RateLimit-Reset headers are included in every response. When exceeded, the API returns a 429 Too Many Requests.",
+  "api_docs.ratelimit_note":
+    "The X-RateLimit-Remaining and X-RateLimit-Reset headers are included in every response. When exceeded, the API returns a 429 Too Many Requests.",
   "api_docs.webhook_title": "Webhooks",
-  "api_docs.webhook_desc": "Cortexia can send POST notifications to your server when a generation completes. Configure the callback URL in your account settings.",
+  "api_docs.webhook_desc":
+    "Cortexia can send POST notifications to your server when a generation completes. Configure the callback URL in your account settings.",
   "api_docs.webhook_events_title": "Events",
   "api_docs.webhook_payload_title": "Payload",
   "api_docs.webhook_verify_title": "Verification",
-  "api_docs.webhook_verify_desc": "Each webhook includes an X-Cortexia-Signature header containing the SHA-256 HMAC of the payload with your webhook secret. Always verify this signature before processing the payload.",
+  "api_docs.webhook_verify_desc":
+    "Each webhook includes an X-Cortexia-Signature header containing the SHA-256 HMAC of the payload with your webhook secret. Always verify this signature before processing the payload.",
 };
 
 // Portuguese, Spanish, Indonesian , cover the core landing strings.
@@ -1214,14 +1253,17 @@ const pt: Dict = {
   "waitlist.no_spam": "Sem cartão. Sem compromisso. Só uma notificação no dia do lançamento.",
   "waitlist.done": "Você está dentro.",
   "waitlist.referral": "Seu link de indicação",
-  "waitlist.referral_copy": "Cada amigo que se inscrever pelo seu link ganha 3 lugares e créditos bônus para vocês dois no lançamento.",
+  "waitlist.referral_copy":
+    "Cada amigo que se inscrever pelo seu link ganha 3 lugares e créditos bônus para vocês dois no lançamento.",
   "waitlist.copy": "Copiar",
   "waitlist.copied": "Copiado",
   "waitlist.friends_invited": "amigos convidados",
-  "waitlist.launch_email": "Pronto. avisamos na abertura, 1º de agosto, com seus créditos já na conta.",
+  "waitlist.launch_email":
+    "Pronto. avisamos na abertura, 1º de agosto, com seus créditos já na conta.",
   "sim.eyebrow": "A fatura é o simulador",
   "sim.title": "A fatura é o simulador. Sem surpresas.",
-  "sim.subtitle": "Monte seu mês típico, todos os modelos misturados. Compare com uma assinatura clássica.",
+  "sim.subtitle":
+    "Monte seu mês típico, todos os modelos misturados. Compare com uma assinatura clássica.",
   "sim.eyebrow_card": "Simulador",
   "sim.compose": "Monte seu mês típico.",
   "sim.your_month": "Seu mês com Cortexia",
@@ -1229,11 +1271,14 @@ const pt: Dict = {
   "sim.classic": "Com uma assinatura clássica",
   "sim.you_save": "Você economiza",
   "sim.this_month": "este mês.",
-  "sim.threshold_note": "Neste volume, uma assinatura começa a ser competitiva, mas você só paga pelo que usa, sem compromisso.",
-  "sim.close_note": "Você está perto do ponto onde uma assinatura compensa. Continue no pay-as-you-go enquanto seu volume varia.",
+  "sim.threshold_note":
+    "Neste volume, uma assinatura começa a ser competitiva, mas você só paga pelo que usa, sem compromisso.",
+  "sim.close_note":
+    "Você está perto do ponto onde uma assinatura compensa. Continue no pay-as-you-go enquanto seu volume varia.",
   "sim.threshold_marker": "ponto de equilíbrio",
   "compare.eyebrow": "O cálculo real",
-  "compare.title": "Higgsfield. Midjourney. ElevenLabs. Claude. Uma conta, um preço, todo o catálogo.",
+  "compare.title":
+    "Higgsfield. Midjourney. ElevenLabs. Claude. Uma conta, um preço, todo o catálogo.",
   "compare.subtitle": "O modelo antigo vs Cortexia.",
   "compare.old.subtitle": "O modelo antigo",
   "compare.old.title": "Assinaturas empilhadas",
@@ -1256,23 +1301,28 @@ const pt: Dict = {
   "wall.load_more": "Ver mais criações",
   "access.eyebrow": "Acessibilidade",
   "access.title": "Disponível em todo lugar. Pago em todo lugar.",
-  "access.body": "Cartão, Mobile Money, cripto ou Alipay. O catálogo completo, onde quer que você esteja.",
+  "access.body":
+    "Cartão, Mobile Money, cripto ou Alipay. O catálogo completo, onde quer que você esteja.",
   "social.eyebrow": "Já estão esperando",
   "social.copy": "criadores inscritos, de Lomé a Jacarta passando por São Paulo e Paris.",
   "faq.eyebrow": "O que perguntam",
   "faq.title": "Perguntas honestas.",
   "faq.q1": "Posso escolher o modelo ou o agente sempre decide?",
-  "faq.a1": "Os dois. Cada modelo tem seu playground acessível diretamente, ou você pode deixar o agente escolher.",
+  "faq.a1":
+    "Os dois. Cada modelo tem seu playground acessível diretamente, ou você pode deixar o agente escolher.",
   "faq.q2": "Quantos modelos terão no lançamento?",
   "faq.a2": "Mais de 30, cobrindo imagem, vídeo, voz, música e texto.",
   "faq.q3": "Quanto custa realmente?",
-  "faq.a3": "Você paga só pelo que gera, no preço exibido em cada modelo. Sem camadas escondidas, sem mínimo mensal.",
+  "faq.a3":
+    "Você paga só pelo que gera, no preço exibido em cada modelo. Sem camadas escondidas, sem mínimo mensal.",
   "faq.q4": "Posso pagar com Mobile Money, cripto ou Alipay?",
   "faq.a4": "Sim, além do cartão de crédito, onde estiver disponível.",
   "faq.q5": "Por que é mais barato que uma assinatura?",
-  "faq.a5": "Porque você nunca paga por capacidade que não usa. O simulador mostra com números reais.",
+  "faq.a5":
+    "Porque você nunca paga por capacidade que não usa. O simulador mostra com números reais.",
   "faq.q6": "Vocês têm API?",
-  "faq.a6": "Sim, desde o lançamento. Endpoints REST, chaves self-service, mesmo faturamento por uso, sem mínimo mensal.",
+  "faq.a6":
+    "Sim, desde o lançamento. Endpoints REST, chaves self-service, mesmo faturamento por uso, sem mínimo mensal.",
   "footer.copy": "© 2026. Construído para os criadores, em todo lugar.",
   "footer.policy": "Privacidade",
   "footer.contact": "Contato",
@@ -1305,7 +1355,8 @@ const pt: Dict = {
   "app.header.help": "Replay boas-vindas",
   "app.header.internal": "Preview interno",
   "app.agent.hello": "Diga o que você quer criar.",
-  "app.agent.hello_sub": "Eu escolho o melhor modelo, você mantém o controle. Cada geração é cobrada pelo custo exibido.",
+  "app.agent.hello_sub":
+    "Eu escolho o melhor modelo, você mantém o controle. Cada geração é cobrada pelo custo exibido.",
   "app.agent.starters_title": "Para começar",
   "app.agent.decision_lead": "Escolhido para você",
   "app.agent.decision_alt": "Outras opções",
@@ -1314,11 +1365,14 @@ const pt: Dict = {
   "app.agent.download": "Baixar",
   "app.agent.result_ready": "Resultado pronto",
   "app.onb.step1.title": "Um agente que escolhe o modelo certo.",
-  "app.onb.step1.body": "Diga o que quer — imagem, vídeo, voz, texto. Cortexia roteia seu prompt para o melhor modelo do catálogo e explica por quê.",
+  "app.onb.step1.body":
+    "Diga o que quer — imagem, vídeo, voz, texto. Cortexia roteia seu prompt para o melhor modelo do catálogo e explica por quê.",
   "app.onb.step2.title": "Um playground por modelo.",
-  "app.onb.step2.body": "Precisa de controle fino? Vá ao catálogo e escolha seu modelo. Cada um tem seu formulário e preços ao vivo.",
+  "app.onb.step2.body":
+    "Precisa de controle fino? Vá ao catálogo e escolha seu modelo. Cada um tem seu formulário e preços ao vivo.",
   "app.onb.step3.title": "Sem assinatura. Sem surpresas.",
-  "app.onb.step3.body": "O preço aparece antes de cada geração. Recarregue o que quiser — Mobile Money, cartão, cripto, Alipay — e saia quando quiser.",
+  "app.onb.step3.body":
+    "O preço aparece antes de cada geração. Recarregue o que quiser — Mobile Money, cartão, cripto, Alipay — e saia quando quiser.",
   "app.onb.next": "Próximo",
   "app.onb.skip": "Pular",
   "app.onb.welcome_credit": "US$5 de créditos de boas-vindas na sua conta.",
@@ -1328,18 +1382,24 @@ const pt: Dict = {
   "waitlist.confirm.recap_label": "Perfil registrado: {profession}",
   "waitlist.confirm.share": "Compartilhar no {network}",
   "waitlist.confirm.referral_hint": "Indique para avançar mais rápido.",
-  "waitlist.confirm.recap.pub": "Perfeito para criativos de pub — Kling, Seedance e GPT Image estarão na sua caixa de ferramentas desde o lançamento.",
-  "waitlist.confirm.recap.ugc": "Perfeito para criadores UGC — avisamos quando o Cortexia abrir, com acesso prioritário ao playground de vídeo.",
-  "waitlist.confirm.recap.émission": "Perfeito para equipes de programa — voz, edição IA e músicas disponíveis desde o lançamento.",
-  "waitlist.confirm.recap.film": "Perfeito para produção audiovisual — Kling 4K e modelos de cinema prontos desde o lançamento.",
-  "waitlist.confirm.recap.autre": "Estamos guardando seu acesso desde o lançamento, com uma mensagem de boas-vindas pessoal.",
+  "waitlist.confirm.recap.pub":
+    "Perfeito para criativos de pub — Kling, Seedance e GPT Image estarão na sua caixa de ferramentas desde o lançamento.",
+  "waitlist.confirm.recap.ugc":
+    "Perfeito para criadores UGC — avisamos quando o Cortexia abrir, com acesso prioritário ao playground de vídeo.",
+  "waitlist.confirm.recap.émission":
+    "Perfeito para equipes de programa — voz, edição IA e músicas disponíveis desde o lançamento.",
+  "waitlist.confirm.recap.film":
+    "Perfeito para produção audiovisual — Kling 4K e modelos de cinema prontos desde o lançamento.",
+  "waitlist.confirm.recap.autre":
+    "Estamos guardando seu acesso desde o lançamento, com uma mensagem de boas-vindas pessoal.",
 
   "waitlist.helper_email": "Serás o primeiro a saber na abertura.",
   "waitlist.error_signup": "Erro no cadastro",
 
   // Developer page
   "dev.title": "Desenvolvedor",
-  "dev.subtitle": "Uma única cobrança por uso para todos os modelos. Sem plano mensal obrigatório, sem mínimo.",
+  "dev.subtitle":
+    "Uma única cobrança por uso para todos os modelos. Sem plano mensal obrigatório, sem mínimo.",
   "dev.quick_start": "Comece em 30 segundos",
   "dev.api_ref": "Referência da API",
   "dev.keys_title": "Chaves API",
@@ -1351,7 +1411,8 @@ const pt: Dict = {
   "dev.key_active": "Ativa",
   "dev.key_created": "Chave criada",
   "dev.key_copy_now": "Copie agora.",
-  "dev.key_secret_warning": "Esta é a única vez que você verá este segredo em texto claro. Depois de fechar, nunca poderá ser recuperado — apenas revogado.",
+  "dev.key_secret_warning":
+    "Esta é a única vez que você verá este segredo em texto claro. Depois de fechar, nunca poderá ser recuperado — apenas revogado.",
   "dev.stat_calls": "Chamadas este mês",
   "dev.stat_cost": "Custo este mês",
   "dev.stat_success": "Taxa de sucesso",
@@ -1610,8 +1671,7 @@ const pt: Dict = {
   "preview.cta.catalog": "Ver catálogo",
   "preview.models_title": "Modelos disponíveis",
   "preview.sim_title": "Simule seu uso.",
-  "preview.sim_body":
-    "Nenhuma surpresa no fim do mês — a fatura é o simulador.",
+  "preview.sim_body": "Nenhuma surpresa no fim do mês — a fatura é o simulador.",
   "preview.footer_copy": "© 2026 Cortexia — construído para os criadores, em todo lugar.",
   "preview.footer_open": "Abrir o app",
 
@@ -1703,8 +1763,10 @@ const pt: Dict = {
 
   // API docs
   "api_docs.auth_title": "Autenticação",
-  "api_docs.auth_desc": "Todas as requisições API devem incluir uma chave API no header Authorization. Use o formato Bearer cx_.... Você pode criar e gerenciar suas chaves na seção acima.",
-  "api_docs.auth_warning": "Nunca exponha sua chave API do lado do cliente. Use variáveis de ambiente e faça a chamada a partir de um servidor seguro.",
+  "api_docs.auth_desc":
+    "Todas as requisições API devem incluir uma chave API no header Authorization. Use o formato Bearer cx_.... Você pode criar e gerenciar suas chaves na seção acima.",
+  "api_docs.auth_warning":
+    "Nunca exponha sua chave API do lado do cliente. Use variáveis de ambiente e faça a chamada a partir de um servidor seguro.",
   "api_docs.endpoints_title": "Referência dos endpoints",
   "api_docs.req_headers": "Headers obrigatórios",
   "api_docs.req_body": "Corpo da requisição",
@@ -1714,13 +1776,16 @@ const pt: Dict = {
   "api_docs.ratelimit_gen": "gerações por minuto por chave API",
   "api_docs.ratelimit_poll": "requisições de status por minuto por chave API",
   "api_docs.ratelimit_other": "requisições por minuto por chave API (demais endpoints)",
-  "api_docs.ratelimit_note": "Os headers X-RateLimit-Remaining e X-RateLimit-Reset são incluídos em cada resposta. Se excedido, a API retorna 429 Too Many Requests.",
+  "api_docs.ratelimit_note":
+    "Os headers X-RateLimit-Remaining e X-RateLimit-Reset são incluídos em cada resposta. Se excedido, a API retorna 429 Too Many Requests.",
   "api_docs.webhook_title": "Webhooks",
-  "api_docs.webhook_desc": "Cortexia can send POST notifications to your server when a generation completes. Configure the callback URL in your account settings.",
+  "api_docs.webhook_desc":
+    "Cortexia can send POST notifications to your server when a generation completes. Configure the callback URL in your account settings.",
   "api_docs.webhook_events_title": "Events",
   "api_docs.webhook_payload_title": "Payload",
   "api_docs.webhook_verify_title": "Verification",
-  "api_docs.webhook_verify_desc": "Each webhook includes an X-Cortexia-Signature header containing the SHA-256 HMAC of the payload with your webhook secret. Always verify this signature before processing the payload.",
+  "api_docs.webhook_verify_desc":
+    "Each webhook includes an X-Cortexia-Signature header containing the SHA-256 HMAC of the payload with your webhook secret. Always verify this signature before processing the payload.",
 };
 
 const es: Dict = {
@@ -1731,7 +1796,8 @@ const es: Dict = {
   "hero.title": "Un acceso. Todos los modelos. Un agente que sabe cuál elegir.",
   "hero.subtitle":
     "Cortexia te da el catálogo completo, Kling, Seedream, Nano Banana, Claude, ElevenLabs y más, acceso directo, playground por playground. ¿Necesitas ir rápido? El agente elige y orquesta por ti. Facturado por uso, nunca por suscripción.",
-  "hero.micro_cta": "30+ modelos. Una sola cuenta. Paga con tarjeta, Mobile Money, cripto o Alipay.",
+  "hero.micro_cta":
+    "30+ modelos. Una sola cuenta. Paga con tarjeta, Mobile Money, cripto o Alipay.",
   "modes.eyebrow": "Dos formas de crear",
   "modes.title": "Tú al mando, o el agente al mando. Tu elección, en cada generación.",
   "modes.agent.title": "Modo Agente",
@@ -1755,14 +1821,17 @@ const es: Dict = {
   "waitlist.no_spam": "Sin tarjeta. Sin compromiso. Solo una notificación el día del lanzamiento.",
   "waitlist.done": "Estás dentro.",
   "waitlist.referral": "Tu link de referido",
-  "waitlist.referral_copy": "Cada amigo que se inscriba por tu link gana 3 lugares y créditos extra para ambos en el lanzamiento.",
+  "waitlist.referral_copy":
+    "Cada amigo que se inscriba por tu link gana 3 lugares y créditos extra para ambos en el lanzamiento.",
   "waitlist.copy": "Copiar",
   "waitlist.copied": "Copiado",
   "waitlist.friends_invited": "amigos invitados",
-  "waitlist.launch_email": "Listo. Te avisamos en la apertura, 1 de agosto, con tus créditos ya en tu cuenta.",
+  "waitlist.launch_email":
+    "Listo. Te avisamos en la apertura, 1 de agosto, con tus créditos ya en tu cuenta.",
   "sim.eyebrow": "La factura es el simulador",
   "sim.title": "La factura es el simulador. Sin sorpresas.",
-  "sim.subtitle": "Armá tu mes típico, todos los modelos mezclados. Compará con una suscripción clásica.",
+  "sim.subtitle":
+    "Armá tu mes típico, todos los modelos mezclados. Compará con una suscripción clásica.",
   "sim.eyebrow_card": "Simulador",
   "sim.compose": "Armá tu mes típico.",
   "sim.your_month": "Tu mes con Cortexia",
@@ -1770,11 +1839,14 @@ const es: Dict = {
   "sim.classic": "Con una suscripción clásica",
   "sim.you_save": "Ahorras",
   "sim.this_month": "este mes.",
-  "sim.threshold_note": "A este volumen, una suscripción empieza a ser competitiva, pero solo pagas lo que usas, sin compromiso.",
-  "sim.close_note": "Estás cerca del punto donde una suscripción compensa. Sigue pay-as-you-go mientras tu volumen varía.",
+  "sim.threshold_note":
+    "A este volumen, una suscripción empieza a ser competitiva, pero solo pagas lo que usas, sin compromiso.",
+  "sim.close_note":
+    "Estás cerca del punto donde una suscripción compensa. Sigue pay-as-you-go mientras tu volumen varía.",
   "sim.threshold_marker": "punto de equilibrio",
   "compare.eyebrow": "El cálculo real",
-  "compare.title": "Higgsfield. Midjourney. ElevenLabs. Claude. Una cuenta, un precio, todo el catálogo.",
+  "compare.title":
+    "Higgsfield. Midjourney. ElevenLabs. Claude. Una cuenta, un precio, todo el catálogo.",
   "compare.subtitle": "El modelo viejo vs Cortexia.",
   "compare.old.subtitle": "El modelo viejo",
   "compare.old.title": "Suscripciones apiladas",
@@ -1793,27 +1865,33 @@ const es: Dict = {
   "compare.total": "Total mensual",
   "wall.eyebrow": "El benchmark real es lo que sale.",
   "wall.title": "El benchmark real es lo que sale.",
-  "wall.subtitle": "Cada render abajo viene de un modelo del catálogo, generado al precio mostrado.",
+  "wall.subtitle":
+    "Cada render abajo viene de un modelo del catálogo, generado al precio mostrado.",
   "wall.load_more": "Ver más creaciones",
   "access.eyebrow": "Accesibilidad",
   "access.title": "Disponible en todos lados. Pagable en todos lados.",
-  "access.body": "Tarjeta, Mobile Money, cripto o Alipay. El catálogo completo, donde quiera que estés.",
+  "access.body":
+    "Tarjeta, Mobile Money, cripto o Alipay. El catálogo completo, donde quiera que estés.",
   "social.eyebrow": "Ya están esperando",
   "social.copy": "creadores inscritos, de Lomé a Yakarta pasando por São Paulo y París.",
   "faq.eyebrow": "Lo que preguntan",
   "faq.title": "Preguntas honestas.",
   "faq.q1": "¿Puedo elegir el modelo o el agente siempre decide?",
-  "faq.a1": "Los dos. Cada modelo tiene su playground accesible directamente, o podés dejar que el agente elija.",
+  "faq.a1":
+    "Los dos. Cada modelo tiene su playground accesible directamente, o podés dejar que el agente elija.",
   "faq.q2": "¿Cuántos modelos habrá en el lanzamiento?",
   "faq.a2": "Más de 30, cubriendo imagen, video, voz, música y texto.",
   "faq.q3": "¿Cuánto cuesta realmente?",
-  "faq.a3": "Pagás solo por lo que generás, al precio mostrado en cada modelo. Sin capas ocultas, sin mínimo mensal.",
+  "faq.a3":
+    "Pagás solo por lo que generás, al precio mostrado en cada modelo. Sin capas ocultas, sin mínimo mensal.",
   "faq.q4": "¿Puedo pagar con Mobile Money, cripto o Alipay?",
   "faq.a4": "Sí, además de tarjeta de crédito, donde esté disponible.",
   "faq.q5": "¿Por qué es más barato que una suscripción?",
-  "faq.a5": "Porque nunca pagás por capacidad que no usás. El simulador lo muestra con números reales.",
+  "faq.a5":
+    "Porque nunca pagás por capacidad que no usás. El simulador lo muestra con números reales.",
   "faq.q6": "¿Tienen API?",
-  "faq.a6": "Sí, desde el lanzamiento. Endpoints REST, claves self-service, mismo faturamiento por uso, sin mínimo mensal.",
+  "faq.a6":
+    "Sí, desde el lanzamiento. Endpoints REST, claves self-service, mismo faturamiento por uso, sin mínimo mensal.",
   "footer.copy": "© 2026. Construido para los creadores, en todos lados.",
   "footer.policy": "Privacidad",
   "footer.contact": "Contacto",
@@ -1846,7 +1924,8 @@ const es: Dict = {
   "app.header.help": "Replay de bienvenida",
   "app.header.internal": "Vista previa interna",
   "app.agent.hello": "Decime qué querés crear.",
-  "app.agent.hello_sub": "Yo elijo el mejor modelo, vos mantenés el control. Cada generación se cobra al costo mostrado.",
+  "app.agent.hello_sub":
+    "Yo elijo el mejor modelo, vos mantenés el control. Cada generación se cobra al costo mostrado.",
   "app.agent.starters_title": "Para empezar",
   "app.agent.decision_lead": "Elegido para vos",
   "app.agent.decision_alt": "Otras opciones",
@@ -1855,11 +1934,14 @@ const es: Dict = {
   "app.agent.download": "Descargar",
   "app.agent.result_ready": "Resultado listo",
   "app.onb.step1.title": "Un agente que elige el modelo correcto.",
-  "app.onb.step1.body": "Decí lo que querés — imagen, video, voz, texto. Cortexia enruta tu prompt al mejor modelo del catálogo y te explica por qué.",
+  "app.onb.step1.body":
+    "Decí lo que querés — imagen, video, voz, texto. Cortexia enruta tu prompt al mejor modelo del catálogo y te explica por qué.",
   "app.onb.step2.title": "Un playground por modelo.",
-  "app.onb.step2.body": "¿Necesitás control fino? Andá al catálogo y elegí tu modelo. Cada uno tiene su formulario y precios en vivo.",
+  "app.onb.step2.body":
+    "¿Necesitás control fino? Andá al catálogo y elegí tu modelo. Cada uno tiene su formulario y precios en vivo.",
   "app.onb.step3.title": "Sin suscripción. Sin sorpresas.",
-  "app.onb.step3.body": "El precio aparece antes de cada generación. Recargá lo que quieras — Mobile Money, tarjeta, cripto, Alipay — y andate cuando quieras.",
+  "app.onb.step3.body":
+    "El precio aparece antes de cada generación. Recargá lo que quieras — Mobile Money, tarjeta, cripto, Alipay — y andate cuando quieras.",
   "app.onb.next": "Siguiente",
   "app.onb.skip": "Saltar",
   "app.onb.welcome_credit": "U$5 de créditos de bienvenida en tu cuenta.",
@@ -1869,18 +1951,24 @@ const es: Dict = {
   "waitlist.confirm.recap_label": "Perfil registrado: {profession}",
   "waitlist.confirm.share": "Compartir en {network}",
   "waitlist.confirm.referral_hint": "Referí para subir más rápido.",
-  "waitlist.confirm.recap.pub": "Perfecto para creativos de pub — Kling, Seedance y GPT Image estarán en tu kit de herramientas desde el lanzamiento.",
-  "waitlist.confirm.recap.ugc": "Perfecto para creadores UGC — te avisamos cuando Cortexia abra, con acceso prioritario al playground de video.",
-  "waitlist.confirm.recap.émission": "Perfecto para equipos de programa — voz, edición IA y música disponibles desde el lanzamiento.",
-  "waitlist.confirm.recap.film": "Perfecto para producción audiovisual — Kling 4K y modelos de cine listos desde el lanzamiento.",
-  "waitlist.confirm.recap.autre": "Te estamos guardando un acceso desde el lanzamiento, con un mensaje de bienvenida personal.",
+  "waitlist.confirm.recap.pub":
+    "Perfecto para creativos de pub — Kling, Seedance y GPT Image estarán en tu kit de herramientas desde el lanzamiento.",
+  "waitlist.confirm.recap.ugc":
+    "Perfecto para creadores UGC — te avisamos cuando Cortexia abra, con acceso prioritario al playground de video.",
+  "waitlist.confirm.recap.émission":
+    "Perfecto para equipos de programa — voz, edición IA y música disponibles desde el lanzamiento.",
+  "waitlist.confirm.recap.film":
+    "Perfecto para producción audiovisual — Kling 4K y modelos de cine listos desde el lanzamiento.",
+  "waitlist.confirm.recap.autre":
+    "Te estamos guardando un acceso desde el lanzamiento, con un mensaje de bienvenida personal.",
 
   "waitlist.helper_email": "Serás el primero en saber en el lanzamiento.",
   "waitlist.error_signup": "Error de registro",
 
   // Developer page
   "dev.title": "Desarrollador",
-  "dev.subtitle": "Una única facturación por uso para todos los modelos. Sin plan mensual obligatorio, sin mínimo.",
+  "dev.subtitle":
+    "Una única facturación por uso para todos los modelos. Sin plan mensual obligatorio, sin mínimo.",
   "dev.quick_start": "Empieza en 30 segundos",
   "dev.api_ref": "Referencia de la API",
   "dev.keys_title": "Claves API",
@@ -1892,7 +1980,8 @@ const es: Dict = {
   "dev.key_active": "Activa",
   "dev.key_created": "Clave creada",
   "dev.key_copy_now": "Cópiala ahora.",
-  "dev.key_secret_warning": "Esta es la única vez que verás este secreto en texto plano. Después de cerrar, nunca podrá recuperarse — solo revocarse.",
+  "dev.key_secret_warning":
+    "Esta es la única vez que verás este secreto en texto plano. Después de cerrar, nunca podrá recuperarse — solo revocarse.",
   "dev.stat_calls": "Llamadas este mes",
   "dev.stat_cost": "Costo este mes",
   "dev.stat_success": "Tasa de éxito",
@@ -2151,8 +2240,7 @@ const es: Dict = {
   "preview.cta.catalog": "Ver catálogo",
   "preview.models_title": "Modelos disponibles",
   "preview.sim_title": "Simulá tu uso.",
-  "preview.sim_body":
-    "Sin sorpresas de fin de mes — la factura es el simulador.",
+  "preview.sim_body": "Sin sorpresas de fin de mes — la factura es el simulador.",
   "preview.footer_copy": "© 2026 Cortexia — construido para los creadores, en todos lados.",
   "preview.footer_open": "Abrir la app",
 
@@ -2244,8 +2332,10 @@ const es: Dict = {
 
   // API docs
   "api_docs.auth_title": "Autenticación",
-  "api_docs.auth_desc": "Todas las peticiones API deben incluir una clave API en el header Authorization. Usa el formato Bearer cx_.... Puedes crear y gestionar tus claves en la sección de arriba.",
-  "api_docs.auth_warning": "Nunca expongas tu clave API del lado del cliente. Usa variables de entorno y llama a la API desde un servidor seguro.",
+  "api_docs.auth_desc":
+    "Todas las peticiones API deben incluir una clave API en el header Authorization. Usa el formato Bearer cx_.... Puedes crear y gestionar tus claves en la sección de arriba.",
+  "api_docs.auth_warning":
+    "Nunca expongas tu clave API del lado del cliente. Usa variables de entorno y llama a la API desde un servidor seguro.",
   "api_docs.endpoints_title": "Referencia de endpoints",
   "api_docs.req_headers": "Headers requeridos",
   "api_docs.req_body": "Cuerpo de la petición",
@@ -2255,13 +2345,16 @@ const es: Dict = {
   "api_docs.ratelimit_gen": "generaciones por minuto por clave API",
   "api_docs.ratelimit_poll": "peticiones de estado por minuto por clave API",
   "api_docs.ratelimit_other": "peticiones por minuto por clave API (demás endpoints)",
-  "api_docs.ratelimit_note": "Los headers X-RateLimit-Remaining y X-RateLimit-Reset se incluyen en cada respuesta. Si se excede, la API devuelve 429 Too Many Requests.",
+  "api_docs.ratelimit_note":
+    "Los headers X-RateLimit-Remaining y X-RateLimit-Reset se incluyen en cada respuesta. Si se excede, la API devuelve 429 Too Many Requests.",
   "api_docs.webhook_title": "Webhooks",
-  "api_docs.webhook_desc": "Cortexia can send POST notifications to your server when a generation completes. Configure the callback URL in your account settings.",
+  "api_docs.webhook_desc":
+    "Cortexia can send POST notifications to your server when a generation completes. Configure the callback URL in your account settings.",
   "api_docs.webhook_events_title": "Events",
   "api_docs.webhook_payload_title": "Payload",
   "api_docs.webhook_verify_title": "Verification",
-  "api_docs.webhook_verify_desc": "Each webhook includes an X-Cortexia-Signature header containing the SHA-256 HMAC of the payload with your webhook secret. Always verify this signature before processing the payload.",
+  "api_docs.webhook_verify_desc":
+    "Each webhook includes an X-Cortexia-Signature header containing the SHA-256 HMAC of the payload with your webhook secret. Always verify this signature before processing the payload.",
 };
 
 const id: Dict = {
@@ -2296,11 +2389,13 @@ const id: Dict = {
   "waitlist.no_spam": "Tanpa kartu. Tanpa komitmen. Hanya notifikasi di hari peluncuran.",
   "waitlist.done": "Kamu sudah masuk.",
   "waitlist.referral": "Link referral-mu",
-  "waitlist.referral_copy": "Setiap teman yang mendaftar lewat link-mu mendapat 3 tempat dan kredit bonus untuk kalian berdua saat peluncuran.",
+  "waitlist.referral_copy":
+    "Setiap teman yang mendaftar lewat link-mu mendapat 3 tempat dan kredit bonus untuk kalian berdua saat peluncuran.",
   "waitlist.copy": "Salin",
   "waitlist.copied": "Tersalin",
   "waitlist.friends_invited": "teman diundang",
-  "waitlist.launch_email": "Siap. Kami kabari saat pembukaan, 1 Agustus, dengan kreditmu sudah di akun.",
+  "waitlist.launch_email":
+    "Siap. Kami kabari saat pembukaan, 1 Agustus, dengan kreditmu sudah di akun.",
   "sim.eyebrow": "Tagihan adalah simulasi",
   "sim.title": "Tagihan adalah simulasi. Tanpa kejutan.",
   "sim.subtitle": "Rancang bulan tipemu, semua model dicampur. Bandingkan dengan langganan klasik.",
@@ -2311,11 +2406,14 @@ const id: Dict = {
   "sim.classic": "Dengan langganan klasik",
   "sim.you_save": "Kamu hemat",
   "sim.this_month": "bulan ini.",
-  "sim.threshold_note": "Di volume ini, langganan mulai kompetitif, tapi kamu tetap hanya bayar yang dipakai, tanpa komitmen.",
-  "sim.close_note": "Kamu mendekati titik di mana langganan tetap lebih worth it. Tetap pay-as-you-go selagi volumemu bervariasi.",
+  "sim.threshold_note":
+    "Di volume ini, langganan mulai kompetitif, tapi kamu tetap hanya bayar yang dipakai, tanpa komitmen.",
+  "sim.close_note":
+    "Kamu mendekati titik di mana langganan tetap lebih worth it. Tetap pay-as-you-go selagi volumemu bervariasi.",
   "sim.threshold_marker": "titik impas",
   "compare.eyebrow": "Perhitungan nyata",
-  "compare.title": "Higgsfield. Midjourney. ElevenLabs. Claude. Satu akun, satu harga, seluruh katalog.",
+  "compare.title":
+    "Higgsfield. Midjourney. ElevenLabs. Claude. Satu akun, satu harga, seluruh katalog.",
   "compare.subtitle": "Model lama vs Cortexia.",
   "compare.old.subtitle": "Model lama",
   "compare.old.title": "Langganan bertumpuk",
@@ -2334,27 +2432,33 @@ const id: Dict = {
   "compare.total": "Total bulanan",
   "wall.eyebrow": "Benchmark nyata adalah yang dihasilkan.",
   "wall.title": "Benchmark nyata adalah yang dihasilkan.",
-  "wall.subtitle": "Setiap render di bawah ini berasal dari model katalog, dihasilkan dengan harga yang ditampilkan.",
+  "wall.subtitle":
+    "Setiap render di bawah ini berasal dari model katalog, dihasilkan dengan harga yang ditampilkan.",
   "wall.load_more": "Lihat lebih banyak karya",
   "access.eyebrow": "Aksesibilitas",
   "access.title": "Tersedia di mana saja. Bisa dibayar di mana saja.",
-  "access.body": "Kartu, Mobile Money, kripto atau Alipay. Katalog lengkap, di mana pun kamu berada.",
+  "access.body":
+    "Kartu, Mobile Money, kripto atau Alipay. Katalog lengkap, di mana pun kamu berada.",
   "social.eyebrow": "Sudah menunggu",
   "social.copy": "kreator terdaftar, dari Lomé ke Jakarta melewati São Paulo dan Paris.",
   "faq.eyebrow": "Yang ditanyakan",
   "faq.title": "Pertanyaan jujur.",
   "faq.q1": "Bisakah aku memilih model sendiri, atau agen yang selalu memutuskan?",
-  "faq.a1": "Keduanya. Setiap model punya playground yang bisa diakses langsung, atau kamu bisa biarkan agen memilih.",
+  "faq.a1":
+    "Keduanya. Setiap model punya playground yang bisa diakses langsung, atau kamu bisa biarkan agen memilih.",
   "faq.q2": "Berapa banyak model saat peluncuran?",
   "faq.a2": "Lebih dari 30, mencakup gambar, video, suara, musik dan teks.",
   "faq.q3": "Berapa biayanya sebenarnya?",
-  "faq.a3": "Kamu hanya bayar apa yang kamu hasilkan, dengan harga yang ditampilkan di setiap model. Tanpa lapisan tersembunyi, tanpa minimum bulanan.",
+  "faq.a3":
+    "Kamu hanya bayar apa yang kamu hasilkan, dengan harga yang ditampilkan di setiap model. Tanpa lapisan tersembunyi, tanpa minimum bulanan.",
   "faq.q4": "Bisakah saya bayar dengan Mobile Money, kripto atau Alipay?",
   "faq.a4": "Ya, selain kartu kredit, di mana pun tersedia.",
   "faq.q5": "Mengapa lebih murah dari langganan?",
-  "faq.a5": "Karena kamu tidak pernah membayar untuk kapasitas yang tidak kamu pakai. Simulator menunjukkan dengan angka nyata.",
+  "faq.a5":
+    "Karena kamu tidak pernah membayar untuk kapasitas yang tidak kamu pakai. Simulator menunjukkan dengan angka nyata.",
   "faq.q6": "Apakah ada API?",
-  "faq.a6": "Ya, sejak peluncuran. Endpoints REST, kunci self-service, sistem tagihan yang sama per penggunaan, tanpa minimum bulanan.",
+  "faq.a6":
+    "Ya, sejak peluncuran. Endpoints REST, kunci self-service, sistem tagihan yang sama per penggunaan, tanpa minimum bulanan.",
   "footer.copy": "© 2026. Dibuat untuk kreator, di mana saja.",
   "footer.policy": "Privasi",
   "footer.contact": "Kontak",
@@ -2387,7 +2491,8 @@ const id: Dict = {
   "app.header.help": "Ulangi sambutan",
   "app.header.internal": "Pratinjau internal",
   "app.agent.hello": "Katakan apa yang ingin kamu buat.",
-  "app.agent.hello_sub": "Saya memilih model terbaik, kamu tetap kendali. Setiap generasi dikenakan biaya sesuai harga yang ditampilkan.",
+  "app.agent.hello_sub":
+    "Saya memilih model terbaik, kamu tetap kendali. Setiap generasi dikenakan biaya sesuai harga yang ditampilkan.",
   "app.agent.starters_title": "Untuk memulai",
   "app.agent.decision_lead": "Dipilih untukmu",
   "app.agent.decision_alt": "Alternatif lain",
@@ -2396,11 +2501,14 @@ const id: Dict = {
   "app.agent.download": "Unduh",
   "app.agent.result_ready": "Hasil siap",
   "app.onb.step1.title": "Agen yang memilih model yang tepat.",
-  "app.onb.step1.body": "Katakan yang kamu mau — gambar, video, suara, teks. Cortexia merutekan promptmu ke model terbaik di katalog dan menjelaskan mengapa.",
+  "app.onb.step1.body":
+    "Katakan yang kamu mau — gambar, video, suara, teks. Cortexia merutekan promptmu ke model terbaik di katalog dan menjelaskan mengapa.",
   "app.onb.step2.title": "Playground per model.",
-  "app.onb.step2.body": "Butuh kontrol detail? Buka katalog dan pilih modelmu. Masing-masing punya formulir dan harga langsung.",
+  "app.onb.step2.body":
+    "Butuh kontrol detail? Buka katalog dan pilih modelmu. Masing-masing punya formulir dan harga langsung.",
   "app.onb.step3.title": "Tanpa langganan. Tanpa kejutan.",
-  "app.onb.step3.body": "Harga muncul sebelum setiap generasi. Isi ulang sesukamu — Mobile Money, kartu, kripto, Alipay — keluar kapan pun.",
+  "app.onb.step3.body":
+    "Harga muncul sebelum setiap generasi. Isi ulang sesukamu — Mobile Money, kartu, kripto, Alipay — keluar kapan pun.",
   "app.onb.next": "Selanjutnya",
   "app.onb.skip": "Lewati",
   "app.onb.welcome_credit": "$5 kredit selamat datang di akunmu.",
@@ -2410,18 +2518,24 @@ const id: Dict = {
   "waitlist.confirm.recap_label": "Profil terdaftar: {profession}",
   "waitlist.confirm.share": "Bagikan di {network}",
   "waitlist.confirm.referral_hint": "Referensikan untuk naik lebih cepat.",
-  "waitlist.confirm.recap.pub": "Cocok untuk kreator iklan — Kling, Seedance dan GPT Image akan ada di kotak alatmu sejak peluncuran.",
-  "waitlist.confirm.recap.ugc": "Cocok untuk kreator UGC — kami kabari saat Cortexia buka, dengan akses prioritas ke playground video.",
-  "waitlist.confirm.recap.émission": "Cocok untuk tim acara — suara, editing AI dan musik tersedia sejak peluncuran.",
-  "waitlist.confirm.recap.film": "Cocok untuk produksi audiovisual — Kling 4K dan model sinema siap sejak peluncuran.",
-  "waitlist.confirm.recap.autre": "Kami simpan akses untukmu sejak peluncuran, dengan pesan sambutan pribadi.",
+  "waitlist.confirm.recap.pub":
+    "Cocok untuk kreator iklan — Kling, Seedance dan GPT Image akan ada di kotak alatmu sejak peluncuran.",
+  "waitlist.confirm.recap.ugc":
+    "Cocok untuk kreator UGC — kami kabari saat Cortexia buka, dengan akses prioritas ke playground video.",
+  "waitlist.confirm.recap.émission":
+    "Cocok untuk tim acara — suara, editing AI dan musik tersedia sejak peluncuran.",
+  "waitlist.confirm.recap.film":
+    "Cocok untuk produksi audiovisual — Kling 4K dan model sinema siap sejak peluncuran.",
+  "waitlist.confirm.recap.autre":
+    "Kami simpan akses untukmu sejak peluncuran, dengan pesan sambutan pribadi.",
 
   "waitlist.helper_email": "Kamu akan menjadi yang pertama tahu saat peluncuran.",
   "waitlist.error_signup": "Kesalahan pendaftaran",
 
   // Developer page
   "dev.title": "Pengembang",
-  "dev.subtitle": "Satu tarif per penggunaan untuk semua model. Tanpa paket bulanan wajib, tanpa minimum.",
+  "dev.subtitle":
+    "Satu tarif per penggunaan untuk semua model. Tanpa paket bulanan wajib, tanpa minimum.",
   "dev.quick_start": "Mulai dalam 30 detik",
   "dev.api_ref": "Referensi API",
   "dev.keys_title": "Kunci API",
@@ -2433,7 +2547,8 @@ const id: Dict = {
   "dev.key_active": "Aktif",
   "dev.key_created": "Kunci dibuat",
   "dev.key_copy_now": "Salin sekarang.",
-  "dev.key_secret_warning": "Ini satu-satunya kali kamu akan melihat rahasia ini dalam teks biasa. Setelah menutup, tidak akan bisa dipulihkan — hanya bisa dicabut.",
+  "dev.key_secret_warning":
+    "Ini satu-satunya kali kamu akan melihat rahasia ini dalam teks biasa. Setelah menutup, tidak akan bisa dipulihkan — hanya bisa dicabut.",
   "dev.stat_calls": "Panggilan bulan ini",
   "dev.stat_cost": "Biaya bulan ini",
   "dev.stat_success": "Tingkat keberhasilan",
@@ -2561,7 +2676,8 @@ const id: Dict = {
   "canvas.empty.suggestion.film": "Film",
   "canvas.empty.suggestion.teaser": "Teaser",
   "canvas.empty.suggestion.podcast": "Podcast",
-  "canvas.empty.suggestion.pub.text": "Buat iklan visual yang menarik dengan gambar dan pengisi suara",
+  "canvas.empty.suggestion.pub.text":
+    "Buat iklan visual yang menarik dengan gambar dan pengisi suara",
   "canvas.empty.suggestion.ugc.text": "Buat konten UGC autentik untuk media sosial",
   "canvas.empty.suggestion.show.text": "Rancang rencana editorial lengkap untuk sebuah acara",
   "canvas.empty.suggestion.film.text": "Buat storyboard visual untuk film pendek",
@@ -2692,8 +2808,7 @@ const id: Dict = {
   "preview.cta.catalog": "Lihat katalog",
   "preview.models_title": "Model tersedia",
   "preview.sim_title": "Simulasikan penggunaanmu.",
-  "preview.sim_body":
-    "Tanpa kejutan di akhir bulan — tagihan adalah simulasi.",
+  "preview.sim_body": "Tanpa kejutan di akhir bulan — tagihan adalah simulasi.",
   "preview.footer_copy": "© 2026 Cortexia — dibuat untuk kreator, di mana saja.",
   "preview.footer_open": "Buka app",
 
@@ -2785,8 +2900,10 @@ const id: Dict = {
 
   // API docs
   "api_docs.auth_title": "Autentikasi",
-  "api_docs.auth_desc": "Semua permintaan API harus menyertakan kunci API di header Authorization. Gunakan format Bearer cx_.... Kamu bisa membuat dan mengelola kuncimu di bagian di atas.",
-  "api_docs.auth_warning": "Jangan pernah mengekspos kunci API-mu di sisi klien. Gunakan variabel lingkungan dan panggil API dari server yang aman.",
+  "api_docs.auth_desc":
+    "Semua permintaan API harus menyertakan kunci API di header Authorization. Gunakan format Bearer cx_.... Kamu bisa membuat dan mengelola kuncimu di bagian di atas.",
+  "api_docs.auth_warning":
+    "Jangan pernah mengekspos kunci API-mu di sisi klien. Gunakan variabel lingkungan dan panggil API dari server yang aman.",
   "api_docs.endpoints_title": "Referensi endpoint",
   "api_docs.req_headers": "Header yang diperlukan",
   "api_docs.req_body": "Badan permintaan",
@@ -2796,13 +2913,16 @@ const id: Dict = {
   "api_docs.ratelimit_gen": "generasi per menit per kunci API",
   "api_docs.ratelimit_poll": "permintaan status per menit per kunci API",
   "api_docs.ratelimit_other": "permintaan per menit per kunci API (endpoint lainnya)",
-  "api_docs.ratelimit_note": "Header X-RateLimit-Remaining dan X-RateLimit-Reset disertakan di setiap respons. Jika terlampaui, API mengembalikan 429 Too Many Requests.",
+  "api_docs.ratelimit_note":
+    "Header X-RateLimit-Remaining dan X-RateLimit-Reset disertakan di setiap respons. Jika terlampaui, API mengembalikan 429 Too Many Requests.",
   "api_docs.webhook_title": "Webhooks",
-  "api_docs.webhook_desc": "Cortexia can send POST notifications to your server when a generation completes. Configure the callback URL in your account settings.",
+  "api_docs.webhook_desc":
+    "Cortexia can send POST notifications to your server when a generation completes. Configure the callback URL in your account settings.",
   "api_docs.webhook_events_title": "Events",
   "api_docs.webhook_payload_title": "Payload",
   "api_docs.webhook_verify_title": "Verification",
-  "api_docs.webhook_verify_desc": "Each webhook includes an X-Cortexia-Signature header containing the SHA-256 HMAC of the payload with your webhook secret. Always verify this signature before processing the payload.",
+  "api_docs.webhook_verify_desc":
+    "Each webhook includes an X-Cortexia-Signature header containing the SHA-256 HMAC of the payload with your webhook secret. Always verify this signature before processing the payload.",
 };
 
 const DICTS: Record<Lang, Dict> = { fr, en, pt, id, es };

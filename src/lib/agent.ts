@@ -40,7 +40,11 @@ export type AgentModel =
 export type GraphOperation =
   | { type: "ADD_NODE"; modelSlug: string; position?: { x: number; y: number } }
   | { type: "CONNECT_NODES"; source: string; target: string }
-  | { type: "UPDATE_NODE"; nodeId: string; params: Record<string, string | number | boolean | null> }
+  | {
+      type: "UPDATE_NODE";
+      nodeId: string;
+      params: Record<string, string | number | boolean | null>;
+    }
   | { type: "REMOVE_NODE"; nodeId: string };
 
 export type AgentResponse = {
@@ -75,9 +79,7 @@ function buildModelsSummary(): string {
   const lines: string[] = [];
   for (const m of uniqueModels.values()) {
     const price = m.priceUSD ?? m.tiers?.[0]?.priceUSD ?? 0;
-    lines.push(
-      `- ${m.slug}: ${m.name} (${m.category}) - ${m.blurb} [~$${price.toFixed(4)}]`
-    );
+    lines.push(`- ${m.slug}: ${m.name} (${m.category}) - ${m.blurb} [~$${price.toFixed(4)}]`);
   }
   return lines.join("\n");
 }
@@ -146,7 +148,7 @@ Detect the user's language from their message and respond in that same language.
 
 async function callClaude(
   messages: Array<{ role: string; content: string }>,
-  config: AgentConfig
+  config: AgentConfig,
 ): Promise<string> {
   const endpoint = `${kieApiBase()}/claude/v1/messages`;
   const body = {
@@ -176,7 +178,7 @@ async function callClaude(
 
 async function callGPT(
   messages: Array<{ role: string; content: string }>,
-  config: AgentConfig
+  config: AgentConfig,
 ): Promise<string> {
   const endpoint = `${kieApiBase()}/openai/v1/chat/completions`;
   const body = {
@@ -206,7 +208,7 @@ async function callGPT(
 
 async function callGemini(
   messages: Array<{ role: string; content: string }>,
-  config: AgentConfig
+  config: AgentConfig,
 ): Promise<string> {
   const model = config.model === "gemini-2-5-flash" ? "gemini-2.5-flash" : "gemini-2.5-pro";
   const endpoint = `${kieApiBase()}/google/v1beta/models/${model}:generateContent`;
@@ -240,7 +242,7 @@ async function callGemini(
 
 async function callGrok(
   messages: Array<{ role: string; content: string }>,
-  config: AgentConfig
+  config: AgentConfig,
 ): Promise<string> {
   const endpoint = `${kieApiBase()}/xai/v1/chat/completions`;
   const body = {
@@ -270,7 +272,7 @@ async function callGrok(
 
 async function callLLM(
   messages: Array<{ role: string; content: string }>,
-  config: AgentConfig
+  config: AgentConfig,
 ): Promise<string> {
   switch (config.model) {
     case "claude-sonnet-4-5":
@@ -354,9 +356,10 @@ function parseAgentResponse(raw: string): AgentResponse {
         validatedOps.push({
           type: "ADD_NODE",
           modelSlug: op.modelSlug,
-          position: op.position && typeof op.position === "object"
-            ? { x: Number(op.position.x) || 0, y: Number(op.position.y) || 0 }
-            : undefined,
+          position:
+            op.position && typeof op.position === "object"
+              ? { x: Number(op.position.x) || 0, y: Number(op.position.y) || 0 }
+              : undefined,
         });
         break;
       }
@@ -401,10 +404,18 @@ function detectLanguage(text: string): string {
   // Simple language detection based on common words
   const lowerText = text.toLowerCase();
 
-  if (/\b(le|la|les|un|une|des|est|sont|je|tu|nous|vous|ils|elles|fait|faire|peut|doit|bonjour|merci)\b/.test(lowerText)) {
+  if (
+    /\b(le|la|les|un|une|des|est|sont|je|tu|nous|vous|ils|elles|fait|faire|peut|doit|bonjour|merci)\b/.test(
+      lowerText,
+    )
+  ) {
     return "fr";
   }
-  if (/\b(the|is|are|was|were|have|has|had|can|will|would|could|should|hello|thanks|thank)\b/.test(lowerText)) {
+  if (
+    /\b(the|is|are|was|were|have|has|had|can|will|would|could|should|hello|thanks|thank)\b/.test(
+      lowerText,
+    )
+  ) {
     return "en";
   }
   if (/\b(el|la|los|las|es|son|estoy|tienes|podemos|puedo|hola|gracias)\b/.test(lowerText)) {
@@ -425,15 +436,13 @@ export async function runAgent(
   currentGraphState?: {
     nodes: Array<{ id: string; slug: string }>;
     edges: Array<{ source: string; target: string }>;
-  }
+  },
 ): Promise<AgentResponse> {
   // Build the user message with context
   let contextMessage = userMessage;
 
   if (currentGraphState && currentGraphState.nodes.length > 0) {
-    const nodeContext = currentGraphState.nodes
-      .map((n) => `- ${n.id}: ${n.slug}`)
-      .join("\n");
+    const nodeContext = currentGraphState.nodes.map((n) => `- ${n.id}: ${n.slug}`).join("\n");
     const edgeContext = currentGraphState.edges
       .map((e) => `- ${e.source} → ${e.target}`)
       .join("\n");
@@ -461,7 +470,7 @@ User request: ${userMessage}`;
 
 export function shouldConfirmOperation(
   estimatedCost: number,
-  threshold: number = DEFAULT_COST_THRESHOLD
+  threshold: number = DEFAULT_COST_THRESHOLD,
 ): boolean {
   return estimatedCost > threshold;
 }

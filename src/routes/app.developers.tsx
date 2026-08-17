@@ -22,7 +22,7 @@ export const Route = createFileRoute("/app/developers")({
     const session = loadSession();
     if (!session) {
       throw redirect({
-        to: "/auth/$pathname" as "/auth/$pathname",
+        to: "/auth/$pathname" as const,
         params: { pathname: "sign-in" },
         search: { redirect: location.href },
       });

@@ -11,8 +11,7 @@ type SimilarModelsProps = {
 export function SimilarModels({ model }: SimilarModelsProps) {
   const t = useT();
   const similar = useMemo(
-    () =>
-      MODELS.filter((m) => m.category === model.category && m.slug !== model.slug).slice(0, 3),
+    () => MODELS.filter((m) => m.category === model.category && m.slug !== model.slug).slice(0, 3),
     [model.category, model.slug],
   );
 

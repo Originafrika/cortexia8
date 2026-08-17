@@ -5,10 +5,7 @@ import { lookupReferralCode } from "@/lib/waitlist";
 export const Route = createFileRoute("/r/$code")({
   component: ReferralRedirect,
   head: () => ({
-    meta: [
-      { title: "Redirection..." },
-      { name: "robots", content: "noindex,nofollow" },
-    ],
+    meta: [{ title: "Redirection..." }, { name: "robots", content: "noindex,nofollow" }],
   }),
 });
 
@@ -40,9 +37,7 @@ function ReferralRedirect() {
           <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
             Invalid referral code
           </div>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Redirecting to homepage...
-          </p>
+          <p className="mt-2 text-sm text-muted-foreground">Redirecting to homepage...</p>
         </div>
       </div>
     );

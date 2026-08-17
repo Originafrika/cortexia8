@@ -94,8 +94,6 @@ export function OnboardingOverlay({ open, onClose }: Props) {
                   {t(Step.titleKey)}
                 </h2>
                 <p className="mt-3 text-foreground/80 leading-relaxed">{t(Step.bodyKey)}</p>
-
-
               </motion.div>
             </AnimatePresence>
 

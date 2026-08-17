@@ -64,9 +64,7 @@ export function PromptBar({
           className="w-full resize-none bg-transparent px-2 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-amber/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background placeholder:text-muted-foreground/70 rounded-md"
         />
       ) : (
-        <div className="px-2 py-1.5 text-sm text-muted-foreground">
-          {t("playground.helper")}
-        </div>
+        <div className="px-2 py-1.5 text-sm text-muted-foreground">{t("playground.helper")}</div>
       )}
 
       <div className="mt-2 flex items-center gap-1.5 flex-wrap">
@@ -86,7 +84,9 @@ export function PromptBar({
             )}
           >
             <Settings2 className="size-3" />
-            <span className="hidden sm:inline">{showAdvanced ? t("playground.advanced") : t("playground.simple")}</span>
+            <span className="hidden sm:inline">
+              {showAdvanced ? t("playground.advanced") : t("playground.simple")}
+            </span>
           </button>
         )}
 
@@ -103,7 +103,9 @@ export function PromptBar({
             {activeCount > 0 ? (
               <>
                 <Loader2 className="size-4 animate-spin" />
-                <span className="hidden sm:inline">{activeCount}/{maxConcurrent}</span>
+                <span className="hidden sm:inline">
+                  {activeCount}/{maxConcurrent}
+                </span>
               </>
             ) : (
               <>

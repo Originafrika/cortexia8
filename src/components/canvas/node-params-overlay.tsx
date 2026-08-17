@@ -1,9 +1,4 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { NodeParams } from "@/components/canvas/node-params";
 import { PriceDisplay } from "@/components/price-display";
@@ -62,22 +57,13 @@ export function NodeParamsOverlay({
         </DialogHeader>
 
         <div className="mt-4">
-          <NodeParams
-            model={model}
-            params={params}
-            onChange={handleChange}
-            disabled={readOnly}
-          />
+          <NodeParams model={model} params={params} onChange={handleChange} disabled={readOnly} />
         </div>
 
         <div className="mt-6 flex items-center justify-between pt-4 border-t border-border">
           <PriceDisplay usd={model.priceUSD ?? 0} className="text-sm" />
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onOpenChange(false)}
-            >
+            <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>
               {t("node.close")}
             </Button>
             <Button

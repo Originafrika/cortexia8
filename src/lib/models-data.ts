@@ -8,12 +8,7 @@
 //   - scripts/generate-seed-sql.mjs (emits drizzle/0002_seed_models.sql)
 
 export type ModelCategory = "image" | "video" | "audio" | "text" | "music";
-export type Unit =
-  | "image"
-  | "second"
-  | "1k-chars"
-  | "1m-tokens-io"
-  | "track";
+export type Unit = "image" | "second" | "1k-chars" | "1m-tokens-io" | "track";
 export type ParamSpec =
   | { kind: "prompt"; label: string; placeholder?: string }
   | { kind: "upload"; label: string; multiple?: boolean; accepts?: string }
@@ -76,17 +71,45 @@ export type CatalogueEntry = {
 export const schemaImageT2I: InputSchemaField[] = [
   { key: "prompt", type: "longtext", required: true, label: "Prompt" },
   { key: "negative_prompt", type: "longtext", label: "Negative prompt" },
-  { key: "aspect_ratio", type: "enum", label: "Aspect ratio", options: ["1:1", "3:4", "4:3", "16:9", "9:16"], default: "1:1" },
-  { key: "num_images", type: "number", label: "Number of images", min: 1, max: 4, step: 1, default: 1 },
+  {
+    key: "aspect_ratio",
+    type: "enum",
+    label: "Aspect ratio",
+    options: ["1:1", "3:4", "4:3", "16:9", "9:16"],
+    default: "1:1",
+  },
+  {
+    key: "num_images",
+    type: "number",
+    label: "Number of images",
+    min: 1,
+    max: 4,
+    step: 1,
+    default: 1,
+  },
   { key: "seed", type: "number", label: "Seed", min: 0, max: 4294967295, step: 1, default: -1 },
-  { key: "guidance_scale", type: "number", label: "Guidance scale", min: 1, max: 20, step: 0.1, default: 7.5 },
+  {
+    key: "guidance_scale",
+    type: "number",
+    label: "Guidance scale",
+    min: 1,
+    max: 20,
+    step: 0.1,
+    default: 7.5,
+  },
 ];
 
 export const schemaImageI2I: InputSchemaField[] = [
   { key: "prompt", type: "longtext", required: true, label: "Prompt" },
   { key: "image", type: "upload", required: true, label: "Source image", accepts: "image/*" },
   { key: "strength", type: "number", label: "Strength", min: 0, max: 1, step: 0.05, default: 0.7 },
-  { key: "aspect_ratio", type: "enum", label: "Aspect ratio", options: ["1:1", "3:4", "4:3", "16:9", "9:16"], default: "1:1" },
+  {
+    key: "aspect_ratio",
+    type: "enum",
+    label: "Aspect ratio",
+    options: ["1:1", "3:4", "4:3", "16:9", "9:16"],
+    default: "1:1",
+  },
   { key: "seed", type: "number", label: "Seed", min: 0, max: 4294967295, step: 1, default: -1 },
 ];
 
@@ -104,7 +127,13 @@ export const schemaImageUpscale: InputSchemaField[] = [
 
 export const schemaVideoT2V: InputSchemaField[] = [
   { key: "prompt", type: "longtext", required: true, label: "Prompt" },
-  { key: "aspect_ratio", type: "enum", label: "Aspect ratio", options: ["16:9", "9:16", "1:1", "4:3"], default: "16:9" },
+  {
+    key: "aspect_ratio",
+    type: "enum",
+    label: "Aspect ratio",
+    options: ["16:9", "9:16", "1:1", "4:3"],
+    default: "16:9",
+  },
   { key: "duration", type: "number", label: "Duration (s)", min: 2, max: 10, step: 1, default: 5 },
   { key: "fps", type: "number", label: "FPS", min: 12, max: 60, step: 1, default: 24 },
   { key: "seed", type: "number", label: "Seed", min: 0, max: 4294967295, step: 1, default: -1 },
@@ -128,7 +157,13 @@ export const schemaVideoExtend: InputSchemaField[] = [
 
 export const schemaVideoUpscale: InputSchemaField[] = [
   { key: "video", type: "upload", required: true, label: "Source video", accepts: "video/*" },
-  { key: "scale", type: "enum", label: "Scale", options: ["720p", "1080p", "4K"], default: "1080p" },
+  {
+    key: "scale",
+    type: "enum",
+    label: "Scale",
+    options: ["720p", "1080p", "4K"],
+    default: "1080p",
+  },
 ];
 
 export const schemaVideoLipSync: InputSchemaField[] = [
@@ -138,8 +173,25 @@ export const schemaVideoLipSync: InputSchemaField[] = [
 
 export const schemaAudioTTS: InputSchemaField[] = [
   { key: "text", type: "longtext", required: true, label: "Text" },
-  { key: "voice", type: "enum", label: "Voice", options: ["Amara — français, naturel", "Julien — français, grave", "Wei — anglais, chaleureux", "Rio — portugais, énergique"], default: "Amara — français, naturel" },
-  { key: "language", type: "enum", label: "Language", options: ["FR", "EN", "PT", "ES", "AR", "SW"], default: "FR" },
+  {
+    key: "voice",
+    type: "enum",
+    label: "Voice",
+    options: [
+      "Amara — français, naturel",
+      "Julien — français, grave",
+      "Wei — anglais, chaleureux",
+      "Rio — portugais, énergique",
+    ],
+    default: "Amara — français, naturel",
+  },
+  {
+    key: "language",
+    type: "enum",
+    label: "Language",
+    options: ["FR", "EN", "PT", "ES", "AR", "SW"],
+    default: "FR",
+  },
   { key: "stability", type: "number", label: "Stability", min: 0, max: 100, step: 1, default: 55 },
   { key: "style", type: "number", label: "Style", min: 0, max: 100, step: 1, default: 20 },
 ];
@@ -149,9 +201,30 @@ export const schemaAudioIsolation: InputSchemaField[] = [
 ];
 
 export const schemaLLM: InputSchemaField[] = [
-  { key: "messages", type: "longtext", required: true, label: "Conversation (JSON array of {role, content})" },
-  { key: "temperature", type: "number", label: "Temperature", min: 0, max: 2, step: 0.1, default: 1 },
-  { key: "max_tokens", type: "number", label: "Max tokens", min: 1, max: 32000, step: 1, default: 1024 },
+  {
+    key: "messages",
+    type: "longtext",
+    required: true,
+    label: "Conversation (JSON array of {role, content})",
+  },
+  {
+    key: "temperature",
+    type: "number",
+    label: "Temperature",
+    min: 0,
+    max: 2,
+    step: 0.1,
+    default: 1,
+  },
+  {
+    key: "max_tokens",
+    type: "number",
+    label: "Max tokens",
+    min: 1,
+    max: 32000,
+    step: 1,
+    default: 1024,
+  },
   { key: "top_p", type: "number", label: "Top P", min: 0, max: 1, step: 0.05, default: 1 },
 ];
 
@@ -197,18 +270,40 @@ export const schemaGrok: InputSchemaField[] = [
 export const schemaMusicGenerate: InputSchemaField[] = [
   { key: "prompt", type: "longtext", required: true, label: "Prompt" },
   { key: "instrumental", type: "boolean", label: "Instrumental only", default: false },
-  { key: "duration", type: "number", label: "Duration (s)", min: 5, max: 240, step: 1, default: 30 },
+  {
+    key: "duration",
+    type: "number",
+    label: "Duration (s)",
+    min: 5,
+    max: 240,
+    step: 1,
+    default: 30,
+  },
 ];
 
 export const schemaMusicExtend: InputSchemaField[] = [
   { key: "audio", type: "upload", required: true, label: "Source audio", accepts: "audio/*" },
   { key: "prompt", type: "longtext", label: "Continuation prompt" },
-  { key: "duration", type: "number", label: "Duration (s)", min: 5, max: 120, step: 1, default: 30 },
+  {
+    key: "duration",
+    type: "number",
+    label: "Duration (s)",
+    min: 5,
+    max: 120,
+    step: 1,
+    default: 30,
+  },
 ];
 
 export const schemaMusicLyrics: InputSchemaField[] = [
   { key: "prompt", type: "longtext", required: true, label: "Topic / theme" },
-  { key: "style", type: "enum", label: "Style", options: ["Pop", "Rock", "Hip-Hop", "R&B", "Electronic", "Jazz", "Afrobeat"], default: "Pop" },
+  {
+    key: "style",
+    type: "enum",
+    label: "Style",
+    options: ["Pop", "Rock", "Hip-Hop", "R&B", "Electronic", "Jazz", "Afrobeat"],
+    default: "Pop",
+  },
 ];
 
 // ── Builders ─────────────────────────────────────────────────────────────
@@ -1177,8 +1272,8 @@ export const CATALOGUE: CatalogueEntry[] = [
     kieEndpoint: "kling/v2-1-master-image-to-video",
     fidelityStatus: "generique",
     supportsReferenceUpload: true,
-    providerCostUsd: 0.10,
-    cortexiaPriceUsd: cortexia(0.10),
+    providerCostUsd: 0.1,
+    cortexiaPriceUsd: cortexia(0.1),
     active: true,
     order: 56,
     blurb: "Kling v2.1 Master I2V — image-vers-vidéo premium.",
@@ -1225,16 +1320,30 @@ export const CATALOGUE: CatalogueEntry[] = [
     kieEndpoint: "kling-2.6/motion-control",
     fidelityStatus: "generique",
     supportsReferenceUpload: true,
-    providerCostUsd: 0.10,
-    cortexiaPriceUsd: cortexia(0.10),
+    providerCostUsd: 0.1,
+    cortexiaPriceUsd: cortexia(0.1),
     active: true,
     order: 53,
     blurb: "Kling — contrôle du mouvement image-vers-vidéo.",
     unit: "second",
     inputSchema: [
-      { key: "reference_video", type: "upload", required: true, label: "Reference video", accepts: "video/*" },
+      {
+        key: "reference_video",
+        type: "upload",
+        required: true,
+        label: "Reference video",
+        accepts: "video/*",
+      },
       { key: "image", type: "upload", required: true, label: "Subject image", accepts: "image/*" },
-      { key: "duration", type: "number", label: "Duration (s)", min: 2, max: 10, step: 1, default: 5 },
+      {
+        key: "duration",
+        type: "number",
+        label: "Duration (s)",
+        min: 2,
+        max: 10,
+        step: 1,
+        default: 5,
+      },
     ],
   },
   {
@@ -1252,9 +1361,23 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Contrôle précis du mouvement caméra et sujet.",
     unit: "second",
     inputSchema: [
-      { key: "reference_video", type: "upload", required: true, label: "Reference video", accepts: "video/*" },
+      {
+        key: "reference_video",
+        type: "upload",
+        required: true,
+        label: "Reference video",
+        accepts: "video/*",
+      },
       { key: "image", type: "upload", required: true, label: "Subject image", accepts: "image/*" },
-      { key: "duration", type: "number", label: "Duration (s)", min: 2, max: 10, step: 1, default: 5 },
+      {
+        key: "duration",
+        type: "number",
+        label: "Duration (s)",
+        min: 2,
+        max: 10,
+        step: 1,
+        default: 5,
+      },
     ],
   },
   {
@@ -1481,8 +1604,8 @@ export const CATALOGUE: CatalogueEntry[] = [
     kieEndpoint: "hailuo/2-3-image-to-video-pro",
     fidelityStatus: "generique",
     supportsReferenceUpload: true,
-    providerCostUsd: 0.10,
-    cortexiaPriceUsd: cortexia(0.10),
+    providerCostUsd: 0.1,
+    cortexiaPriceUsd: cortexia(0.1),
     active: true,
     badge: "pro",
     order: 40,
@@ -1606,7 +1729,15 @@ export const CATALOGUE: CatalogueEntry[] = [
     inputSchema: [
       { key: "audio", type: "upload", required: true, label: "Speech audio", accepts: "audio/*" },
       { key: "image", type: "upload", label: "Reference image", accepts: "image/*" },
-      { key: "duration", type: "number", label: "Duration (s)", min: 2, max: 10, step: 1, default: 5 },
+      {
+        key: "duration",
+        type: "number",
+        label: "Duration (s)",
+        min: 2,
+        max: 10,
+        step: 1,
+        default: 5,
+      },
     ],
   },
   {
@@ -1641,7 +1772,13 @@ export const CATALOGUE: CatalogueEntry[] = [
     unit: "second",
     inputSchema: [
       { key: "image", type: "upload", required: true, label: "Source image", accepts: "image/*" },
-      { key: "motion_video", type: "upload", required: true, label: "Motion reference", accepts: "video/*" },
+      {
+        key: "motion_video",
+        type: "upload",
+        required: true,
+        label: "Motion reference",
+        accepts: "video/*",
+      },
     ],
   },
   {
@@ -1660,7 +1797,13 @@ export const CATALOGUE: CatalogueEntry[] = [
     unit: "second",
     inputSchema: [
       { key: "video", type: "upload", required: true, label: "Source video", accepts: "video/*" },
-      { key: "image", type: "upload", required: true, label: "Replacement subject", accepts: "image/*" },
+      {
+        key: "image",
+        type: "upload",
+        required: true,
+        label: "Replacement subject",
+        accepts: "image/*",
+      },
     ],
   },
   {
@@ -1847,7 +1990,13 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Wan 2.7 — reference-vers-vidéo.",
     unit: "second",
     inputSchema: [
-      { key: "reference", type: "upload", required: true, label: "Reference image", accepts: "image/*" },
+      {
+        key: "reference",
+        type: "upload",
+        required: true,
+        label: "Reference image",
+        accepts: "image/*",
+      },
       { key: "prompt", type: "longtext", required: true, label: "Prompt" },
     ],
   },
@@ -1875,8 +2024,8 @@ export const CATALOGUE: CatalogueEntry[] = [
     kieEndpoint: "infinitalk/from-audio",
     fidelityStatus: "generique",
     supportsReferenceUpload: true,
-    providerCostUsd: 0.10,
-    cortexiaPriceUsd: cortexia(0.10),
+    providerCostUsd: 0.1,
+    cortexiaPriceUsd: cortexia(0.1),
     active: true,
     order: 73,
     blurb: "Infinitalk — vidéo parlante à partir d'un audio.",
@@ -1936,7 +2085,13 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "HappyHorse — reference-vers-vidéo.",
     unit: "second",
     inputSchema: [
-      { key: "reference", type: "upload", required: true, label: "Reference", accepts: "image/*,video/*" },
+      {
+        key: "reference",
+        type: "upload",
+        required: true,
+        label: "Reference",
+        accepts: "image/*,video/*",
+      },
       { key: "prompt", type: "longtext", required: true, label: "Prompt" },
     ],
   },
@@ -2006,7 +2161,13 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "HappyHorse 1.1 — reference-vers-vidéo.",
     unit: "second",
     inputSchema: [
-      { key: "reference", type: "upload", required: true, label: "Reference", accepts: "image/*,video/*" },
+      {
+        key: "reference",
+        type: "upload",
+        required: true,
+        label: "Reference",
+        accepts: "image/*,video/*",
+      },
       { key: "prompt", type: "longtext", required: true, label: "Prompt" },
     ],
   },
@@ -2021,8 +2182,8 @@ export const CATALOGUE: CatalogueEntry[] = [
     kieEndpoint: "gemini-omni-video",
     fidelityStatus: "fidele",
     supportsReferenceUpload: false,
-    providerCostUsd: 0.50,
-    cortexiaPriceUsd: cortexia(0.50),
+    providerCostUsd: 0.5,
+    cortexiaPriceUsd: cortexia(0.5),
     active: true,
     badge: "pro",
     order: 42,
@@ -2064,7 +2225,13 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Gemini Omni — personnage animé et parlé.",
     unit: "second",
     inputSchema: [
-      { key: "image", type: "upload", required: true, label: "Character image", accepts: "image/*" },
+      {
+        key: "image",
+        type: "upload",
+        required: true,
+        label: "Character image",
+        accepts: "image/*",
+      },
       { key: "audio", type: "upload", required: true, label: "Voice audio", accepts: "audio/*" },
     ],
   },
@@ -2083,7 +2250,13 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Génération de personnages réalistes.",
     unit: "second",
     inputSchema: [
-      { key: "image", type: "upload", required: true, label: "Character image", accepts: "image/*" },
+      {
+        key: "image",
+        type: "upload",
+        required: true,
+        label: "Character image",
+        accepts: "image/*",
+      },
       { key: "audio", type: "upload", required: true, label: "Voice audio", accepts: "audio/*" },
     ],
   },
@@ -2736,8 +2909,8 @@ export const CATALOGUE: CatalogueEntry[] = [
     kieEndpoint: "suno-api/upload-and-cover-audio",
     fidelityStatus: "generique",
     supportsReferenceUpload: true,
-    providerCostUsd: 0.10,
-    cortexiaPriceUsd: cortexia(0.10),
+    providerCostUsd: 0.1,
+    cortexiaPriceUsd: cortexia(0.1),
     active: true,
     order: 48,
     blurb: "Suno — uploadez un audio et obtenez une cover IA.",
@@ -2755,8 +2928,8 @@ export const CATALOGUE: CatalogueEntry[] = [
     kieEndpoint: "suno-api/upload-and-extend-audio",
     fidelityStatus: "generique",
     supportsReferenceUpload: true,
-    providerCostUsd: 0.10,
-    cortexiaPriceUsd: cortexia(0.10),
+    providerCostUsd: 0.1,
+    cortexiaPriceUsd: cortexia(0.1),
     active: true,
     order: 47,
     blurb: "Suno — uploadez et étendez un audio.",
@@ -2797,7 +2970,13 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Suno — ajouter des voix à un instrumental.",
     unit: "track",
     inputSchema: [
-      { key: "instrumental", type: "upload", required: true, label: "Instrumental audio", accepts: "audio/*" },
+      {
+        key: "instrumental",
+        type: "upload",
+        required: true,
+        label: "Instrumental audio",
+        accepts: "audio/*",
+      },
       { key: "lyrics", type: "longtext", required: true, label: "Lyrics" },
     ],
   },
@@ -2809,8 +2988,8 @@ export const CATALOGUE: CatalogueEntry[] = [
     kieEndpoint: "suno-api/cover-suno",
     fidelityStatus: "generique",
     supportsReferenceUpload: true,
-    providerCostUsd: 0.10,
-    cortexiaPriceUsd: cortexia(0.10),
+    providerCostUsd: 0.1,
+    cortexiaPriceUsd: cortexia(0.1),
     active: true,
     order: 44,
     blurb: "Suno — cover d'une track Suno existante.",
@@ -2835,7 +3014,15 @@ export const CATALOGUE: CatalogueEntry[] = [
     unit: "track",
     inputSchema: [
       { key: "audio", type: "upload", required: true, label: "Source audio", accepts: "audio/*" },
-      { key: "start_time", type: "number", label: "Start (s)", min: 0, max: 600, step: 1, default: 0 },
+      {
+        key: "start_time",
+        type: "number",
+        label: "Start (s)",
+        min: 0,
+        max: 600,
+        step: 1,
+        default: 0,
+      },
       { key: "end_time", type: "number", label: "End (s)", min: 0, max: 600, step: 1, default: 30 },
       { key: "prompt", type: "longtext", label: "Replacement prompt" },
     ],
@@ -2855,7 +3042,13 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Suno — générer une persona vocale.",
     unit: "track",
     inputSchema: [
-      { key: "audio", type: "upload", required: true, label: "Reference audio", accepts: "audio/*" },
+      {
+        key: "audio",
+        type: "upload",
+        required: true,
+        label: "Reference audio",
+        accepts: "audio/*",
+      },
     ],
   },
   {
@@ -2982,7 +3175,15 @@ export const CATALOGUE: CatalogueEntry[] = [
     unit: "track",
     inputSchema: [
       { key: "prompt", type: "longtext", required: true, label: "Sound description" },
-      { key: "duration", type: "number", label: "Duration (s)", min: 1, max: 30, step: 1, default: 5 },
+      {
+        key: "duration",
+        type: "number",
+        label: "Duration (s)",
+        min: 1,
+        max: 30,
+        step: 1,
+        default: 5,
+      },
     ],
   },
   {
@@ -3000,7 +3201,13 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Suno — génération d'une voix.",
     unit: "track",
     inputSchema: [
-      { key: "reference_audio", type: "upload", required: true, label: "Reference voice", accepts: "audio/*" },
+      {
+        key: "reference_audio",
+        type: "upload",
+        required: true,
+        label: "Reference voice",
+        accepts: "audio/*",
+      },
       { key: "text", type: "longtext", required: true, label: "Text" },
     ],
   },
@@ -3018,9 +3225,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     order: 33,
     blurb: "Suno — validation de la qualité d'une voix clonée.",
     unit: "track",
-    inputSchema: [
-      { key: "voice_id", type: "text", required: true, label: "Voice ID" },
-    ],
+    inputSchema: [{ key: "voice_id", type: "text", required: true, label: "Voice ID" }],
   },
   {
     slug: "suno-voice-record-info",
@@ -3036,9 +3241,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     order: 32,
     blurb: "Suno — informations d'un enregistrement vocal.",
     unit: "track",
-    inputSchema: [
-      { key: "voice_id", type: "text", required: true, label: "Voice ID" },
-    ],
+    inputSchema: [{ key: "voice_id", type: "text", required: true, label: "Voice ID" }],
   },
   {
     slug: "suno-voice-regenerate",
@@ -3073,9 +3276,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     order: 30,
     blurb: "Suno — vérification de cohérence d'une voix.",
     unit: "track",
-    inputSchema: [
-      { key: "voice_id", type: "text", required: true, label: "Voice ID" },
-    ],
+    inputSchema: [{ key: "voice_id", type: "text", required: true, label: "Voice ID" }],
   },
   // ════════════════════════════════════════════════════════════════════
   // VEO 3
@@ -3088,8 +3289,8 @@ export const CATALOGUE: CatalogueEntry[] = [
     kieEndpoint: "veo3-api/generate-veo-3-video",
     fidelityStatus: "generique",
     supportsReferenceUpload: false,
-    providerCostUsd: 0.20,
-    cortexiaPriceUsd: cortexia(0.20),
+    providerCostUsd: 0.2,
+    cortexiaPriceUsd: cortexia(0.2),
     active: true,
     badge: "pro",
     order: 45,
@@ -3105,8 +3306,8 @@ export const CATALOGUE: CatalogueEntry[] = [
     kieEndpoint: "veo3-api/generate-veo-3-video-callbacks",
     fidelityStatus: "generique",
     supportsReferenceUpload: false,
-    providerCostUsd: 0.20,
-    cortexiaPriceUsd: cortexia(0.20),
+    providerCostUsd: 0.2,
+    cortexiaPriceUsd: cortexia(0.2),
     active: true,
     order: 26,
     blurb: "Veo 3 — variante avec callbacks webhook.",
@@ -3127,9 +3328,7 @@ export const CATALOGUE: CatalogueEntry[] = [
     order: 25,
     blurb: "Veo 3 — récupération des détails d'une génération.",
     unit: "second",
-    inputSchema: [
-      { key: "task_id", type: "text", required: true, label: "Task ID" },
-    ],
+    inputSchema: [{ key: "task_id", type: "text", required: true, label: "Task ID" }],
   },
   {
     slug: "veo3-1080p",
@@ -3139,15 +3338,13 @@ export const CATALOGUE: CatalogueEntry[] = [
     kieEndpoint: "veo3-api/get-veo-3-1080-p-video",
     fidelityStatus: "generique",
     supportsReferenceUpload: false,
-    providerCostUsd: 0.20,
-    cortexiaPriceUsd: cortexia(0.20),
+    providerCostUsd: 0.2,
+    cortexiaPriceUsd: cortexia(0.2),
     active: true,
     order: 24,
     blurb: "Veo 3 — sortie vidéo 1080p.",
     unit: "second",
-    inputSchema: [
-      { key: "task_id", type: "text", required: true, label: "Task ID" },
-    ],
+    inputSchema: [{ key: "task_id", type: "text", required: true, label: "Task ID" }],
   },
   {
     slug: "veo3-4k",
@@ -3157,16 +3354,14 @@ export const CATALOGUE: CatalogueEntry[] = [
     kieEndpoint: "veo3-api/get-veo-3-4k-video",
     fidelityStatus: "generique",
     supportsReferenceUpload: false,
-    providerCostUsd: 0.40,
-    cortexiaPriceUsd: cortexia(0.40),
+    providerCostUsd: 0.4,
+    cortexiaPriceUsd: cortexia(0.4),
     active: true,
     badge: "pro",
     order: 46,
     blurb: "Veo 3 — sortie vidéo 4K haut de gamme.",
     unit: "second",
-    inputSchema: [
-      { key: "task_id", type: "text", required: true, label: "Task ID" },
-    ],
+    inputSchema: [{ key: "task_id", type: "text", required: true, label: "Task ID" }],
   },
   {
     slug: "veo3-extend",
@@ -3176,8 +3371,8 @@ export const CATALOGUE: CatalogueEntry[] = [
     kieEndpoint: "veo3-api/extend-video",
     fidelityStatus: "generique",
     supportsReferenceUpload: true,
-    providerCostUsd: 0.20,
-    cortexiaPriceUsd: cortexia(0.20),
+    providerCostUsd: 0.2,
+    cortexiaPriceUsd: cortexia(0.2),
     active: true,
     order: 23,
     blurb: "Veo 3 — extension d'une vidéo existante.",
@@ -3192,15 +3387,13 @@ export const CATALOGUE: CatalogueEntry[] = [
     kieEndpoint: "veo3-api/get-veo-3-4k-video-callbacks",
     fidelityStatus: "generique",
     supportsReferenceUpload: false,
-    providerCostUsd: 0.40,
-    cortexiaPriceUsd: cortexia(0.40),
+    providerCostUsd: 0.4,
+    cortexiaPriceUsd: cortexia(0.4),
     active: true,
     order: 22,
     blurb: "Veo 3 — sortie 4K avec callbacks webhook.",
     unit: "second",
-    inputSchema: [
-      { key: "task_id", type: "text", required: true, label: "Task ID" },
-    ],
+    inputSchema: [{ key: "task_id", type: "text", required: true, label: "Task ID" }],
   },
   // ════════════════════════════════════════════════════════════════════
   // IMAGE — Additional (spec 213)
@@ -3287,9 +3480,23 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "Kling 2.6 — contrôle du mouvement image-vers-vidéo.",
     unit: "second",
     inputSchema: [
-      { key: "reference_video", type: "upload", required: true, label: "Reference video", accepts: "video/*" },
+      {
+        key: "reference_video",
+        type: "upload",
+        required: true,
+        label: "Reference video",
+        accepts: "video/*",
+      },
       { key: "image", type: "upload", required: true, label: "Subject image", accepts: "image/*" },
-      { key: "duration", type: "number", label: "Duration (s)", min: 2, max: 10, step: 1, default: 5 },
+      {
+        key: "duration",
+        type: "number",
+        label: "Duration (s)",
+        min: 2,
+        max: 10,
+        step: 1,
+        default: 5,
+      },
     ],
   },
   {
@@ -3316,8 +3523,8 @@ export const CATALOGUE: CatalogueEntry[] = [
     kieEndpoint: "sora-2-text-to-video",
     fidelityStatus: "fidele",
     supportsReferenceUpload: false,
-    providerCostUsd: 0.10,
-    cortexiaPriceUsd: cortexia(0.10),
+    providerCostUsd: 0.1,
+    cortexiaPriceUsd: cortexia(0.1),
     active: true,
     badge: "popular",
     order: 84,
@@ -3409,7 +3616,13 @@ export const CATALOGUE: CatalogueEntry[] = [
     unit: "second",
     inputSchema: [
       { key: "prompt", type: "longtext", required: true, label: "Storyboard prompt" },
-      { key: "images", type: "upload", multiple: true, label: "Reference images", accepts: "image/*" },
+      {
+        key: "images",
+        type: "upload",
+        multiple: true,
+        label: "Reference images",
+        accepts: "image/*",
+      },
     ],
   },
   {
@@ -3475,8 +3688,8 @@ export const CATALOGUE: CatalogueEntry[] = [
     kieEndpoint: "runway/generate",
     fidelityStatus: "fidele",
     supportsReferenceUpload: false,
-    providerCostUsd: 0.10,
-    cortexiaPriceUsd: cortexia(0.10),
+    providerCostUsd: 0.1,
+    cortexiaPriceUsd: cortexia(0.1),
     active: true,
     badge: "popular",
     order: 79,
@@ -3492,8 +3705,8 @@ export const CATALOGUE: CatalogueEntry[] = [
     kieEndpoint: "runway/extend",
     fidelityStatus: "generique",
     supportsReferenceUpload: true,
-    providerCostUsd: 0.10,
-    cortexiaPriceUsd: cortexia(0.10),
+    providerCostUsd: 0.1,
+    cortexiaPriceUsd: cortexia(0.1),
     active: true,
     order: 30,
     blurb: "Runway — extension de vidéo existante.",
@@ -3560,8 +3773,8 @@ export const CATALOGUE: CatalogueEntry[] = [
     kieEndpoint: "hailuo/2-3-image-to-video-pro",
     fidelityStatus: "generique",
     supportsReferenceUpload: false,
-    providerCostUsd: 0.10,
-    cortexiaPriceUsd: cortexia(0.10),
+    providerCostUsd: 0.1,
+    cortexiaPriceUsd: cortexia(0.1),
     active: true,
     order: 103,
     blurb: "Hailuo 2.3 — texte-vers-vidéo Pro.",
@@ -3603,7 +3816,15 @@ export const CATALOGUE: CatalogueEntry[] = [
     unit: "1k-chars",
     inputSchema: [
       { key: "text", type: "longtext", required: true, label: "Sound description" },
-      { key: "duration", type: "number", label: "Duration (s)", min: 1, max: 30, step: 1, default: 5 },
+      {
+        key: "duration",
+        type: "number",
+        label: "Duration (s)",
+        min: 1,
+        max: 30,
+        step: 1,
+        default: 5,
+      },
     ],
   },
   {
@@ -3621,8 +3842,20 @@ export const CATALOGUE: CatalogueEntry[] = [
     blurb: "ElevenLabs — transcription audio en texte.",
     unit: "1k-chars",
     inputSchema: [
-      { key: "audio", type: "upload", required: true, label: "Audio to transcribe", accepts: "audio/*" },
-      { key: "language", type: "enum", label: "Language", options: ["FR", "EN", "ES", "DE", "PT", "AR"], default: "EN" },
+      {
+        key: "audio",
+        type: "upload",
+        required: true,
+        label: "Audio to transcribe",
+        accepts: "audio/*",
+      },
+      {
+        key: "language",
+        type: "enum",
+        label: "Language",
+        options: ["FR", "EN", "ES", "DE", "PT", "AR"],
+        default: "EN",
+      },
     ],
   },
   {
@@ -3952,7 +4185,15 @@ export const CATALOGUE: CatalogueEntry[] = [
     unit: "track",
     inputSchema: [
       { key: "prompt", type: "longtext", required: true, label: "Topic / theme" },
-      { key: "duration", type: "number", label: "Duration (s)", min: 5, max: 240, step: 1, default: 30 },
+      {
+        key: "duration",
+        type: "number",
+        label: "Duration (s)",
+        min: 5,
+        max: 240,
+        step: 1,
+        default: 30,
+      },
     ],
   },
   {
@@ -3975,4 +4216,3 @@ export const CATALOGUE: CatalogueEntry[] = [
     ],
   },
 ];
-

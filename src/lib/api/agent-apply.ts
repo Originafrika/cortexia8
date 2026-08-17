@@ -23,13 +23,24 @@ import { MODELS } from "@/lib/models";
 
 // ── Cost Confirmation Threshold ────────────────────────────────────────────
 // Configurable: operations with estimated cost above this require user confirmation (USD)
-export const COST_CONFIRM_THRESHOLD = 2.00;
+export const COST_CONFIRM_THRESHOLD = 2.0;
 
 // ── Types ─────────────────────────────────────────────────────────────────
 
 export type AgentOp =
-  | { op: "ADD_NODE"; modelSlug: string; position?: { x: number; y: number }; config?: Record<string, string | number | boolean | null> }
-  | { op: "CONNECT_NODES"; source: string; target: string; sourceOutputKey?: string; targetInputKey?: string }
+  | {
+      op: "ADD_NODE";
+      modelSlug: string;
+      position?: { x: number; y: number };
+      config?: Record<string, string | number | boolean | null>;
+    }
+  | {
+      op: "CONNECT_NODES";
+      source: string;
+      target: string;
+      sourceOutputKey?: string;
+      targetInputKey?: string;
+    }
   | { op: "UPDATE_NODE"; nodeId: string; params: Record<string, string | number | boolean | null> }
   | { op: "REMOVE_NODE"; nodeId: string };
 
@@ -159,13 +170,7 @@ async function applyOneOp(
            (workflow_id, type, model_slug, config, canvas_x, canvas_y)
          VALUES ($1, 'model', $2, $3::jsonb, $4, $5)
          RETURNING id`,
-        [
-          workflowId,
-          op.modelSlug,
-          JSON.stringify(op.config ?? {}),
-          String(pos.x),
-          String(pos.y),
-        ],
+        [workflowId, op.modelSlug, JSON.stringify(op.config ?? {}), String(pos.x), String(pos.y)],
       );
       const dbId = res.rows[0].id;
       // Store mapping keyed by agent's temp ref convention
@@ -182,19 +187,16 @@ async function applyOneOp(
       const sourceId = resolveRef(client, op.source, idMap, workflowId);
       const targetId = resolveRef(client, op.target, idMap, workflowId);
       if (sourceId == null || targetId == null) {
-        throw new HttpError(400, `Cannot resolve node refs: source=${op.source}, target=${op.target}`);
+        throw new HttpError(
+          400,
+          `Cannot resolve node refs: source=${op.source}, target=${op.target}`,
+        );
       }
       await client.query(
         `INSERT INTO workflow_edges
            (workflow_id, source_node_id, target_node_id, source_output_key, target_input_key)
          VALUES ($1, $2, $3, $4, $5)`,
-        [
-          workflowId,
-          sourceId,
-          targetId,
-          op.sourceOutputKey ?? "out",
-          op.targetInputKey ?? "in",
-        ],
+        [workflowId, sourceId, targetId, op.sourceOutputKey ?? "out", op.targetInputKey ?? "in"],
       );
       break;
     }
@@ -243,10 +245,10 @@ async function applyOneOp(
         `DELETE FROM workflow_edges WHERE (source_node_id = $1 OR target_node_id = $1) AND workflow_id = $2`,
         [nodeId, workflowId],
       );
-      await client.query(
-        `DELETE FROM workflow_nodes WHERE id = $1 AND workflow_id = $2`,
-        [nodeId, workflowId],
-      );
+      await client.query(`DELETE FROM workflow_nodes WHERE id = $1 AND workflow_id = $2`, [
+        nodeId,
+        workflowId,
+      ]);
       break;
     }
   }

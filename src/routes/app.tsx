@@ -12,20 +12,14 @@ import {
   Wallet,
   Sparkles,
   HelpCircle,
-    Workflow,
+  Workflow,
   Menu,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
 import { getUserBalance } from "@/lib/api/balance";
 import { loadSession, isAdmin } from "@/lib/auth-store";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 export const Route = createFileRoute("/app")({
   beforeLoad: ({ location }) => {
@@ -33,7 +27,11 @@ export const Route = createFileRoute("/app")({
     if (typeof window === "undefined") return;
     const session = loadSession();
     if (!session) {
-      throw redirect({ to: "/auth/$pathname" as "/auth/$pathname", params: { pathname: "sign-in" }, search: { redirect: location.href } });
+      throw redirect({
+        to: "/auth/$pathname" as const,
+        params: { pathname: "sign-in" },
+        search: { redirect: location.href },
+      });
     }
   },
   head: () => ({
@@ -70,7 +68,6 @@ function AppLayout() {
   );
 }
 
-
 function AppShell({
   path,
   CREDIT_USD,
@@ -85,7 +82,13 @@ function AppShell({
   setOpen: (v: boolean) => void;
 }) {
   const NAV = [
-    { to: "/app/workflows", label: t("app.nav.workflows") || "Workflows", icon: Workflow, exact: true, adminOnly: true },
+    {
+      to: "/app/workflows",
+      label: t("app.nav.workflows") || "Workflows",
+      icon: Workflow,
+      exact: true,
+      adminOnly: true,
+    },
     { to: "/app/models", label: t("app.nav.models"), icon: LayoutGrid },
     { to: "/app/history", label: t("app.nav.history"), icon: History, exact: true },
     { to: "/app/developers", label: t("app.nav.dev"), icon: Code2, exact: true, adminOnly: true },

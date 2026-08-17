@@ -48,7 +48,9 @@ function CanvasPage() {
         <div className="text-center">
           <h1 className="text-2xl font-semibold">Admin access required</h1>
           <p className="text-muted-foreground mt-2">Canvas is only available to admin accounts.</p>
-          <Link to="/app/models" className="mt-4 inline-block underline text-sm">Back to models</Link>
+          <Link to="/app/models" className="mt-4 inline-block underline text-sm">
+            Back to models
+          </Link>
         </div>
       </div>
     );
@@ -107,7 +109,8 @@ function CanvasShell() {
             to="/app"
             className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition shrink-0"
           >
-            <ArrowLeft className="size-3.5" /> <span className="hidden sm:inline">{t("canvas.back")}</span>
+            <ArrowLeft className="size-3.5" />{" "}
+            <span className="hidden sm:inline">{t("canvas.back")}</span>
           </Link>
           <div className="hidden md:flex flex-col min-w-0">
             <input
@@ -145,9 +148,7 @@ function CanvasShell() {
       {isMobile && (
         <div className="shrink-0 z-20 border-b border-border bg-amber/10 px-4 py-2 flex items-center gap-2 text-[11px]">
           <Eye className="size-3.5 text-amber shrink-0" />
-          <span className="text-foreground/80">
-            {t("canvas.mobile_banner")}
-          </span>
+          <span className="text-foreground/80">{t("canvas.mobile_banner")}</span>
         </div>
       )}
 
@@ -250,7 +251,8 @@ function CanvasInnerWrapper({
             className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface-1/90 backdrop-blur px-4 h-9 text-sm hover:border-amber/40 transition shadow-lg cursor-pointer"
           >
             <Copy className="size-3.5" />
-            {t("canvas.duplicate")}{selectedNodeIds.length > 1 ? ` (${selectedNodeIds.length})` : ""}
+            {t("canvas.duplicate")}
+            {selectedNodeIds.length > 1 ? ` (${selectedNodeIds.length})` : ""}
           </button>
         </div>
       )}
@@ -271,7 +273,7 @@ function CanvasInnerWrapper({
             "absolute bottom-4 right-4 z-20 inline-flex items-center justify-center size-11 rounded-full border shadow-lg transition cursor-pointer",
             agentOpen
               ? "bg-amber text-primary-foreground border-amber/40"
-              : "bg-surface-1/90 backdrop-blur border-border hover:border-amber/40 text-muted-foreground hover:text-foreground"
+              : "bg-surface-1/90 backdrop-blur border-border hover:border-amber/40 text-muted-foreground hover:text-foreground",
           )}
           aria-label={t("canvas.tab.agent")}
         >
@@ -281,10 +283,7 @@ function CanvasInnerWrapper({
 
       {/* Agent slide-in panel */}
       {agentOpen && (
-        <div
-          className="absolute inset-y-0 right-0 z-40 flex"
-          style={{ top: 0 }}
-        >
+        <div className="absolute inset-y-0 right-0 z-40 flex" style={{ top: 0 }}>
           <div
             className="absolute inset-0 bg-black/20 backdrop-blur-sm"
             onClick={() => setAgentOpen(false)}

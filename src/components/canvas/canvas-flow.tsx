@@ -96,12 +96,7 @@ export function CanvasFlow() {
         maxZoom={2.5}
         className="bg-background"
       >
-        <Background
-          variant={BackgroundVariant.Dots}
-          gap={24}
-          size={1.2}
-          color="var(--border)"
-        />
+        <Background variant={BackgroundVariant.Dots} gap={24} size={1.2} color="var(--border)" />
         <Controls
           position="bottom-left"
           showInteractive={false}

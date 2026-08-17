@@ -63,7 +63,8 @@ export const proxyImage = createServerFn({ method: "GET" })
     }
 
     const contentType = upstream.headers.get("content-type") ?? "application/octet-stream";
-    const cacheControl = upstream.headers.get("cache-control") ?? "public, max-age=86400, s-maxage=604800";
+    const cacheControl =
+      upstream.headers.get("cache-control") ?? "public, max-age=86400, s-maxage=604800";
 
     const arrayBuffer = await upstream.arrayBuffer();
     const base64 = Buffer.from(arrayBuffer).toString("base64");

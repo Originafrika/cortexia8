@@ -11,11 +11,7 @@ import { UploadSource, upload as kieUpload } from "@/lib/kie-api/upload";
 
 export type ModelCategory = "image" | "video" | "audio" | "text" | "music";
 
-export type ApiFamily =
-  | "market_unified"
-  | "dedicated"
-  | "chat_openai"
-  | "chat_anthropic";
+export type ApiFamily = "market_unified" | "dedicated" | "chat_openai" | "chat_anthropic";
 
 export type ModelRow = {
   id: number;
@@ -51,7 +47,9 @@ export async function getActiveModelBySlug(slug: string): Promise<ModelRow | nul
 }
 
 /** Resolve multiple models by slug in a single query (avoids N+1). */
-export async function getActiveModelsBySlugs(slugs: string[]): Promise<Map<string, ModelRow | null>> {
+export async function getActiveModelsBySlugs(
+  slugs: string[],
+): Promise<Map<string, ModelRow | null>> {
   const uniqueSlugs = [...new Set(slugs)];
   const result = new Map<string, ModelRow | null>();
 

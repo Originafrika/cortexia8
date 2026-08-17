@@ -8,14 +8,24 @@ import { cn } from "@/lib/utils";
 import { getHistory, type HistoryItem } from "@/lib/api/history";
 import { useT } from "@/lib/i18n";
 import { loadSession } from "@/lib/auth-store";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { proxiedUrl } from "@/lib/storage/r2";
 
 export const Route = createFileRoute("/app/history")({
   head: () => ({
     meta: [
       { title: "Cortexia — Generation History" },
-      { name: "description", content: "Review your past AI generation jobs on Cortexia — prompts, models used, costs, and preview outputs." },
+      {
+        name: "description",
+        content:
+          "Review your past AI generation jobs on Cortexia — prompts, models used, costs, and preview outputs.",
+      },
     ],
   }),
   component: HistoryPage,
@@ -72,7 +82,9 @@ function HistoryPage() {
   useEffect(() => {
     async function fetchHistory() {
       try {
-        const result = await getHistory({ data: { limit: 100, sessionToken: loadSession()?.token } });
+        const result = await getHistory({
+          data: { limit: 100, sessionToken: loadSession()?.token },
+        });
         const mapped: DisplayItem[] = result.items.map((item: HistoryItem, i: number) => {
           const model = MODELS.find((m) => m.slug === item.modelSlug) ?? MODELS[0];
           return {
@@ -81,7 +93,14 @@ function HistoryPage() {
             prompt: item.prompt,
             date: formatRelative(item.date, t),
             cost: item.cost || basePrice(model) * (model.unit === "second" ? 5 : 1),
-            ratio: item.modelCategory === "video" ? "aspect-[9/16]" : item.modelCategory === "audio" ? "aspect-[4/3]" : item.modelCategory === "text" ? "aspect-square" : "aspect-square",
+            ratio:
+              item.modelCategory === "video"
+                ? "aspect-[9/16]"
+                : item.modelCategory === "audio"
+                  ? "aspect-[4/3]"
+                  : item.modelCategory === "text"
+                    ? "aspect-square"
+                    : "aspect-square",
             tint: TINTS[i % TINTS.length],
             previewUrl: item.previewUrl,
             textContent: item.textContent,
@@ -180,7 +199,9 @@ function HistoryPage() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all" className="text-xs">{t("history.all")}</SelectItem>
+              <SelectItem value="all" className="text-xs">
+                {t("history.all")}
+              </SelectItem>
               {modelOptions
                 .filter((m) => cat === "all" || m.category === cat)
                 .map((m) => (

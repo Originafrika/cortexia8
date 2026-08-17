@@ -67,9 +67,12 @@ export type SaveMessageResponse = {
 export const saveMessage = createServerFn({ method: "POST" })
   .validator((data: SaveMessageInput): SaveMessageInput => {
     if (!data || typeof data !== "object") throw new HttpError(400, "Invalid input");
-    if (!Number.isInteger(data.conversationId)) throw new HttpError(400, "conversationId is required");
-    if (data.role !== "user" && data.role !== "assistant") throw new HttpError(400, "role must be user or assistant");
-    if (typeof data.content !== "string" || !data.content.trim()) throw new HttpError(400, "content is required");
+    if (!Number.isInteger(data.conversationId))
+      throw new HttpError(400, "conversationId is required");
+    if (data.role !== "user" && data.role !== "assistant")
+      throw new HttpError(400, "role must be user or assistant");
+    if (typeof data.content !== "string" || !data.content.trim())
+      throw new HttpError(400, "content is required");
     return data;
   })
   .handler(async ({ data }) => {
@@ -116,7 +119,8 @@ export type GetConversationResponse = {
 export const getConversation = createServerFn({ method: "GET" })
   .validator((data: GetConversationInput): GetConversationInput => {
     if (!data || typeof data !== "object") throw new HttpError(400, "Invalid input");
-    if (!Number.isInteger(data.conversationId)) throw new HttpError(400, "conversationId is required");
+    if (!Number.isInteger(data.conversationId))
+      throw new HttpError(400, "conversationId is required");
     return { conversationId: data.conversationId, sessionToken: data.sessionToken };
   })
   .handler(async ({ data }) => {

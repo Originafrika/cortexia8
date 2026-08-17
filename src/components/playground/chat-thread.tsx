@@ -22,10 +22,7 @@ export function ChatThread({ messages }: Props) {
       {messages.map((msg) => (
         <div
           key={msg.id}
-          className={cn(
-            "flex",
-            msg.role === "user" ? "justify-end" : "justify-start",
-          )}
+          className={cn("flex", msg.role === "user" ? "justify-end" : "justify-start")}
         >
           <div
             className={cn(

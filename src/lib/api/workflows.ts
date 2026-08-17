@@ -188,7 +188,7 @@ export const getWorkflow = createServerFn({ method: "GET" })
         id: number;
         type: string;
         modelSlug: string;
-  config: Record<string, string | number | boolean | null>;
+        config: Record<string, string | number | boolean | null>;
         x: number;
         y: number;
         width: number;
@@ -295,18 +295,22 @@ export const renameWorkflow = createServerFn({ method: "POST" })
     if (!data || typeof data !== "object") throw new HttpError(400, "Invalid input");
     if (!Number.isInteger(data.workflowId)) throw new HttpError(400, "workflowId is required");
     if (!data.name || typeof data.name !== "string") throw new HttpError(400, "name is required");
-    return { workflowId: data.workflowId, name: data.name.trim().slice(0, 200), sessionToken: data.sessionToken };
+    return {
+      workflowId: data.workflowId,
+      name: data.name.trim().slice(0, 200),
+      sessionToken: data.sessionToken,
+    };
   })
   .handler(async ({ data }) => {
     try {
       const ctx = await getRequestContext(data.sessionToken);
       const userId = await requireUserId(ctx);
 
-      const result = await sql`
+      const result = (await sql`
         UPDATE workflows SET name = ${data.name}, updated_at = NOW()
         WHERE id = ${data.workflowId} AND user_id = ${userId}
         RETURNING id
-      ` as { id: number }[];
+      `) as { id: number }[];
 
       if (result.length === 0) {
         throw new HttpError(404, "Workflow not found");

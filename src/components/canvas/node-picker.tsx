@@ -6,7 +6,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import { MODELS, type Model, type ModelCategory } from "@/lib/models";
 import { categoryAccent, categoryPillColor, portsForCategory, portLabel } from "@/lib/canvas-types";
 import { useCanvasStore } from "@/lib/canvas-store";
@@ -37,7 +44,13 @@ type Props = {
   onOpenChange?: (open: boolean) => void;
 };
 
-export function NodePicker({ variant = "toolbar", className, getPosition, open: controlledOpen, onOpenChange }: Props) {
+export function NodePicker({
+  variant = "toolbar",
+  className,
+  getPosition,
+  open: controlledOpen,
+  onOpenChange,
+}: Props) {
   const t = useT();
   const [internalOpen, setInternalOpen] = useState(false);
   const open = controlledOpen ?? internalOpen;
@@ -113,14 +126,26 @@ function PickerBody({
           m.provider.toLowerCase().includes(term) ||
           m.blurb.toLowerCase().includes(term)),
     );
-    const out: Record<ModelCategory, Model[]> = { image: [], video: [], audio: [], text: [], music: [] };
+    const out: Record<ModelCategory, Model[]> = {
+      image: [],
+      video: [],
+      audio: [],
+      text: [],
+      music: [],
+    };
     filtered.forEach((m) => out[m.category].push(m));
     return out;
   }, [q, activeCategory]);
 
   // Count models per category for the pills
   const categoryCounts = useMemo(() => {
-    const counts: Record<ModelCategory, number> = { image: 0, video: 0, audio: 0, text: 0, music: 0 };
+    const counts: Record<ModelCategory, number> = {
+      image: 0,
+      video: 0,
+      audio: 0,
+      text: 0,
+      music: 0,
+    };
     MODELS.forEach((m) => counts[m.category]++);
     return counts;
   }, []);
