@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Loader2, MessageSquare } from "lucide-react";
+import { Loader2, MessageSquare, Music2, Play, Volume2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
 import { PriceDisplay } from "@/components/price-display";
@@ -22,18 +22,24 @@ function HistoryItem({
   onSelect: (id: string) => void;
 }) {
   const t = useT();
-  const [imgUrl, setImgUrl] = useState(item.resultUrl ?? "");
+  const [mediaUrl, setMediaUrl] = useState(item.resultUrl ?? "");
+  const isImage = item.model.category === "image";
+  const isVideo = item.model.category === "video";
+  const isAudio = item.model.category === "audio" || item.model.category === "music";
 
   useEffect(() => {
-    if (!item.resultUrl) return;
+    if (!item.resultUrl || !isImage) {
+      setMediaUrl(item.resultUrl ?? "");
+      return;
+    }
     let cancelled = false;
     fetchProxiedImage(item.resultUrl).then((url) => {
-      if (!cancelled) setImgUrl(url);
+      if (!cancelled) setMediaUrl(url);
     });
     return () => {
       cancelled = true;
     };
-  }, [item.resultUrl]);
+  }, [isImage, item.resultUrl]);
 
   const hasMedia = !!item.resultUrl;
   const hasText = !!item.textContent;
@@ -52,8 +58,31 @@ function HistoryItem({
           : { background: `linear-gradient(135deg, var(--surface-2), var(--background))` }
       }
     >
-      {hasMedia && (
-        <img src={imgUrl} alt={item.prompt} loading="lazy" className="w-full h-full object-cover" />
+      {hasMedia && isImage && (
+        <img
+          src={mediaUrl}
+          alt={item.prompt}
+          loading="lazy"
+          className="w-full h-full object-cover"
+        />
+      )}
+      {hasMedia && isVideo && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-surface-2 text-muted-foreground">
+          <Play className="size-7" />
+          <span className="text-[10px] font-mono uppercase tracking-wider">Video</span>
+        </div>
+      )}
+      {hasMedia && isAudio && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-surface-2 text-muted-foreground">
+          {item.model.category === "music" ? (
+            <Music2 className="size-7" />
+          ) : (
+            <Volume2 className="size-7" />
+          )}
+          <span className="text-[10px] font-mono uppercase tracking-wider">
+            {item.model.category === "music" ? "Music" : "Audio"}
+          </span>
+        </div>
       )}
       {!hasMedia && hasText && (
         <div className="absolute inset-0 flex flex-col p-3 overflow-hidden">

@@ -19,10 +19,16 @@ export function ResultView({ result, onRegenerate }: ResultViewProps) {
   const isImage = result.model.category === "image";
   const isVideo = result.model.category === "video";
   const isAudio = result.model.category === "audio";
+  const isMusic = result.model.category === "music";
   const isText = result.model.category === "text";
   const [displayUrl, setDisplayUrl] = useState(result.resultUrl ?? "");
 
   useEffect(() => {
+    if (!result.resultUrl || (!isImage && !isVideo)) {
+      setDisplayUrl(result.resultUrl ?? "");
+      return;
+    }
+
     let cancelled = false;
     fetchProxiedImage(result.resultUrl).then((url) => {
       if (!cancelled) setDisplayUrl(url);
@@ -30,7 +36,7 @@ export function ResultView({ result, onRegenerate }: ResultViewProps) {
     return () => {
       cancelled = true;
     };
-  }, [result.resultUrl]);
+  }, [isImage, isVideo, result.resultUrl]);
 
   function copyText() {
     if (result.textContent) {
@@ -65,9 +71,9 @@ export function ResultView({ result, onRegenerate }: ResultViewProps) {
           {hasResult && isVideo && (
             <video src={displayUrl} controls className="w-full h-full object-contain" />
           )}
-          {hasResult && isAudio && (
+          {hasResult && (isAudio || isMusic) && (
             <div className="flex flex-col items-center justify-center h-full gap-3 p-4">
-              <audio src={displayUrl} controls className="w-full max-w-xs" />
+              <audio src={displayUrl} controls className="w-full max-w-xs" preload="metadata" />
             </div>
           )}
           {hasResult && isText && (

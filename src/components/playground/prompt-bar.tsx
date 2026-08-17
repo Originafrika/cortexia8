@@ -42,7 +42,10 @@ export function PromptBar({
 }: PromptBarProps) {
   const t = useT();
   const isAtLimit = activeCount >= maxConcurrent;
-  const promptSpec = model.params.find((p) => p.kind === "prompt");
+  const promptSpec = model.params.find(
+    (p) =>
+      p.kind === "prompt" || (p.kind === "longtext" && (p.key === "prompt" || p.key === "text")),
+  );
   const placeholder =
     (promptSpec && "placeholder" in promptSpec && promptSpec.placeholder) ||
     t("playground.placeholder");

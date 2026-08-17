@@ -83,6 +83,14 @@ function capabilityForModelCategory(category: Model["category"]): Capability | n
   return null;
 }
 
+function isPrimaryTextParam(param: Model["params"][number], category: Model["category"]): boolean {
+  return (
+    param.kind === "prompt" ||
+    (param.kind === "longtext" &&
+      (param.key === "prompt" || param.key === "text" || category === "text"))
+  );
+}
+
 export type Result = {
   id: string;
   model: Model;
@@ -168,20 +176,13 @@ function ModelPlaygroundStateful({ model, isModal = false }: { model: Model; isM
   const storeSetBalance = useAppStore((s) => s.setBalance);
 
   const currentPrice = useMemo(() => estimatePrice(model, state), [model, state]);
-  const hasPrompt = model.params.some(
-    (p) =>
-      p.kind === "prompt" ||
-      (p.kind === "longtext" && (p.key === "prompt" || model.category === "text")),
-  );
+  const hasPrompt = model.params.some((p) => isPrimaryTextParam(p, model.category));
   const active = history.find((h) => h.id === activeId) ?? null;
 
   const canGenerate = useMemo(() => {
     for (const p of model.params) {
       if (!p.required) continue;
-      if (
-        p.kind === "prompt" ||
-        (p.kind === "longtext" && (p.key === "prompt" || model.category === "text"))
-      ) {
+      if (isPrimaryTextParam(p, model.category)) {
         if (prompt.trim().length < 3) return false;
       } else if (p.kind === "upload") {
         const val = state[p.key ?? ""] ?? [];
@@ -195,9 +196,8 @@ function ModelPlaygroundStateful({ model, isModal = false }: { model: Model; isM
   }, [model.params, model.category, prompt, state]);
 
   const iconParams = model.params.filter((p) => {
-    // Exclude main prompt (goes in textarea)
-    if (p.kind === "prompt") return false;
-    if (p.kind === "longtext" && (p.key === "prompt" || model.category === "text")) return false;
+    // Exclude the primary prompt/text field (goes in the main composer).
+    if (isPrimaryTextParam(p, model.category)) return false;
     // Exclude advanced params when not showing advanced
     if (!showAdvanced && "advanced" in p && p.advanced) return false;
     return true;
@@ -249,10 +249,7 @@ function ModelPlaygroundStateful({ model, isModal = false }: { model: Model; isM
     const missingFields: string[] = [];
     for (const p of model.params) {
       if (!p.required) continue;
-      if (
-        p.kind === "prompt" ||
-        (p.kind === "longtext" && (p.key === "prompt" || model.category === "text"))
-      ) {
+      if (isPrimaryTextParam(p, model.category)) {
         if (prompt.trim().length < 3) missingFields.push(p.label);
       } else if (p.kind === "upload") {
         const val = state[p.key ?? ""] ?? [];
@@ -318,9 +315,9 @@ function ModelPlaygroundStateful({ model, isModal = false }: { model: Model; isM
       setChatMessages(updatedSession?.messages ?? []);
       setSidebarRefreshKey((k) => k + 1);
     } else {
-      // Non-text models: existing behavior
-      const promptParam = model.params.find((p) => p.kind === "prompt" || p.kind === "longtext");
-      const promptKey = promptParam?.key ?? "prompt";
+      // Non-chat models: send the main composer value to the model's primary field.
+      const promptParam = model.params.find((p) => isPrimaryTextParam(p, model.category));
+      const promptKey = promptParam && "key" in promptParam ? promptParam.key : "prompt";
       if (prompt.trim()) input[promptKey] = prompt.trim();
     }
 
