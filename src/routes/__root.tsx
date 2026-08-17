@@ -8,7 +8,7 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
-import { initTheme } from "../components/ui/theme-toggle";
+import { initTheme } from "../components/ui/theme";
 import { NeonAuthUIProvider } from "@neondatabase/auth-ui";
 import { authClient } from "../auth";
 import { useLang, useLocaleStore } from "../lib/i18n";

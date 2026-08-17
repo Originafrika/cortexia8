@@ -1,16 +1,6 @@
 import { useEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
-
-const STORAGE_KEY = "cortexia-theme";
-
-function getInitialTheme(): "light" | "dark" {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored === "light" || stored === "dark") return stored;
-  if (typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: light)").matches) {
-    return "light";
-  }
-  return "dark";
-}
+import { getInitialTheme } from "./theme";
 
 export function ThemeToggle() {
   const [theme, setTheme] = useState<"light" | "dark">("dark");
@@ -27,7 +17,7 @@ export function ThemeToggle() {
   function toggle() {
     const next = theme === "dark" ? "light" : "dark";
     setTheme(next);
-    localStorage.setItem(STORAGE_KEY, next);
+    localStorage.setItem("cortexia-theme", next);
     document.documentElement.classList.toggle("light", next === "light");
     document.documentElement.classList.toggle("dark", next === "dark");
   }
@@ -45,11 +35,4 @@ export function ThemeToggle() {
       )}
     </button>
   );
-}
-
-export function initTheme() {
-  if (typeof document === "undefined") return;
-  const initial = getInitialTheme();
-  document.documentElement.classList.toggle("light", initial === "light");
-  document.documentElement.classList.toggle("dark", initial === "dark");
 }

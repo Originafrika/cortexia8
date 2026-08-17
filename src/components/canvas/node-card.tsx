@@ -24,7 +24,8 @@ import {
 } from "lucide-react";
 import { PriceDisplay } from "@/components/price-display";
 import { getModel, type ModelCategory } from "@/lib/models";
-import { getPrimaryParams, ParamField } from "@/components/canvas/node-params";
+import { ParamField } from "@/components/canvas/node-params";
+import { getPrimaryParams } from "@/components/canvas/node-params-data";
 import { NodeParamsOverlay } from "@/components/canvas/node-params-overlay";
 import { useT } from "@/lib/i18n";
 

@@ -71,7 +71,7 @@ function DevelopersPage() {
       .catch(() => {
         // Stats are non-critical — silently ignore
       });
-  }, []);
+  }, [t]);
 
   const snippets = {
     curl: `# Step 1: Start generation

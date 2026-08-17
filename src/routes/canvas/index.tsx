@@ -226,7 +226,7 @@ function CanvasInnerWrapper({
         fitView({ padding: 0.2, maxZoom: 1.1 });
       }
     });
-  }, [workflowId, fitView]);
+  }, [workflowId, fitView, loadedRef]);
 
   return (
     <>

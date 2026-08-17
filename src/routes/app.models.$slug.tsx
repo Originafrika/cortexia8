@@ -1,24 +1,8 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { getModel, basePrice, unitLabel, type Model, type ParamSpec } from "@/lib/models";
+import { getModel, basePrice, unitLabel, type Model } from "@/lib/models";
 import { PriceDisplay } from "@/components/price-display";
-import {
-  ArrowLeft,
-  Sparkles,
-  AlertTriangle,
-  Loader2,
-  Image as ImageIcon,
-  Ratio,
-  Palette,
-  Clock,
-  Dice5,
-  Volume2,
-  Upload,
-  SlidersHorizontal,
-  MessageSquare,
-  Ban,
-  X,
-} from "lucide-react";
+import { ArrowLeft, Sparkles, AlertTriangle, Loader2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { generate } from "@/lib/api/generate";
 import { generationStatus } from "@/lib/api/generation-status";
@@ -101,22 +85,6 @@ export type Result = {
   state: Record<string, unknown>;
   timestamp: Date;
 };
-
-export function iconForParam(key: string, kind: ParamSpec["kind"]) {
-  // Secondary text params (not the main prompt)
-  if (key === "negative_prompt") return Ban;
-  if (key === "lyrics" || key === "script" || key === "description") return MessageSquare;
-
-  // Other param types
-  if (kind === "upload") return Upload;
-  if (kind === "seed") return Dice5;
-  if (key === "ratio") return Ratio;
-  if (key === "resolution") return ImageIcon;
-  if (key === "style") return Palette;
-  if (key === "duration") return Clock;
-  if (key === "audio" || key === "voice" || key === "lang") return Volume2;
-  return SlidersHorizontal;
-}
 
 function ModelPlayground() {
   const { model } = Route.useLoaderData();

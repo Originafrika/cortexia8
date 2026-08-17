@@ -118,16 +118,3 @@ export function OnboardingOverlay({ open, onClose }: Props) {
     </AnimatePresence>
   );
 }
-
-export function useOnboarding() {
-  const [open, setOpen] = useState(false);
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (!localStorage.getItem(STORAGE_KEY)) {
-      // Small delay so the app renders behind the overlay first.
-      const id = window.setTimeout(() => setOpen(true), 500);
-      return () => window.clearTimeout(id);
-    }
-  }, []);
-  return { open, setOpen };
-}

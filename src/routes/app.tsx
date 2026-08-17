@@ -4,7 +4,8 @@ import { SignedIn, RedirectToSignIn } from "@neondatabase/auth-ui";
 import { AmbientBackground } from "@/components/ambient-background";
 import { LocalePicker } from "@/components/locale-picker";
 import { PriceDisplay } from "@/components/price-display";
-import { OnboardingOverlay, useOnboarding } from "@/components/onboarding-overlay";
+import { OnboardingOverlay } from "@/components/onboarding-overlay";
+import { useOnboarding } from "@/components/onboarding-hook";
 import {
   LayoutGrid,
   History,

@@ -5,7 +5,7 @@ import { Upload, X } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
-import { iconForParam } from "@/routes/app.models.$slug";
+import { iconForParam } from "@/components/playground/param-utils";
 import type { Model, ParamSpec } from "@/lib/models";
 
 type ParamEditorProps = {

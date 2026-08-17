@@ -115,7 +115,7 @@ function HistoryPage() {
       }
     }
     fetchHistory();
-  }, []);
+  }, [t]);
 
   const modelOptions = useMemo(() => {
     const set = new Map<string, Model>();
