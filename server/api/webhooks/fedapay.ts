@@ -2,11 +2,12 @@ import { verifyFedaPayWebhookSignature } from "@/lib/fedapay-webhook";
 import { defineEventHandler, getHeader, readRawBody, setResponseStatus } from "h3";
 import { sql } from "@/lib/db";
 import { getBalance, recordTransaction } from "@/lib/credits";
+import { errorContext, logger } from "@/lib/logger";
 
 export default defineEventHandler(async (event) => {
   const secret = process.env.FEDAPAY_WEBHOOK_SECRET;
   if (!secret) {
-    console.error("[FedaPay webhook] FEDAPAY_WEBHOOK_SECRET is not configured");
+    logger.error("webhook.fedapay.configuration_missing");
     setResponseStatus(event, 500);
     return { received: false };
   }
@@ -21,7 +22,7 @@ export default defineEventHandler(async (event) => {
   }
 
   if (!verifyFedaPayWebhookSignature(rawBody, signature, secret)) {
-    console.error("[FedaPay webhook] signature verification failed");
+    logger.warn("webhook.fedapay.signature_verification_failed");
     setResponseStatus(event, 400);
     return { received: false };
   }
@@ -103,7 +104,7 @@ export default defineEventHandler(async (event) => {
         UPDATE payment_transactions SET status = 'needs_review', updated_at = NOW()
         WHERE id = ${payment.id} AND status <> 'completed'
       `;
-      console.error("[FedaPay webhook] amount/currency mismatch", {
+      logger.warn("webhook.fedapay.amount_currency_mismatch", {
         transactionId,
         paymentId: payment.id,
       });
@@ -134,9 +135,9 @@ export default defineEventHandler(async (event) => {
     setResponseStatus(event, 200);
     return { received: true, action: "credited", transactionId, balance };
   } catch (error) {
-    console.error("[FedaPay webhook] processing failed", {
+    logger.error("webhook.fedapay.processing_failed", {
       transactionId,
-      error: error instanceof Error ? error.message : String(error),
+      ...errorContext(error),
     });
     setResponseStatus(event, 500);
     return { received: false, transactionId };

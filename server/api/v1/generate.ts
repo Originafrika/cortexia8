@@ -10,6 +10,7 @@ import { createTask, buildCallbackUrl } from "@/lib/kie-api/client";
 import { getActiveModelBySlug } from "@/lib/api/shared";
 import { ensureSufficientCredits, recordTransaction, refundGeneration } from "@/lib/credits";
 import { sha256Hex } from "../../../src/lib/utils/crypto";
+import { errorContext, logger } from "../../../src/lib/logger";
 import {
   checkRateLimit,
   getRemainingRequests,
@@ -158,21 +159,35 @@ export default defineEventHandler(async (event) => {
       try {
         await refundGeneration({ userId, amount: chargedAmount, runId, nodeExecutionId });
       } catch (refundError) {
-        console.error("[api/v1/generate] refund failed", refundError);
+        logger.error("api.generate.refund_failed", {
+          runId,
+          nodeExecutionId,
+          ...errorContext(refundError),
+        });
       }
       await sql`
         UPDATE run_node_executions
         SET status = 'failed', completed_at = NOW(), error_message = ${err instanceof Error ? err.message.slice(0, 2000) : "Generation submission failed"}
         WHERE id = ${nodeExecutionId} AND status IN ('submitting', 'queued')
       `.catch((updateError) =>
-        console.error("[api/v1/generate] failed to mark execution", updateError),
+        logger.error("api.generate.execution_mark_failed", {
+          nodeExecutionId,
+          ...errorContext(updateError),
+        }),
       );
       await sql`
         UPDATE runs SET status = 'failed', completed_at = NOW()
         WHERE id = ${runId} AND status = 'running'
-      `.catch((updateError) => console.error("[api/v1/generate] failed to mark run", updateError));
+      `.catch((updateError) =>
+        logger.error("api.generate.run_mark_failed", { runId, ...errorContext(updateError) }),
+      );
     }
-    console.error("[api/v1/generate]", err);
+    logger.error("api.generate.submission_failed", {
+      runId,
+      nodeExecutionId,
+      userId,
+      ...errorContext(err),
+    });
     setResponseStatus(event, 500);
     return { error: "Internal server error" };
   }

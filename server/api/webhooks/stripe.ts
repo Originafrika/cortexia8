@@ -17,11 +17,12 @@
 import { defineEventHandler, getHeader, readRawBody, setResponseStatus } from "h3";
 import { sql } from "@/lib/db";
 import { recordTransaction } from "@/lib/credits";
+import { errorContext, logger } from "@/lib/logger";
 
 export default defineEventHandler(async (event) => {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!webhookSecret) {
-    console.error("[Stripe webhook] STRIPE_WEBHOOK_SECRET not configured");
+    logger.error("webhook.stripe.configuration_missing");
     setResponseStatus(event, 500);
     return { ok: false, error: "Webhook secret not configured" };
   }
@@ -50,7 +51,7 @@ export default defineEventHandler(async (event) => {
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : "Signature verification failed";
-    console.error("[Stripe webhook]", message);
+    logger.error("webhook.stripe.signature_verification_failed", errorContext(err));
     setResponseStatus(event, 401);
     return { ok: false, error: message };
   }

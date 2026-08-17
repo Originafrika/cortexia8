@@ -9,8 +9,15 @@
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "test": "vitest run",
-    "lint": "eslint .",
-    "format": "prettier --write ."
+    "lint": "pnpm run check:lint",
+    "format": "prettier --write .",
+    "check:lint": "eslint src server vite.config.ts eslint.config.js",
+    "check:types": "tsc --noEmit",
+    "check:test": "vitest run",
+    "check:build": "vite build",
+    "check:security": "pnpm audit --prod --audit-level=high",
+    "check:peers": "pnpm peers check",
+    "check:release": "pnpm install --frozen-lockfile && pnpm run check:lint && pnpm run check:types && pnpm run check:test && pnpm run check:build && pnpm run check:security && pnpm run check:peers"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

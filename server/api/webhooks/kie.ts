@@ -10,13 +10,14 @@ import { timingSafeEqual, createHmac } from "node:crypto";
 import { defineEventHandler, getHeader, readRawBody, setResponseStatus } from "h3";
 import { handleWebhook } from "@/lib/api/webhooks-kie-core";
 import { extractTaskId } from "@/lib/kie-api/webhook";
+import { errorContext, logger } from "@/lib/logger";
 
 const WEBHOOK_TOLERANCE_SECONDS = 5 * 60;
 
 export default defineEventHandler(async (event) => {
   const secret = process.env.KIE_WEBHOOK_HMAC_KEY;
   if (!secret) {
-    console.error("[kie webhook] KIE_WEBHOOK_HMAC_KEY is not configured");
+    logger.error("webhook.kie.configuration_missing");
     setResponseStatus(event, 500);
     return { ok: false, action: "rejected", reason: "Webhook verification is not configured" };
   }
@@ -76,10 +77,7 @@ export default defineEventHandler(async (event) => {
     setResponseStatus(event, result.ok ? 200 : 422);
     return result;
   } catch (error) {
-    console.error("[kie webhook] Internal error", {
-      taskId,
-      error: error instanceof Error ? error.message : String(error),
-    });
+    logger.error("webhook.kie.internal_error", { taskId, ...errorContext(error) });
     setResponseStatus(event, 500);
     return { ok: false, taskId, action: "rejected", reason: "internal error" };
   }
