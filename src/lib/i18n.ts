@@ -624,6 +624,14 @@ const fr: Dict = {
   "api_docs.webhook_verify_title": "Vérification",
   "api_docs.webhook_verify_desc":
     "Chaque webhook inclut un header X-Cortexia-Signature contenant le SHA-256 HMAC du payload avec ton webhook secret. Vérifie toujours cette signature avant de traiter le payload.",
+
+  "capability.label": "État de la capacité",
+  "capability.beta": "bêta",
+  "capability.beta_desc":
+    "Cette capacité est disponible en bêta contrôlée pendant la vérification des modèles et des paiements.",
+  "capability.coming_soon": "bientôt disponible",
+  "capability.coming_soon_desc":
+    "Cette capacité est en préparation. Nous vérifions encore les modèles, les résultats et la facturation avant de l'ouvrir.",
 };
 
 const en: Dict = {
@@ -1217,6 +1225,14 @@ const en: Dict = {
   "api_docs.webhook_verify_title": "Verification",
   "api_docs.webhook_verify_desc":
     "Each webhook includes an X-Cortexia-Signature header containing the SHA-256 HMAC of the payload with your webhook secret. Always verify this signature before processing the payload.",
+
+  "capability.label": "Capability status",
+  "capability.beta": "beta",
+  "capability.beta_desc":
+    "This capability is available in a controlled beta while models and payments are being verified.",
+  "capability.coming_soon": "coming soon",
+  "capability.coming_soon_desc":
+    "This capability is being prepared. We are still verifying models, results, and billing before opening it.",
 };
 
 // Portuguese, Spanish, Indonesian , cover the core landing strings.
@@ -1786,6 +1802,14 @@ const pt: Dict = {
   "api_docs.webhook_verify_title": "Verification",
   "api_docs.webhook_verify_desc":
     "Each webhook includes an X-Cortexia-Signature header containing the SHA-256 HMAC of the payload with your webhook secret. Always verify this signature before processing the payload.",
+
+  "capability.label": "Capability status",
+  "capability.beta": "beta",
+  "capability.beta_desc":
+    "This capability is available in a controlled beta while models and payments are being verified.",
+  "capability.coming_soon": "coming soon",
+  "capability.coming_soon_desc":
+    "This capability is being prepared. We are still verifying models, results, and billing before opening it.",
 };
 
 const es: Dict = {
@@ -2355,6 +2379,14 @@ const es: Dict = {
   "api_docs.webhook_verify_title": "Verification",
   "api_docs.webhook_verify_desc":
     "Each webhook includes an X-Cortexia-Signature header containing the SHA-256 HMAC of the payload with your webhook secret. Always verify this signature before processing the payload.",
+
+  "capability.label": "Capability status",
+  "capability.beta": "beta",
+  "capability.beta_desc":
+    "This capability is available in a controlled beta while models and payments are being verified.",
+  "capability.coming_soon": "coming soon",
+  "capability.coming_soon_desc":
+    "This capability is being prepared. We are still verifying models, results, and billing before opening it.",
 };
 
 const id: Dict = {
@@ -2923,6 +2955,14 @@ const id: Dict = {
   "api_docs.webhook_verify_title": "Verification",
   "api_docs.webhook_verify_desc":
     "Each webhook includes an X-Cortexia-Signature header containing the SHA-256 HMAC of the payload with your webhook secret. Always verify this signature before processing the payload.",
+
+  "capability.label": "Capability status",
+  "capability.beta": "beta",
+  "capability.beta_desc":
+    "This capability is available in a controlled beta while models and payments are being verified.",
+  "capability.coming_soon": "coming soon",
+  "capability.coming_soon_desc":
+    "This capability is being prepared. We are still verifying models, results, and billing before opening it.",
 };
 
 const DICTS: Record<Lang, Dict> = { fr, en, pt, id, es };

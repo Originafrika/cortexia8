@@ -19,7 +19,8 @@ import {
 import { cn } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
 import { getUserBalance } from "@/lib/api/balance";
-import { loadSession, isAdmin } from "@/lib/auth-store";
+import { loadSession } from "@/lib/auth-store";
+import { isCapabilityEnabled, type Capability } from "@/lib/capabilities";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 export const Route = createFileRoute("/app")({
@@ -82,19 +83,31 @@ function AppShell({
   open: boolean;
   setOpen: (v: boolean) => void;
 }) {
-  const NAV = [
+  const NAV: Array<{
+    to: string;
+    label: string;
+    icon: typeof Workflow;
+    exact?: boolean;
+    capability?: Capability;
+  }> = [
     {
       to: "/app/workflows",
       label: t("app.nav.workflows") || "Workflows",
       icon: Workflow,
       exact: true,
-      adminOnly: true,
+      capability: "workflows" as Capability,
     },
     { to: "/app/models", label: t("app.nav.models"), icon: LayoutGrid },
     { to: "/app/history", label: t("app.nav.history"), icon: History, exact: true },
-    { to: "/app/developers", label: t("app.nav.dev"), icon: Code2, exact: true, adminOnly: true },
+    {
+      to: "/app/developers",
+      label: t("app.nav.dev"),
+      icon: Code2,
+      exact: true,
+      capability: "developers" as Capability,
+    },
     { to: "/app/account", label: t("app.nav.account"), icon: Wallet, exact: true },
-  ].filter((item) => !item.adminOnly || isAdmin());
+  ].filter((item) => !item.capability || isCapabilityEnabled(item.capability));
 
   const [mobileOpen, setMobileOpen] = useState(false);
 

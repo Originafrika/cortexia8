@@ -5,7 +5,7 @@ import { ModelCard } from "@/components/model-card";
 import { Search, ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
-import { isAdmin } from "@/lib/auth-store";
+import { isCapabilityEnabled, type Capability } from "@/lib/capabilities";
 
 export const Route = createFileRoute("/app/models")({
   head: () => ({
@@ -43,6 +43,17 @@ const CATS: { key: ModelCategory | "all"; labelKey: string }[] = [
 
 const PAGE_SIZE = 12;
 
+const CATEGORY_CAPABILITY: Partial<Record<ModelCategory, Capability>> = {
+  text: "text",
+  audio: "audio",
+  music: "music",
+};
+
+function isCategoryEnabled(category: ModelCategory): boolean {
+  const capability = CATEGORY_CAPABILITY[category];
+  return capability ? isCapabilityEnabled(capability) : true;
+}
+
 export function ModelsCatalog() {
   const t = useT();
   const [cat, setCat] = useState<ModelCategory | "all">("all");
@@ -50,19 +61,17 @@ export function ModelsCatalog() {
   const [page, setPage] = useState(1);
   const [sortBy, setSortBy] = useState<"newest" | "price_asc" | "price_desc" | "az">("newest");
 
-  const visibleCats = useMemo(() => {
-    const admin = isAdmin();
-    if (admin) return CATS;
-    return CATS.filter((c) => c.key === "all" || c.key === "image" || c.key === "video");
-  }, []);
+  const visibleCats = useMemo(
+    () => CATS.filter((c) => c.key === "all" || isCategoryEnabled(c.key)),
+    [],
+  );
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
-    const admin = isAdmin();
     return MODELS.filter(
       (m) =>
         (cat === "all" || m.category === cat) &&
-        (admin || (m.category !== "text" && m.category !== "audio" && m.category !== "music")) &&
+        isCategoryEnabled(m.category) &&
         (term === "" ||
           m.name.toLowerCase().includes(term) ||
           m.provider.toLowerCase().includes(term) ||

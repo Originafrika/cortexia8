@@ -6,6 +6,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { runAgent, type AgentConfig, type AgentResponse } from "@/lib/agent";
 import { getRequestContext, requireUserId, HttpError } from "./auth";
+import { isCapabilityEnabled } from "@/lib/capabilities";
 
 export type AgentRunInput = {
   message: string;
@@ -31,6 +32,9 @@ export const agentRun = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     try {
+      if (!isCapabilityEnabled("agent") || !isCapabilityEnabled("canvas")) {
+        throw new HttpError(503, "Agent mode is not enabled");
+      }
       const ctx = await getRequestContext(data.sessionToken);
       const userId = await requireUserId(ctx);
 

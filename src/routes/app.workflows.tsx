@@ -11,6 +11,8 @@ import {
 } from "@/lib/api/workflows";
 import { useT } from "@/lib/i18n";
 import { loadSession } from "@/lib/auth-store";
+import { isCapabilityEnabled } from "@/lib/capabilities";
+import { CapabilityUnavailable } from "@/components/capability-unavailable";
 
 export const Route = createFileRoute("/app/workflows")({
   beforeLoad: ({ location }) => {
@@ -22,9 +24,6 @@ export const Route = createFileRoute("/app/workflows")({
         params: { pathname: "sign-in" },
         search: { redirect: location.href },
       });
-    }
-    if (session.user.role !== "admin") {
-      throw redirect({ to: "/app/models" });
     }
   },
   head: () => ({
@@ -55,6 +54,13 @@ function formatRelative(dateStr: string | null, t: (key: string) => string): str
 }
 
 function WorkflowsPage() {
+  if (!isCapabilityEnabled("workflows")) {
+    return <CapabilityUnavailable capability="workflows" />;
+  }
+  return <EnabledWorkflowsPage />;
+}
+
+function EnabledWorkflowsPage() {
   const t = useT();
   const navigate = useNavigate();
   const [workflows, setWorkflows] = useState<WorkflowListItem[]>([]);

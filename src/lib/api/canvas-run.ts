@@ -24,6 +24,7 @@ import {
   type ModelRow,
 } from "./shared";
 import { getRequestContext, HttpError, requireUserId } from "./auth";
+import { isCapabilityEnabled } from "@/lib/capabilities";
 
 export type RunInput = {
   workflowId: number;
@@ -68,6 +69,9 @@ export const runCanvas = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     try {
+      if (!isCapabilityEnabled("canvas")) {
+        throw new HttpError(503, "Canvas is not enabled");
+      }
       const ctx = await getRequestContext(data.sessionToken);
       const userId = await requireUserId(ctx);
       return await runCanvasImpl(data, userId);

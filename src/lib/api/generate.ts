@@ -37,6 +37,7 @@ import {
 } from "./shared";
 import { getRequestContext, HttpError, requireUserId, validateOrigin } from "./auth";
 import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
+import { capabilityForCategory, isCapabilityEnabled } from "@/lib/capabilities";
 
 export type GenerateInput = {
   modelSlug: string;
@@ -103,6 +104,11 @@ async function runGenerate(
   const model = await getActiveModelBySlug(data.modelSlug);
   if (!model) {
     throw new HttpError(404, `Model '${data.modelSlug}' not found or inactive`);
+  }
+
+  const requiredCapability = capabilityForCategory(model.category);
+  if (requiredCapability && !isCapabilityEnabled(requiredCapability)) {
+    throw new HttpError(503, `${model.category} generation is not enabled`);
   }
 
   // Validate kie_endpoint is properly configured before calling kie.ai

@@ -10,6 +10,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { sql } from "@/lib/db";
 import { getRequestContext, HttpError, requireUserId, validateOrigin } from "./auth";
+import { isCapabilityEnabled } from "@/lib/capabilities";
 
 // ---------------------------------------------------------------------------
 // createWorkflow
@@ -30,6 +31,9 @@ export const createWorkflow = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     try {
+      if (!isCapabilityEnabled("workflows")) {
+        throw new HttpError(503, "Workflows are not enabled");
+      }
       const ctx = await getRequestContext(data.sessionToken);
       const userId = await requireUserId(ctx);
       // CSRF: validate origin for state-changing endpoint.
@@ -71,6 +75,9 @@ export const listWorkflows = createServerFn({ method: "GET" })
   .validator((_data: { sessionToken?: string } | void) => _data ?? {})
   .handler(async ({ data }) => {
     try {
+      if (!isCapabilityEnabled("workflows")) {
+        throw new HttpError(503, "Workflows are not enabled");
+      }
       const ctx = await getRequestContext(data.sessionToken);
       const userId = await requireUserId(ctx);
 
@@ -160,6 +167,9 @@ export const getWorkflow = createServerFn({ method: "GET" })
   })
   .handler(async ({ data }) => {
     try {
+      if (!isCapabilityEnabled("workflows")) {
+        throw new HttpError(503, "Workflows are not enabled");
+      }
       const ctx = await getRequestContext(data.sessionToken);
       const userId = await requireUserId(ctx);
 
@@ -255,6 +265,9 @@ export const deleteWorkflow = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     try {
+      if (!isCapabilityEnabled("workflows")) {
+        throw new HttpError(503, "Workflows are not enabled");
+      }
       const ctx = await getRequestContext(data.sessionToken);
       const userId = await requireUserId(ctx);
 
@@ -306,6 +319,9 @@ export const renameWorkflow = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     try {
+      if (!isCapabilityEnabled("workflows")) {
+        throw new HttpError(503, "Workflows are not enabled");
+      }
       const ctx = await getRequestContext(data.sessionToken);
       const userId = await requireUserId(ctx);
 

@@ -7,6 +7,8 @@ import { createApiKey, listApiKeys, revokeApiKey, type ApiKeyRow } from "@/lib/a
 import { getApiStats, type ApiStats } from "@/lib/api/api-stats";
 import { useT } from "@/lib/i18n";
 import { loadSession } from "@/lib/auth-store";
+import { isCapabilityEnabled } from "@/lib/capabilities";
+import { CapabilityUnavailable } from "@/components/capability-unavailable";
 import { toast } from "sonner";
 import {
   Select,
@@ -27,9 +29,6 @@ export const Route = createFileRoute("/app/developers")({
         search: { redirect: location.href },
       });
     }
-    if (session.user.role !== "admin") {
-      throw redirect({ to: "/app/models" });
-    }
   },
   head: () => ({
     meta: [
@@ -45,6 +44,13 @@ export const Route = createFileRoute("/app/developers")({
 });
 
 function DevelopersPage() {
+  if (!isCapabilityEnabled("developers")) {
+    return <CapabilityUnavailable capability="developers" />;
+  }
+  return <EnabledDevelopersPage />;
+}
+
+function EnabledDevelopersPage() {
   const t = useT();
   const [tab, setTab] = useState<"curl" | "js" | "py">("curl");
   const [copied, setCopied] = useState(false);

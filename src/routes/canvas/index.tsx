@@ -3,7 +3,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ReactFlowProvider, useReactFlow } from "@xyflow/react";
 import { z } from "zod";
 import { SignedIn, RedirectToSignIn } from "@neondatabase/auth-ui";
-import { loadSession } from "@/lib/auth-store";
+import { isCapabilityEnabled } from "@/lib/capabilities";
+import { CapabilityUnavailable } from "@/components/capability-unavailable";
 import { CanvasFlow } from "@/components/canvas/canvas-flow";
 import { AgentPanel } from "@/components/canvas/agent-panel";
 import { NodePicker } from "@/components/canvas/node-picker";
@@ -30,36 +31,14 @@ export const Route = createFileRoute("/canvas/")({
 });
 
 function CanvasPage() {
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [checked, setChecked] = useState(false);
-
-  useEffect(() => {
-    const session = loadSession();
-    if (session?.user?.role === "admin") {
-      setIsAdmin(true);
-    }
-    setChecked(true);
-  }, []);
-
-  if (!checked) return null;
-  if (!isAdmin) {
-    return (
-      <div className="min-h-screen grid place-items-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-semibold">Admin access required</h1>
-          <p className="text-muted-foreground mt-2">Canvas is only available to admin accounts.</p>
-          <Link to="/app/models" className="mt-4 inline-block underline text-sm">
-            Back to models
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <>
       <SignedIn>
-        <CanvasShell />
+        {isCapabilityEnabled("canvas") ? (
+          <CanvasShell />
+        ) : (
+          <CapabilityUnavailable capability="canvas" />
+        )}
       </SignedIn>
       <RedirectToSignIn />
     </>

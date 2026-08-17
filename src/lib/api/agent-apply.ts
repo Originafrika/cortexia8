@@ -20,6 +20,7 @@ import { getRequestContext, HttpError, requireUserId } from "./auth";
 import { runCanvas } from "./canvas-run";
 import { getWorkflow, type GetWorkflowResponse } from "./workflows";
 import { MODELS } from "@/lib/models";
+import { isCapabilityEnabled } from "@/lib/capabilities";
 
 // ── Cost Confirmation Threshold ────────────────────────────────────────────
 // Configurable: operations with estimated cost above this require user confirmation (USD)
@@ -101,6 +102,9 @@ function estimateOperationsCost(operations: AgentOp[]): number {
 // ── Implementation ────────────────────────────────────────────────────────
 
 async function applyPlanImpl(input: AgentApplyInput): Promise<AgentApplyResponse> {
+  if (!isCapabilityEnabled("agent") || !isCapabilityEnabled("canvas")) {
+    throw new HttpError(503, "Agent mode is not enabled");
+  }
   const ctx = await getRequestContext();
   const userId = await requireUserId(ctx);
 
