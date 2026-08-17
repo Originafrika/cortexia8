@@ -38,7 +38,7 @@ export const agentRun = createServerFn({ method: "POST" })
       const ctx = await getRequestContext(data.sessionToken);
       const userId = await requireUserId(ctx);
 
-      const config: AgentConfig = data.config ?? { model: "gpt-5-2" };
+      const config: AgentConfig = data.config ?? { model: "gpt-52" };
       return (await runAgent(data.message, config, data.graphState)) as AgentResponse;
     } catch (err) {
       if (err instanceof HttpError) throw err;

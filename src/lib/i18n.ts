@@ -598,6 +598,10 @@ const fr: Dict = {
   "models.sort_price_desc": "Prix : décroissant",
   "models.sort_az": "A → Z",
   "models.search_placeholder": "Kling, Claude, ElevenLabs…",
+  "models.fidelity_verified": "Fidélité vérifiée",
+  "models.fidelity_generic": "Fidélité générique",
+  "models.readiness_provider_route": "Route fournisseur enregistrée",
+  "models.readiness_provider_missing": "Vérification fournisseur requise",
 
   // API docs
   "api_docs.auth_title": "Authentification",
@@ -1199,6 +1203,10 @@ const en: Dict = {
   "models.sort_price_desc": "Price: High → Low",
   "models.sort_az": "A → Z",
   "models.search_placeholder": "Kling, Claude, ElevenLabs…",
+  "models.fidelity_verified": "Verified fidelity",
+  "models.fidelity_generic": "General fidelity",
+  "models.readiness_provider_route": "Provider route recorded",
+  "models.readiness_provider_missing": "Provider verification needed",
 
   // API docs
   "api_docs.auth_title": "Authentication",
@@ -1776,6 +1784,10 @@ const pt: Dict = {
   "models.sort_price_desc": "Preço: decrescente",
   "models.sort_az": "A → Z",
   "models.search_placeholder": "Kling, Claude, ElevenLabs…",
+  "models.fidelity_verified": "Fidelidade verificada",
+  "models.fidelity_generic": "Fidelidade geral",
+  "models.readiness_provider_route": "Rota do provedor registrada",
+  "models.readiness_provider_missing": "Verificação do provedor necessária",
 
   // API docs
   "api_docs.auth_title": "Autenticação",
@@ -2353,6 +2365,10 @@ const es: Dict = {
   "models.sort_price_desc": "Precio: mayor → menor",
   "models.sort_az": "A → Z",
   "models.search_placeholder": "Kling, Claude, ElevenLabs…",
+  "models.fidelity_verified": "Fidelidad verificada",
+  "models.fidelity_generic": "Fidelidad general",
+  "models.readiness_provider_route": "Ruta del proveedor registrada",
+  "models.readiness_provider_missing": "Se requiere verificación del proveedor",
 
   // API docs
   "api_docs.auth_title": "Autenticación",
@@ -2929,6 +2945,10 @@ const id: Dict = {
   "models.sort_price_desc": "Harga: tinggi → rendah",
   "models.sort_az": "A → Z",
   "models.search_placeholder": "Kling, Claude, ElevenLabs…",
+  "models.fidelity_verified": "Fidelitas terverifikasi",
+  "models.fidelity_generic": "Fidelitas umum",
+  "models.readiness_provider_route": "Rute penyedia tercatat",
+  "models.readiness_provider_missing": "Verifikasi penyedia diperlukan",
 
   // API docs
   "api_docs.auth_title": "Autentikasi",

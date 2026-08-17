@@ -12,30 +12,13 @@
  */
 
 import { MODELS, type Model } from "./models";
+import { CATALOGUE } from "./models-data";
 import { kieApiBase } from "./kie-api/client";
 
 // ── Types ─────────────────────────────────────────────────────────────────
 
-export type AgentModel =
-  | "claude-sonnet-4-5"
-  | "gpt-5-2"
-  | "gpt-5"
-  | "gpt-4.1"
-  | "gpt-4.1-mini"
-  | "claude-opus-4"
-  | "claude-haiku-3-5"
-  | "gemini-2-5-pro"
-  | "gemini-2-5-flash"
-  | "grok-3"
-  | "claude-fable-5"
-  | "claude-sonnet-5"
-  | "claude-opus-47"
-  | "claude-sonnet-46"
-  | "gpt-55"
-  | "gpt-56-luna"
-  | "gemini-3-pro"
-  | "gemini-3-flash"
-  | "grok-43";
+/** Model slugs are validated against the active text catalogue at runtime. */
+export type AgentModel = string;
 
 export type GraphOperation =
   | { type: "ADD_NODE"; modelSlug: string; position?: { x: number; y: number } }
@@ -149,10 +132,11 @@ Detect the user's language from their message and respond in that same language.
 async function callClaude(
   messages: Array<{ role: string; content: string }>,
   config: AgentConfig,
+  providerModel: string,
 ): Promise<string> {
   const endpoint = `${kieApiBase()}/claude/v1/messages`;
   const body = {
-    model: "claude-sonnet-4-5-20250514",
+    model: providerModel,
     messages,
     max_tokens: config.maxTokens ?? DEFAULT_MAX_TOKENS,
     stream: false,
@@ -179,10 +163,11 @@ async function callClaude(
 async function callGPT(
   messages: Array<{ role: string; content: string }>,
   config: AgentConfig,
+  providerModel: string,
 ): Promise<string> {
   const endpoint = `${kieApiBase()}/openai/v1/chat/completions`;
   const body = {
-    model: "gpt-5.2",
+    model: providerModel,
     messages,
     max_tokens: config.maxTokens ?? DEFAULT_MAX_TOKENS,
     stream: false,
@@ -209,8 +194,9 @@ async function callGPT(
 async function callGemini(
   messages: Array<{ role: string; content: string }>,
   config: AgentConfig,
+  providerModel: string,
 ): Promise<string> {
-  const model = config.model === "gemini-2-5-flash" ? "gemini-2.5-flash" : "gemini-2.5-pro";
+  const model = providerModel;
   const endpoint = `${kieApiBase()}/google/v1beta/models/${model}:generateContent`;
   const body = {
     contents: messages.map((m) => ({
@@ -243,10 +229,11 @@ async function callGemini(
 async function callGrok(
   messages: Array<{ role: string; content: string }>,
   config: AgentConfig,
+  providerModel: string,
 ): Promise<string> {
   const endpoint = `${kieApiBase()}/xai/v1/chat/completions`;
   const body = {
-    model: "grok-3",
+    model: providerModel,
     messages,
     max_tokens: config.maxTokens ?? DEFAULT_MAX_TOKENS,
     stream: false,
@@ -274,33 +261,26 @@ async function callLLM(
   messages: Array<{ role: string; content: string }>,
   config: AgentConfig,
 ): Promise<string> {
-  switch (config.model) {
-    case "claude-sonnet-4-5":
-    case "claude-opus-4":
-    case "claude-haiku-3-5":
-    case "claude-fable-5":
-    case "claude-sonnet-5":
-    case "claude-opus-47":
-    case "claude-sonnet-46":
-      return callClaude(messages, config);
-    case "gpt-5-2":
-    case "gpt-5":
-    case "gpt-4.1":
-    case "gpt-4.1-mini":
-    case "gpt-55":
-    case "gpt-56-luna":
-      return callGPT(messages, config);
-    case "gemini-2-5-pro":
-    case "gemini-2-5-flash":
-    case "gemini-3-pro":
-    case "gemini-3-flash":
-      return callGemini(messages, config);
-    case "grok-3":
-    case "grok-43":
-      return callGrok(messages, config);
-    default:
-      throw new Error(`Unsupported model: ${config.model}`);
+  const catalogueModel = CATALOGUE.find(
+    (model) =>
+      model.slug === config.model &&
+      model.active &&
+      model.category === "text" &&
+      (model.apiFamily === "chat_openai" || model.apiFamily === "chat_anthropic"),
+  );
+  if (!catalogueModel) throw new Error(`Unsupported or inactive model: ${config.model}`);
+
+  const providerModel = catalogueModel.kieEndpoint;
+  if (catalogueModel.apiFamily === "chat_anthropic") {
+    return callClaude(messages, config, providerModel);
   }
+  if (providerModel.startsWith("gemini-")) {
+    return callGemini(messages, config, providerModel);
+  }
+  if (providerModel.startsWith("grok-")) {
+    return callGrok(messages, config, providerModel);
+  }
+  return callGPT(messages, config, providerModel);
 }
 
 // ── Response Parsing ──────────────────────────────────────────────────────
@@ -477,26 +457,11 @@ export function shouldConfirmOperation(
 
 // ── Export Constants ──────────────────────────────────────────────────────
 
-export const AGENT_MODELS: Array<{ value: AgentModel; label: string }> = [
-  { value: "gpt-5-2", label: "GPT 5.2" },
-  { value: "gpt-55", label: "GPT 5.5" },
-  { value: "gpt-5", label: "GPT 5" },
-  { value: "gpt-56-luna", label: "GPT 5.6 Luna" },
-  { value: "gpt-4.1", label: "GPT 4.1" },
-  { value: "gpt-4.1-mini", label: "GPT 4.1 Mini" },
-  { value: "claude-sonnet-5", label: "Claude Sonnet 5" },
-  { value: "claude-sonnet-4-5", label: "Claude Sonnet 4.5" },
-  { value: "claude-sonnet-46", label: "Claude Sonnet 4.6" },
-  { value: "claude-opus-47", label: "Claude Opus 4.7" },
-  { value: "claude-opus-4", label: "Claude Opus 4" },
-  { value: "claude-fable-5", label: "Claude Fable 5" },
-  { value: "claude-haiku-3-5", label: "Claude Haiku 3.5" },
-  { value: "gemini-3-pro", label: "Gemini 3 Pro" },
-  { value: "gemini-2-5-pro", label: "Gemini 2.5 Pro" },
-  { value: "gemini-3-flash", label: "Gemini 3 Flash" },
-  { value: "gemini-2-5-flash", label: "Gemini 2.5 Flash" },
-  { value: "grok-43", label: "Grok 4.3" },
-  { value: "grok-3", label: "Grok 3" },
-];
+export const AGENT_MODELS: Array<{ value: AgentModel; label: string }> = CATALOGUE.filter(
+  (model) =>
+    model.active &&
+    model.category === "text" &&
+    (model.apiFamily === "chat_openai" || model.apiFamily === "chat_anthropic"),
+).map((model) => ({ value: model.slug, label: model.name }));
 
 export const COST_THRESHOLD = DEFAULT_COST_THRESHOLD;

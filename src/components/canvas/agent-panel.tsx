@@ -75,7 +75,7 @@ export function AgentPanel({
   const [busy, setBusy] = useState(false);
   const [log, setLog] = useState<{ text: string; tone: "info" | "ok" | "muted" | "warn" }[]>([]);
   const [expanded, setExpanded] = useState(true);
-  const [selectedModel, setSelectedModel] = useState<AgentModel>("claude-sonnet-4-5");
+  const [selectedModel, setSelectedModel] = useState<AgentModel>("claude-sonnet-45");
   const [permissionMode, setPermissionMode] = useState<PermissionMode>("auto_under_threshold");
   const [pendingOperations, setPendingOperations] = useState<AgentResponse | null>(null);
   const [pendingLaunch, setPendingLaunch] = useState(false);

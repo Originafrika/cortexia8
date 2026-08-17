@@ -47,6 +47,26 @@ export function ModelCard({ model, compact = false }: ModelCardProps) {
         </p>
       )}
 
+      <div className="mt-3 flex flex-wrap items-center gap-1.5">
+        <span className="rounded-full bg-surface-2 px-2 py-0.5 text-[10px] font-mono text-muted-foreground">
+          {model.fidelityStatus === "fidele"
+            ? t("models.fidelity_verified")
+            : t("models.fidelity_generic")}
+        </span>
+        <span
+          className={cn(
+            "rounded-full px-2 py-0.5 text-[10px] font-mono",
+            model.active && model.kieEndpoint
+              ? "bg-emerald/15 text-emerald"
+              : "bg-amber/15 text-amber-soft",
+          )}
+        >
+          {model.active && model.kieEndpoint
+            ? t("models.readiness_provider_route")
+            : t("models.readiness_provider_missing")}
+        </span>
+      </div>
+
       <div
         className={cn(
           "flex items-baseline justify-between",
