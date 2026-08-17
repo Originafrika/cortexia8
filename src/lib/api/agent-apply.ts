@@ -20,7 +20,7 @@ import { getRequestContext, HttpError, requireUserId } from "./auth";
 import { runCanvas } from "./canvas-run";
 import { getWorkflow, type GetWorkflowResponse } from "./workflows";
 import { MODELS } from "@/lib/models";
-import { isCapabilityEnabled } from "@/lib/capabilities";
+import { capabilityForCategory, isCapabilityEnabled } from "@/lib/capabilities";
 
 // ── Cost Confirmation Threshold ────────────────────────────────────────────
 // Configurable: operations with estimated cost above this require user confirmation (USD)
@@ -113,7 +113,7 @@ async function applyPlanImpl(input: AgentApplyInput): Promise<AgentApplyResponse
     SELECT id, user_id FROM workflows WHERE id = ${input.workflowId} LIMIT 1
   `) as { id: number; user_id: number | null }[];
   if (wfRows.length === 0) throw new HttpError(404, "Workflow not found");
-  if (wfRows[0].user_id != null && wfRows[0].user_id !== userId) {
+  if (wfRows[0].user_id !== userId) {
     throw new HttpError(403, "Workflow belongs to a different user");
   }
 
@@ -165,8 +165,13 @@ async function applyOneOp(
 ) {
   switch (op.op) {
     case "ADD_NODE": {
-      if (typeof op.modelSlug !== "string" || !MODELS.find((m) => m.slug === op.modelSlug)) {
-        throw new HttpError(400, `Unknown model: ${op.modelSlug}`);
+      const model = MODELS.find((m) => m.slug === op.modelSlug && m.active);
+      if (!model) {
+        throw new HttpError(400, `Unknown or inactive model: ${op.modelSlug}`);
+      }
+      const requiredCapability = capabilityForCategory(model.category);
+      if (requiredCapability && !isCapabilityEnabled(requiredCapability)) {
+        throw new HttpError(503, `${model.category} generation is not enabled`);
       }
       const pos = op.position ?? { x: 120 + Math.random() * 80, y: 120 + Math.random() * 80 };
       const res = await client.query<{ id: number }>(

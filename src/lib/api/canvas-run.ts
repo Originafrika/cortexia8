@@ -24,7 +24,7 @@ import {
   type ModelRow,
 } from "./shared";
 import { getRequestContext, HttpError, requireUserId } from "./auth";
-import { isCapabilityEnabled } from "@/lib/capabilities";
+import { capabilityForCategory, isCapabilityEnabled } from "@/lib/capabilities";
 
 export type RunInput = {
   workflowId: number;
@@ -122,7 +122,7 @@ async function runCanvasImpl(input: RunInput, userId: number): Promise<RunRespon
   if (wfRows.length === 0) {
     throw new HttpError(404, `Workflow ${input.workflowId} not found`);
   }
-  if (wfRows[0].user_id != null && wfRows[0].user_id !== userId) {
+  if (wfRows[0].user_id !== userId) {
     throw new HttpError(403, "Workflow belongs to a different user");
   }
   const workflow = wfRows[0];
@@ -144,6 +144,14 @@ async function runCanvasImpl(input: RunInput, userId: number): Promise<RunRespon
 
   // 2. Resolve all model slugs in one query (batch).
   const modelCache = await getActiveModelsBySlugs(nodes.map((n) => n.model_slug));
+
+  for (const model of modelCache.values()) {
+    if (!model) continue;
+    const requiredCapability = capabilityForCategory(model.category);
+    if (requiredCapability && !isCapabilityEnabled(requiredCapability)) {
+      throw new HttpError(503, `${model.category} generation is not enabled`);
+    }
+  }
 
   // 3. Determine which nodes to execute vs reuse
   const rerunNodeId = input.rerunNodeId;

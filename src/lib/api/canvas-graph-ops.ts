@@ -20,6 +20,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { withTransaction } from "@/lib/db";
 import type { PoolClient } from "@/lib/db";
 import { getRequestContext, HttpError, requireUserId } from "./auth";
+import { isCapabilityEnabled } from "@/lib/capabilities";
 
 type CreateNodeOp = {
   op: "createNode";
@@ -92,6 +93,9 @@ export const graphOps = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     try {
+      if (!isCapabilityEnabled("canvas")) {
+        throw new HttpError(503, "Canvas is not enabled");
+      }
       const ctx = await getRequestContext(data.sessionToken);
       const userId = await requireUserId(ctx);
       return await applyOps(data, userId);
@@ -135,6 +139,7 @@ async function dispatch(
   await assertWorkflowOwnedBy(client, op, userId);
   switch (op.op) {
     case "createNode": {
+      await assertActiveModel(client, op.modelSlug);
       const res = await client.query<{ id: number }>(
         `INSERT INTO workflow_nodes
           (workflow_id, type, model_slug, config, canvas_x, canvas_y, canvas_width, canvas_height)
@@ -154,6 +159,7 @@ async function dispatch(
     }
     case "updateNode": {
       const p = op.patch;
+      if (p.modelSlug !== undefined) await assertActiveModel(client, p.modelSlug);
       const sets: string[] = [];
       const params: unknown[] = [];
       let i = 2; // $1 is the node id
@@ -197,6 +203,13 @@ async function dispatch(
       return { nodeId: op.nodeId, deleted: true };
     }
     case "createEdge": {
+      const nodes = await client.query<{ id: number }>(
+        `SELECT id FROM workflow_nodes WHERE workflow_id = $1 AND id = ANY($2::int[])`,
+        [op.workflowId, [op.sourceNodeId, op.targetNodeId]],
+      );
+      if (nodes.rows.length !== 2) {
+        throw new HttpError(400, "Edge nodes must belong to the same workflow");
+      }
       const res = await client.query<{ id: number }>(
         `INSERT INTO workflow_edges
           (workflow_id, source_node_id, target_node_id, source_output_key, target_input_key)
@@ -247,7 +260,17 @@ async function assertWorkflowOwnedBy(client: PoolClient, op: CanvasOp, userId: n
   if (owner.rows.length === 0) {
     throw new HttpError(404, "Workflow not found");
   }
-  if (owner.rows[0].user_id != null && owner.rows[0].user_id !== userId) {
+  if (owner.rows[0].user_id !== userId) {
     throw new HttpError(403, "Workflow belongs to a different user");
+  }
+}
+
+async function assertActiveModel(client: PoolClient, modelSlug: string) {
+  const model = await client.query<{ slug: string }>(
+    `SELECT slug FROM models WHERE slug = $1 AND active = TRUE LIMIT 1`,
+    [modelSlug],
+  );
+  if (model.rows.length === 0) {
+    throw new HttpError(400, `Unknown or inactive model: ${modelSlug}`);
   }
 }
