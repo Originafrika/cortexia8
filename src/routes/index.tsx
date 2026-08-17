@@ -11,6 +11,8 @@ import { ModelsWall, WallPreview } from "@/components/models-wall";
 import { useCountUp } from "@/lib/use-count-up";
 import { useT } from "@/lib/i18n";
 import { getWaitlistCount } from "@/lib/waitlist";
+import { CATALOGUE } from "@/lib/models-data";
+import { capabilityForCategory, isCapabilityEnabled } from "@/lib/capabilities";
 import { useQuery } from "@tanstack/react-query";
 import { LAUNCH_DATE } from "@/lib/launch";
 import { useEffect, useState, useRef } from "react";
@@ -18,14 +20,20 @@ import { AppPreview } from "@/components/app-preview";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, ArrowRight, Bot, Sliders } from "lucide-react";
 
+const PUBLIC_MODEL_COUNT = CATALOGUE.filter((model) => {
+  if (!model.active) return false;
+  const capability = capabilityForCategory(model.category);
+  return !capability || isCapabilityEnabled(capability);
+}).length;
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Cortexia — Un accès. Tous les modèles." },
+      { title: "Cortexia — Provider-verified AI models" },
       {
         name: "description",
         content:
-          "Cortexia — AI generation platform with 200+ models. Image, video, voice, music, text. Pay per use.",
+          "Cortexia — one account for provider-verified AI models, with pay-as-you-go generation.",
       },
     ],
   }),
@@ -95,7 +103,11 @@ function Hero() {
               {t("hero.subtitle")}
             </p>
           </LangFade>
-          <p className="mt-4 text-xs text-muted-foreground">{t("hero.micro_cta")}</p>
+          <p className="mt-4 text-xs text-muted-foreground">
+            {t("public.ready_prefix")}
+            {PUBLIC_MODEL_COUNT}
+            {t("public.ready_suffix")}
+          </p>
 
           <motion.div
             initial={{ opacity: 0, y: 12 }}
@@ -115,7 +127,7 @@ function Hero() {
         >
           <EditorialCountdown target={LAUNCH_DATE} />
           <div className="mt-6 pt-6 border-t border-border grid grid-cols-3 gap-4">
-            <Stat label={t("stat.models")} value="30+" />
+            <Stat label={t("stat.models")} value={`${PUBLIC_MODEL_COUNT}+`} />
             <Stat label={t("stat.currencies")} value="8" />
             <Stat label={t("stat.no_sub")} value="0 €" />
           </div>

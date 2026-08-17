@@ -32,11 +32,13 @@ const fr: Dict = {
   "badge.live": "En ligne , accès libre",
   "badge.prelaunch": "Pré-lancement",
 
-  "hero.title": "Un accès. Tous les modèles. Un agent qui sait lequel choisir.",
+  "hero.title": "Un accès. Des modèles vérifiés. Une création qui s'ouvre par étapes.",
   "hero.subtitle":
-    "Cortexia te donne le catalogue complet , Kling, Seedream, Nano Banana, Claude, ElevenLabs et le reste , en accès direct, playground par playground. Besoin d'aller vite ? L'agent choisit et orchestre à ta place. Facturé à l'usage, jamais à l'abonnement.",
+    "Cortexia réunit les modèles vérifiés dans un seul espace. Commence par les capacités ouvertes, puis active les nouveaux parcours à mesure que les modèles, les résultats et la facturation sont vérifiés. Facturé à l'usage, jamais à l'abonnement.",
   "hero.micro_cta":
     "30+ modèles. Un seul compte. Payable par carte, Mobile Money, crypto ou Alipay.",
+  "public.ready_prefix": "Actuellement : ",
+  "public.ready_suffix": " modèles vérifiés et ouverts au public.",
 
   "stat.models": "modèles",
   "stat.currencies": "devises",
@@ -54,13 +56,13 @@ const fr: Dict = {
     "Les deux modes partagent le même compte, le même solde, le même prix à l'usage. Tu changes de mode selon le projet, jamais selon ton fournisseur.",
 
   "catalog.eyebrow": "Catalogue",
-  "catalog.title": "Pas un modèle. Le catalogue entier.",
+  "catalog.title": "Les modèles vérifiés, au même endroit.",
   "catalog.body":
-    "Image, vidéo, voix, musique, texte , plus de 30 modèles des meilleurs labos (Google, Anthropic, OpenAI, ByteDance, Kuaishou, ElevenLabs, xAI...) accessibles avec le même compte, le même solde, la même simplicité. Plus besoin de 4 abonnements pour 4 types de contenu.",
+    "Image et vidéo dès maintenant, puis les capacités texte, audio, musique et agent à mesure que les modèles, les résultats et la facturation sont vérifiés. Un seul compte, un seul solde, un prix à l'usage.",
 
   "waitlist.title": "Réserve ta place avant le 1er août",
   "waitlist.subtitle":
-    "Accès complet au catalogue et à l'agent dès l'ouverture. Les premiers inscrits reçoivent des crédits offerts et un accès prioritaire.",
+    "Les capacités sont ouvertes progressivement. Les premiers inscrits reçoivent des crédits offerts et un accès prioritaire.",
   "waitlist.email_placeholder": "ton@email.com",
   "waitlist.cta": "Je réserve ma place",
   "waitlist.i_create": "Je crée surtout :",
@@ -644,10 +646,12 @@ const en: Dict = {
   "badge.live": "Live , open access",
   "badge.prelaunch": "Pre-launch",
 
-  "hero.title": "One access. Every model. An agent that knows which to pick.",
+  "hero.title": "One access. Provider-verified models. Creation that opens in stages.",
   "hero.subtitle":
-    "Cortexia gives you the full catalog , Kling, Seedream, Nano Banana, Claude, ElevenLabs and more , direct access, playground by playground. Need it fast? The agent picks and orchestrates for you. Pay-as-you-go, never a subscription.",
+    "Cortexia brings verified models into one workspace. Start with the capabilities that are open today, then add new creation paths as models, results, and billing are verified. Pay-as-you-go, never a subscription.",
   "hero.micro_cta": "30+ models. One account. Pay by card, Mobile Money, crypto or Alipay.",
+  "public.ready_prefix": "Currently open: ",
+  "public.ready_suffix": " provider-verified models.",
 
   "stat.models": "models",
   "stat.currencies": "currencies",
@@ -665,13 +669,13 @@ const en: Dict = {
     "Both modes share the same account, the same balance, the same pay-as-you-go pricing. You switch modes by project, never by provider.",
 
   "catalog.eyebrow": "Catalog",
-  "catalog.title": "Not one model. The full catalog.",
+  "catalog.title": "Provider-verified models, in one place.",
   "catalog.body":
-    "Image, video, voice, music, text , over 30 models from the best labs (Google, Anthropic, OpenAI, ByteDance, Kuaishou, ElevenLabs, xAI...) accessible with the same account, the same balance, the same simplicity. No more 4 subscriptions for 4 types of content.",
+    "Image and video are open now, with text, audio, music, and agent paths opening as models, results, and billing are verified. One account, one balance, pay-as-you-go.",
 
   "waitlist.title": "Save your spot before August 1st",
   "waitlist.subtitle":
-    "Full catalog and agent access from day one. Early signups get welcome credits and priority access.",
+    "Capabilities open progressively as they are verified. Early signups get welcome credits and priority access.",
   "waitlist.email_placeholder": "you@email.com",
   "waitlist.cta": "Save my spot",
   "waitlist.i_create": "I mostly create:",
@@ -1250,10 +1254,12 @@ const pt: Dict = {
   "badge.launch": "Abertura, 1º de agosto",
   "badge.live": "No ar, acesso livre",
   "badge.prelaunch": "Pré-lançamento",
-  "hero.title": "Um acesso. Todos os modelos. Um agente que sabe qual escolher.",
+  "hero.title": "Um acesso. Modelos verificados. Criação aberta por etapas.",
   "hero.subtitle":
-    "Cortexia te dá o catálogo completo, Kling, Seedream, Nano Banana, Claude, ElevenLabs e mais, acesso direto, playground por playground. Precisa ir rápido? O agente escolhe e orquestra para você. Cobrado por uso, nunca por assinatura.",
+    "A Cortexia reúne modelos verificados em um só espaço. Comece pelas capacidades abertas hoje e acompanhe a abertura de novos fluxos à medida que modelos, resultados e cobrança são verificados. Pague pelo uso, nunca por assinatura.",
   "hero.micro_cta": "30+ modelos. Uma conta. Pague com cartão, Mobile Money, cripto ou Alipay.",
+  "public.ready_prefix": "Disponíveis agora: ",
+  "public.ready_suffix": " modelos verificados pelo provedor.",
   "modes.eyebrow": "Duas formas de criar",
   "modes.title": "Você no controle, ou o agente no controle. Sua escolha, a cada geração.",
   "modes.agent.title": "Modo Agente",
@@ -1265,12 +1271,13 @@ const pt: Dict = {
   "modes.synthesis":
     "Os dois modos compartilham a mesma conta, o mesmo saldo, o mesmo preço por uso. Você troca de modo por projeto, nunca por provedor.",
   "catalog.eyebrow": "Catálogo",
-  "catalog.title": "Não um modelo. O catálogo completo.",
+  "catalog.title": "Modelos verificados, em um só lugar.",
   "catalog.body":
-    "Imagem, vídeo, voz, música, texto, mais de 30 modelos dos melhores laboratórios acessíveis com a mesma conta, o mesmo saldo. Não precisa de 4 assinaturas para 4 tipos de conteúdo.",
+    "Imagem e vídeo estão abertos agora; texto, áudio, música e agente serão liberados à medida que modelos, resultados e cobrança forem verificados. Uma conta, um saldo, pagamento por uso.",
+
   "waitlist.title": "Reserve seu lugar antes de 1º de agosto",
   "waitlist.subtitle":
-    "Acesso completo ao catálogo e ao agente na abertura. Os primeiros inscritos recebem créditos e acesso prioritário.",
+    "As capacidades são abertas progressivamente conforme são verificadas. Os primeiros inscritos recebem créditos e acesso prioritário.",
   "waitlist.email_placeholder": "seu@email.com",
   "waitlist.cta": "Reservar meu lugar",
   "waitlist.i_create": "Eu crio principalmente:",
@@ -1829,11 +1836,13 @@ const es: Dict = {
   "badge.launch": "Apertura, 1 de agosto",
   "badge.live": "En línea, acceso libre",
   "badge.prelaunch": "Pre-lanzamiento",
-  "hero.title": "Un acceso. Todos los modelos. Un agente que sabe cuál elegir.",
+  "hero.title": "Un acceso. Modelos verificados. Creación que se abre por etapas.",
   "hero.subtitle":
-    "Cortexia te da el catálogo completo, Kling, Seedream, Nano Banana, Claude, ElevenLabs y más, acceso directo, playground por playground. ¿Necesitas ir rápido? El agente elige y orquesta por ti. Facturado por uso, nunca por suscripción.",
+    "Cortexia reúne modelos verificados en un solo espacio. Empieza con las capacidades abiertas hoy y añade nuevos flujos a medida que se verifican los modelos, los resultados y la facturación. Facturado por uso, nunca por suscripción.",
   "hero.micro_cta":
     "30+ modelos. Una sola cuenta. Paga con tarjeta, Mobile Money, cripto o Alipay.",
+  "public.ready_prefix": "Disponibles ahora: ",
+  "public.ready_suffix": " modelos verificados por el proveedor.",
   "modes.eyebrow": "Dos formas de crear",
   "modes.title": "Tú al mando, o el agente al mando. Tu elección, en cada generación.",
   "modes.agent.title": "Modo Agente",
@@ -1845,12 +1854,13 @@ const es: Dict = {
   "modes.synthesis":
     "Los dos modos comparten la misma cuenta, el mismo saldo, el mismo precio por uso. Cambias de modo por proyecto, nunca por proveedor.",
   "catalog.eyebrow": "Catálogo",
-  "catalog.title": "No un modelo. El catálogo completo.",
+  "catalog.title": "Modelos verificados, en un solo lugar.",
   "catalog.body":
-    "Imagen, video, voz, música, texto, más de 30 modelos de los mejores laboratorios accesibles con la misma cuenta, el mismo saldo. No necesitas 4 suscripciones para 4 tipos de contenido.",
+    "Imagen y video están abiertos ahora; texto, audio, música y agente se liberan a medida que se verifican modelos, resultados y facturación. Una cuenta, un saldo, pago por uso.",
+
   "waitlist.title": "Reserva tu lugar antes del 1 de agosto",
   "waitlist.subtitle":
-    "Acceso completo al catálogo y al agente en la apertura. Los primeros inscritos reciben créditos y acceso prioritario.",
+    "Las capacidades se abren progresivamente a medida que se verifican. Los primeros inscritos reciben créditos y acceso prioritario.",
   "waitlist.email_placeholder": "tu@email.com",
   "waitlist.cta": "Reservar mi lugar",
   "waitlist.i_create": "Creo sobre todo:",
@@ -2410,10 +2420,12 @@ const id: Dict = {
   "badge.launch": "Rilis, 1 Agustus",
   "badge.live": "Online, akses bebas",
   "badge.prelaunch": "Pra-rilis",
-  "hero.title": "Satu akses. Semua model. Agen yang tahu mana yang dipilih.",
+  "hero.title": "Satu akses. Model terverifikasi. Kreasi dibuka bertahap.",
   "hero.subtitle":
-    "Cortexia memberikanmu katalog lengkap, Kling, Seedream, Nano Banana, Claude, ElevenLabs dan lainnya, akses langsung, playground per model. Butuh cepat? Agen memilih dan mengorkestrasi untukmu. Dibayar per penggunaan, bukan berlangganan.",
+    "Cortexia menyatukan model terverifikasi dalam satu ruang kerja. Mulai dari kemampuan yang terbuka hari ini, lalu gunakan alur baru saat model, hasil, dan penagihan selesai diverifikasi. Bayar sesuai penggunaan, bukan langganan.",
   "hero.micro_cta": "30+ model. Satu akun. Bayar pakai kartu, Mobile Money, kripto atau Alipay.",
+  "public.ready_prefix": "Tersedia sekarang: ",
+  "public.ready_suffix": " model terverifikasi penyedia.",
   "modes.eyebrow": "Dua cara berkarya",
   "modes.title": "Kamu yang kendali, atau agen yang kendali. Pilihanmu, setiap generasi.",
   "modes.agent.title": "Mode Agen",
@@ -2425,12 +2437,13 @@ const id: Dict = {
   "modes.synthesis":
     "Kedua mode berbagi akun yang sama, saldo yang sama, harga yang sama per penggunaan. Kamu ganti mode per proyek, bukan per penyedia.",
   "catalog.eyebrow": "Katalog",
-  "catalog.title": "Bukan satu model. Katalog lengkap.",
+  "catalog.title": "Model terverifikasi, dalam satu tempat.",
   "catalog.body":
-    "Gambar, video, suara, musik, teks, lebih dari 30 model dari lab terbaik yang bisa diakses dengan akun yang sama, saldo yang sama. Tidak perlu 4 langganan untuk 4 jenis konten.",
+    "Gambar dan video terbuka sekarang; teks, suara, musik, dan agen dibuka saat model, hasil, dan penagihan selesai diverifikasi. Satu akun, satu saldo, bayar sesuai penggunaan.",
+
   "waitlist.title": "Simpan tempatmu sebelum 1 Agustus",
   "waitlist.subtitle":
-    "Akses lengkap ke katalog dan agen saat pembukaan. Pendaftar awal mendapat kredit dan akses prioritas.",
+    "Kemampuan dibuka bertahap setelah diverifikasi. Pendaftar awal mendapat kredit dan akses prioritas.",
   "waitlist.email_placeholder": "kamu@email.com",
   "waitlist.cta": "Simpan tempatku",
   "waitlist.i_create": "Aku terutama membuat:",

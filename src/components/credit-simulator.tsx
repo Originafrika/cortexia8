@@ -299,20 +299,23 @@ const VIDEO_MODELS: SimModel[] = [
   },
 ];
 
-const VOICE_MODELS: SimModel[] = [
-  {
-    key: "eleven-v3",
-    name: "ElevenLabs Text-to-Dialogue V3",
-    category: "voice",
+const CATALOGUE_VOICE_MODELS: SimModel[] = CATALOGUE.filter(
+  (e) => e.category === "audio" && e.active,
+).map((e) => {
+  const isPerSecond = e.unit === "second";
+  return {
+    key: e.slug,
+    name: e.name,
+    category: "voice" as const,
     icon: Mic,
-    unit: "1k caractères",
-    unitPriceUSD: 0.0882,
-    suffix: "×1k car. / mois",
-    max: 200,
-    step: 2,
-    defaultValue: 6,
-  },
-];
+    unit: isPerSecond ? "secondes" : "1k caractères",
+    unitPriceUSD: e.cortexiaPriceUsd,
+    suffix: isPerSecond ? "secondes / mois" : "×1k car. / mois",
+    max: isPerSecond ? 300 : 200,
+    step: isPerSecond ? 5 : 2,
+    defaultValue: 0,
+  };
+});
 
 const CATALOGUE_TEXT_MODELS: SimModel[] = CATALOGUE.filter(
   (e) => e.category === "text" && e.active,
@@ -347,7 +350,7 @@ const CATALOGUE_MUSIC_MODELS: SimModel[] = CATALOGUE.filter(
 const ALL_MODELS: SimModel[] = [
   ...IMAGE_MODELS,
   ...VIDEO_MODELS,
-  ...VOICE_MODELS,
+  ...CATALOGUE_VOICE_MODELS,
   ...CATALOGUE_TEXT_MODELS,
   ...CATALOGUE_MUSIC_MODELS,
 ];
