@@ -26,7 +26,19 @@ Les créateurs, agences, équipes marketing et développeurs doivent actuellemen
 
 ## Tronc critique du MVP
 
-Le parcours prioritaire est : **inscription → recharge Mobile Money → choix d’un modèle réel → saisie d’un prompt → génération → résultat conservé dans l’historique → solde et coût visibles**. Le paiement par carte, le chat multi-modèles, le canvas agentique et les flows de type Canva sont des branches importantes, mais ne doivent pas masquer ce tronc.
+Le parcours prioritaire est : **inscription → recharge Mobile Money → choix d’un modèle réel → saisie d’un prompt → génération → résultat conservé dans l’historique → solde et coût visibles**. Le paiement par carte, le chat multi-modèles et le canvas agentique sont des branches importantes, mais ne doivent pas masquer ce tronc.
+
+## Priorités de livraison
+
+| Rang | Priorité                                                          | Condition d’entrée                                  | Preuve attendue                                                                                                                                          |
+| ---: | ----------------------------------------------------------------- | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|    1 | Tronc compte unifié, crédits, Mobile Money et génération vérifiée | Toujours actif                                      | Paiement réconcilié, génération réelle, solde cohérent                                                                                                   |
+|    2 | **Fonctionnalité agentique du canvas**                            | Le tronc local est vert et le staging est configuré | L’agent lit le graphe, propose un plan borné, calcule le coût, demande confirmation selon le seuil et applique le plan dans le workflow de l’utilisateur |
+|    3 | Paiement carte et chat multi-modèles                              | Gate staging du tronc fermé                         | Checkout/webhook idempotent et conversation multi-modèles vérifiable                                                                                     |
+|    4 | Flows créatifs de type Canva et orchestration multi-étapes        | Agent canvas prouvé sur plusieurs workflows         | Flow rejouable, coût traçable, échec récupérable                                                                                                         |
+|    5 | Expansion du catalogue, plans équipe et routage avancé            | Usage récurrent et marges mesurées                  | Données de rétention, marge par unité et capacité opérateur                                                                                              |
+
+L’agentique n’est donc plus une fonctionnalité différée sans rang : elle devient la **prochaine branche produit prioritaire après la fermeture du tronc staging**. Sa première version reste bornée au canvas actuel, aux modèles vérifiés, aux opérations `ADD_NODE`, `CONNECT_NODES`, `UPDATE_NODE` et `REMOVE_NODE`, avec confirmation et application serveur.
 
 ## Promesse du premier ring
 
@@ -45,7 +57,7 @@ Cortexia doit permettre à un utilisateur authentifié, dans un pays couvert par
 
 ## Non-objectifs immédiats
 
-Le premier ring ne cherche pas à livrer simultanément tous les modèles frontier, une parité complète avec Canva, des agents autonomes non bornés, une place de marché ouverte, des abonnements complexes, une application mobile native ou une couverture de paiement mondiale. Ces sujets restent dans la vision, mais seront ouverts comme branches seulement après preuve du tronc et des marges unitaires.
+Le premier ring ne cherche pas à livrer simultanément tous les modèles frontier, une parité complète avec Canva, des agents autonomes non bornés, une place de marché ouverte, des abonnements complexes, une application mobile native ou une couverture de paiement mondiale. Le canvas agentique est désormais une priorité de rang 2, mais sa version de lancement reste bornée et n’ouvre pas encore la voie à des agents autonomes non bornés. Les autres sujets restent dans la vision et seront ouverts comme branches après preuve du tronc, de l’agentique bornée et des marges unitaires.
 
 ## Échec à ne pas expédier
 
@@ -57,7 +69,7 @@ Pour ce ring, “production-ready” signifie que les contrats de données, les 
 
 ## Décisions à prendre plus tard, sans bloquer le tronc
 
-Le catalogue de modèles doit progressivement passer d’un registre statique à une source contrôlée des capacités réellement disponibles. Le routage agentique devra ensuite s’appuyer sur ce catalogue plutôt que sur des alias de modèles non vérifiés. L’expansion vers les cartes et les autres rails de paiement doit conserver le même ledger autoritatif et la même règle d’idempotence.
+Le catalogue de modèles doit progressivement passer d’un registre statique à une source contrôlée des capacités réellement disponibles. Le routage agentique devra s’appuyer sur ce catalogue vérifié plutôt que sur des alias de modèles non vérifiés ; le canvas agentique devient la prochaine branche après le staging du tronc, avec une application serveur et des permissions bornées. L’expansion vers les cartes et les autres rails de paiement doit conserver le même ledger autoritatif et la même règle d’idempotence.
 
 ## Références internes
 
