@@ -2,14 +2,14 @@
 
 **Date :** 25 août 2026  
 **Branche :** `main`  
-**Commit observé :** `e006476`
+**Commit observé :** `29b309b`
 **Statut :** `local_ready_external_blocked`
 
 ## Revue
 
 Le dépôt Cortexia est propre et synchronisé avec `origin/main`. Le tronc actif reste la vérification du parcours **compte unifié → crédits → paiement Mobile Money/carte → génération vérifiée**. Aucun nouveau périmètre Canva, agent autonome ou catalogue non réconcilié ne doit consommer de capacité avant la fermeture de ce gate.
 
-Les preuves locales restent vertes : quatre fichiers de tests et onze tests réussis, typecheck validé, build validé, formatage contrôlé et template staging vérifié comme contenant uniquement des placeholders. Le dernier verrou serveur empêche aussi la génération web sur un modèle non vérifié lorsqu’un client contourne l’interface. L’application du plan agentique recalcule désormais les modèles et les coûts depuis la base, refuse les entrées non vérifiées et conserve l’application transactionnelle du graphe.
+Les preuves locales restent vertes : quatre fichiers de tests et onze tests réussis, typecheck validé, build validé, formatage contrôlé et template staging vérifié comme contenant uniquement des placeholders. Le dernier verrou serveur empêche aussi la génération web sur un modèle non vérifié lorsqu’un client contourne l’interface. L’application du plan agentique recalcule désormais les modèles et les coûts depuis la base, refuse les entrées non vérifiées et conserve l’application transactionnelle du graphe. Le runner canvas bloque également les nœuds non vérifiés déjà présents dans un workflow avant toute soumission fournisseur.
 
 ## Décision de la revue
 
