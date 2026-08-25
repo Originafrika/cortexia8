@@ -15,6 +15,10 @@
 | PR-005   | Le catalogue et l’API publique masquent les entrées non vérifiées | Filtrage UI, loader playground, `GET /v1/models`, `POST /v1/generate`                       | Revue de code + build | Entrées `generique` non exposées aux utilisateurs publics      | Bounded  | Test HTTP authentifié et migration DB à exécuter                    |
 | PR-006   | Les paiements et la génération disposent de chemins serveur réels | Revue de `src/lib/api/generate.ts`, `src/lib/api/payments.ts`, callbacks KIE/FedaPay/Stripe | Dépôt Git             | Création, vérification, ledger, refunds et callbacks présents  | Bounded  | Smoke test avec sandbox fournisseurs non exécuté dans cette session |
 
+## Vérification d’environnement
+
+Aucune variable de staging n’est disponible dans cette session : `APP_URL`, `DATABASE_URL`, `KIE_API_KEY`, `KIE_WEBHOOK_HMAC_KEY`, les secrets FedaPay, les secrets Stripe et les variables R2 ont été contrôlées uniquement par présence et sont toutes absentes. Aucun secret n’a été imprimé ni ajouté au dépôt. Cette observation confirme un **blocage d’environnement**, pas un échec de l’implémentation locale.
+
 ## Tests encore requis avant exposition externe
 
 Le premier ring reste bloqué pour une ouverture publique tant que l’équipe n’a pas exécuté sur un environnement staging isolé un paiement FedaPay approuvé, refusé, rejoué et discordant ; un paiement Stripe en mode test avec vérification de signature ; une génération média avec callback réussi ; une génération avec échec et remboursement ; une génération interrompue puis réconciliée par polling ; et un contrôle d’accès sur un workflow d’un autre utilisateur.
@@ -23,7 +27,7 @@ Chaque test staging doit enregistrer un identifiant de transaction ou de run non
 
 ## Conclusion de gate
 
-Le ring de code et de documentation est **vérifié localement**, mais le ring de production est **partiel**. Le prochain propriétaire est l’équipe d’exploitation/engineering, qui doit exécuter la matrice staging avec les variables définies dans `PRODUCTION-RUNBOOK.md`. Tant que cette matrice n’est pas passée, la bonne décision est de conserver l’exposition publique fermée ou limitée à une liste pilote explicitement approuvée.
+Le ring de code et de documentation est **vérifié localement**, mais le ring de production est **bloqué par l’environnement staging manquant**. Le prochain propriétaire est l’équipe d’exploitation/engineering, qui doit configurer les variables définies dans `PRODUCTION-RUNBOOK.md`, puis exécuter la matrice staging. Tant que cette matrice n’est pas passée, la bonne décision est de conserver l’exposition publique fermée ou limitée à une liste pilote explicitement approuvée.
 
 ## Références
 
