@@ -2,14 +2,14 @@
 
 **Date :** 25 août 2026  
 **Branche :** `main`  
-**Commit observé :** `3f228d7`  
+**Commit observé :** `e006476`
 **Statut :** `local_ready_external_blocked`
 
 ## Revue
 
 Le dépôt Cortexia est propre et synchronisé avec `origin/main`. Le tronc actif reste la vérification du parcours **compte unifié → crédits → paiement Mobile Money/carte → génération vérifiée**. Aucun nouveau périmètre Canva, agent autonome ou catalogue non réconcilié ne doit consommer de capacité avant la fermeture de ce gate.
 
-Les preuves locales restent vertes : quatre fichiers de tests et onze tests réussis, typecheck validé, build validé, formatage contrôlé et template staging vérifié comme contenant uniquement des placeholders. Le dernier verrou serveur empêche aussi la génération web sur un modèle non vérifié lorsqu’un client contourne l’interface.
+Les preuves locales restent vertes : quatre fichiers de tests et onze tests réussis, typecheck validé, build validé, formatage contrôlé et template staging vérifié comme contenant uniquement des placeholders. Le dernier verrou serveur empêche aussi la génération web sur un modèle non vérifié lorsqu’un client contourne l’interface. L’application du plan agentique recalcule désormais les modèles et les coûts depuis la base, refuse les entrées non vérifiées et conserve l’application transactionnelle du graphe.
 
 ## Décision de la revue
 
@@ -29,7 +29,7 @@ Aucune opportunité externe, levée de fonds ou engagement partenaire n’est ac
 
 ## Condition de réouverture
 
-Réouvrir le périmètre seulement après un `Proof Record` staging contenant au minimum un paiement Mobile Money approuvé et rejoué, un paiement carte en mode test, une génération vérifiée réussie, une génération échouée avec remboursement et une réconciliation d’un callback manqué. Une anomalie de double crédit ou de débit orphelin impose une pause et une revue du ledger.
+Réouvrir le périmètre seulement après un `Proof Record` staging contenant au minimum un paiement Mobile Money approuvé et rejoué, un paiement carte en mode test, une génération vérifiée réussie, une génération échouée avec remboursement, une réconciliation d’un callback manqué et un workflow agentique validé sur un graphe réel. Une anomalie de double crédit ou de débit orphelin impose une pause et une revue du ledger.
 
 ## Références
 
