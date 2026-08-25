@@ -60,7 +60,11 @@ export const runCanvas = createServerFn({ method: "POST" })
     if (!Number.isInteger(data.workflowId)) {
       throw new HttpError(400, "workflowId is required");
     }
-    return { workflowId: data.workflowId, rerunNodeId: data.rerunNodeId, sessionToken: data.sessionToken };
+    return {
+      workflowId: data.workflowId,
+      rerunNodeId: data.rerunNodeId,
+      sessionToken: data.sessionToken,
+    };
   })
   .handler(async ({ data }) => {
     try {
@@ -252,6 +256,15 @@ async function dispatchNode(opts: {
       error: `Model '${node.model_slug}' not found or inactive`,
     });
     throw new Error(`model not found: ${node.model_slug}`);
+  }
+  if (model.fidelity_status !== "fidele") {
+    await recordNodeExecution({
+      runId,
+      workflowNodeId: node.id,
+      status: "failed",
+      error: `Model '${node.model_slug}' is not available for canvas execution`,
+    });
+    throw new Error(`unverified model: ${node.model_slug}`);
   }
 
   // Resolve any reference uploads in the node's config.
