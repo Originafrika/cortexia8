@@ -1,30 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { runMigration } from "@/lib/api/run-migration";
 
 export const Route = createFileRoute("/run-migration")({
-  component: RunMigration,
+  component: DisabledMigrationRoute,
 });
 
-function RunMigration() {
-  const [results, setResults] = useState<string[] | null>(null);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    runMigration()
-      .then(setResults)
-      .catch((e) => setError(String(e)));
-  }, []);
-
+function DisabledMigrationRoute() {
   return (
-    <div className="p-8 font-mono text-xs bg-black text-green-400 min-h-screen">
-      <h1 className="text-lg font-bold mb-4 text-white">Database Migration</h1>
-      {error && <div className="text-red-400">ERROR: {error}</div>}
-      {results ? (
-        <pre>{JSON.stringify(results, null, 2)}</pre>
-      ) : (
-        <div>Running migration...</div>
-      )}
-    </div>
+    <main className="grid min-h-screen place-items-center bg-black px-6 text-green-300">
+      <section className="max-w-xl space-y-4 font-mono text-sm">
+        <p className="text-xs uppercase tracking-[0.24em] text-green-500">410 · Gone</p>
+        <h1 className="text-xl font-semibold text-white">Migration web désactivée</h1>
+        <p className="text-green-200/80">
+          Les migrations de production sont exécutées exclusivement par la chaîne versionnée et la
+          procédure opérateur documentée. Cette URL ne lit ni n’écrit aucune donnée.
+        </p>
+      </section>
+    </main>
   );
 }

@@ -6,31 +6,29 @@ Deploy only after the following commands pass from the repository root:
 
 ```bash
 pnpm install --frozen-lockfile
-pnpm test
-pnpm exec tsc --noEmit
-pnpm exec vite build
+pnpm check:release
 ```
 
 The repository’s full ESLint command currently includes a pre-existing formatting backlog outside the launch-critical changes. New production code should still be formatted and reviewed before merge.
 
 ## Required production environment
 
-| Variable | Required | Purpose |
-| --- | --- | --- |
-| `APP_URL` | Yes | Canonical HTTPS URL used for provider callbacks and redirects |
-| `DATABASE_URL` | Yes | Neon Postgres connection string |
-| `VITE_NEON_AUTH_URL` | Yes | Neon Auth client endpoint |
-| `KIE_API_KEY` | Yes | KIE.ai model gateway credential |
-| `KIE_WEBHOOK_HMAC_KEY` | Yes | KIE callback signature verification key |
-| `FEDAPAY_SECRET_KEY` | Yes for mobile money | Server-side FedaPay API credential |
-| `FEDAPAY_WEBHOOK_SECRET` | Yes for mobile money | FedaPay endpoint signing secret |
-| `FEDAPAY_XOF_PER_USD` | Yes for mobile money | Server-owned XOF conversion rate; set deliberately and review periodically |
-| `VITE_FEDAPAY_PUBLIC_KEY` | Yes for mobile money UI | Browser Checkout.js public key |
-| `STRIPE_SECRET_KEY` | Yes for card checkout | Server-side Stripe API credential |
-| `STRIPE_WEBHOOK_SECRET` | Yes for card checkout | Stripe endpoint signing secret |
-| `R2_ENDPOINT`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_REGION`, `R2_PUBLIC_BASE_URL` | Yes for durable assets | Cloudflare R2 S3-compatible storage configuration; these names match `src/lib/storage/r2.ts` |
-| `RESEND_API_KEY` | Optional | Transactional email delivery for launch-day flows |
-| `VITE_LAUNCH_MODE` | Optional | Set to `live` or omit for live behavior; set to `waitlist` only for an intentional waitlist deployment |
+| Variable                                                                                                  | Required                | Purpose                                                                                                |
+| --------------------------------------------------------------------------------------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------ |
+| `APP_URL`                                                                                                 | Yes                     | Canonical HTTPS URL used for provider callbacks and redirects                                          |
+| `DATABASE_URL`                                                                                            | Yes                     | Neon Postgres connection string                                                                        |
+| `VITE_NEON_AUTH_URL`                                                                                      | Yes                     | Neon Auth client endpoint                                                                              |
+| `KIE_API_KEY`                                                                                             | Yes                     | KIE.ai model gateway credential                                                                        |
+| `KIE_WEBHOOK_HMAC_KEY`                                                                                    | Yes                     | KIE callback signature verification key                                                                |
+| `FEDAPAY_SECRET_KEY`                                                                                      | Yes for mobile money    | Server-side FedaPay API credential                                                                     |
+| `FEDAPAY_WEBHOOK_SECRET`                                                                                  | Yes for mobile money    | FedaPay endpoint signing secret                                                                        |
+| `FEDAPAY_XOF_PER_USD`                                                                                     | Yes for mobile money    | Server-owned XOF conversion rate; set deliberately and review periodically                             |
+| `VITE_FEDAPAY_PUBLIC_KEY`                                                                                 | Yes for mobile money UI | Browser Checkout.js public key                                                                         |
+| `STRIPE_SECRET_KEY`                                                                                       | Yes for card checkout   | Server-side Stripe API credential                                                                      |
+| `STRIPE_WEBHOOK_SECRET`                                                                                   | Yes for card checkout   | Stripe endpoint signing secret                                                                         |
+| `R2_ENDPOINT`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_REGION`, `R2_PUBLIC_BASE_URL` | Yes for durable assets  | Cloudflare R2 S3-compatible storage configuration; these names match `src/lib/storage/r2.ts`           |
+| `RESEND_API_KEY`                                                                                          | Optional                | Transactional email delivery for launch-day flows                                                      |
+| `VITE_LAUNCH_MODE`                                                                                        | Optional                | Set to `live` or omit for live behavior; set to `waitlist` only for an intentional waitlist deployment |
 
 Do not commit any value for these variables. Store them in the production deployment provider and keep sandbox and live provider credentials separate.
 
@@ -44,11 +42,11 @@ Register only the HTTPS endpoints below in the live provider dashboards. KIE.ai 
 
 Configure the following HTTPS endpoints in the provider dashboards:
 
-| Provider | Endpoint | Required verification |
-| --- | --- | --- |
-| KIE.ai | `/api/webhooks/kie` | `KIE_WEBHOOK_HMAC_KEY` with the provider’s HMAC headers |
-| FedaPay | `/api/webhooks/fedapay` | `FEDAPAY_WEBHOOK_SECRET` and `X-FEDAPAY-SIGNATURE` |
-| Stripe | `/api/webhooks/stripe` | `STRIPE_WEBHOOK_SECRET` and `Stripe-Signature` |
+| Provider | Endpoint                | Required verification                                   |
+| -------- | ----------------------- | ------------------------------------------------------- |
+| KIE.ai   | `/api/webhooks/kie`     | `KIE_WEBHOOK_HMAC_KEY` with the provider’s HMAC headers |
+| FedaPay  | `/api/webhooks/fedapay` | `FEDAPAY_WEBHOOK_SECRET` and `X-FEDAPAY-SIGNATURE`      |
+| Stripe   | `/api/webhooks/stripe`  | `STRIPE_WEBHOOK_SECRET` and `Stripe-Signature`          |
 
 KIE callback verification uses the provider’s task ID and timestamp signature contract [1]. FedaPay webhook verification uses the endpoint secret and the signed timestamp header [2]. Stripe verification uses the signed raw request body and replay tolerance.
 
@@ -67,7 +65,5 @@ If a provider credential is suspected to be exposed, rotate it at the provider, 
 ## References
 
 [1]: https://docs.kie.ai/common-api/webhook-verification "KIE.ai Webhook Security Verification"
-
 [2]: https://docs.fedapay.com/integration-api/en/webhooks-en "FedaPay Webhooks and Events"
-
 [3]: https://docs.stripe.com/webhooks "Stripe Webhooks"

@@ -1,148 +1,73 @@
-# Cortexia — Plan de mise en production
+# Cortexia — Plan de production
 
-## État actuel (résumé)
-- **RÉEL** : DB Neon Postgres, Auth Neon, Waitlist SQL, Wall URLs CDN (images/vidéos), Simulateur (math)
-- **MOCK** : Agent IA 100%, Facturation/Paiement, Audio wall, ~12 modèles fictifs (GPT-5.5, Claude Opus 4.8...)
+**Révision :** 25 août 2026
 
----
+**Méthode :** Nature Way
 
-## Phase A — Intégration IA (priorité 1)
+**Autorité :** `docs/nature-way/00-founder-hq-board.md` et `docs/nature-way/01-seed-cortexia.md`
 
-### A1. Connexion fal.ai pour l'exécution des modèles
-**Fichier** : `src/server.ts` ou nouveau `src/lib/ai.ts`
+## État réel réconcilié
 
-- Créer un server function `generateContent` qui appelle l'API fal.ai
-- Pour chaque type (image/vidéo/voix/texte), router vers le bon endpoint fal.ai
-- Retourner l'URL du résultat généré
-- **Endpoints à connecter** :
-  - Image : `fal-ai/seedream/v5/pro/text-to-image`, `fal-ai/nano-banana-2`, `fal-ai/gpt-image-2`
-  - Vidéo : `fal-ai/kling-video/v3/pro/text-to-video`, `fal-ai/seedance-2.0/text-to-video`
-  - Voix : `elevenlabs/tts/turbo-v2.5`
-  - Texte : `fal-ai/claude-sonnet-5` (ou autre LLM)
+Le dépôt contient déjà une base plus avancée que ne le disait la version historique de ce document. Le **playground** appelle une fonction serveur de génération, résout les uploads, vérifie les crédits, persiste les runs, soumet les tâches au fournisseur et poll les résultats asynchrones. Les modèles texte disposent d’un chemin synchrone. Les paiements **FedaPay Mobile Money** et **Stripe Checkout** possèdent également des chemins serveur, une vérification fournisseur et un crédit idempotent du ledger. Les assets et les workflows ont des structures persistantes en base.
 
-### A2. Remplacer le mock de l'agent
-**Fichier** : `src/routes/app.index.tsx`
+La production n’est toutefois pas considérée comme fermée. La preuve staging de bout en bout, la réconciliation réelle des callbacks, l’observabilité structurée et l’assainissement des alias de modèles restent à démontrer. L’ancienne route `/run-migration` est désormais une page inerte et ne doit plus être utilisée pour modifier la base.
 
-- Remplacer `inferKind()` par un vrai appel LLM (Claude/GPT) pour classifier le prompt
-- Remplacer `pickModels()` par un routing intelligent basé sur le type détecté
-- Remplacer `runGeneration()` par l'appel `generateContent` du serveur
-- Remplacer les images placeholder `picsum.photos` par les vraies URLs de sortie
+| Domaine          | État                                                                                                | Source d’autorité                                            | Gap résiduel                                                      |
+| ---------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ | ----------------------------------------------------------------- |
+| Authentification | Implémentée avec session serveur et contrôles de rôle sur certaines surfaces                        | `src/lib/api/auth.ts`, routes d’authentification             | Tests ciblés et réduction des assertions de type                  |
+| Catalogue        | Catalogue statique détaillé, prix et schémas d’entrée disponibles ; base seedée                     | `src/lib/models-data.ts`, `drizzle/0002_seed_models.sql`     | Réconciliation datée des endpoints actifs et des prix fournisseur |
+| Génération       | Réelle pour le playground via KIE, avec débit et persistance                                        | `src/lib/api/generate.ts`, `src/routes/app.models.$slug.tsx` | Smoke test staging par catégorie et preuve de récupération        |
+| Crédits          | Ledger et références d’usage/paiement idempotentes                                                  | `src/lib/credits.ts`, `drizzle/schema.ts`                    | Test d’intégration DB sous concurrence et replay                  |
+| Mobile Money     | Création et vérification FedaPay côté serveur                                                       | `src/lib/api/payments.ts`                                    | Validation par pays, callback signé et preuve staging             |
+| Carte            | Session Stripe et webhook signé sur corps brut                                                      | `src/lib/api/payments.ts`, `server/api/webhooks/stripe.ts`   | Replay staging, monitoring et procédure de réconciliation         |
+| Stockage         | R2 optionnel avec fallback CDN documenté                                                            | `src/lib/storage/r2.ts`                                      | Confirmer le stockage durable en environnement de production      |
+| Canvas / agents  | Canvas et application de plans présents ; sélection agent encore polluée par des alias non vérifiés | `src/lib/agent.ts`, `src/components/canvas/agent-panel.tsx`  | Lier l’agent au catalogue réel avant commercialisation            |
+| Opérations       | Runbook et checklist de cutover présents                                                            | `PRODUCTION-RUNBOOK.md`, `LIVE-CUTOVER-CHECKLIST.md`         | Logger structuré, IDs de corrélation, CI et tests staging         |
 
-### A3. Modèles fictifs
-**Fichier** : `src/lib/models.ts`
+## Milestone actif
 
-- Supprimer ou renommer les modèles fictifs : `claude-sonnet-5`, `claude-opus-48`, `gpt-55`, `gemini-31-pro`, etc.
-- Garder uniquement les modèles réellement disponibles via fal.ai
-- Vérifier les prix against les tarifs réels fal.ai
+**Fermer le premier ring de preuve :** un utilisateur authentifié recharge son compte par Mobile Money, exécute un modèle actif réel, reçoit un résultat ou une erreur récupérable, puis voit un solde et un historique cohérents. Le paiement carte doit être vérifié dans la même fenêtre, mais ne doit pas retarder la preuve Mobile Money dans le pays de lancement.
 
----
+## Ordre d’exécution Nature Way
 
-## Phase B — Facturation et Crédits (priorité 2)
+| Ring | Tranche verticale                      | Dépendances                                       | Définition de fini                                                                      | Statut                    |
+| ---- | -------------------------------------- | ------------------------------------------------- | --------------------------------------------------------------------------------------- | ------------------------- |
+| R0   | Fondation de sécurité et documentation | Migrations versionnées, runbook                   | Aucune mutation DB par route publique ; documents réconciliés ; typecheck/build passent | `in_progress`             |
+| R1   | Génération unitaire réelle             | Auth, catalogue, crédits, KIE, stockage           | UI → serveur → fournisseur → résultat/erreur ; coût et solde vérifiables                | `partial`                 |
+| R2   | Recharge Mobile Money                  | FedaPay, ledger, callback, change XOF/USD         | Paiement approuvé, refusé, montant discordant et replay prouvés                         | `partial`                 |
+| R3   | Carte                                  | Stripe Checkout, webhook signé                    | Session créée, callback signé, crédit unique et réconciliation prouvés                  | `partial`                 |
+| R4   | Catalogue fiable                       | Source modèle, endpoint, prix, état de fidélité   | Aucun alias commercial sans endpoint et prix vérifiés                                   | `blocked` par CX-ROOT-004 |
+| R5   | Canvas agentique borné                 | Catalogue fiable, permissions, opérations graphes | Agent propose un plan valide, coût estimé, confirmation et exécution récupérable        | `deferred`                |
+| R6   | Flows créatifs type Canva              | Tronc stable, assets, templates, quotas           | Un flow métier complet avec états, coûts et export vérifiés                             | `deferred`                |
 
-### B1. Système de crédits
-**Fichiers** : `src/lib/credits.ts` (nouveau), `drizzle/schema.ts`
+## P0 immédiat réalisé dans ce ring
 
-- Table `credits` : user_id, amount, source (waitlist_bonus, recharge, usage)
-- Table `usage` : user_id, model, units, cost, timestamp
-- Server functions : `getBalance`, `useCredits`, `rechargeCredits`
+La route legacy `/run-migration` ne déclenche plus de migration. Elle affiche uniquement une page de désactivation. Les migrations de production restent celles de `drizzle/` exécutées par la procédure opérateur décrite dans `PRODUCTION-RUNBOOK.md` et `LIVE-CUTOVER-CHECKLIST.md`.
 
-### B2. Intégration paiement
-**Fichier** : `src/lib/payments.ts` (nouveau)
+## Ce qui ne doit pas être fait maintenant
 
-- Stripe Checkout ou Mobile Money via PawaPay
-- Webhook pour confirmer les paiements
-- Créditer le compte utilisateur après paiement
+Il ne faut pas élargir le catalogue, ajouter une parité marketing avec Canva ou exposer davantage d’agents avant d’avoir fermé les preuves de paiement, de génération, de stockage et de réconciliation. Il ne faut pas non plus afficher comme capacités disponibles les alias qui ne disposent pas d’une correspondance contrôlée dans le catalogue et la base.
 
-### B3. Affichage du solde dans l'app
-**Fichier** : `src/routes/app.index.tsx`
+## Gates de validation
 
-- Remplacer `const CREDIT_USD = 24.63` par un vrai appel `getBalance()`
-- Afficher le solde réel dans le header
+À chaque changement touchant l’authentification, les crédits, les paiements, les callbacks, le stockage ou le catalogue, exécuter au minimum :
 
----
+```bash
+pnpm install --frozen-lockfile
+pnpm test
+pnpm exec tsc --noEmit
+pnpm exec vite build
+```
 
-## Phase C — Wall Audio (priorité 3)
+La validation complète doit ajouter un smoke test staging, une vérification des callbacks signés, un replay idempotent, une inspection du solde et une preuve de résultat utilisateur. Une capture d’écran seule ne prouve ni l’autorisation serveur ni la comptabilité.
 
-### C1. Générer les fichiers audio
-- Utiliser l'API ElevenLabs pour générer les 3 clips audio (teaser FR, spot PT-BR, afrobeat)
-- Stocker les fichiers dans un bucket (S3/Cloudflare R2)
+## Références
 
-### C2. Mettre à jour wall-data.ts
-- Ajouter les `audioSrc` avec les vraies URLs des fichiers audio générés
-
----
-
-## Phase D — Nettoyage des modèles fictifs (priorité 4)
-
-### D1. Identifier les modèles réels vs fictifs
-**Réels** (vérifiables sur fal.ai) :
-- Seedream 5.0 Pro/Lite, Nano Banana 2/Lite, GPT Image 2, Qwen Image 2.0
-- Kling 3.0 (Pro/Turbo/Standard/4K/Motion), Seedance 2.0 (Fast/Mini)
-- Wan 2.7 (Image/Video), HappyHorse 1.1, Grok Video 1.5
-- Gemini Omni Video, OmniHuman 1.5, Volcengine Lip Sync
-- ElevenLabs V3
-
-**Fictifs à supprimer ou remplacer** :
-- `claude-sonnet-5`, `claude-fable-5`, `claude-opus-48/47/46/45`, `claude-sonnet-46/45`, `claude-haiku-45`
-- `gpt-55`, `gpt-54`, `gpt-52`, `gpt-5-codex-a/b`
-- `gemini-31-pro`, `gemini-35-flash`, `gemini-25-flash`
-
-### D2. Remplacer par des modèles réels
-- Utiliser les modèles LLM disponibles via fal.ai ou directement via les APIs
-- Vérifier les prix contre les tarifs réels
-
----
-
-## Phase E — Optimisations et Polish (priorité 5)
-
-### E1. Performance
-- Lazy loading des vidéos (déjà fait avec IntersectionObserver)
-- Optimisation des images (WebP, responsive)
-- Cache des prix du catalogue
-
-### E2. SEO et Meta
-- Tags Open Graph pour chaque page
-- Sitemap
-- Meta descriptions
-
-### E3. Monitoring
-- Erreurs serveur (Sentry ou similar)
-- Analytics (Plausible ou PostHog)
-- Uptime monitoring
-
----
-
-## Ordre d'exécution recommandé
-
-| Étape | Priorité | Effort | Impact |
-|-------|----------|--------|--------|
-| A1 (fal.ai) | P0 | Moyen | Débloque tout le reste |
-| A2 (Agent mock) | P0 | Élevé | Le cœur du produit |
-| B1 (Crédits) | P1 | Moyen | Nécessaire pour la facturation |
-| B2 (Paiement) | P1 | Élevé | Monétisation |
-| C1 (Audio wall) | P2 | Faible | Polish visuel |
-| D1 (Modèles fictifs) | P2 | Faible | Cohérence du catalogue |
-| A3 (Nettoyage modèles) | P2 | Moyen | Fiabilité |
-| E1-E3 (Polish) | P3 | Variable | Production-ready |
-
----
-
-## Estimation temps
-
-| Phase | Semaines estimées |
-|-------|-------------------|
-| A (Intégration IA) | 3-4 semaines |
-| B (Facturation) | 2-3 semaines |
-| C (Audio wall) | 1 semaine |
-| D (Nettoyage modèles) | 1 semaine |
-| E (Polish) | 1-2 semaines |
-| **Total** | **8-11 semaines** |
-
----
-
-## Questions ouvertes
-
-1. **Quel LLM pour l'agent ?** Claude via API directe, ou fal.ai ?
-2. **Quel provider de paiement ?** Stripe (carte), PawaPay (Mobile Money), ou les deux ?
-3. **Quel bucket pour les assets ?** Cloudflare R2, AWS S3, ou autre ?
-4. **Le wall doit-il être dynamique (généré à la demande) ou statique (pré-généré) ?**
+[1]: docs/nature-way/00-founder-hq-board.md "Cortexia Founder HQ Board"
+[2]: docs/nature-way/01-seed-cortexia.md "Cortexia Seed produit"
+[3]: docs/nature-way/02-decision-ledger.md "Cortexia Decision Ledger"
+[4]: src/lib/api/generate.ts "Cortexia generation server function"
+[5]: src/lib/api/payments.ts "Cortexia payment server functions"
+[6]: server/api/webhooks/stripe.ts "Cortexia Stripe webhook"
+[7]: PRODUCTION-RUNBOOK.md "Cortexia production runbook"
+[8]: LIVE-CUTOVER-CHECKLIST.md "Cortexia live cutover checklist"
