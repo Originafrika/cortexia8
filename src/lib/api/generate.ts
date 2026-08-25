@@ -104,6 +104,9 @@ async function runGenerate(
   if (!model) {
     throw new HttpError(404, `Model '${data.modelSlug}' not found or inactive`);
   }
+  if (model.fidelity_status !== "fidele") {
+    throw new HttpError(404, `Model '${data.modelSlug}' is not available for public generation`);
+  }
 
   // Validate kie_endpoint is properly configured before calling kie.ai
   if (!model.kie_endpoint) {
