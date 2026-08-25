@@ -19,17 +19,28 @@ import { withTransaction, sql, type PoolClient } from "@/lib/db";
 import { getRequestContext, HttpError, requireUserId } from "./auth";
 import { runCanvas } from "./canvas-run";
 import { getWorkflow, type GetWorkflowResponse } from "./workflows";
-import { MODELS } from "@/lib/models";
+import { getActiveModelsBySlugs, toNumber, type ModelRow } from "./shared";
 
 // ── Cost Confirmation Threshold ────────────────────────────────────────────
 // Configurable: operations with estimated cost above this require user confirmation (USD)
-export const COST_CONFIRM_THRESHOLD = 2.00;
+export const COST_CONFIRM_THRESHOLD = 2.0;
 
 // ── Types ─────────────────────────────────────────────────────────────────
 
 export type AgentOp =
-  | { op: "ADD_NODE"; modelSlug: string; position?: { x: number; y: number }; config?: Record<string, string | number | boolean | null> }
-  | { op: "CONNECT_NODES"; source: string; target: string; sourceOutputKey?: string; targetInputKey?: string }
+  | {
+      op: "ADD_NODE";
+      modelSlug: string;
+      position?: { x: number; y: number };
+      config?: Record<string, string | number | boolean | null>;
+    }
+  | {
+      op: "CONNECT_NODES";
+      source: string;
+      target: string;
+      sourceOutputKey?: string;
+      targetInputKey?: string;
+    }
   | { op: "UPDATE_NODE"; nodeId: string; params: Record<string, string | number | boolean | null> }
   | { op: "REMOVE_NODE"; nodeId: string };
 
@@ -73,15 +84,16 @@ export const applyAgentPlan = createServerFn({ method: "POST" })
 
 // ── Cost Calculation ───────────────────────────────────────────────────────
 
-function estimateOperationsCost(operations: AgentOp[]): number {
+function estimateOperationsCost(
+  operations: AgentOp[],
+  models: Map<string, ModelRow | null>,
+): number {
   let totalCost = 0;
   for (const op of operations) {
-    if (op.op === "ADD_NODE") {
-      const model = MODELS.find((m) => m.slug === op.modelSlug);
-      if (model) {
-        const price = model.priceUSD ?? model.tiers?.[0]?.priceUSD ?? 0;
-        totalCost += price;
-      }
+    if (op.op !== "ADD_NODE") continue;
+    const model = models.get(op.modelSlug);
+    if (model?.fidelity_status === "fidele") {
+      totalCost += toNumber(model.cortexia_price_usd);
     }
   }
   return totalCost;
@@ -102,8 +114,12 @@ async function applyPlanImpl(input: AgentApplyInput): Promise<AgentApplyResponse
     throw new HttpError(403, "Workflow belongs to a different user");
   }
 
-  // 2. Estimate cost and check confirmation threshold
-  const estimatedTotalCostUsd = estimateOperationsCost(input.operations);
+  // 2. Estimate cost from the same active, verified DB catalogue used by execution.
+  const modelSlugs = input.operations
+    .filter((op): op is Extract<AgentOp, { op: "ADD_NODE" }> => op.op === "ADD_NODE")
+    .map((op) => op.modelSlug);
+  const models = await getActiveModelsBySlugs(modelSlugs);
+  const estimatedTotalCostUsd = estimateOperationsCost(input.operations, models);
   const requiresConfirmation = estimatedTotalCostUsd > COST_CONFIRM_THRESHOLD;
 
   // 2b. Dry-run: return threshold info without applying operations
@@ -150,8 +166,17 @@ async function applyOneOp(
 ) {
   switch (op.op) {
     case "ADD_NODE": {
-      if (typeof op.modelSlug !== "string" || !MODELS.find((m) => m.slug === op.modelSlug)) {
+      if (typeof op.modelSlug !== "string") {
         throw new HttpError(400, `Unknown model: ${op.modelSlug}`);
+      }
+      const modelResult = await client.query<{ slug: string }>(
+        `SELECT slug FROM models
+         WHERE slug = $1 AND active = TRUE AND fidelity_status = 'fidele'
+         LIMIT 1`,
+        [op.modelSlug],
+      );
+      if (modelResult.rows.length === 0) {
+        throw new HttpError(400, `Model is not available for agent workflows: ${op.modelSlug}`);
       }
       const pos = op.position ?? { x: 120 + Math.random() * 80, y: 120 + Math.random() * 80 };
       const res = await client.query<{ id: number }>(
@@ -159,13 +184,7 @@ async function applyOneOp(
            (workflow_id, type, model_slug, config, canvas_x, canvas_y)
          VALUES ($1, 'model', $2, $3::jsonb, $4, $5)
          RETURNING id`,
-        [
-          workflowId,
-          op.modelSlug,
-          JSON.stringify(op.config ?? {}),
-          String(pos.x),
-          String(pos.y),
-        ],
+        [workflowId, op.modelSlug, JSON.stringify(op.config ?? {}), String(pos.x), String(pos.y)],
       );
       const dbId = res.rows[0].id;
       // Store mapping keyed by agent's temp ref convention
@@ -182,19 +201,16 @@ async function applyOneOp(
       const sourceId = resolveRef(client, op.source, idMap, workflowId);
       const targetId = resolveRef(client, op.target, idMap, workflowId);
       if (sourceId == null || targetId == null) {
-        throw new HttpError(400, `Cannot resolve node refs: source=${op.source}, target=${op.target}`);
+        throw new HttpError(
+          400,
+          `Cannot resolve node refs: source=${op.source}, target=${op.target}`,
+        );
       }
       await client.query(
         `INSERT INTO workflow_edges
            (workflow_id, source_node_id, target_node_id, source_output_key, target_input_key)
          VALUES ($1, $2, $3, $4, $5)`,
-        [
-          workflowId,
-          sourceId,
-          targetId,
-          op.sourceOutputKey ?? "out",
-          op.targetInputKey ?? "in",
-        ],
+        [workflowId, sourceId, targetId, op.sourceOutputKey ?? "out", op.targetInputKey ?? "in"],
       );
       break;
     }
@@ -243,10 +259,10 @@ async function applyOneOp(
         `DELETE FROM workflow_edges WHERE (source_node_id = $1 OR target_node_id = $1) AND workflow_id = $2`,
         [nodeId, workflowId],
       );
-      await client.query(
-        `DELETE FROM workflow_nodes WHERE id = $1 AND workflow_id = $2`,
-        [nodeId, workflowId],
-      );
+      await client.query(`DELETE FROM workflow_nodes WHERE id = $1 AND workflow_id = $2`, [
+        nodeId,
+        workflowId,
+      ]);
       break;
     }
   }
