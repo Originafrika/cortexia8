@@ -14,7 +14,7 @@ export const Route = createFileRoute("/app/models")({
       {
         name: "description",
         content:
-          "Browse the full catalog of AI models available on Cortexia — image, video, audio, music, and text generation.",
+          "Browse the verified AI model catalog available on Cortexia — image, video, audio, music, and text generation.",
       },
     ],
   }),
@@ -62,7 +62,11 @@ export function ModelsCatalog() {
     return MODELS.filter(
       (m) =>
         (cat === "all" || m.category === cat) &&
-        (admin || (m.category !== "text" && m.category !== "audio" && m.category !== "music")) &&
+        (admin ||
+          (m.fidelityStatus === "fidele" &&
+            m.category !== "text" &&
+            m.category !== "audio" &&
+            m.category !== "music")) &&
         (term === "" ||
           m.name.toLowerCase().includes(term) ||
           m.provider.toLowerCase().includes(term) ||

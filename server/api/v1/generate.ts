@@ -75,6 +75,10 @@ export default defineEventHandler(async (event) => {
       setResponseStatus(event, 404);
       return { error: `Model '${modelSlug}' not found or inactive` };
     }
+    if (model.fidelity_status !== "fidele") {
+      setResponseStatus(event, 404);
+      return { error: `Model '${modelSlug}' is not available through the public API` };
+    }
     const cost = Number(model.cortexia_price_usd ?? 0);
     if (!Number.isFinite(cost) || cost <= 0) {
       setResponseStatus(event, 503);

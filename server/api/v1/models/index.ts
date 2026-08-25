@@ -1,5 +1,5 @@
 /**
- * GET /v1/models — List all active models.
+ * GET /v1/models — List all active, verified models.
  *
  * Authentication: Bearer API key (cx_...) in Authorization header
  *
@@ -74,6 +74,7 @@ export default defineEventHandler(async (event) => {
              supports_reference_upload, fidelity_status
       FROM models
       WHERE active = TRUE
+        AND fidelity_status = 'fidele'
         ${category ? sql`AND category = ${category}` : sql``}
       ORDER BY category, name
     `) as {
