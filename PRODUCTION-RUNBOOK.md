@@ -13,6 +13,8 @@ The repository’s full ESLint command currently includes a pre-existing formatt
 
 ## Required production environment
 
+The no-secrets staging template is `.env.staging.example`. Use it only to verify the expected variable names, then place real values exclusively in the deployment secret manager. The local staging procedure and non-disclosure rules are documented in `docs/nature-way/10-local-staging-kit.md`.
+
 | Variable                                                                                                  | Required                | Purpose                                                                                                |
 | --------------------------------------------------------------------------------------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------ |
 | `APP_URL`                                                                                                 | Yes                     | Canonical HTTPS URL used for provider callbacks and redirects                                          |
