@@ -37,3 +37,4 @@ Conserver les migrations versionnées comme seule voie opérateur, garder les ga
 - `docs/nature-way/04-pricing-experiment.md`
 - `docs/nature-way/08-proof-record.md`
 - `docs/nature-way/09-launch-envelope.md`
+- `docs/nature-way/11-founder-hq-review-2026-08-25.md`
