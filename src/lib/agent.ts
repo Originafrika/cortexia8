@@ -11,36 +11,23 @@
  * 7. Executes via graphOps server function
  */
 
-import { MODELS, type Model } from "./models";
-import { kieApiBase } from "./kie-api/client";
+import { CATALOGUE } from "./models-data";
+import { chatCompletion, chatAnthropic } from "./kie-api/client";
+import { AGENT_MODELS, DEFAULT_AGENT_MODEL, type AgentModel } from "./agent-models";
+
+export { AGENT_MODELS, DEFAULT_AGENT_MODEL } from "./agent-models";
+export type { AgentModel } from "./agent-models";
 
 // ── Types ─────────────────────────────────────────────────────────────────
-
-export type AgentModel =
-  | "claude-sonnet-4-5"
-  | "gpt-5-2"
-  | "gpt-5"
-  | "gpt-4.1"
-  | "gpt-4.1-mini"
-  | "claude-opus-4"
-  | "claude-haiku-3-5"
-  | "gemini-2-5-pro"
-  | "gemini-2-5-flash"
-  | "grok-3"
-  | "claude-fable-5"
-  | "claude-sonnet-5"
-  | "claude-opus-47"
-  | "claude-sonnet-46"
-  | "gpt-55"
-  | "gpt-56-luna"
-  | "gemini-3-pro"
-  | "gemini-3-flash"
-  | "grok-43";
 
 export type GraphOperation =
   | { type: "ADD_NODE"; modelSlug: string; position?: { x: number; y: number } }
   | { type: "CONNECT_NODES"; source: string; target: string }
-  | { type: "UPDATE_NODE"; nodeId: string; params: Record<string, string | number | boolean | null> }
+  | {
+      type: "UPDATE_NODE";
+      nodeId: string;
+      params: Record<string, string | number | boolean | null>;
+    }
   | { type: "REMOVE_NODE"; nodeId: string };
 
 export type AgentResponse = {
@@ -63,20 +50,22 @@ const DEFAULT_COST_THRESHOLD = 0.5; // USD
 
 // ── System Prompt Construction ────────────────────────────────────────────
 
+const VERIFIED_CATALOGUE = CATALOGUE.filter(
+  (model) => model.active && model.fidelityStatus === "fidele",
+);
+
 function buildModelsSummary(): string {
-  // Get unique models (by slug) and summarize them
-  const uniqueModels = new Map<string, Model>();
-  for (const m of MODELS) {
-    if (!uniqueModels.has(m.slug)) {
-      uniqueModels.set(m.slug, m);
-    }
+  // Only expose active, explicitly verified catalogue entries to the agent.
+  const uniqueModels = new Map<string, (typeof CATALOGUE)[number]>();
+  for (const model of VERIFIED_CATALOGUE) {
+    if (!uniqueModels.has(model.slug)) uniqueModels.set(model.slug, model);
   }
 
   const lines: string[] = [];
-  for (const m of uniqueModels.values()) {
-    const price = m.priceUSD ?? m.tiers?.[0]?.priceUSD ?? 0;
+  for (const model of uniqueModels.values()) {
+    const price = model.tiers?.[0]?.priceUSD ?? model.cortexiaPriceUsd;
     lines.push(
-      `- ${m.slug}: ${m.name} (${m.category}) - ${m.blurb} [~$${price.toFixed(4)}]`
+      `- ${model.slug}: ${model.name} (${model.category}) - ${model.blurb} [~$${price.toFixed(4)}]`,
     );
   }
   return lines.join("\n");
@@ -90,7 +79,7 @@ function buildSystemPrompt(): string {
 ## Your Role
 Analyze the user's request and generate a sequence of graph operations to build the requested pipeline.
 
-## Available Models (slugs for ADD_NODE)
+## Available verified models (slugs for ADD_NODE)
 ${modelsSummary}
 
 ## Available Operations
@@ -144,161 +133,58 @@ Detect the user's language from their message and respond in that same language.
 
 // ── LLM API Calls ────────────────────────────────────────────────────────
 
-async function callClaude(
-  messages: Array<{ role: string; content: string }>,
-  config: AgentConfig
-): Promise<string> {
-  const endpoint = `${kieApiBase()}/claude/v1/messages`;
-  const body = {
-    model: "claude-sonnet-4-5-20250514",
-    messages,
-    max_tokens: config.maxTokens ?? DEFAULT_MAX_TOKENS,
-    stream: false,
-  };
-
-  const res = await fetch(endpoint, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.KIE_API_KEY}`,
-    },
-    body: JSON.stringify(body),
-  });
-
-  if (!res.ok) {
-    const error = await res.text();
-    throw new Error(`Claude API error: ${res.status} - ${error}`);
+function resolveAgentEntry(modelSlug: AgentModel) {
+  const entry = CATALOGUE.find(
+    (model) =>
+      model.slug === modelSlug &&
+      model.active &&
+      model.category === "text" &&
+      model.fidelityStatus === "fidele" &&
+      Boolean(model.apiFamily),
+  );
+  if (!entry) {
+    throw new Error(`Unsupported or unverified agent model: ${modelSlug}`);
   }
-
-  const data = await res.json();
-  return data.content?.[0]?.text ?? "";
-}
-
-async function callGPT(
-  messages: Array<{ role: string; content: string }>,
-  config: AgentConfig
-): Promise<string> {
-  const endpoint = `${kieApiBase()}/openai/v1/chat/completions`;
-  const body = {
-    model: "gpt-5.2",
-    messages,
-    max_tokens: config.maxTokens ?? DEFAULT_MAX_TOKENS,
-    stream: false,
-  };
-
-  const res = await fetch(endpoint, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.KIE_API_KEY}`,
-    },
-    body: JSON.stringify(body),
-  });
-
-  if (!res.ok) {
-    const error = await res.text();
-    throw new Error(`GPT API error: ${res.status} - ${error}`);
-  }
-
-  const data = await res.json();
-  return data.choices?.[0]?.message?.content ?? "";
-}
-
-async function callGemini(
-  messages: Array<{ role: string; content: string }>,
-  config: AgentConfig
-): Promise<string> {
-  const model = config.model === "gemini-2-5-flash" ? "gemini-2.5-flash" : "gemini-2.5-pro";
-  const endpoint = `${kieApiBase()}/google/v1beta/models/${model}:generateContent`;
-  const body = {
-    contents: messages.map((m) => ({
-      role: m.role === "assistant" ? "model" : "user",
-      parts: [{ text: m.content }],
-    })),
-    generationConfig: {
-      maxOutputTokens: config.maxTokens ?? DEFAULT_MAX_TOKENS,
-    },
-  };
-
-  const res = await fetch(endpoint, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.KIE_API_KEY}`,
-    },
-    body: JSON.stringify(body),
-  });
-
-  if (!res.ok) {
-    const error = await res.text();
-    throw new Error(`Gemini API error: ${res.status} - ${error}`);
-  }
-
-  const data = await res.json();
-  return data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
-}
-
-async function callGrok(
-  messages: Array<{ role: string; content: string }>,
-  config: AgentConfig
-): Promise<string> {
-  const endpoint = `${kieApiBase()}/xai/v1/chat/completions`;
-  const body = {
-    model: "grok-3",
-    messages,
-    max_tokens: config.maxTokens ?? DEFAULT_MAX_TOKENS,
-    stream: false,
-  };
-
-  const res = await fetch(endpoint, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.KIE_API_KEY}`,
-    },
-    body: JSON.stringify(body),
-  });
-
-  if (!res.ok) {
-    const error = await res.text();
-    throw new Error(`Grok API error: ${res.status} - ${error}`);
-  }
-
-  const data = await res.json();
-  return data.choices?.[0]?.message?.content ?? "";
+  return entry;
 }
 
 async function callLLM(
   messages: Array<{ role: string; content: string }>,
-  config: AgentConfig
+  config: AgentConfig,
 ): Promise<string> {
-  switch (config.model) {
-    case "claude-sonnet-4-5":
-    case "claude-opus-4":
-    case "claude-haiku-3-5":
-    case "claude-fable-5":
-    case "claude-sonnet-5":
-    case "claude-opus-47":
-    case "claude-sonnet-46":
-      return callClaude(messages, config);
-    case "gpt-5-2":
-    case "gpt-5":
-    case "gpt-4.1":
-    case "gpt-4.1-mini":
-    case "gpt-55":
-    case "gpt-56-luna":
-      return callGPT(messages, config);
-    case "gemini-2-5-pro":
-    case "gemini-2-5-flash":
-    case "gemini-3-pro":
-    case "gemini-3-flash":
-      return callGemini(messages, config);
-    case "grok-3":
-    case "grok-43":
-      return callGrok(messages, config);
-    default:
-      throw new Error(`Unsupported model: ${config.model}`);
+  const model = resolveAgentEntry(config.model ?? DEFAULT_AGENT_MODEL);
+
+  if (model.apiFamily === "chat_anthropic") {
+    const { response } = await chatAnthropic({
+      model: model.kieEndpoint,
+      messages,
+      max_tokens: config.maxTokens ?? DEFAULT_MAX_TOKENS,
+      stream: false,
+    });
+    const content = (response as { content?: Array<{ type?: string; text?: string }> } | undefined)
+      ?.content;
+    return (
+      content
+        ?.filter((part) => part.type === "text")
+        .map((part) => part.text ?? "")
+        .join("") ?? ""
+    );
   }
+
+  if (model.apiFamily === "chat_openai") {
+    const { response } = await chatCompletion({
+      model: model.kieEndpoint,
+      messages,
+      reasoning_effort: "high",
+      stream: false,
+    });
+    const choices = (
+      response as { choices?: Array<{ message?: { content?: string } }> } | undefined
+    )?.choices;
+    return choices?.[0]?.message?.content ?? "";
+  }
+
+  throw new Error(`Unsupported agent API family: ${model.apiFamily ?? "missing"}`);
 }
 
 // ── Response Parsing ──────────────────────────────────────────────────────
@@ -345,18 +231,19 @@ function parseAgentResponse(raw: string): AgentResponse {
     switch (op.type) {
       case "ADD_NODE": {
         if (typeof op.modelSlug !== "string") continue;
-        const model = MODELS.find((m) => m.slug === op.modelSlug);
+        const model = VERIFIED_CATALOGUE.find((m) => m.slug === op.modelSlug);
         if (!model) continue;
 
-        const price = model.priceUSD ?? model.tiers?.[0]?.priceUSD ?? 0;
+        const price = model.tiers?.[0]?.priceUSD ?? model.cortexiaPriceUsd;
         estimatedCost += price;
 
         validatedOps.push({
           type: "ADD_NODE",
           modelSlug: op.modelSlug,
-          position: op.position && typeof op.position === "object"
-            ? { x: Number(op.position.x) || 0, y: Number(op.position.y) || 0 }
-            : undefined,
+          position:
+            op.position && typeof op.position === "object"
+              ? { x: Number(op.position.x) || 0, y: Number(op.position.y) || 0 }
+              : undefined,
         });
         break;
       }
@@ -401,10 +288,18 @@ function detectLanguage(text: string): string {
   // Simple language detection based on common words
   const lowerText = text.toLowerCase();
 
-  if (/\b(le|la|les|un|une|des|est|sont|je|tu|nous|vous|ils|elles|fait|faire|peut|doit|bonjour|merci)\b/.test(lowerText)) {
+  if (
+    /\b(le|la|les|un|une|des|est|sont|je|tu|nous|vous|ils|elles|fait|faire|peut|doit|bonjour|merci)\b/.test(
+      lowerText,
+    )
+  ) {
     return "fr";
   }
-  if (/\b(the|is|are|was|were|have|has|had|can|will|would|could|should|hello|thanks|thank)\b/.test(lowerText)) {
+  if (
+    /\b(the|is|are|was|were|have|has|had|can|will|would|could|should|hello|thanks|thank)\b/.test(
+      lowerText,
+    )
+  ) {
     return "en";
   }
   if (/\b(el|la|los|las|es|son|estoy|tienes|podemos|puedo|hola|gracias)\b/.test(lowerText)) {
@@ -425,15 +320,13 @@ export async function runAgent(
   currentGraphState?: {
     nodes: Array<{ id: string; slug: string }>;
     edges: Array<{ source: string; target: string }>;
-  }
+  },
 ): Promise<AgentResponse> {
   // Build the user message with context
   let contextMessage = userMessage;
 
   if (currentGraphState && currentGraphState.nodes.length > 0) {
-    const nodeContext = currentGraphState.nodes
-      .map((n) => `- ${n.id}: ${n.slug}`)
-      .join("\n");
+    const nodeContext = currentGraphState.nodes.map((n) => `- ${n.id}: ${n.slug}`).join("\n");
     const edgeContext = currentGraphState.edges
       .map((e) => `- ${e.source} → ${e.target}`)
       .join("\n");
@@ -461,33 +354,9 @@ User request: ${userMessage}`;
 
 export function shouldConfirmOperation(
   estimatedCost: number,
-  threshold: number = DEFAULT_COST_THRESHOLD
+  threshold: number = DEFAULT_COST_THRESHOLD,
 ): boolean {
   return estimatedCost > threshold;
 }
-
-// ── Export Constants ──────────────────────────────────────────────────────
-
-export const AGENT_MODELS: Array<{ value: AgentModel; label: string }> = [
-  { value: "gpt-5-2", label: "GPT 5.2" },
-  { value: "gpt-55", label: "GPT 5.5" },
-  { value: "gpt-5", label: "GPT 5" },
-  { value: "gpt-56-luna", label: "GPT 5.6 Luna" },
-  { value: "gpt-4.1", label: "GPT 4.1" },
-  { value: "gpt-4.1-mini", label: "GPT 4.1 Mini" },
-  { value: "claude-sonnet-5", label: "Claude Sonnet 5" },
-  { value: "claude-sonnet-4-5", label: "Claude Sonnet 4.5" },
-  { value: "claude-sonnet-46", label: "Claude Sonnet 4.6" },
-  { value: "claude-opus-47", label: "Claude Opus 4.7" },
-  { value: "claude-opus-4", label: "Claude Opus 4" },
-  { value: "claude-fable-5", label: "Claude Fable 5" },
-  { value: "claude-haiku-3-5", label: "Claude Haiku 3.5" },
-  { value: "gemini-3-pro", label: "Gemini 3 Pro" },
-  { value: "gemini-2-5-pro", label: "Gemini 2.5 Pro" },
-  { value: "gemini-3-flash", label: "Gemini 3 Flash" },
-  { value: "gemini-2-5-flash", label: "Gemini 2.5 Flash" },
-  { value: "grok-43", label: "Grok 4.3" },
-  { value: "grok-3", label: "Grok 3" },
-];
 
 export const COST_THRESHOLD = DEFAULT_COST_THRESHOLD;

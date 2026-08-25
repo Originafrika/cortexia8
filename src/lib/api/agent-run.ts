@@ -4,7 +4,7 @@
  */
 
 import { createServerFn } from "@tanstack/react-start";
-import { runAgent, type AgentConfig, type AgentResponse } from "@/lib/agent";
+import { runAgent, DEFAULT_AGENT_MODEL, type AgentConfig, type AgentResponse } from "@/lib/agent";
 import { getRequestContext, requireUserId, HttpError } from "./auth";
 
 export type AgentRunInput = {
@@ -34,8 +34,8 @@ export const agentRun = createServerFn({ method: "POST" })
       const ctx = await getRequestContext(data.sessionToken);
       const userId = await requireUserId(ctx);
 
-      const config: AgentConfig = data.config ?? { model: "gpt-5-2" };
-      return await runAgent(data.message, config, data.graphState) as AgentResponse;
+      const config: AgentConfig = data.config ?? { model: DEFAULT_AGENT_MODEL };
+      return (await runAgent(data.message, config, data.graphState)) as AgentResponse;
     } catch (err) {
       if (err instanceof HttpError) throw err;
       throw new HttpError(500, "Internal server error");
