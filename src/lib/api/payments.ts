@@ -50,10 +50,9 @@ export const createFedaPayTransaction = createServerFn({ method: "POST" })
     if (
       typeof data.amountUsd !== "number" ||
       !Number.isFinite(data.amountUsd) ||
-      data.amountUsd < 1 ||
-      data.amountUsd > 500
+      data.amountUsd < 1
     ) {
-      throw new HttpError(400, "amountUsd must be between 1 and 500");
+      throw new HttpError(400, "amountUsd must be at least 1 USD");
     }
     if (
       typeof data.idempotencyKey !== "string" ||
@@ -90,7 +89,10 @@ export const createFedaPayTransaction = createServerFn({ method: "POST" })
           externalReference,
         };
       }
-      throw new HttpError(409, "Payment order is already being prepared; retry with the same idempotency key shortly");
+      throw new HttpError(
+        409,
+        "Payment order is already being prepared; retry with the same idempotency key shortly",
+      );
     }
 
     const xofPerUsd = Number(process.env.FEDAPAY_XOF_PER_USD ?? 605);
@@ -325,13 +327,8 @@ export type StripeCheckoutResponse = {
 export const createStripeCheckout = createServerFn({ method: "POST" })
   .validator((data: StripeCheckoutInput): StripeCheckoutInput => {
     if (!data || typeof data !== "object") throw new HttpError(400, "Invalid body");
-    if (
-      typeof data.amount !== "number" ||
-      !Number.isFinite(data.amount) ||
-      data.amount < 1 ||
-      data.amount > 500
-    ) {
-      throw new HttpError(400, "amount must be between 1 and 500");
+    if (typeof data.amount !== "number" || !Number.isFinite(data.amount) || data.amount < 1) {
+      throw new HttpError(400, "amount must be at least 1 USD");
     }
     if (
       typeof data.idempotencyKey !== "string" ||

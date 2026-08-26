@@ -25,16 +25,24 @@ export function ModelCard({ model, compact = false }: ModelCardProps) {
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <span className={cn(
-              "font-display tracking-[-0.02em] truncate",
-              compact ? "text-base" : "text-lg"
-            )}>
+            <span
+              className={cn(
+                "font-display tracking-[-0.02em] truncate",
+                compact ? "text-base" : "text-lg",
+              )}
+            >
               {model.name}
             </span>
             {model.badge && <ModelBadge badge={model.badge} />}
           </div>
           <div className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
             {model.provider} · {model.category}
+          </div>
+          <div
+            className="mt-1 truncate font-mono text-[10px] text-amber-soft/80"
+            title={model.slug}
+          >
+            {model.slug}
           </div>
         </div>
       </div>
@@ -45,20 +53,20 @@ export function ModelCard({ model, compact = false }: ModelCardProps) {
         </p>
       )}
 
-      <div className={cn(
-        "flex items-baseline justify-between",
-        compact ? "mt-2 pt-2" : "mt-4 pt-4",
-        "border-t border-border"
-      )}>
+      <div
+        className={cn(
+          "flex items-baseline justify-between",
+          compact ? "mt-2 pt-2" : "mt-4 pt-4",
+          "border-t border-border",
+        )}
+      >
         <PriceDisplay
           usd={basePrice(model)}
           className={cn("font-display tracking-[-0.02em]", compact ? "text-lg" : "text-2xl")}
           emphasize
         />
         {!compact && (
-          <span className="text-[11px] text-muted-foreground font-mono">
-            {unitLabel(model)}
-          </span>
+          <span className="text-[11px] text-muted-foreground font-mono">{unitLabel(model)}</span>
         )}
       </div>
     </Link>
@@ -75,10 +83,14 @@ function ModelBadge({ badge }: { badge: string }) {
           ? "bg-amber/20 text-amber-soft"
           : badge === "new"
             ? "bg-emerald/20 text-emerald"
-            : "bg-surface-3 text-muted-foreground"
+            : "bg-surface-3 text-muted-foreground",
       )}
     >
-      {badge === "popular" ? t("models.badge_popular") : badge === "new" ? t("models.badge_new") : t("models.badge_pro")}
+      {badge === "popular"
+        ? t("models.badge_popular")
+        : badge === "new"
+          ? t("models.badge_new")
+          : t("models.badge_pro")}
     </span>
   );
 }

@@ -7,7 +7,8 @@ const endpoints = [
     method: "POST",
     path: "/v1/generate",
     title: "Generate content",
-    description: "Starts an image, video, or audio generation based on the chosen model. Returns immediately with `status: \"processing\"`. Poll `GET /v1/generations/:id` to retrieve the result URL once complete.",
+    description:
+      'Starts a text, image, video, audio, or music generation with a verified Cortexia model. The cost is charged from your account credits and the request returns immediately with `status: "processing"`. Poll `GET /v1/generations/:id` to retrieve the result or text once complete.',
     headers: [
       { name: "Authorization", value: "Bearer cx_..." },
       { name: "Content-Type", value: "application/json" },
@@ -28,6 +29,7 @@ const endpoints = [
       { code: 400, message: "Invalid or missing parameters" },
       { code: 401, message: "Invalid or missing API key" },
       { code: 402, message: "Insufficient credits" },
+      { code: 403, message: "API key scope does not allow this model category" },
       { code: 429, message: "Rate limit exceeded" },
     ],
   },
@@ -72,7 +74,8 @@ const endpoints = [
     method: "GET",
     path: "/v1/models",
     title: "List models",
-    description: "Returns all active models. Optionally filter by category.",
+    description:
+      "Returns all active and verified Cortexia models available to this API key. Optionally filter by category. Use the model slug in `POST /v1/generate`.",
     headers: [{ name: "Authorization", value: "Bearer cx_..." }],
     requestBody: null,
     responseExample: `{
@@ -327,9 +330,7 @@ function EndpointCard({ ep }: { ep: (typeof endpoints)[number] }) {
             <h4 className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">
               {t("api_docs.req_headers")}
             </h4>
-            <CodeBlock>
-              {ep.headers.map((h) => `${h.name}: ${h.value}`).join("\n")}
-            </CodeBlock>
+            <CodeBlock>{ep.headers.map((h) => `${h.name}: ${h.value}`).join("\n")}</CodeBlock>
           </div>
 
           {ep.requestBody && (
@@ -377,21 +378,19 @@ export function ApiDocs() {
       {/* Authentication */}
       <div className="surface-gradient-border rounded-2xl bg-surface-1/60 p-6 space-y-4">
         <h3 className="font-display text-2xl tracking-[-0.02em]">{t("api_docs.auth_title")}</h3>
-        <p className="text-sm text-muted-foreground max-w-2xl">
-          {t("api_docs.auth_desc")}
-        </p>
+        <p className="text-sm text-muted-foreground max-w-2xl">{t("api_docs.auth_desc")}</p>
         <CodeBlock>{`Authorization: Bearer cx_tes_cle_api_ici`}</CodeBlock>
         <div className="rounded-xl border border-amber/30 bg-amber/5 p-3 flex items-start gap-2 text-xs text-amber-soft">
           <span className="shrink-0 mt-0.5">⚠</span>
-          <span>
-            {t("api_docs.auth_warning")}
-          </span>
+          <span>{t("api_docs.auth_warning")}</span>
         </div>
       </div>
 
       {/* Endpoints */}
       <div className="space-y-4">
-        <h3 className="font-display text-2xl tracking-[-0.02em]">{t("api_docs.endpoints_title")}</h3>
+        <h3 className="font-display text-2xl tracking-[-0.02em]">
+          {t("api_docs.endpoints_title")}
+        </h3>
         <div className="space-y-3">
           {endpoints.map((ep) => (
             <EndpointCard key={ep.method + ep.path} ep={ep} />
@@ -401,7 +400,9 @@ export function ApiDocs() {
 
       {/* Rate limits */}
       <div className="surface-gradient-border rounded-2xl bg-surface-1/60 p-6 space-y-4">
-        <h3 className="font-display text-2xl tracking-[-0.02em]">{t("api_docs.ratelimit_title")}</h3>
+        <h3 className="font-display text-2xl tracking-[-0.02em]">
+          {t("api_docs.ratelimit_title")}
+        </h3>
         <div className="space-y-3 text-sm text-muted-foreground">
           <div className="flex items-center gap-3">
             <code className="rounded-md bg-surface-2 px-1.5 py-0.5 font-mono text-xs font-bold">
@@ -422,17 +423,13 @@ export function ApiDocs() {
             <span>{t("api_docs.ratelimit_other")}</span>
           </div>
         </div>
-        <p className="text-xs text-muted-foreground">
-          {t("api_docs.ratelimit_note")}
-        </p>
+        <p className="text-xs text-muted-foreground">{t("api_docs.ratelimit_note")}</p>
       </div>
 
       {/* Webhooks */}
       <div className="surface-gradient-border rounded-2xl bg-surface-1/60 p-6 space-y-4">
         <h3 className="font-display text-2xl tracking-[-0.02em]">{t("api_docs.webhook_title")}</h3>
-        <p className="text-sm text-muted-foreground max-w-2xl">
-          {t("api_docs.webhook_desc")}
-        </p>
+        <p className="text-sm text-muted-foreground max-w-2xl">{t("api_docs.webhook_desc")}</p>
 
         <div>
           <h4 className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">
@@ -443,7 +440,9 @@ export function ApiDocs() {
               <code className="rounded-md bg-emerald/10 text-emerald px-1.5 py-0.5 font-mono font-bold">
                 generation.completed
               </code>
-              <span className="text-muted-foreground">Fired when a generation finishes successfully</span>
+              <span className="text-muted-foreground">
+                Fired when a generation finishes successfully
+              </span>
             </div>
             <div className="flex items-center gap-3 text-xs">
               <code className="rounded-md bg-red/10 text-red px-1.5 py-0.5 font-mono font-bold">

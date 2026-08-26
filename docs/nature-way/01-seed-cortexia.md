@@ -7,7 +7,7 @@
 
 ## Vision compressée
 
-Cortexia devient le **compte de travail unifié pour la création et l’intelligence artificielle** : un utilisateur paie une seule fois, choisit le meilleur modèle ou laisse Cortexia router la tâche, puis retrouve ses générations, crédits, conversations et workflows dans un même espace. La différenciation ne repose pas sur la promesse abstraite de “tous les modèles”, mais sur une expérience fiable, transparente sur les coûts et adaptée aux usages africains, avec **Mobile Money d’abord**, carte ensuite, et un accès progressif aux flows de canvas et d’agents.
+Cortexia devient la **couche d’accès unifiée aux modèles IA pour les développeurs** : une équipe crée un compte, recharge un portefeuille prépayé, génère une clé API, teste un modèle dans le playground puis branche cette clé à son application. La différenciation ne repose pas sur la promesse abstraite de “tous les modèles”, mais sur une API fiable, des prix transparents, un catalogue vérifié et des paiements adaptés aux usages africains, avec **Mobile Money d’abord**, carte ensuite. Le workspace créatif grand public, son canvas infini et son agent restent une branche séparée construite sur ce socle.
 
 > **Principe de produit :** ne pas vendre un catalogue de fournisseurs ; vendre un résultat créatif ou intellectuel qui traverse plusieurs modèles sans changer de compte, d’interface ou de logique de facturation.
 
@@ -17,28 +17,28 @@ Les créateurs, agences, équipes marketing et développeurs doivent actuellemen
 
 ## Acteurs cibles
 
-| Acteur                    | Besoin principal                                            | Première preuve attendue                                |
-| ------------------------- | ----------------------------------------------------------- | ------------------------------------------------------- |
-| Créateur individuel       | Générer vite avec un prix visible et un paiement accessible | Une génération réussie après recharge Mobile Money      |
-| Agence / équipe marketing | Comparer des modèles et réutiliser des workflows            | Un workflow sauvegardé et rejoué avec un coût traçable  |
-| Développeur               | Appeler Cortexia par API avec une facturation prévisible    | Une clé API, une requête et un résultat vérifiable      |
-| Opérateur Cortexia        | Surveiller modèles, paiements, marges et incidents          | Un journal d’exécution et de réconciliation exploitable |
+| Acteur                            | Besoin principal                                                        | Première preuve attendue                                                        |
+| --------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| Développeur individuel            | Tester rapidement un modèle et brancher Cortexia à son produit          | Une clé API, une recharge de 1 USD, une requête et un résultat vérifiable       |
+| Équipe produit / agence technique | Comparer plusieurs modèles et suivre le coût d’un service en production | Une clé nommée pour une application, un workflow d’appels et un ledger traçable |
+| Créateur grand public             | Utiliser plus tard un workspace simple sans connaître les API           | Une création réussie depuis le playground ou le futur canvas agentique          |
+| Opérateur Cortexia                | Surveiller modèles, clés, paiements, marges et incidents                | Un journal d’exécution et de réconciliation exploitable                         |
 
 ## Tronc critique du MVP
 
-Le parcours prioritaire est : **inscription → recharge Mobile Money → choix d’un modèle réel → saisie d’un prompt → génération → résultat conservé dans l’historique → solde et coût visibles**. Le paiement par carte, le chat multi-modèles et le canvas agentique sont des branches importantes, mais ne doivent pas masquer ce tronc.
+Le parcours prioritaire est : **inscription → accès développeur → création d’une clé API nommée pour une application → révélation unique → recharge Mobile Money d’au moins 1 USD → sélection d’un modèle vérifié → test dans le playground → copie du snippet → appel depuis l’application → suivi du solde et du coût**. La future surface grand public — prompt simple, canvas infini et chat agentique — est une branche importante, mais ne doit pas masquer ce tronc développeur.
 
 ## Priorités de livraison
 
-| Rang | Priorité                                                          | Condition d’entrée                                  | Preuve attendue                                                                                                                                          |
-| ---: | ----------------------------------------------------------------- | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-|    1 | Tronc compte unifié, crédits, Mobile Money et génération vérifiée | Toujours actif                                      | Paiement réconcilié, génération réelle, solde cohérent                                                                                                   |
-|    2 | **Fonctionnalité agentique du canvas**                            | Le tronc local est vert et le staging est configuré | L’agent lit le graphe, propose un plan borné, calcule le coût, demande confirmation selon le seuil et applique le plan dans le workflow de l’utilisateur |
-|    3 | Paiement carte et chat multi-modèles                              | Gate staging du tronc fermé                         | Checkout/webhook idempotent et conversation multi-modèles vérifiable                                                                                     |
-|    4 | Flows créatifs de type Canva et orchestration multi-étapes        | Agent canvas prouvé sur plusieurs workflows         | Flow rejouable, coût traçable, échec récupérable                                                                                                         |
-|    5 | Expansion du catalogue, plans équipe et routage avancé            | Usage récurrent et marges mesurées                  | Données de rétention, marge par unité et capacité opérateur                                                                                              |
+| Rang | Priorité                                                                    | Condition d’entrée                       | Preuve attendue                                                                                                            |
+| ---: | --------------------------------------------------------------------------- | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+|    1 | **Developer Platform : accès authentifié, clés API, crédits et génération** | Toujours actif                           | Un compte authentifié crée une clé, recharge au moins 1 USD, appelle un modèle vérifié et obtient un résultat API traçable |
+|    2 | **Playground développeur et catalogue vérifié multi-catégories**            | Clé API et ledger du compte fonctionnels | Chaque modèle vérifié expose slug, paramètres, prix, test, résultat/erreur et snippet d’intégration                        |
+|    3 | Scopes, liaison formelle d’applications et paiement carte                   | Tronc développeur fermé en Mobile Money  | Permissions effectives, application nommée, révocation et checkout/webhook idempotents                                     |
+|    4 | Workspace grand public : prompt simple, canvas infini et agentique          | Developer Platform et playground prouvés | Création accessible sans connaître les API, orchestration bornée et coût transparent                                       |
+|    5 | SDK, plans équipe, quotas et routage avancé                                 | Usage récurrent et marges mesurées       | Adoption développeur, marge par unité et capacité opérateur                                                                |
 
-L’agentique n’est donc plus une fonctionnalité différée sans rang : elle devient la **prochaine branche produit prioritaire après la fermeture du tronc staging**. Sa première version reste bornée au canvas actuel, aux modèles vérifiés, aux opérations `ADD_NODE`, `CONNECT_NODES`, `UPDATE_NODE` et `REMOVE_NODE`, avec confirmation et application serveur.
+L’agentique grand public reste une capacité stratégique, mais elle n’est plus la prochaine branche immédiate : elle vient après la Developer Platform, le playground multi-catégories, les paiements et les scopes. Sa première version restera bornée au canvas actuel, aux modèles vérifiés, aux opérations `ADD_NODE`, `CONNECT_NODES`, `UPDATE_NODE` et `REMOVE_NODE`, avec confirmation et application serveur.
 
 ## Promesse du premier ring
 
@@ -57,7 +57,7 @@ Cortexia doit permettre à un utilisateur authentifié, dans un pays couvert par
 
 ## Non-objectifs immédiats
 
-Le premier ring ne cherche pas à livrer simultanément tous les modèles frontier, une parité complète avec Canva, des agents autonomes non bornés, une place de marché ouverte, des abonnements complexes, une application mobile native ou une couverture de paiement mondiale. Le canvas agentique est désormais une priorité de rang 2, mais sa version de lancement reste bornée et n’ouvre pas encore la voie à des agents autonomes non bornés. Les autres sujets restent dans la vision et seront ouverts comme branches après preuve du tronc, de l’agentique bornée et des marges unitaires.
+Le premier ring ne cherche pas à livrer simultanément tous les modèles frontier, une parité complète avec Canva, des agents autonomes non bornés, une place de marché ouverte, des abonnements complexes, une application mobile native ou une couverture de paiement mondiale. Le workspace grand public est une branche de rang 4, après la Developer Platform, le playground et les paiements/scopes. Le canvas infini et le chat agentique pourront être construits sur le compte, le ledger et le catalogue vérifié sans devenir une dépendance du premier parcours développeur.
 
 ## Échec à ne pas expédier
 
@@ -69,7 +69,7 @@ Pour ce ring, “production-ready” signifie que les contrats de données, les 
 
 ## Décisions à prendre plus tard, sans bloquer le tronc
 
-Le catalogue de modèles doit progressivement passer d’un registre statique à une source contrôlée des capacités réellement disponibles. Le routage agentique devra s’appuyer sur ce catalogue vérifié plutôt que sur des alias de modèles non vérifiés ; le canvas agentique devient la prochaine branche après le staging du tronc, avec une application serveur et des permissions bornées. L’expansion vers les cartes et les autres rails de paiement doit conserver le même ledger autoritatif et la même règle d’idempotence.
+Le catalogue de modèles doit progressivement passer d’un registre statique à une source contrôlée des capacités réellement disponibles. Le futur routage agentique devra s’appuyer sur ce catalogue vérifié plutôt que sur des alias de modèles non vérifiés ; le canvas agentique sera construit après la preuve de la Developer Platform, avec une application serveur et des permissions bornées. L’expansion vers les cartes et les autres rails de paiement doit conserver le même ledger autoritatif et la même règle d’idempotence.
 
 ## Références internes
 

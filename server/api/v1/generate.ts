@@ -10,6 +10,7 @@ import { createTask, buildCallbackUrl } from "@/lib/kie-api/client";
 import { getActiveModelBySlug } from "@/lib/api/shared";
 import { ensureSufficientCredits, recordTransaction, refundGeneration } from "@/lib/credits";
 import { sha256Hex } from "../../../src/lib/utils/crypto";
+import { normalizeApiKeyPermissions, scopeAllowsCategory } from "../../../src/lib/api-key-policy";
 import {
   checkRateLimit,
   getRemainingRequests,
@@ -32,15 +33,16 @@ export default defineEventHandler(async (event) => {
     const token = auth.slice(7);
     const keyHash = await sha256Hex(token);
     const keyRows = (await sql`
-      SELECT id, user_id FROM api_keys
+      SELECT id, user_id, permissions FROM api_keys
       WHERE key_hash = ${keyHash} AND status = 'active'
       LIMIT 1
-    `) as { id: number; user_id: number }[];
+    `) as { id: number; user_id: number; permissions: unknown }[];
     if (keyRows.length === 0) {
       setResponseStatus(event, 401);
       return { error: "Invalid or inactive API key" };
     }
     userId = keyRows[0].user_id;
+    const permissions = normalizeApiKeyPermissions(keyRows[0].permissions);
 
     const rlKey = `api:generate:${userId}`;
     if (!checkRateLimit(rlKey, RATE_LIMITS.generation)) {
@@ -79,6 +81,12 @@ export default defineEventHandler(async (event) => {
       setResponseStatus(event, 404);
       return { error: `Model '${modelSlug}' is not available through the public API` };
     }
+    const scope = `generate:${model.category}`;
+    if (!scopeAllowsCategory(permissions, model.category)) {
+      setResponseStatus(event, 403);
+      return { error: `API key does not allow ${scope}` };
+    }
+    await sql`UPDATE api_keys SET last_used_at = NOW() WHERE id = ${keyRows[0].id}`;
     const cost = Number(model.cortexia_price_usd ?? 0);
     if (!Number.isFinite(cost) || cost <= 0) {
       setResponseStatus(event, 503);

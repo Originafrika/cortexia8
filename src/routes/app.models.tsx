@@ -50,11 +50,7 @@ export function ModelsCatalog() {
   const [page, setPage] = useState(1);
   const [sortBy, setSortBy] = useState<"newest" | "price_asc" | "price_desc" | "az">("newest");
 
-  const visibleCats = useMemo(() => {
-    const admin = isAdmin();
-    if (admin) return CATS;
-    return CATS.filter((c) => c.key === "all" || c.key === "image" || c.key === "video");
-  }, []);
+  const visibleCats = useMemo(() => CATS, []);
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
@@ -62,11 +58,7 @@ export function ModelsCatalog() {
     return MODELS.filter(
       (m) =>
         (cat === "all" || m.category === cat) &&
-        (admin ||
-          (m.fidelityStatus === "fidele" &&
-            m.category !== "text" &&
-            m.category !== "audio" &&
-            m.category !== "music")) &&
+        (admin || m.fidelityStatus === "fidele") &&
         (term === "" ||
           m.name.toLowerCase().includes(term) ||
           m.provider.toLowerCase().includes(term) ||
@@ -111,6 +103,10 @@ export function ModelsCatalog() {
             {t("models.title")}
           </h1>
           <p className="mt-2 text-muted-foreground">{t("models.subtitle")}</p>
+          <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
+            Explore les modèles vérifiés, ouvre leur playground individuel et récupère le slug à
+            utiliser avec ta clé API Cortexia.
+          </p>
         </div>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />

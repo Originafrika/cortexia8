@@ -261,14 +261,17 @@ function AccountPage() {
               <label className="text-xs text-muted-foreground mb-1 block">
                 {t("account.custom_amount")}
               </label>
+              <p className="mb-2 text-[11px] text-muted-foreground">
+                Minimum 1 USD. Aucun plafond Cortexia n’est défini ; le prestataire de paiement peut
+                appliquer ses propres limites opérationnelles.
+              </p>
               <input
                 type="number"
                 min={1}
-                max={500}
                 value={amount}
                 onChange={(e) => {
                   const v = Number(e.target.value);
-                  if (v >= 1 && v <= 500) setAmount(v);
+                  if (v >= 1 && Number.isFinite(v)) setAmount(v);
                 }}
                 placeholder={t("account.custom_amount_placeholder")}
                 className="w-full rounded-xl border border-border bg-surface-2/40 px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-amber/60"

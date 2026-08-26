@@ -14,6 +14,10 @@ import { defineEventHandler, getHeader, getQuery, setResponseStatus } from "h3";
 import { sql } from "@/lib/db";
 import { sha256Hex } from "../../../../src/lib/utils/crypto";
 import {
+  normalizeApiKeyPermissions,
+  scopeAllowsCategory,
+} from "../../../../src/lib/api-key-policy";
+import {
   checkRateLimit,
   getRemainingRequests,
   getResetTime,
@@ -32,10 +36,10 @@ export default defineEventHandler(async (event) => {
     const keyHash = await sha256Hex(token);
 
     const keyRows = (await sql`
-      SELECT id, user_id FROM api_keys
+      SELECT id, user_id, permissions FROM api_keys
       WHERE key_hash = ${keyHash} AND status = 'active'
       LIMIT 1
-    `) as { id: number; user_id: number }[];
+    `) as { id: number; user_id: number; permissions: unknown }[];
 
     if (keyRows.length === 0) {
       setResponseStatus(event, 401);
@@ -43,6 +47,10 @@ export default defineEventHandler(async (event) => {
     }
 
     const userId = keyRows[0].user_id;
+    const permissions = normalizeApiKeyPermissions(keyRows[0].permissions);
+    const canUseCategory = (modelCategory: string) =>
+      scopeAllowsCategory(permissions, modelCategory);
+    await sql`UPDATE api_keys SET last_used_at = NOW() WHERE id = ${keyRows[0].id}`;
 
     // Rate limit
     const rlKey = `api:models:${userId}`;
@@ -87,9 +95,10 @@ export default defineEventHandler(async (event) => {
       fidelity_status: string;
     }[];
 
-    // 4. Return response
+    // 4. Return only categories authorized by this key.
+    const visibleRows = rows.filter((row) => canUseCategory(row.category));
     return {
-      data: rows.map((r) => ({
+      data: visibleRows.map((r) => ({
         slug: r.slug,
         name: r.name,
         provider: r.provider,
@@ -98,7 +107,7 @@ export default defineEventHandler(async (event) => {
         supports_reference_upload: r.supports_reference_upload,
         fidelity_status: r.fidelity_status,
       })),
-      total: rows.length,
+      total: visibleRows.length,
     };
   } catch (err) {
     console.error("[api/v1/models]", err);

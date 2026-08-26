@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { sql } from "@/lib/db";
 import { getRequestContext, HttpError } from "./auth";
 import { sha256Hex } from "@/lib/utils/crypto";
+import { API_KEY_SCOPES } from "@/lib/api-key-policy";
 
 // ── Create API Key ────────────────────────────────────────────────────────
 
@@ -17,7 +18,11 @@ export const createApiKey = createServerFn({ method: "POST" })
     if (!data?.name || typeof data.name !== "string" || data.name.trim().length === 0) {
       throw new HttpError(400, "name is required");
     }
-    return { name: data.name.trim(), scope: data.scope ?? "generate:*", sessionToken: data.sessionToken };
+    const scope = data.scope ?? "generate:*";
+    if (!(API_KEY_SCOPES as readonly string[]).includes(scope)) {
+      throw new HttpError(400, `Unsupported API key scope: ${scope}`);
+    }
+    return { name: data.name.trim(), scope, sessionToken: data.sessionToken };
   })
   .handler(async ({ data }) => {
     try {
@@ -80,7 +85,10 @@ export const listApiKeys = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     try {
-      console.log("[api-keys] listApiKeys called, sessionToken:", data.sessionToken ? data.sessionToken.slice(0, 12) + "..." : "NONE");
+      console.log(
+        "[api-keys] listApiKeys called, sessionToken:",
+        data.sessionToken ? data.sessionToken.slice(0, 12) + "..." : "NONE",
+      );
       const ctx = await getRequestContext(data.sessionToken);
       console.log("[api-keys] auth ctx:", ctx);
       if (ctx.userId == null) {
@@ -109,9 +117,7 @@ export const listApiKeys = createServerFn({ method: "POST" })
         prefix: r.prefix,
         permissions: r.permissions,
         status: r.status,
-        lastUsed: r.last_used_at
-          ? formatRelativeTime(new Date(r.last_used_at))
-          : "never",
+        lastUsed: r.last_used_at ? formatRelativeTime(new Date(r.last_used_at)) : "never",
         created_at: r.created_at,
       }));
     } catch (err) {

@@ -9,6 +9,10 @@ import { sql } from "@/lib/db";
 import { createTask, buildCallbackUrl } from "@/lib/kie-api/client";
 import { ensureSufficientCredits, recordTransaction, refundGeneration } from "@/lib/credits";
 import { sha256Hex } from "../../../../src/lib/utils/crypto";
+import {
+  normalizeApiKeyPermissions,
+  scopeAllowsCategory,
+} from "../../../../src/lib/api-key-policy";
 
 type WorkflowInput = Record<string, string>;
 
@@ -21,6 +25,8 @@ type NodeRow = {
 type ModelRow = {
   slug: string;
   name: string;
+  category: string;
+  fidelity_status: string;
   kie_endpoint: string;
   cortexia_price_usd: string;
 };
@@ -35,15 +41,17 @@ export default defineEventHandler(async (event) => {
     }
     const keyHash = await sha256Hex(auth.slice(7));
     const keyRows = (await sql`
-      SELECT id, user_id FROM api_keys
+      SELECT id, user_id, permissions FROM api_keys
       WHERE key_hash = ${keyHash} AND status = 'active'
       LIMIT 1
-    `) as { id: number; user_id: number }[];
+    `) as { id: number; user_id: number; permissions: unknown }[];
     if (keyRows.length === 0) {
       setResponseStatus(event, 401);
       return { error: "Invalid or inactive API key" };
     }
     const userId = keyRows[0].user_id;
+    const permissions = normalizeApiKeyPermissions(keyRows[0].permissions);
+    const canUseCategory = (category: string) => scopeAllowsCategory(permissions, category);
     await sql`UPDATE api_keys SET last_used_at = NOW() WHERE id = ${keyRows[0].id}`.catch(
       () => undefined,
     );
@@ -82,14 +90,18 @@ export default defineEventHandler(async (event) => {
 
     const modelSlugs = nodeRows.map((node) => node.model_slug);
     const modelRows = (await sql`
-      SELECT slug, name, kie_endpoint, cortexia_price_usd::text AS cortexia_price_usd
+      SELECT slug, name, category, fidelity_status, kie_endpoint, cortexia_price_usd::text AS cortexia_price_usd
       FROM models
-      WHERE slug = ANY(${modelSlugs}) AND active = TRUE
+      WHERE slug = ANY(${modelSlugs}) AND active = TRUE AND fidelity_status = 'fidele'
     `) as ModelRow[];
     const modelsBySlug = new Map(modelRows.map((model) => [model.slug, model]));
     if (modelRows.length !== new Set(modelSlugs).size) {
       setResponseStatus(event, 400);
-      return { error: "Workflow contains an inactive or missing model" };
+      return { error: "Workflow contains an inactive, unverified, or missing model" };
+    }
+    if (modelRows.some((model) => !canUseCategory(model.category))) {
+      setResponseStatus(event, 403);
+      return { error: "API key scope does not allow one or more workflow model categories" };
     }
 
     const totalCost = nodeRows.reduce(

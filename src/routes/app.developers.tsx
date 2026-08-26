@@ -1,4 +1,4 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, redirect, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { Copy, Check, Plus, KeyRound, X, AlertTriangle, Loader2 } from "lucide-react";
 import { ApiDocs } from "@/components/api-docs";
@@ -26,9 +26,6 @@ export const Route = createFileRoute("/app/developers")({
         params: { pathname: "sign-in" },
         search: { redirect: location.href },
       });
-    }
-    if (session.user.role !== "admin") {
-      throw redirect({ to: "/app/models" });
     }
   },
   head: () => ({
@@ -330,6 +327,28 @@ gen_id = res.json()["id"]`,
         </div>
         <h1 className="mt-2 font-display text-4xl tracking-[-0.03em]">API Cortexia.</h1>
         <p className="mt-2 text-muted-foreground max-w-2xl">{t("dev.subtitle")}</p>
+        <p className="mt-3 text-sm text-muted-foreground max-w-2xl">
+          Crée une clé pour ton application, recharge ton compte à partir de 1 USD, puis teste
+          chaque modèle dans le playground avant l’intégration.
+        </p>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-amber/20 bg-amber/5 p-4">
+        <div className="flex-1 min-w-[220px]">
+          <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-amber-soft">
+            Portefeuille développeur
+          </div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Recharge à partir de 1 USD, sans plafond produit défini. Le solde est partagé par tes
+            clés actives.
+          </p>
+        </div>
+        <Link
+          to="/app/account"
+          className="inline-flex items-center justify-center rounded-full bg-amber px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-95 transition"
+        >
+          Recharger le compte
+        </Link>
       </div>
 
       {/* Usage */}
@@ -412,6 +431,28 @@ gen_id = res.json()["id"]`,
         <ApiDocs />
       </div>
 
+      <div className="rounded-2xl border border-border bg-surface-1/50 p-5">
+        <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+          Parcours recommandé
+        </div>
+        <div className="mt-3 grid gap-3 sm:grid-cols-3 text-sm">
+          <div>
+            <span className="font-mono text-amber-soft">01</span>
+            <p className="mt-1 text-muted-foreground">Crée une clé nommée pour ton application.</p>
+          </div>
+          <div>
+            <span className="font-mono text-amber-soft">02</span>
+            <p className="mt-1 text-muted-foreground">Recharge le compte, minimum 1 USD.</p>
+          </div>
+          <div>
+            <span className="font-mono text-amber-soft">03</span>
+            <p className="mt-1 text-muted-foreground">
+              Teste un modèle puis copie l’exemple d’intégration.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Keys */}
       <div>
         <div className="flex items-center justify-between mb-4">
@@ -420,8 +461,8 @@ gen_id = res.json()["id"]`,
             <input
               value={keyName}
               onChange={(e) => setKeyName(e.target.value)}
-              placeholder={t("dev.key_name_placeholder")}
-              aria-label="API key name"
+              placeholder="Nom de l’application"
+              aria-label="Nom de l’application liée à la clé API"
               className="h-9 rounded-full border border-input bg-transparent px-3 py-2 text-sm focus:border-amber/40 focus-visible:ring-2 focus-visible:ring-amber/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background outline-none w-full sm:w-48"
             />
             <Select value={keyScope} onValueChange={setKeyScope}>
@@ -430,7 +471,7 @@ gen_id = res.json()["id"]`,
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="generate:*" className="text-sm">
-                  generate:* (all)
+                  Tous les modèles (generate:*)
                 </SelectItem>
                 <SelectItem value="generate:image" className="text-sm">
                   generate:image
@@ -440,6 +481,12 @@ gen_id = res.json()["id"]`,
                 </SelectItem>
                 <SelectItem value="generate:audio" className="text-sm">
                   generate:audio
+                </SelectItem>
+                <SelectItem value="generate:text" className="text-sm">
+                  generate:text
+                </SelectItem>
+                <SelectItem value="generate:music" className="text-sm">
+                  generate:music
                 </SelectItem>
               </SelectContent>
             </Select>

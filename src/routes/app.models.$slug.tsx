@@ -132,11 +132,9 @@ export function ModelPlaygroundContent({
 }) {
   const t = useT();
 
-  // Public users may only open models that passed the catalogue verification gate.
-  const adminOnly =
-    model.category === "text" || model.category === "audio" || model.category === "music";
+  // Authenticated developers may open every model that passed the catalogue verification gate.
   const unverified = model.fidelityStatus !== "fidele";
-  if ((adminOnly || unverified) && !isAdmin()) {
+  if (unverified && !isAdmin()) {
     return (
       <div className="grid place-items-center h-full">
         <div className="text-center">
