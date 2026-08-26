@@ -24,7 +24,11 @@ import { Route as AppWorkflowsRouteImport } from './routes/app.workflows'
 import { Route as AuthPathnameRouteImport } from './routes/auth.$pathname'
 import { Route as CanvasIndexRouteImport } from './routes/canvas/index'
 import { Route as RCodeRouteImport } from './routes/r.$code'
+import { Route as V1CreditsRouteImport } from './routes/v1.credits'
+import { Route as V1GenerateRouteImport } from './routes/v1.generate'
+import { Route as V1ModelsRouteImport } from './routes/v1.models'
 import { Route as AppModelsSlugRouteImport } from './routes/app.models.$slug'
+import { Route as V1GenerationsIdRouteImport } from './routes/v1.generations.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -101,10 +105,30 @@ const RCodeRoute = RCodeRouteImport.update({
   path: '/r/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
+const V1CreditsRoute = V1CreditsRouteImport.update({
+  id: '/v1/credits',
+  path: '/v1/credits',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const V1GenerateRoute = V1GenerateRouteImport.update({
+  id: '/v1/generate',
+  path: '/v1/generate',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const V1ModelsRoute = V1ModelsRouteImport.update({
+  id: '/v1/models',
+  path: '/v1/models',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppModelsSlugRoute = AppModelsSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
   getParentRoute: () => AppModelsRoute,
+} as any)
+const V1GenerationsIdRoute = V1GenerationsIdRouteImport.update({
+  id: '/v1/generations/$id',
+  path: '/v1/generations/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -121,9 +145,13 @@ export interface FileRoutesByFullPath {
   '/app/workflows': typeof AppWorkflowsRoute
   '/auth/$pathname': typeof AuthPathnameRoute
   '/r/$code': typeof RCodeRoute
+  '/v1/credits': typeof V1CreditsRoute
+  '/v1/generate': typeof V1GenerateRoute
+  '/v1/models': typeof V1ModelsRoute
   '/app/': typeof AppIndexRoute
   '/canvas/': typeof CanvasIndexRoute
   '/app/models/$slug': typeof AppModelsSlugRoute
+  '/v1/generations/$id': typeof V1GenerationsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -138,9 +166,13 @@ export interface FileRoutesByTo {
   '/app/workflows': typeof AppWorkflowsRoute
   '/auth/$pathname': typeof AuthPathnameRoute
   '/r/$code': typeof RCodeRoute
+  '/v1/credits': typeof V1CreditsRoute
+  '/v1/generate': typeof V1GenerateRoute
+  '/v1/models': typeof V1ModelsRoute
   '/app': typeof AppIndexRoute
   '/canvas': typeof CanvasIndexRoute
   '/app/models/$slug': typeof AppModelsSlugRoute
+  '/v1/generations/$id': typeof V1GenerationsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -157,9 +189,13 @@ export interface FileRoutesById {
   '/app/workflows': typeof AppWorkflowsRoute
   '/auth/$pathname': typeof AuthPathnameRoute
   '/r/$code': typeof RCodeRoute
+  '/v1/credits': typeof V1CreditsRoute
+  '/v1/generate': typeof V1GenerateRoute
+  '/v1/models': typeof V1ModelsRoute
   '/app/': typeof AppIndexRoute
   '/canvas/': typeof CanvasIndexRoute
   '/app/models/$slug': typeof AppModelsSlugRoute
+  '/v1/generations/$id': typeof V1GenerationsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -177,9 +213,13 @@ export interface FileRouteTypes {
     | '/app/workflows'
     | '/auth/$pathname'
     | '/r/$code'
+    | '/v1/credits'
+    | '/v1/generate'
+    | '/v1/models'
     | '/app/'
     | '/canvas/'
     | '/app/models/$slug'
+    | '/v1/generations/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -194,9 +234,13 @@ export interface FileRouteTypes {
     | '/app/workflows'
     | '/auth/$pathname'
     | '/r/$code'
+    | '/v1/credits'
+    | '/v1/generate'
+    | '/v1/models'
     | '/app'
     | '/canvas'
     | '/app/models/$slug'
+    | '/v1/generations/$id'
   id:
     | '__root__'
     | '/'
@@ -212,9 +256,13 @@ export interface FileRouteTypes {
     | '/app/workflows'
     | '/auth/$pathname'
     | '/r/$code'
+    | '/v1/credits'
+    | '/v1/generate'
+    | '/v1/models'
     | '/app/'
     | '/canvas/'
     | '/app/models/$slug'
+    | '/v1/generations/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -226,7 +274,11 @@ export interface RootRouteChildren {
   AccountPathnameRoute: typeof AccountPathnameRoute
   AuthPathnameRoute: typeof AuthPathnameRoute
   RCodeRoute: typeof RCodeRoute
+  V1CreditsRoute: typeof V1CreditsRoute
+  V1GenerateRoute: typeof V1GenerateRoute
+  V1ModelsRoute: typeof V1ModelsRoute
   CanvasIndexRoute: typeof CanvasIndexRoute
+  V1GenerationsIdRoute: typeof V1GenerationsIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -336,12 +388,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/v1/credits': {
+      id: '/v1/credits'
+      path: '/v1/credits'
+      fullPath: '/v1/credits'
+      preLoaderRoute: typeof V1CreditsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/v1/generate': {
+      id: '/v1/generate'
+      path: '/v1/generate'
+      fullPath: '/v1/generate'
+      preLoaderRoute: typeof V1GenerateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/v1/models': {
+      id: '/v1/models'
+      path: '/v1/models'
+      fullPath: '/v1/models'
+      preLoaderRoute: typeof V1ModelsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/models/$slug': {
       id: '/app/models/$slug'
       path: '/$slug'
       fullPath: '/app/models/$slug'
       preLoaderRoute: typeof AppModelsSlugRouteImport
       parentRoute: typeof AppModelsRoute
+    }
+    '/v1/generations/$id': {
+      id: '/v1/generations/$id'
+      path: '/v1/generations/$id'
+      fullPath: '/v1/generations/$id'
+      preLoaderRoute: typeof V1GenerationsIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -387,7 +467,11 @@ const rootRouteChildren: RootRouteChildren = {
   AccountPathnameRoute: AccountPathnameRoute,
   AuthPathnameRoute: AuthPathnameRoute,
   RCodeRoute: RCodeRoute,
+  V1CreditsRoute: V1CreditsRoute,
+  V1GenerateRoute: V1GenerateRoute,
+  V1ModelsRoute: V1ModelsRoute,
   CanvasIndexRoute: CanvasIndexRoute,
+  V1GenerationsIdRoute: V1GenerationsIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
