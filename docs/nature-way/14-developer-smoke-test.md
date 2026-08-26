@@ -56,3 +56,13 @@ Cette dernière commande ne doit jamais être exécutée dans une CI générale.
 Avant le montage des Server Routes TanStack Start, le domaine de production répondait HTTP 200 sur les pages publiques mais `/v1/models` et `/v1/generate` répondaient HTTP 404. Le script a donc correctement signalé un échec de release API, sans tenter de paiement ni de génération.
 
 Les wrappers locaux ont ensuite été ajoutés pour monter les handlers h3 existants sous `/v1/models`, `/v1/generate`, `/v1/credits` et `/v1/generations/:id`. Le test local non authentifié répond maintenant HTTP 401 sur ces quatre contrats, ce qui prouve le routage et le garde d’authentification ; cela ne prouve pas encore une session, un paiement ou une génération fournisseur en production.
+
+## Exécution authentifiée du 26 août 2026
+
+Une connexion avec le compte de test fourni par le propriétaire a atteint l’interface applicative. Le portail `/app/developers` se rend et expose le formulaire de clé, les scopes, le solde et la documentation API ; le solde observé était nul et aucune clé active n’était listée.
+
+La tentative contrôlée de création de la clé `smoke-test-app` a échoué avec le message applicatif générique « Échec de la création de la clé API ». Aucun secret n’a donc été révélé, aucune clé n’a été créée et aucune révocation n’a été nécessaire. La cause serveur reste à diagnostiquer dans les logs de déploiement ; elle ne doit pas être devinée depuis le navigateur.
+
+Le catalogue `/app/models` est accessible dans la session et expose 213 modèles avec catégories, slugs et prix. Cette observation prouve le rendu du catalogue mais pas encore l’exécution du playground. Le smoke test s’est arrêté avant la recharge et avant toute génération fournisseur, conformément au garde-fou financier.
+
+**Statut :** surface authentifiée partiellement prouvée ; création de clé bloquée ; recharge, playground soumis et appel API non exécutés.
