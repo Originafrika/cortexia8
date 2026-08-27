@@ -31,3 +31,13 @@ Le schéma initial `drizzle/0001_full_schema.sql` crée `api_keys` sans colonnes
 La seule conclusion précise permise par les preuves est la suivante : **le build du déploiement actif est sain, mais l’erreur runtime de la tentative historique a expiré de la rétention Vercel ; son origine exacte ne peut plus être identifiée rétroactivement depuis les logs.** Le diagnostic nécessite une nouvelle observation instrumentée et non destructive, ou un accès à un export de logs conservé ailleurs.
 
 Aucune nouvelle création de clé, recharge ou génération n’a été lancée pendant cette inspection. Pour une prochaine tentative de diagnostic, il faut d’abord ajouter une référence de corrélation non sensible et journaliser uniquement le type d’étape et le code SQL normalisé, jamais le token de session, la clé brute, le hash ou les données personnelles. Ensuite, une seule tentative contrôlée pourra être effectuée avec surveillance Vercel dans la fenêtre de rétention.
+
+## Nouvelle tentative du 27 août 2026
+
+Une nouvelle tentative unique a été lancée depuis `https://cortexia.originafrika.online/app/developers` avec le nom `smoke-live-log-20260827`. L’interface a de nouveau affiché « Échec de la création de la clé API ».
+
+La recherche immédiate des logs Vercel sur le projet connecté n’a retourné aucune ligne, y compris sans filtre de texte. L’inspection du projet Vercel a alors établi le point de routage critique : le projet `cortexia` de l’équipe ORIGIN est marqué `live: false`, ses domaines sont uniquement `cortexia-iota.vercel.app`, `cortexia-origin-d6fb.vercel.app` et `cortexia-git-main-origin-d6fb.vercel.app`, et **`cortexia.originafrika.online` n’est pas attaché à ce projet**.
+
+La tentative effectuée sur le domaine personnalisé ne peut donc pas avoir produit de logs dans le nouveau projet Vercel inspecté. Le message d’erreur observé provient du projet actuellement associé au domaine personnalisé — vraisemblablement l’ancien déploiement — ou d’une autre cible de routage. L’origine exacte de l’échec SQL/session n’est pas encore capturée ; l’origine exacte de l’absence de logs est, elle, confirmée : **le domaine de test et le projet Vercel connecté ne sont pas la même cible**.
+
+Aucune clé n’a été révélée ou confirmée comme créée. Aucun paiement, aucune génération et aucune modification de domaine n’ont été effectués.
